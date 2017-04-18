@@ -79,6 +79,7 @@
     "tslint-loader": "^3.4.3",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
+    "vue-bulma-card": "^1.0.2",
     "vue-bulma-expanding": "0.0.1",
     "vue-bulma-tooltip": "^1.0.3",
     "vue-class-component": "^5.0.0",
