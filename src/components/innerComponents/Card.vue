@@ -1,43 +1,72 @@
 <template>
-    <base-card class="card"
-               v-bind:icon="'angle-right'"
-               v-bind:title="title"
-               v-bind:class="color"
-               v-bind:content="'Hola mundo!!'">
-               <card-content-item slot="content"
-                          v-bind:href="'https://github.com'">Hola cara cola
-               </card-content-item>
-    </base-card>
+    <div class="card">
+        <div class="card-header title"
+             v-bind:class="state">
+            <span class="card-header-left">{{title}}</span>
+            <span class="card-header-right"> {{identificador}}</span>
+        </div>
+        <div class="card-body">
+            <p>Service: {{service}}</p>
+            <div class="roles"
+                 v-if="roles && roles.lenght">
+                <p>Roles:</p>
+                {{roles}}
+            </div>
+            <p>Website: {{website}}</p>
+            <p>Links: {{links}}</p>
+            <p>Volumes: {{volumes}}</p>
+        </div>
+        <div class="card-footer"
+             v-if="false"></div>
+    </div>
 </template>
+
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { BaseCard, CardFooterItem } from 'vue-bulma-card'
-
 @Component({
-    name: 'card',
-    components: {
-        'base-card':BaseCard,
-        'card-footer-item':CardFooterItem
-    },
-    props:['title','color','service', 'website','roles']
+    name:'card',
+    props:{
+        state: String,
+        title: String,
+        identificador: String,
+        service: String,
+        roles: String,
+        website: String,
+        links: String,
+        volumes: String
+    }
 })
-export default class Card extends Vue {
-    content ="<p>'Service: '{{service}}</p><div class='roles'><p>'Roles: '</p>{{roles}}</div><p>'Website: '{{website}}</p><div class='links'><p>'Links: '</p>{{links}}</div>";
-}
+export default class Card extends Vue {}
 </script>
+
 <style lang="scss">
-.yellow .card-header {
+$padding: 10px;
+
+.card {
+    padding: $padding;
+    margin: $padding;
+}
+
+.title {
+    padding: $padding;
+}
+
+.card-header-right {
+    color: grey;
+    
+}
+
+.normal {
+    background: green;
+}
+
+.warning {
     background: yellow;
 }
 
-.red .card-header {
+.error {
     background: red;
-}
-
-.card {
-    padding: 10px;
-    margin: 10px;
 }
 </style>

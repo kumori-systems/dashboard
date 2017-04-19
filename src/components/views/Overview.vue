@@ -1,8 +1,34 @@
 <template>
     <div>
         <p>OverView</p>
-        <card title="Mi titulo" content="mi contenido" color="yellow"/>
-        <card title="Segunda" content="segunda carta" color="red"/>
+        <div class="tile">
+            <card state="error"
+                  title="mi segundo! titulo"
+                  identificador="identificador"
+                  service="mi servicio"
+                  roles="mis roles"
+                  website="mi website"
+                  links="mis links"
+                  volumes="mis volumenes" />
+    
+            <card state="normal"
+                  title="mi titulo"
+                  identificador="identificador"
+                  service="mi servicio"
+                  roles="mis roles"
+                  website="mi website"
+                  links="mis links"
+                  volumes="mis volumenes" />
+    
+            <card state="warning"
+                  title="mi segundo! titulo"
+                  identificador="identificador"
+                  service="mi servicio"
+                  roles="mis roles"
+                  website="mi website"
+                  links="mis links"
+                  volumes="mis volumenes" />
+        </div>
     </div>
 </template>
 
@@ -24,4 +50,5 @@ export default class Overview extends Vue{
 }
 </script>
 <style lang="scss">
+
 </style>
