@@ -1,5 +1,7 @@
 export default {
-  expandMenu(state) {
-    state.menu.expdanded = true;
+  setDeployments(state, { deploymentList }) {
+    for (let i = 0; i < deploymentList.length; i++) {
+      state.deploymentList.push(deploymentList[i]);
+    }
   }
 };

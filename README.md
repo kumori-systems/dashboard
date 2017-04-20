@@ -8,12 +8,14 @@ TODOS
             cambiando la configuración de webpack. No lo he hecho porque no me parece limpio y muchos después dicen tener
             problemas con otras cosas. Solución: https://github.com/request/request/issues/1529#issuecomment-103454943
 
-    OverView
-        - Actualmente no se está ejecutando el final de la promesa. Por lo que leí, posiblemente sólo se ejecuten
-            eventos asíncronos dentro de la store (vuex). Probar a mover la promesa dentro de vuex.
-            => Ojo! que para webpack posíblemente los eventos asíncronos haya que tratarlos de otra manera:
-                https://vuejs.org/v2/guide/components.html#Async-Components
-                INTENTAR PASARLO A LA STORE, PORQUE FINALMENTE VA A QUEDARSE AHÍ. SI ESO LO SOLUCIONA ME OLVIDO DEL RESTO.
+    Card
+        - La lista de roles la estamos obteniendo como si cada rol fuera el parámetro de un objeto. Necesito parsarlo a una
+            lista. Posiblemente sería conveniente comentárselo a Javi o abrir un ticket.
+    Overview
+        - Añadir icono flotante '+' con las opciones desplegables:
+            -> Deploy a new HTTP Entrypoint
+            -> Deploy a new Web Service
+            -> Deploy a new service (advanced mode)
 
 DONE
 ---------------------------------------------------------
@@ -22,5 +24,6 @@ DONE
 
     OverView
         - Las cards deberían de estar en horizontal, por lo menos hasta un grupo de 2.
+        - Eventos asíncronos en vuex.
 
 

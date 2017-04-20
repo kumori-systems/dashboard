@@ -4,14 +4,14 @@
         <div class="tile">
             <card v-for="deployment in deploymentList"
                   v-bind:key="deployment.service"
-                  state="error"
-                  title="mi titulo"
-                  identificador="identificador"
-                  service=deployment.service
-                  roles="mis roles"
-                  website="mi website"
-                  links="mis links"
-                  volumes="mis volumenes" />
+                  v-bind:state="'error'"
+                  v-bind:title="'mi titulo'"
+                  v-bind:identificador="'mi identificador'"
+                  v-bind:service="deployment.service"
+                  v-bind:roles="deployment.roles"
+                  v-bind:website="'mi website'"
+                  v-bind:links="'mis links'"
+                  v-bind:volumes="'mis volumenes'" />
         </div>
     </div>
 </template>
@@ -24,9 +24,6 @@ import Component from 'vue-class-component'
 // Componentes
 import Card from './../innerComponents/Card.vue'
 
-// Dependencias
-import { Deployment, getDeployments } from './../../connection'
-
 @Component({  
     name: 'Overview',
     components:{
@@ -34,19 +31,18 @@ import { Deployment, getDeployments } from './../../connection'
     }
 })
 export default class Overview extends Vue{
-    // data
-    deploymentList:Deployment[]=[];
-
-    // lifecycle hook
-    beforeMount(){}
-    mounted () {
-        getDeployments().then(function({ deploymentList }){
-            this.deploymentList = deploymentList;
-
-            console.log('Ejecutamos el final de la promesa');
-            console.log('y deploymentList contiene: ' + deploymentList);
-        });
+    // computed
+    get deploymentList(){
+        let res = this.$store.getters.getDeploymentList;
+        console.log('Overview deployment list contiene: ' + JSON.stringify(res));
+        return res;
     }
+    // lifecycle hook
+    beforeMount(){
+        // Enviamos una petición para obtener los deployments antes de que el componente se monte
+        this.$store.dispatch('getDeployments');
+    }
+    mounted () {}
 }
 </script>
 <style lang="scss">

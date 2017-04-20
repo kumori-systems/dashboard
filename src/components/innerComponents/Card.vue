@@ -27,18 +27,20 @@ import Component from 'vue-class-component'
 
 @Component({
     name:'card',
-    props:{
+    props: {
         state: String,
         title: String,
         identificador: String,
         service: String,
-        roles: String,
+        roles: Object,
         website: String,
         links: String,
         volumes: String
     }
 })
-export default class Card extends Vue {}
+export default class Card extends Vue {
+    mounted(){}
+}
 </script>
 
 <style lang="scss">
