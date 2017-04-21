@@ -11,11 +11,13 @@ TODOS
     Card
         - La lista de roles la estamos obteniendo como si cada rol fuera el parámetro de un objeto. Necesito parsarlo a una
             lista. Posiblemente sería conveniente comentárselo a Javi o abrir un ticket.
-    Overview
-        - Añadir icono flotante '+' con las opciones desplegables:
-            -> Deploy a new HTTP Entrypoint
-            -> Deploy a new Web Service
-            -> Deploy a new service (advanced mode)
+
+    Sidebar & LevelBar
+        - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
+            pero perdemos toda posible referéncia a métodos de dentro de la clase.
+
+    OverView
+        - Acabar de mirar cómo ocultar los entrypoints
 
 DONE
 ---------------------------------------------------------
@@ -25,5 +27,9 @@ DONE
     OverView
         - Las cards deberían de estar en horizontal, por lo menos hasta un grupo de 2.
         - Eventos asíncronos en vuex.
+        - Añadir icono flotante '+' con las opciones desplegables:
+            -> Deploy a new HTTP Entrypoint
+            -> Deploy a new Web Service
+            -> Deploy a new service (advanced mode)
 
 

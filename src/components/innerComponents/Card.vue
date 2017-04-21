@@ -3,7 +3,7 @@
         <div class="card-header title"
              v-bind:class="state">
             <span class="card-header-left">{{title}}</span>
-            <span class="card-header-right"> {{identificador}}</span>
+            <span class="card-header-right">{{identificador}}</span>
         </div>
         <div class="card-body">
             <p>Service: {{service}}</p>
@@ -57,7 +57,7 @@ $padding: 10px;
 
 .card-header-right {
     color: grey;
-    
+    padding-left:10px;
 }
 
 .normal {
