@@ -9,7 +9,8 @@
 // let api: DefaultApi = new DefaultApi();
 
 class Deployment {
-    'service': string;
+    name: string;
+    service: string;
     roles: {
         [key: string]: {
             instances: {
@@ -18,11 +19,19 @@ class Deployment {
                     privateIp: string,
                     publicIp: string,
                     arrangement: {
-                        cpu: number,
-                        bandwidth: number,
                         failurezones: number,
-                        mininstances: number,
-                        maxinstances: number
+                        bandwidth: number,
+                        memory: number,
+                        cpu: number,
+                        maxinstances: number,
+                        __instances: number,
+                        __cpu: number,
+                        __memory: number,
+                        __ioperf: number,
+                        __iopsintensive: number,
+                        __bandwidth: number,
+                        __resilience: number,
+                        mininstances: number
                     }
                 }
             }
@@ -47,14 +56,15 @@ function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
         // console.log('El cuerpo es: ' + JSON.stringify(body));
 
         deploymentList.push({
-            'service': 'serviceName',
+            'name': 'slap://eslap.cloud/deployments/20170310_072206/7c6c6f67',
+            'service': 'eslap://eslap.cloud/services/monitor/1_0_0',
             roles: {
-                'rol1': {
+                'monitor': {
                     'instances': {
-                        'instance1': {
-                            'id': 'idInstancia1',
-                            'privateIp': 'privateIpInstancia1',
-                            'publicIp': 'publicIpInstancia1',
+                        'eslap.cloud_monitor_5': {
+                            'id': 'f93fdb65-a1cf-44aa-87cd-0460908db1dc',
+                            'privateIp': '10.1.0.36',
+                            'publicIp': '192.168.187.159',
                             'arrangement': {
                                 'cpu': 1,
                                 'bandwidth': 1,
@@ -78,8 +88,7 @@ export { Deployment, getDeployments };
     "success": true,
     "message": "SUCCESSFULLY PROCESSED DEPLOYMENT INFO.",
     "data": {
-        "slap://eslap.cloud/deployments/20170310_072206/7c6c6f67":
-        {
+        "slap://eslap.cloud/deployments/20170310_072206/7c6c6f67":{
             "service": "eslap://eslap.cloud/services/monitor/1_0_0",
             "roles": {
                 "monitor": {
