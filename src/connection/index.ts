@@ -28,12 +28,47 @@ class Deployment {
                         __cpu: number,
                         __memory: number,
                         __ioperf: number,
-                        __iopsintensive: number,
+                        __iopsintensive: boolean,
                         __bandwidth: number,
                         __resilience: number,
                         mininstances: number
                     }
                 }
+            },
+            configuration: {
+                // La configuración no es correcta. Hay roles que tienen otras configuraciones distintas,
+                // pero no consigo sacar un patrón.
+                // tipo any?
+                config: {
+                    planner: {
+                        domain: string,
+                        port: number,
+                        address: string
+                    },
+                    measureBuffer: {
+                        maxsize: number
+                    },
+                    metricStorage: [
+                        {
+                            topics: string[],
+                            transport: {
+                                'http-port': number,
+                                'http-host': string
+                            },
+                            type: string
+                        }
+                    ],
+                    restapi: {
+                        bodySizeLimit: string,
+                        saveMeasures: boolean
+                    }
+                }
+            },
+            entrypoint: {
+                instancespath: boolean,
+                domain: string,
+                sslonly: boolean,
+                secrets: any
             }
         }
     };
@@ -56,27 +91,77 @@ function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
         // console.log('El cuerpo es: ' + JSON.stringify(body));
 
         deploymentList.push({
-            'name': 'slap://eslap.cloud/deployments/20170310_072206/7c6c6f67',
-            'service': 'eslap://eslap.cloud/services/monitor/1_0_0',
+            name: 'slap://eslap.cloud/deployments/20170310_072206/7c6c6f67',
+            service: 'eslap://eslap.cloud/services/monitor/1_0_0',
             roles: {
-                'monitor': {
-                    'instances': {
+                monitor: {
+                    instances: {
                         'eslap.cloud_monitor_5': {
-                            'id': 'f93fdb65-a1cf-44aa-87cd-0460908db1dc',
-                            'privateIp': '10.1.0.36',
-                            'publicIp': '192.168.187.159',
-                            'arrangement': {
-                                'cpu': 1,
-                                'bandwidth': 1,
-                                'failurezones': 1,
-                                'mininstances': 1,
-                                'maxinstances': 2
+                            id: 'eslap.cloud_monitor_5',
+                            privateIp: '10.1.0.36',
+                            publicIp: '192.168.187.159',
+                            arrangement: {
+                                failurezones: 1,
+                                bandwidth: 1,
+                                memory: 1,
+                                cpu: 1,
+                                maxinstances: 1,
+                                __instances: 1,
+                                __cpu: 1,
+                                __memory: 1,
+                                __ioperf: 1,
+                                __iopsintensive: false,
+                                __bandwidth: 1,
+                                __resilience: 1,
+                                mininstances: 1
                             }
                         }
-                    }
-                }
-            }
-        });
+                    },
+                    configuration: {
+                        config: {
+                            planner: {
+                                domain: 'stamp-nightly.osdmz.iti.es',
+                                port: 80,
+                                address: '10.1.0.37'
+                            },
+                            measureBuffer: {
+                                maxsize: 1000000
+                            },
+                            metricStorage: [
+                                {
+                                    topics: ['measures', 'metrics'],
+                                    transport: {
+                                        'http-port': 9004,
+                                        'http-host': '10.1.2.35'
+                                    },
+                                    type: 'http'
+                                },
+                                {
+                                    topics: [
+                                        'measures',
+                                        'metrics'
+                                    ],
+                                    transport: {
+                                        'http-port': 28778,
+                                        'http-host': '10.1.2.35'
+                                    },
+                                    type: 'httpLogstash'
+                                }
+                            ],
+                            restapi: {
+                                bodySizeLimit: '50mb',
+                                saveMeasures: true
+                            }
+                        }
+                    },
+                    entrypoint: {
+                        instancespath: false,
+                        domain: 'monitor-nightly.osdmz.iti.es',
+                        sslonly: false,
+                        secrets: {}
+                     }
+                },
+            });
         return { deploymentList: deploymentList };
     });
 };
