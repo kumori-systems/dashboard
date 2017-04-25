@@ -8,10 +8,6 @@ TODOS
             cambiando la configuración de webpack. No lo he hecho porque no me parece limpio y muchos después dicen tener
             problemas con otras cosas. Solución: https://github.com/request/request/issues/1529#issuecomment-103454943
 
-    Card
-        - La lista de roles la estamos obteniendo como si cada rol fuera el parámetro de un objeto. Necesito parsarlo a una
-            lista. Posiblemente sería conveniente comentárselo a Javi o abrir un ticket.
-
     Sidebar & LevelBar
         - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
             pero perdemos toda posible referéncia a métodos de dentro de la clase.

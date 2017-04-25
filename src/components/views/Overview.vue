@@ -13,7 +13,7 @@
             <label for="hideEntryPoints" v-on:click="hideEntrypoints=!hideEntrypoints"> Hide HTTP entrypoints</label>
 
             <div class="tile">
-                <card v-for="deployment in deploymentList"
+                <deployment-card v-for="deployment in deploymentList"
                     v-bind:key="deployment.service"
                     v-bind:state="'normal'"
                     v-bind:title="'HTTP Entrypoint'"
@@ -26,7 +26,7 @@
                     v-bind:volumes="'mis volumenes'" />
             </div>
             <div class="tile">
-                <card v-for="deployment in deploymentList"
+                <deployment-card v-for="deployment in deploymentList"
                     v-bind:key="deployment.service"
                     v-bind:state="'warning'"
                     v-bind:title="'mi titulo'"
@@ -38,7 +38,7 @@
                     v-bind:volumes="'mis volumenes'" />
             </div>
             <div class="tile">
-                <card v-for="deployment in deploymentList"
+                <deployment-card v-for="deployment in deploymentList"
                     v-bind:key="deployment.service"
                     v-bind:state="'error'"
                     v-bind:title="'mi titulo'"
@@ -57,14 +57,14 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 // Componentes
-import Card from './../innerComponents/Card.vue'
+import DeploymentCard from './../innerComponents/DeploymentCard.vue'
 
 import {Collapse, Item as CollapseItem}from 'vue-bulma-collapse'
 
 @Component({  
     name: 'Overview',
     components:{
-        'card': Card,
+        'deployment-card': DeploymentCard,
         'collapse':Collapse,
         'collapse-item':CollapseItem
     }

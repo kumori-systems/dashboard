@@ -14,7 +14,7 @@ import AlarmsAndLogs from './views/AlarmsAndLogs.vue';
 import Help from './views/Help.vue';
 
 // Inner components
-import Card from './innerComponents/Card.vue';
+import DeploymentCard from './innerComponents/DeploymentCard.vue';
 
 
 // Export layouts
@@ -24,4 +24,4 @@ export {AppMain, FooterBar, NavBar, SideBar};
 export { Overview, Deployments, Storage, WebDomains, DataVolumes, AlarmsAndLogs, Help };
 
 // Export inner components
-export{ Card };
+export{ DeploymentCard };

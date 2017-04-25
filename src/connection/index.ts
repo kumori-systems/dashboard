@@ -159,9 +159,10 @@ function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
                         domain: 'monitor-nightly.osdmz.iti.es',
                         sslonly: false,
                         secrets: {}
-                     }
-                },
-            });
+                    }
+                }
+            }
+        });
         return { deploymentList: deploymentList };
     });
 };
