@@ -1,13 +1,15 @@
 <template>
     <div>
-        <p>Service: ServiceName</p>
-        <p>Connected to: ServChan1 -> "otherdeployment-2"</p>
-        <rol-card
+        <p class="title">{{deploymentName}}</p>
+        <p>Service: {{serviceName}}</p>
+        <p>Connected to: {{connectedTo}}</p>
+
+        <rol-card v-for="rol in rols"
             state="normal"
-            nombre="miRol1"
-            v-bind:numInstancias=1
-            id="idDeMiRol1"
-            runtime="Runtime1"/>
+            v-bind:nombre="rol.name"
+            v-bind:numInstancias="rol.numInstances"
+            v-bind:id="rol.id"
+            v-bind:runtime="rol.runtime"/>
     </div>
 </template>
 <script lang="ts">
@@ -19,9 +21,22 @@ import RolCard from './../innerComponents/RolCard.vue';
     name: 'Deployments',
     components:{
         'rol-card': RolCard
+    },
+    props:{
+        rol: Object
     }
 })
-export default class Deployments extends Vue{}
+export default class Deployments extends Vue{
+    get deploymentName(){
+        return 'Deployment Name';
+    }
+    get serviceName(){
+        return 'serviceName';
+    }
+    get connectedTo(){
+        return 'ServChan1 -> "otherdeployment-2"';
+    }
+}
 </script>
 <style lang="scss">
 </style>

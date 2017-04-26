@@ -19,9 +19,6 @@
                 <input type="checkbox" id="killInstance">
                 <label for="killInstance">kill instance</label>
 
-
-                
-
             </span>
             <!--chart-->     
             <chart v-bind:type="'line'" v-bind:width=100 v-bind:height=100 v-bind:data="data" v-bind:options="options"></chart>
@@ -39,7 +36,7 @@ import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 
 @Component({
-    name: 'rol-card',
+    name: 'instance-card',
     props: {
         state: String,
         name: String
@@ -56,7 +53,7 @@ export default class Card extends Vue {
             label: 'mylabel',
             backgroundColor:'green',
             data:[
-                { x:0, y:2 },
+                { x:0, y:1 },
                 { x:1, y:1 }
                 ]
         },{
@@ -64,15 +61,15 @@ export default class Card extends Vue {
             backgroundColor:'yellow',
             data:[
                 { x:0, y:1 },
-                { x:1, y:3 }
+                { x:1, y:1 }
                 ]
         },
         {
             label: 'mylabel3',
             backgroundColor:'red',
             data:[
-                { x:0, y:2.4 },
-                { x:1, y:1.5 }
+                { x:0, y:1 },
+                { x:1, y:1 }
                 ]
         }]
     };

@@ -2,6 +2,8 @@ TODOS
 ---------------------------------------------------------
     SideBar
         - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
+=>        - Falta por hacer que aparezcan distintos deployments
+=>        - El botón deployments no debería de llevarnos a ninguna ruta
     
     connection
         - Si intento instalar swagger, acaba metiendo dependencias que dan un error y, según parece, puede ser solucionado

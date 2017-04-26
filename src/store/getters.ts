@@ -4,5 +4,8 @@ export default {
   },
   getDeploymentList: function(state){
     return state.deploymentList;
+  },
+  getHideEntrypoints: function(state){
+    return state.hideEntrypoints;
   }
 };

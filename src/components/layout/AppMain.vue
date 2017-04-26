@@ -1,7 +1,7 @@
 <template>
     <div id="app-main">
-        <level-bar/>
-        <router-view/>
+        <!-- <level-bar/> -->
+        <router-view class="content"/>
     </div>
 </template>
 
@@ -22,8 +22,13 @@ export default class AppMain extends Vue{
 }
 </script>
 <style lang="scss">
+
+$default_padding:10px;
+$default_margin_left:180px;
+
 #app-main{
-    padding-top: 50px;
-    margin-left: 180px;
+    padding: $default_padding;
+    padding-top: 50px + $default_padding;
+    margin-left: $default_margin_left;
 }
 </style>

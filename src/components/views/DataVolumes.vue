@@ -1,6 +1,19 @@
 <template>
     <div>
-        Data volumes
+        <p>
+            <span>CALC_WORKER_DATA</span>
+            <span class="warning">in use</span>
+            <span>by worker</span>
+            <span>3 chunks</span>
+            <button class="fa fa-info"/>
+            <button class="fa fa-times"/>
+        </p>
+        <p>
+            <span>BLABLA_DATA</span>
+            <span>2 chunks</span>
+            <button class="fa fa-info"/>
+            <button class="fa fa-times"/>
+        </p>
     </div>
 </template>
 

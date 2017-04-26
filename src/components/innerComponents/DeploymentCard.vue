@@ -6,15 +6,15 @@
             <span class="card-header-right">{{identificador}}</span>
         </div>
         <div class="card-body">
-            <p>Service: {{service}}</p>
+            <p><u>Service:</u> {{service}}</p>
             <div class="roles"
                  v-if="roles && roles.lenght">
                 <p>Roles:</p>
                 {{roles}}
             </div>
-            <p>Website: {{website}}</p>
-            <p>Links: {{links}}</p>
-            <p>Volumes: {{volumes}}</p>
+            <p><u>Website:</u> {{website}}</p>
+            <p><u>Links:</u> {{links}}</p>
+            <p><u>Volumes:</u> {{volumes}}</p>
         </div>
         <div class="card-footer"
              v-if="false"></div>

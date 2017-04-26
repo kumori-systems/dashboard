@@ -1,6 +1,5 @@
 <template>
     <div id="footerbar">
-        Esto es el footerbar
     </div>
 </template>
 
@@ -17,7 +16,11 @@ export default class FooterBar extends Vue{
 }
 </script>
 <style lang="scss">
+$default_padding:10px;
+$default_margin_left:180px;
 #footerbar{
-     margin-left: 180px;
+    padding: $default_padding;
+    margin-left: $default_margin_left;
+    text-align:center;
 }
 </style>

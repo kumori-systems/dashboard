@@ -11,12 +11,13 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     strict: true, // Cuando se intenta mutar de una forma inadecuada lanza un error
-    'state': { // Estado inicial de la página
+    'state': {
         sidebar: {
             opened: true,
             hidden: false
         },
-        deploymentList: []
+        deploymentList: [],
+        hideEntrypoints: false
     },
     'getters': getters,
     'mutations': mutations,
