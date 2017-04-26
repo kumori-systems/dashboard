@@ -55,10 +55,10 @@ export default class Sidebar extends Vue{
   }
 
   toggle (index, item) {
-    this.expandMenu({
+   /* this.expandMenu({
       index: index,
       expanded: !item.meta.expanded
-    })
+    })*/
   }
 
   shouldExpandMatchItem (route) {

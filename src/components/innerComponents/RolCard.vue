@@ -15,11 +15,9 @@
                 <!-- Cuadraditos para memoria, cpu y red-->
             </span>
             <p>Connected to: RepChan -> Worker ReqChan</p>
-             <collapse class="tile" title="View instances">
-                <collapse-item>
-                    <p>Instancia 1</p>
-                    <p>Instancia 2</p>
-                    <p>Instancia 3</p>
+             <collapse>
+                <collapse-item title="View instances">
+                    <instance-card name="myInstanceName" state="normal"/>
                 </collapse-item>
             </collapse>
         </div>
@@ -32,6 +30,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import {Collapse, Item as CollapseItem}from 'vue-bulma-collapse';
+import InstanceCard from './InstanceCard.vue';
 
 @Component({
     name:'rol-card',
@@ -44,7 +43,8 @@ import {Collapse, Item as CollapseItem}from 'vue-bulma-collapse';
     },
     components:{
         'collapse':Collapse,
-        'collapse-item':CollapseItem
+        'collapse-item':CollapseItem,
+        'instance-card':InstanceCard
     }
 })
 export default class Card extends Vue {

@@ -1,6 +1,12 @@
 <template>
     <div>
-        Web Domains
+        <p>
+            <span>www.calculator.com</span>
+            <span class="warning">In use</span>
+        </p>
+        <p>
+            <span>blablabla.es</span>
+        </p>
     </div>
 </template>
 

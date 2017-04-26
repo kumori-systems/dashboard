@@ -4,6 +4,7 @@
 		<nav-bar v-bind:show="true"></nav-bar>
 		<side-bar title="Menu" v-bind:show="SideBar.opened && !SideBar.hidden"></side-bar>
 		<app-main></app-main>
+		<fab></fab>
 		<footer-bar></footer-bar>
 	</div>
 </template>
@@ -13,7 +14,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import NprogressContainer from 'vue-nprogress/src/NprogressContainer.vue'
-import {NavBar, AppMain, SideBar, FooterBar} from './components'
+import {NavBar, AppMain, SideBar, FAB, FooterBar} from './components'
 
 @Component({	
 	name:'App',
@@ -22,6 +23,7 @@ import {NavBar, AppMain, SideBar, FooterBar} from './components'
 		'nav-bar':NavBar,
 		'side-bar':SideBar,
 		'app-main':AppMain,
+		'fab':FAB,
 		'footer-bar':FooterBar
 	}
 })

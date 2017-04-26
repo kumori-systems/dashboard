@@ -1,6 +1,8 @@
 // Layouts
 import AppMain from './layout/AppMain.vue';
+import FAB from './layout/FAB.vue';
 import FooterBar from './layout/FooterBar.vue';
+import LevelBar from './layout/LevelBar.vue';
 import NavBar from './layout/NavBar.vue';
 import SideBar from './layout/SideBar.vue';
 
@@ -18,10 +20,10 @@ import DeploymentCard from './innerComponents/DeploymentCard.vue';
 
 
 // Export layouts
-export {AppMain, FooterBar, NavBar, SideBar};
+export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 
 // Export views
 export { Overview, Deployments, Storage, WebDomains, DataVolumes, AlarmsAndLogs, Help };
 
 // Export inner components
-export{ DeploymentCard };
+export { DeploymentCard };
