@@ -26,7 +26,6 @@ const getters: any = {
 
 const mutations: any = {
     expandMenu(state, menuItem) {
-        console.log('El menuItem que recibimos es: ' + JSON.stringify(menuItem));
         if (menuItem.index > -1) {
             if (state.items[menuItem.index] && state.items[menuItem.index].meta) {
                 state.items[menuItem.index].meta.expanded = menuItem.expanded;
