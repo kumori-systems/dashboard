@@ -13,6 +13,7 @@ export default {
             console.log('No se han podido obtener los deployments');
             console.log('motivo: ' + error);
         });
+
     },
     hideEntrypoints({ commit }, { }) {
         commit('hideEntrypoints', {});
