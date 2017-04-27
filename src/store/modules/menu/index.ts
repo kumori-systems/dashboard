@@ -7,17 +7,34 @@ import alarmsAndLogs from './alarmsAndLogs';
 import help from './help';
 
 const state: any = {
-    menuitems: [overview, deployments, storage, webDomains, dataVolumes, alarmsAndLogs, help]
+    items: [
+        overview,
+        deployments,
+        storage,
+        webDomains,
+        dataVolumes,
+        alarmsAndLogs,
+        help
+    ]
 };
 
 const getters: any = {
     menuitems: function (state) {
-        return state.menuitems;
+        return state.items;
     }
 };
 
 const mutations: any = {
-
+    expandMenu(state, menuItem) {
+        console.log('El menuItem que recibimos es: ' + JSON.stringify(menuItem));
+        if (menuItem.index > -1) {
+            if (state.items[menuItem.index] && state.items[menuItem.index].meta) {
+                state.items[menuItem.index].meta.expanded = menuItem.expanded;
+            }
+        } else if (menuItem.item && 'expanded' in menuItem.item.meta) {
+            menuItem.item.meta.expanded = menuItem.expanded;
+        }
+    }
 };
 
 export default {

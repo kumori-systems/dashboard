@@ -1,6 +1,6 @@
 <template>
     <div id="app-main">
-        <!-- <level-bar/> -->
+        <level-bar/>
         <router-view class="content"/>
     </div>
 </template>

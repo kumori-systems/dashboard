@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, Deployments, Storage, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
+import { Overview, Deployments, DeploymentItem, Storage, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
 
 Vue.use(Router);
 
@@ -15,6 +15,11 @@ export default new Router({
       path: '/deployments',
       name: 'Deployments',
       component: Deployments
+    },
+    {
+      path: '/deployments/Deployment1',
+      name: 'Deployment1',
+      component: DeploymentItem
     },
     {
       path: '/storage',

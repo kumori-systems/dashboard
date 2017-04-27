@@ -1,7 +1,10 @@
 import * as connection from './../connection';
 export default {
-    expandMenu({ commit }) {
-        commit('expandMenu');
+    expandMenu({ commit }, menuItem) {
+        if (menuItem) {
+            menuItem.expanded = menuItem.expanded || false;
+            commit('expandMenu', menuItem);
+        }
     },
     getDeployments({ commit }) {
         connection.getDeployments().then(function ({ deploymentList }) {
@@ -11,7 +14,7 @@ export default {
             console.log('motivo: ' + error);
         });
     },
-    hideEntrypoints({commit}, {}) {
+    hideEntrypoints({ commit }, { }) {
         commit('hideEntrypoints', {});
     },
     // TODO: no queda claro que hace falta para añadir una estáncia ni qué se devuelve

@@ -4,7 +4,7 @@ export default {
       state.deploymentList.push(deploymentList[i]);
     }
   },
-  hideEntrypoints(state, {}) {
+  hideEntrypoints(state, { }) {
     state.hideEntrypoints = !state.hideEntrypoints;
   },
   addInstance(state, { rol }) {

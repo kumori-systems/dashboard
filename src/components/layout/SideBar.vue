@@ -1,125 +1,140 @@
 <template>
-  <aside class="menu app-sidebar animated"
-         v-bind:class="{ slideInLeft: show, slideOutLeft: !show }">
+  <aside class="menu app-sidebar animated" :class="{ slideInLeft: show, slideOutLeft: !show }">
+    <p class="menu-label">
+      General
+    </p>
     <ul class="menu-list">
       <li v-for="(item, index) in menu">
-        <router-link v-bind:to="item.path"
-                     v-bind:exact="true"
-                     v-bind:aria-expanded="isExpanded(item) ? 'true' : 'false'"
-                     v-if="item.path"
-                     v-on:click.native="toggle(index, item)">
-            <p class="element">{{ item.name }}</p>
-          <span class="icon is-small is-angle"
-                v-if="item.children && item.children.length">
-              <i class="fa fa-angle-down"></i>
-            </span>
+        <router-link :to="item.path" :exact="true" :aria-expanded="isExpanded(item) ? 'true' : 'false'" v-if="item.path" @click.native="toggle(index, item)">
+          <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
+          <span class="icon is-small is-angle" v-if="item.children && item.children.length">
+                            <i class="fa fa-angle-down"></i>
+                          </span>
         </router-link>
-        
+        <a :aria-expanded="isExpanded(item)" v-else @click="toggle(index, item)">
+          <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
+          <span class="icon is-small is-angle" v-if="item.children && item.children.length">
+                            <i class="fa fa-angle-down"></i>
+                          </span>
+        </a>
+  
+        <expanding v-if="item.children && item.children.length">
+          <ul v-show="isExpanded(item)">
+            <li v-for="subItem in item.children" v-if="subItem.path">
+              <router-link :to="generatePath(item, subItem)">
+                {{ subItem.meta && subItem.meta.label || subItem.name }}
+              </router-link>
+            </li>
+          </ul>
+        </expanding>
       </li>
     </ul>
   </aside>
 </template>
-
 <script lang="ts">
-
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import Expanding from 'vue-bulma-expanding/src/Expanding.vue'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import Expanding from 'vue-bulma-expanding/src/Expanding.vue';
 
 @Component({
-    name: 'side-bar',
-    components:{
-        'expanding':Expanding
-    },
-    props:{
-      show:true,
-      title:""
-    }
+  name: 'side-bar',
+  components: {
+    'expanding': Expanding
+  },
+  props: {
+    show: Boolean,
+  }
 })
-export default class Sidebar extends Vue{
-  title:string;
-  isReady:boolean = false;
-  watch= {
-    $route (route) {
+export default class Sidebar extends Vue {
+  /* DATA */
+  title: string = "";
+  isReady: boolean = false;
+
+  /* GETTERS */
+  get menu() {
+    return this.$store.getters.menuitems;
+  }
+
+  /* LIFEHOOK CYCLE */
+  mounted() {
+    let route = this.$route;
+    if (route.name) {
       this.isReady = true;
       this.shouldExpandMatchItem(route);
     }
   }
 
-  mounted () {
-    let route = this.$route
-    if (route.name) {
-      this.isReady = true
-      this.shouldExpandMatchItem(route)
-    }
+  /* METHODS */
+  // returns if a item is expanded or not
+  isExpanded(item):Boolean {
+    return item.meta.expanded;
   }
 
-  toggle (index, item) {
-   /* this.expandMenu({
+  // change the state of the menuItem
+  toggle(index, item) {
+    this.expandMenu({
       index: index,
       expanded: !item.meta.expanded
-    })*/
+    });
   }
 
-  shouldExpandMatchItem (route) {
-    /*
-    // Es una función interesante pero que ahora mismo no nos interesa
-    let matched = route.matched
-    let lastMatched = matched[matched.length - 1]
-    let parent = lastMatched.parent || lastMatched
-    const isParent = parent === lastMatched
+  // checks if the item should be expanded and expands it if we should
+  shouldExpandMatchItem(route) {
+    let matched = route.matched;
+    let lastMatched = matched[matched.length - 1];
+    let parent = lastMatched.parent || lastMatched;
+    const isParent = parent === lastMatched;
     if (isParent) {
-      const p = this.findParentFromMenu(route)
-      if (p) {
-        parent = p
-      }
+      const p = this.findParentFromMenu(route);
+      if (p) { parent = p; }
     }
     if ('expanded' in parent.meta && !isParent) {
       this.expandMenu({
         item: parent,
         expanded: true
-      })
+      });
     }
-    */
   }
 
-  generatePath (item, subItem) {
-    return `${item.component ? item.path + '/' : ''}${subItem.path}`
+  // returns a path for the router
+  generatePath(item, subItem) {
+    return `${item.component ? item.path + '/' : ''}${subItem.path}`;
   }
 
-  findParentFromMenu (route) {
-    const menu = this.menu
-    for (let i = 0, l = menu.length; i < l; i++) {
-      const item = menu[i]
-      const k = item.children && item.children.length
+  // finds the parent of the actual view in the menu
+  findParentFromMenu(route) {
+    const menu = this.menu;
+    for (let i = 0; i < menu.length; i++) {
+      const item = menu[i];
+      const k = item.children && item.children.length;
       if (k) {
         for (let j = 0; j < k; j++) {
-          if (item.children[j].name === route.name) {
-            return item
-          }
+          if (item.children[j].name === route.name) { return item; }
         }
       }
     }
   }
 
-  get menu(){
-    return this.$store.getters.menuitems;
+  // expands the item in the menu matching the actual route
+  expandMenu(argument: any) {
+    let payload: any = {};
+    if (argument.index) payload.index = argument.index;
+    if (argument.item) payload.item = argument.item;
+    if (argument.expanded) payload.expanded = argument.expanded;
+    this.$store.dispatch('expandMenu', payload);
   }
 
-  isExpanded(item){
-      return item.expanded;
+
+  watch() {
+    // Tenemos que comprobar que efectivamente se llama al método watch como corresponde
+    /*$route(route){
+      this.isReady = true;
+      this.shouldExpandMatchItem(route);
+    }*/
   }
 
-  get expandMenu(){
-    return this.$store.getters.menu;
-  }
-  
-  set expandMenu(item){
-    this.$store.dispatch('expandMenu',item);
-  }
 }
 </script>
-
 <style lang="scss">
 @import '~bulma/sass/utilities/variables';
 @import '~bulma/sass/utilities/mixins';
@@ -148,9 +163,6 @@ export default class Sidebar extends Vue{
       right: 10px;
       transition: transform .377s ease;
     }
-  }
-  .menu-label {
-    padding-left: 5px;
   }
   .menu-list {
     li a {

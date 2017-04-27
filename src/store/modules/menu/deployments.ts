@@ -3,7 +3,16 @@ export default {
     path: '/deployments',
     meta: {
         link: 'src/components/views/Deployments.vue',
-        expanded: false,
+        expanded: true,
     },
-    component: 'Deployments'
+    component: 'Deployments',
+    children: [{
+        name: 'Deployment1',
+        path: 'Deployment1',
+        component: 'DeploymentsItem',
+        meta: {
+            link: 'src/components/views/DeploymentsItem.vue',
+        }
+    }
+    ]
 };
