@@ -49,11 +49,5 @@ export default class Overview extends Vue{
     set hideEntrypoints({}){
         this.$store.dispatch('hideEntrypoints', {});
     }
-
-    // lifecycle hook
-    beforeMount(){
-        // Enviamos una petición para obtener los deployments antes de que el componente se monte
-        this.$store.dispatch('getDeployments');
-    }
 }
 </script>

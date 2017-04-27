@@ -29,7 +29,8 @@ import {NavBar, AppMain, SideBar, FAB, FooterBar} from './components'
 })
 export default class App extends Vue {
 	name:string = 'App';
-
+       
+    
 	beforeMount ():void {
 		const { body } = document
 		const WIDTH:number = 768;
@@ -45,6 +46,9 @@ export default class App extends Vue {
 		document.addEventListener('visibilitychange', handler)
 		window.addEventListener('DOMContentLoaded', handler)
 		window.addEventListener('resize', handler)
+
+		 // Enviamos una petición para obtener los deployments antes de que el componente se monte
+        this.$store.dispatch('getDeployments');
 	}
 
 	get SideBar(){
