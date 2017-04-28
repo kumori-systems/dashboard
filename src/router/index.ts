@@ -17,11 +17,6 @@ export default new Router({
       component: Deployments
     },
     {
-      path: '/deployments/Deployment1',
-      name: 'Deployment1',
-      component: DeploymentItem
-    },
-    {
       path: '/storage',
       name: 'Storage',
       component: Storage
