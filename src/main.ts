@@ -5,11 +5,11 @@ import App from './App.vue';
 
 import router from './router';
 import store from './store';
-/*
+
 // store keeps routes
 import { sync } from 'vuex-router-sync'; 
 sync(store, router) ;
-*/
+
 
 // Con compilador
 new Vue({
