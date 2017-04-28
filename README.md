@@ -15,8 +15,9 @@ TODOS
         - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
             pero perdemos toda posible referéncia a métodos de dentro de la clase.
 
-    OverView
-        - Acabar de mirar cómo ocultar los entrypoints
+    
+
+    
 
 DONE
 ---------------------------------------------------------
@@ -30,6 +31,7 @@ DONE
             -> Deploy a new HTTP Entrypoint
             -> Deploy a new Web Service
             -> Deploy a new service (advanced mode)
+        - Acabar de mirar cómo ocultar los entrypoints
 
 SideBar
         - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
