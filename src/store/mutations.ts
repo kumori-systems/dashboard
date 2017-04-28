@@ -1,23 +1,19 @@
 export default {
   setDeployments(state, { deploymentList }) {
-    for (let i = 0; i < deploymentList.length; i++) {
-      state.deploymentList.push(deploymentList[i]);
-    }
+    // añadimos los deployments al estado
+    state.deploymentList = state.deploymentList.concat(deploymentList);
+  },
+  addDeploymentMenuItem(state, { deploymentList }) {
+    // obtenemos el menuitem deployments
+    let deploymentsMenuItem = state.menu.items.filter(item => { return item.name === 'DEPLOYMENTS'; })[0];
 
-    // Después de asignar los deployments tenemos que actualizar la sidebar
-    // Para ello, simplemente tenemos que actualizar el estado y en items, en el item deployments
-    // tantos hijos como deployments tengamos
+    // si no tiene la propiedad children la añadimos
+    if (!deploymentsMenuItem.children) deploymentsMenuItem.children = [];
 
-    state.menu.items.filter(item => { return item.name === 'DEPLOYMENTS'; })[0].children = [
-      {
-        name: 'Deployment1',
-        path: 'Deployment1',
-        component: 'DeploymentsItem',
-        meta: {
-          link: 'src/components/views/DeploymentsItem.vue'
-        }
-      }];
-
+    // añadimos cada deployment a la lista de children
+    deploymentList.forEach(element => {
+      deploymentsMenuItem.children.push(element);
+    });
   },
   hideEntrypoints(state, { }) {
     state.hideEntrypoints = !state.hideEntrypoints;
