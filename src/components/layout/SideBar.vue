@@ -8,8 +8,8 @@
         <router-link :to="item.path" :exact="true" :aria-expanded="isExpanded(item) ? 'true' : 'false'" v-if="item.path" @click.native="toggle(index, item)">
           <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
           <span class="icon is-small is-angle" v-if="item.children && item.children.length">
-                            <i class="fa fa-angle-down"></i>
-                          </span>
+            <i class="fa fa-angle-down"></i>
+          </span>
         </router-link>
         <a :aria-expanded="isExpanded(item)" v-else @click="toggle(index, item)">
           <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
