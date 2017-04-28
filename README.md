@@ -15,8 +15,12 @@ TODOS
         - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
             pero perdemos toda posible referéncia a métodos de dentro de la clase.
 
-    
-
+    Deployments
+=>      - Actualmente hay un problema cuando agregamos los deployments; para poder tener acceso el router debería de añadir
+            rutas después de que la instáncia esté creada. Esto debería de ser posible gracias al método 'addRoutes(routes)'.
+            El problema es que el método parece no funcionar. En la acción que dispara el método hay distintos console.log
+            para comprobar si el método es asíncrono o cualquier cosa, y aun así no estoy obteniendo buenos resultados.
+            ¿Comentar en el foro? ¿Buscar otra manera de solucionarlo?
     
 
 DONE
