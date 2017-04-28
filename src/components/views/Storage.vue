@@ -3,7 +3,7 @@
         <input type="checkbox" id="showpublic3rdpartyelements">
         <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         <collapse>
-            <collapse-item title="Comonents">
+            <collapse-item title="Components">
                     <p>Component 1</p>
                     <p>Component 2</p>
                     <p>Component 3</p>
