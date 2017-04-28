@@ -1,9 +1,10 @@
 TODOS
 ---------------------------------------------------------
     SideBar
-        - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
-=>        - Falta por hacer que aparezcan distintos deployments
-=>        - El botón deployments no debería de llevarnos a ninguna ruta
+        - El botón deployments no debería de llevarnos a ninguna ruta
+        - El botón para desplegar a los hijos no muestra un funcionamiento correcto:
+            1 - No aparece al iniciar la página (hay que pulsar en la sidebar)
+            2 - Ocurren solapes cuando, al principio, pulsamos otros elementos de la sidebar
     
     connection
         - Si intento instalar swagger, acaba metiendo dependencias que dan un error y, según parece, puede ser solucionado
@@ -30,4 +31,6 @@ DONE
             -> Deploy a new Web Service
             -> Deploy a new service (advanced mode)
 
-
+SideBar
+        - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
+        - Falta por hacer que aparezcan distintos deployments
