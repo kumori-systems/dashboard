@@ -20,7 +20,7 @@ new Vue({
   components: { App }
 });
 
-/* sin compilador <-Este es el recomendado
+/*
 // Sin compilador. Este es el recomendado
 new Vue({
   el: '#app',
