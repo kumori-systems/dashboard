@@ -1,3 +1,7 @@
+#Dashboard
+Web dashboard para que los clientes puedan manejar sus instáncias de forma visual e intuitiva.
+
+
 TODOS
 ---------------------------------------------------------
     SideBar
@@ -14,14 +18,9 @@ TODOS
     Sidebar & LevelBar
         - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
             pero perdemos toda posible referéncia a métodos de dentro de la clase.
-
-    Deployments
-=>      - Actualmente hay un problema cuando agregamos los deployments; para poder tener acceso el router debería de añadir
-            rutas después de que la instáncia esté creada. Esto debería de ser posible gracias al método 'addRoutes(routes)'.
-            El problema es que el método parece no funcionar. En la acción que dispara el método hay distintos console.log
-            para comprobar si el método es asíncrono o cualquier cosa, y aun así no estoy obteniendo buenos resultados.
-            ¿Comentar en el foro? ¿Buscar otra manera de solucionarlo?
     
+    Deployments
+        - El nombre de los hijos no aparece en la ruta
 
 DONE
 ---------------------------------------------------------
@@ -37,6 +36,9 @@ DONE
             -> Deploy a new service (advanced mode)
         - Acabar de mirar cómo ocultar los entrypoints
 
-SideBar
+    SideBar
         - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
         - Falta por hacer que aparezcan distintos deployments
+
+    Deployments
+        - Los childs de deployments aparecen evitando la llamada a this.$router.addRoutes(routes)
