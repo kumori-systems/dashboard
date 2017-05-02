@@ -20,23 +20,14 @@ export default {
                 res.push({
                     'name': name[name.length - 1],
                     'path': name[name.length - 1],
-                    'component': DeploymentItem,
-                    'meta': {
-                        link: '/src/components/views/DeploymentItem.vue'
-                    }
                 });
             });
+            /* Aparentemente deberíamos de hacerlo sin esto
             // añadimos las rutas en el router
-            let router = vueInstanceReference.$router;
-            console.log('las rutas actuales son:' + JSON.stringify(router.options.routes));
-            router.addRoutes([{ name: 'oscar', path: '/myPath' }]);
-
-
-            setTimeout(() => {
-                console.log('Tras añadir las nuevas rutas, las rutas son:' + JSON.stringify(router.options.routes));
-            }, 2000);
-
-
+                let router = vueInstanceReference.$router;
+                console.log('las rutas actuales son:' + JSON.stringify(router.options.routes));
+                router.addRoutes([{ name: 'oscar', path: '/myPath' }]);
+            */
 
             // añadimos cada deployment como un deploymentMenuItem
             commit('addDeploymentMenuItem', { deploymentList: res });

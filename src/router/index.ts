@@ -14,7 +14,10 @@ export default new Router({
     {
       path: '/deployments',
       name: 'Deployments',
-      component: Deployments
+      component: Deployments,
+      children: [
+        { path: ':deploymentId', name: 'deploymentId', component: DeploymentItem }
+      ]
     },
     {
       path: '/storage',

@@ -1,6 +1,7 @@
 <template>
     <div>
-    <p>Esta vista debería de desaparecer en un futuro</p>
+        <p>Vista de deployments</p>
+    <router-view></router-view>
     </div>
 </template>
 <script lang="ts">
