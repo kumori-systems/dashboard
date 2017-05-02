@@ -21,7 +21,9 @@
                 <button>RED</button>
             </span>
             <p>Connected to: RepChan -> Worker ReqChan</p>
-            <chart v-bind:type="'line'" v-bind:width=100 v-bind:height=100 v-bind:data="data" v-bind:options="options"></chart>
+            <div class="tile is-parent is-4">
+                <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
+        </div>
              <collapse>
                 <collapse-item title="View instances">
                     <instance-card name="myInstanceName" state="normal"/>

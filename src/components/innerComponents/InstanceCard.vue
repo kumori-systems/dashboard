@@ -1,32 +1,30 @@
 <template>
     <div class="card">
         <div class="card-header title" v-bind:class="state">
-
+    
             <span class="card-header-left">{{name}}</span>
             <span class="card-header-right"></span>
-
+    
         </div>
         <div class="card-body">
-
             <span>
-
                 <!-- resources -->
                 <span>MEM</span>
                 <span>CPU</span>
                 <span>NET</span>
-
+    
                 <!-- kill instance -->
                 <input type="checkbox" id="killInstance">
-                <label for="killInstance">kill instance</label>
-
+                <label for="killInstance">kill instance</label>    
             </span>
-            <!--chart-->     
-            <chart v-bind:type="'line'" v-bind:width=100 v-bind:height=100 v-bind:data="data" v-bind:options="options"></chart>
-                 
-            
-        </div>
-        <div class="card-footer" v-if="false"/>
 
+            <!--chart-->
+            <div class="tile is-parent is-4">
+                <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
+            </div>
+
+        </div>
+        <div class="card-footer" v-if="false" />
     </div>
 </template>
 <script lang="ts">
@@ -48,38 +46,38 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
     }
 })
 export default class Card extends Vue {
-    data ={
+    data = {
         datasets: [{
             label: 'mylabel',
-            backgroundColor:'green',
-            data:[
-                { x:0, y:1 },
-                { x:1, y:1 }
-                ]
-        },{
+            backgroundColor: 'green',
+            data: [
+                { x: 0, y: 1 },
+                { x: 1, y: 1 }
+            ]
+        }, {
             label: 'mylabel2',
-            backgroundColor:'yellow',
-            data:[
-                { x:0, y:1 },
-                { x:1, y:1 }
-                ]
+            backgroundColor: 'yellow',
+            data: [
+                { x: 0, y: 1 },
+                { x: 1, y: 1 }
+            ]
         },
         {
             label: 'mylabel3',
-            backgroundColor:'red',
-            data:[
-                { x:0, y:1 },
-                { x:1, y:1 }
-                ]
+            backgroundColor: 'red',
+            data: [
+                { x: 0, y: 1 },
+                { x: 1, y: 1 }
+            ]
         }]
     };
-    options={
-        tooltips:{mode:'label'},
-          title:{
-              text:"Hola mundo"
-          },
-          showLines:true,
-          spanGaps:false,
+    options = {
+        tooltips: { mode: 'label' },
+        title: {
+            text: "Hola mundo"
+        },
+        showLines: true,
+        spanGaps: false,
     };
 
     mounted() { }

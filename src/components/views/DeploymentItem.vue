@@ -3,7 +3,9 @@
         <p class="title">{{deploymentId}}</p>
         <p>Service: {{serviceName}}</p>
         <p>Connected to: {{connectedTo}}</p>
-        <chart v-bind:type="'line'" v-bind:width=100 v-bind:height=100 v-bind:data="data" v-bind:options="options"></chart>
+        <div class="tile is-parent is-4">
+                <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
+        </div>
         <rol-card v-for="rol in rols" v-bind:key="rol.name" state="normal" v-bind:nombre="rol.name" v-bind:numInstancias="rol.numInstances" v-bind:id="rol.id" v-bind:runtime="rol.runtime" />
     </div>
 </template>
@@ -26,38 +28,38 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 })
 export default class DeploymentItem extends Vue {
     deploymentId: string = this.deploymentId;
-    data ={
+    data = {
         datasets: [{
             label: 'mylabel',
-            backgroundColor:'green',
-            data:[
-                { x:0, y:2 },
-                { x:1, y:1 }
-                ]
-        },{
+            backgroundColor: 'green',
+            data: [
+                { x: 0, y: 2 },
+                { x: 1, y: 1 }
+            ]
+        }, {
             label: 'mylabel2',
-            backgroundColor:'yellow',
-            data:[
-                { x:0, y:1 },
-                { x:1, y:3 }
-                ]
+            backgroundColor: 'yellow',
+            data: [
+                { x: 0, y: 1 },
+                { x: 1, y: 3 }
+            ]
         },
         {
             label: 'mylabel3',
-            backgroundColor:'red',
-            data:[
-                { x:0, y:2.4 },
-                { x:1, y:1.5 }
-                ]
+            backgroundColor: 'red',
+            data: [
+                { x: 0, y: 2.4 },
+                { x: 1, y: 1.5 }
+            ]
         }]
     };
-    options={
-        tooltips:{mode:'label'},
-          title:{
-              text:"Hola mundo"
-          },
-          showLines:true,
-          spanGaps:false,
+    options = {
+        tooltips: { mode: 'label' },
+        title: {
+            text: "Hola mundo"
+        },
+        showLines: true,
+        spanGaps: false,
     };
 
     get rols() {
