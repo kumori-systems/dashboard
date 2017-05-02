@@ -16,10 +16,9 @@ export default {
 
             let res = [];
             deploymentList.forEach(element => {
-                let name = element.name.split('/');
                 res.push({
-                    'name': name[name.length - 1],
-                    'path': name[name.length - 1],
+                    'name': element.name,
+                    'path': element.name,
                 });
             });
             /* Aparentemente deberíamos de hacerlo sin esto

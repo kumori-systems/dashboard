@@ -3,8 +3,8 @@
         <div class="level-left">
             <div class="level-item">
                 <h3 class="subtitle is-5">
-                        <strong><breadcrumb v-bind:list="getList()"></breadcrumb></strong>
-                    </h3>
+                                <strong><breadcrumb v-bind:list="getList()"></breadcrumb></strong>
+                            </h3>
             </div>
         </div>
     </nav>
@@ -26,14 +26,14 @@ import Breadcrumb from 'vue-bulma-breadcrumb/src/Breadcrumb.vue'
 })
 export default class NavBar extends Vue {
     getList() {
-        let res:any = this.$route.matched.filter(item => item.name);
+        let res: any = this.$route.matched.filter(item => item.name);
         let parents = res[0].path.split('/');
-        
+
         // Ignoramos el primer y el último elemento
         // primer elemento = ''
         // último elemento es el elemento que tenemos
-        for (let i=parents.length-2; i>0 ;i--){
-            res =[{ name: parents[i], path: '/'+parents[i] }].concat(res);
+        for (let i = parents.length - 2; i > 0; i--) {
+            res = [{ name: parents[i], path: '/' + parents[i] }].concat(res);
         }
 
         return res;

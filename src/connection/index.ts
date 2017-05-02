@@ -49,8 +49,9 @@ function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
         let deploymentList: Deployment[] = [];
 
         // TODO: parsear los deployments
+        // TODO: hay que tratar los nombres para que no contengan '/' ni :
         deploymentList.push({
-            name: 'slap://eslap.cloud/deployments/20170310_072206/7c6c6f67',
+            name: 'slap.cloud-deployments-20170310_072206-7c6c6f67',
             service: 'eslap://eslap.cloud/services/monitor/1_0_0',
             roles: {
                 monitor: {

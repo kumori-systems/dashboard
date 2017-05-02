@@ -1,6 +1,6 @@
 <template>
     <div>
-        <p class="title">{{deploymentName}}</p>
+        <p class="title">{{deploymentId}}</p>
         <p>Service: {{serviceName}}</p>
         <p>Connected to: {{connectedTo}}</p>
     
@@ -20,15 +20,16 @@ import RolCard from './../innerComponents/RolCard.vue';
         'rol-card': RolCard
     },
     props: {
-        rols:Object
+        deploymentId: String
     }
 })
 export default class DeploymentItem extends Vue {
-    rols: Object = this.rols;
+    deploymentId: string = this.deploymentId;
 
-    get deploymentName() {
-        return this.$route.params.deploymentId;
+    get rols() {
+        return this.$store.getters.getRols(this.deploymentId);
     }
+
     get serviceName() {
         return 'serviceName';
     }
@@ -36,8 +37,9 @@ export default class DeploymentItem extends Vue {
         return 'ServChan1 -> "otherdeployment-2"';
     }
 
-    mount(){
-        console.log('Tenemos roles?' +JSON.stringify(this.rols));
+    mounted() {
+        console.log('Tenemos roles?' + JSON.stringify(this.rols));
+        console.log('Tenemos deploymentId?' + JSON.stringify(this.deploymentId));
     }
 }
 </script>

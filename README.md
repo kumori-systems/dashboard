@@ -24,8 +24,8 @@ TODOS
         - El contenido de la vista de deployments debería ser sustituido si router-view tiene contenido
 
     Rol-Card
-        - Debería de aparecer en deploymentItem
-        - Solucionar problemas con las gráficas; actualmente no aparecen
+=>        - Debería de aparecer en deploymentItem
+=>        - Solucionar problemas con las gráficas; actualmente no aparecen
 
 DONE
 ---------------------------------------------------------

@@ -16,7 +16,9 @@ export default new Router({
       name: 'Deployments',
       component: Deployments,
       children: [
-        { path: ':deploymentId', name: 'deploymentId', component: DeploymentItem }
+        { path: ':deploymentId', name: 'deploymentId', component: DeploymentItem,
+        props: true
+      }
       ]
     },
     {

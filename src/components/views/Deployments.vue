@@ -1,6 +1,6 @@
 <template>
     <div>
-        <p>Vista de deployments</p>
+        <p>Vista general de deployments</p>
     <router-view></router-view>
     </div>
 </template>
