@@ -5,7 +5,6 @@ Web dashboard para que los clientes puedan manejar sus instáncias de forma visu
 TODOS
 ---------------------------------------------------------
     SideBar
-        - El botón deployments no debería de llevarnos a ninguna ruta
         - El botón para desplegar a los hijos no muestra un funcionamiento correcto:
             1 - No aparece al iniciar la página (hay que pulsar en la sidebar)
             2 - Ocurren solapes cuando, al principio, pulsamos otros elementos de la sidebar
@@ -17,10 +16,16 @@ TODOS
 
     Sidebar & LevelBar
         - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
-            pero perdemos toda posible referéncia a métodos de dentro de la clase.
+            pero perdemos toda posible referéncia a métodos de dentro de la clase, por lo que resulta inútil.
     
     Deployments
+        - Proponer que la vista 'Overview' pase a ser la página de deployments
         - El nombre de los hijos no aparece en la ruta
+        - El contenido de la vista de deployments debería ser sustituido si router-view tiene contenido
+
+    Rol-Card
+        - Debería de aparecer en deploymentItem
+        - Solucionar problemas con las gráficas; actualmente no aparecen
 
 DONE
 ---------------------------------------------------------
