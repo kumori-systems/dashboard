@@ -1,6 +1,6 @@
 class Deployment {
     service: string;
-    roles: {
+    rols: {
         [key: string]: {
             instances: {
                 [key: string]: {
@@ -52,7 +52,7 @@ function getDeployments(): Promise<{ [key: string]: Deployment }> {
         // TODO: hay que tratar los nombres para que no contengan '/' ni :
         res['slap.cloud-deployments-20170310_072206-7c6c6f67'] = {
             service: 'eslap://eslap.cloud/services/monitor/1_0_0',
-            roles: {
+            rols: {
                 monitor: {
                     instances: {
                         'eslap.cloud_monitor_5': {

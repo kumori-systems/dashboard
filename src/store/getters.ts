@@ -9,6 +9,9 @@ export default {
     return state.hideEntrypoints;
   },
   getRols: (state, getters) => (deploymentId) => {
-    return state.deploymentList[deploymentId].roles;
+    return state.deploymentList[deploymentId].rols;
+  },
+  getRolInfo: (state, getters) => (deploymentId, rolId) => { 
+    return state.deploymentList[deploymentId].rols[rolId];
   }
 };
