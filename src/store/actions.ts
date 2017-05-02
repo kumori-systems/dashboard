@@ -8,25 +8,17 @@ export default {
         }
     },
     getDeployments({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getDeployments().then(function ({ deploymentList }) {
-            // Obtenemos la lista de deployments
+        connection.getDeployments().then(function (deploymentList) {
+            // Guardamos los deployments en el estado
             commit('setDeployments', { deploymentList });
 
-
-
             let res = [];
-            deploymentList.forEach(element => {
+            for (let key in deploymentList) {
                 res.push({
-                    'name': element.name,
-                    'path': element.name,
+                    'name': key,
+                    'path': key,
                 });
-            });
-            /* Aparentemente deberíamos de hacerlo sin esto
-            // añadimos las rutas en el router
-                let router = vueInstanceReference.$router;
-                console.log('las rutas actuales son:' + JSON.stringify(router.options.routes));
-                router.addRoutes([{ name: 'oscar', path: '/myPath' }]);
-            */
+            }
 
             // añadimos cada deployment como un deploymentMenuItem
             commit('addDeploymentMenuItem', { deploymentList: res });

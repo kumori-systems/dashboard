@@ -1,5 +1,4 @@
 class Deployment {
-    name: string;
     service: string;
     roles: {
         [key: string]: {
@@ -44,14 +43,14 @@ function auxFunction() {
     return promesa;
 }
 
-function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
+function getDeployments(): Promise<{ [key: string]: Deployment }> {
     return auxFunction().then(function ({ response, body }) {
-        let deploymentList: Deployment[] = [];
+        let res: { [key: string]: Deployment } = {};
+
 
         // TODO: parsear los deployments
         // TODO: hay que tratar los nombres para que no contengan '/' ni :
-        deploymentList.push({
-            name: 'slap.cloud-deployments-20170310_072206-7c6c6f67',
+        res['slap.cloud-deployments-20170310_072206-7c6c6f67'] = {
             service: 'eslap://eslap.cloud/services/monitor/1_0_0',
             roles: {
                 monitor: {
@@ -122,8 +121,8 @@ function getDeployments(): Promise<{ deploymentList: Deployment[] }> {
                     }
                 }
             }
-        });
-        return { deploymentList: deploymentList };
+        };
+        return res;
     });
 };
 function addInstance(): Promise<{ state: string }> {

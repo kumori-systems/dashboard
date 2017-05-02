@@ -9,6 +9,6 @@ export default {
     return state.hideEntrypoints;
   },
   getRols: (state, getters) => (deploymentId) => {
-    return state.deploymentList.find(deployment => deployment.name === deploymentId).roles;
+    return state.deploymentList[deploymentId].roles;
   }
 };

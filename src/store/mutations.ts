@@ -1,7 +1,7 @@
 export default {
   setDeployments(state, { deploymentList }) {
     // añadimos los deployments al estado
-    state.deploymentList = state.deploymentList.concat(deploymentList);
+    state.deploymentList = deploymentList;
   },
   addDeploymentMenuItem(state, { deploymentList }) {
     // obtenemos el menuitem deployments
