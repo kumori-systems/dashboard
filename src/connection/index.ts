@@ -1,37 +1,39 @@
-class Deployment {
+export class Deployment {
     service: string;
-    rols: {
-        [key: string]: {
-            instances: {
-                [key: string]: {
-                    id: string,
-                    privateIp: string,
-                    publicIp: string,
-                    arrangement: {
-                        failurezones: number,
-                        bandwidth: number,
-                        memory: number,
-                        cpu: number,
-                        maxinstances: number,
-                        __instances: number,
-                        __cpu: number,
-                        __memory: number,
-                        __ioperf: number,
-                        __iopsintensive: boolean,
-                        __bandwidth: number,
-                        __resilience: number,
-                        mininstances: number
-                    }
-                }
-            },
-            configuration: any,
-            entrypoint: {
-                instancespath: boolean,
-                domain: string,
-                sslonly: boolean,
-                secrets: any
-            }
-        }
+    roles: { [key: string]: Rol };
+}
+
+export class Rol {
+    instances: {
+        [key: string]: Instance
+    };
+    configuration: any;
+    entrypoint: {
+        instancespath: boolean;
+        domain: string;
+        sslonly: boolean;
+        secrets: any;
+    };
+}
+
+export class Instance {
+    id: string;
+    privateIp: string;
+    publicIp: string;
+    arrangement: {
+        failurezones: number;
+        bandwidth: number;
+        memory: number;
+        cpu: number;
+        maxinstances: number;
+        __instances: number;
+        __cpu: number;
+        __memory: number;
+        __ioperf: number;
+        __iopsintensive: boolean;
+        __bandwidth: number;
+        __resilience: number;
+        mininstances: number;
     };
 }
 
@@ -43,7 +45,7 @@ function auxFunction() {
     return promesa;
 }
 
-function getDeployments(): Promise<{ [key: string]: Deployment }> {
+export function getDeployments(): Promise<{ [key: string]: Deployment }> {
     return auxFunction().then(function ({ response, body }) {
         let res: { [key: string]: Deployment } = {};
 
@@ -52,7 +54,7 @@ function getDeployments(): Promise<{ [key: string]: Deployment }> {
         // TODO: hay que tratar los nombres para que no contengan '/' ni :
         res['slap.cloud-deployments-20170310_072206-7c6c6f67'] = {
             service: 'eslap://eslap.cloud/services/monitor/1_0_0',
-            rols: {
+            roles: {
                 monitor: {
                     instances: {
                         'eslap.cloud_monitor_5': {
@@ -124,17 +126,16 @@ function getDeployments(): Promise<{ [key: string]: Deployment }> {
         };
         return res;
     });
-};
-function addInstance(): Promise<{ state: string }> {
+}
+
+export function addInstance(): Promise<{ state: string }> {
     return auxFunction().then(function ({ response, body }) {
         return { state: 'SUCCESS' };
     });
-};
+}
 
-function removeInstance(): Promise<{ state: string }> {
+export function removeInstance(): Promise<{ state: string }> {
     return auxFunction().then(function ({ response, body }) {
         return { state: 'SUCCESS' };
     });
-};
-
-export { Deployment, getDeployments, addInstance, removeInstance };
+}
