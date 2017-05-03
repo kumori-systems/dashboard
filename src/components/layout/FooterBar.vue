@@ -8,9 +8,9 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-@Component
-   // {name: 'footer-bar'}
-
+@Component({
+    name: 'footer-bar'
+})
 export default class FooterBar extends Vue{
 
 }
