@@ -36,8 +36,8 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 @Component({
     name: 'instance-card',
     props: {
-        state: String,
-        name: String
+        state: {required:true, type: String},
+        name: {required:true, type: String}
     },
     components: {
         'collapse': Collapse,
