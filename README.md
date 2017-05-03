@@ -1,6 +1,13 @@
 # Dashboard
 Web dashboard para que los clientes puedan manejar sus instáncias de forma visual e intuitiva.
 
+PREGUNTAS
+---------------------------------------------------------
+El nombre en los deployments debería de estar partido en 2. No puedo diferenciar las dos partes actualmente.
+Los nombres contienen '/', que son un problema para el enrutado. Aunque posíblemente lo puedo arreglar.
+
+PALABRA=[estado de un deployment, website, links volumenes];
+¿Cómo detecto el $PALABRA? ¿Debería de decírmelo la plataforma con un argumento o debería de concluirlo yo analizando datos?
 
 TODOS
 ---------------------------------------------------------
