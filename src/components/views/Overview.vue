@@ -6,17 +6,8 @@
     
         <div class="tile" v-for="deployment, key in deploymentList">
             <deployment-card
-                v-bind:key="deployment.service"
-                
-                v-bind:state="'normal'"
-                v-bind:title="getDeploymentName(key)"
-                v-bind:identificador="getDeploymentId(key)"
-                v-bind:class="'entrypoint'"
-                v-bind:service="deployment.service"
-                v-bind:roles="deployment.roles"
-                v-bind:website="'mi website'"
-                v-bind:links="'mis links'"
-                v-bind:volumes="'mis volumenes'"/>
+                v-bind:key="key"
+                v-bind:deploymentId="key"/>
         </div>
     
     </div>
@@ -39,20 +30,7 @@ import { Deployment } from '../../connection';
     }
 })
 export default class Overview extends Vue {
-
-    // Methods
-    getDeploymentName(deploymentNameId: string): string {
-        return deploymentNameId.substring(0, deploymentNameId.lastIndexOf('-'));
-    }
-    getDeploymentId(deploymentNameId: string): string {
-        return deploymentNameId.substring(deploymentNameId.lastIndexOf('-')+1, deploymentNameId.length);
-    }
-
-
     // computed
-    /**
-     * Obteniendo lista de deployments
-     */
     get deploymentList(): { [key: string]: Deployment } {
         return this.$store.getters.getDeploymentList;
     }

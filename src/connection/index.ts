@@ -1,3 +1,4 @@
+export enum state {NORMAL, WARNING, ERROR};
 export class Deployment {
     service: string;
     roles: { [key: string]: Rol };

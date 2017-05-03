@@ -1,8 +1,8 @@
 <template>
     <div class="card">
         <div class="card-header title" v-bind:class="state">
-            <span class="card-header-left">{{title}}</span>
-            <span class="card-header-right">{{identificador}}</span>
+            <span class="card-header-left">{{shortTitle}}</span>
+            <span class="card-header-right">{{longTitle}}</span>
         </div>
         <div class="card-body">
             <p><u>Service:</u> {{service}}</p>
@@ -10,7 +10,7 @@
                 <p><u>Roles:</u></p>
                 <div v-for="rol, key in roles" class="rol">
                     <span>
-                    <strong>{{key}}</strong><span class="right">{{getNumInstances(rol)}}</span>
+                                    <strong>{{key}}</strong><span class="right">{{rolNumInstances(key)}}</span>
                     </span>
                     <p>{{rol.entrypoint.domain}}</p>
                 </div>
@@ -24,33 +24,51 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import { Rol } from '../../connection';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Rol, state as StateType } from './../../connection';
 
 @Component({
     name: 'deployment-card',
     props: {
-        state: { required: true, type: String },
-        title: { required: true, type: String },
-        identificador: { required: true, type: String },
-        service: { required: true, type: String },
-        roles: { required: true, type: Rol },
-        website: { required: true, type: String },
-        links: { required: true, type: String },
-        volumes: { required: true, type: String }
+        deploymentId: { required: true, type: String }
     }
 })
 export default class Card extends Vue {
-    roles: Rol = this.roles;
+    deploymentId: String = this.deploymentId;
+    // Computed
+    get state(): string {
+        return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
+    };
 
-    /**
-     * Método para obtener el número de instáncias de un rol
-     * */
-    getNumInstances(rol): number{
-        let res = 0;
-        for (let key in rol.instances)res++;
-        return res;
+    get shortTitle(): String {
+        return this.$store.getters.getDeploymentShortTitle(this.deploymentId);
+    }
+
+    get longTitle(): String {
+        return this.$store.getters.getDeploymentLongTitle(this.deploymentId);
+    }
+
+    get service(): String {
+        return this.$store.getters.getDeploymentService(this.deploymentId);
+    }
+    get roles(): { [key: string]: Rol } {
+        return this.$store.getters.getDeploymentRoles(this.deploymentId);
+    }
+    get rolNumInstances(): Function {
+        return function (rol): number {
+            return this.$store.getters.getRolNumInstances(this.deploymentId, rol);
+        }
+    }
+    get website(): String {
+        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
+    }
+    get links(): Array<String> {
+        return this.$store.getters.getDeploymentLinks(this.deploymentId);
+    }
+
+    get volumes(): Array<number> {
+        return this.$store.getters.getDeploymentVolumes(this.deploymentId);
     }
 }
 </script>
@@ -66,7 +84,8 @@ $padding: 10px;
 .title {
     padding: $padding;
 }
-.rol{
+
+.rol {
     padding-left: $padding;
 }
 
@@ -75,15 +94,15 @@ $padding: 10px;
     padding-left: padding;
 }
 
-.normal {
-    background: green;
+.NORMAL {
+    background: #93c47d;
 }
 
-.warning {
-    background: yellow;
+.WARNING {
+    background: #f5d164;
 }
 
-.error {
+.ERROR {
     background: red;
 }
 </style>

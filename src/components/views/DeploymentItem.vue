@@ -6,7 +6,9 @@
         <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
         </div>
-        <rol-card v-for="rol in rols" v-bind:key="rol.name" state="normal" v-bind:nombre="rol.name" v-bind:numInstancias="rol.numInstances" v-bind:id="rol.id" v-bind:runtime="rol.runtime" />
+        <p>Aquí va la rolcard</p>
+        <rol-card v-for="rol in roles" v-bind:key="rol.name" state="normal" v-bind:nombre="rol.name" v-bind:numInstancias="rol.numInstances" v-bind:id="rol.id" v-bind:runtime="rol.runtime" />
+        <p>Aquí acaba la rolcard</p>
     </div>
 </template>
 <script lang="ts">
@@ -62,7 +64,7 @@ export default class DeploymentItem extends Vue {
         spanGaps: false,
     };
 
-    get rols() {
+    get roles() {
         return this.$store.getters.getRols(this.deploymentId);
     }
 
