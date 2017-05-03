@@ -6,9 +6,7 @@
         <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
         </div>
-        <p>Aquí va la rolcard</p>
         <rol-card v-for="rol in roles" v-bind:key="rol.name" state="normal" v-bind:nombre="rol.name" v-bind:numInstancias="rol.numInstances" v-bind:id="rol.id" v-bind:runtime="rol.runtime" />
-        <p>Aquí acaba la rolcard</p>
     </div>
 </template>
 <script lang="ts">
@@ -25,7 +23,7 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
         'chart': Chart
     },
     props: {
-        deploymentId: String
+        deploymentId: {required: true, type: String}
     }
 })
 export default class DeploymentItem extends Vue {
@@ -65,14 +63,14 @@ export default class DeploymentItem extends Vue {
     };
 
     get roles() {
-        return this.$store.getters.getRols(this.deploymentId);
+        return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
 
     get serviceName() {
-        return 'Preguntar a Javi';
+        return 'My Service Name';
     }
     get connectedTo() {
-        return 'Preguntar a Javi';
+        return 'My Connected To';
     }
 }
 </script>

@@ -63,17 +63,12 @@ export default {
   
   
   /* ROLES */
-  getRoles: function(state){
-    return function (deploymentId) {
-      return state.deploymentList[deploymentId].roles;
-    };
-  },
-  getRolInfo: function(state){
+  getDeploymentRolInfo: function(state){
     return function (deploymentId, rolId) { 
       return state.deploymentList[deploymentId].roles[rolId];
     };
   },
-  getRolNumInstances: function(state): Function{
+  getDeploymentRolNumInstances: function(state): Function{
     return function (deploymentId, rolId): number{
       let res = 0;
       for (let counter in state.deploymentList[deploymentId].roles[rolId].instances) res++;

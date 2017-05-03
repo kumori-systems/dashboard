@@ -10,14 +10,22 @@
                 <p><u>Roles:</u></p>
                 <div v-for="rol, key in roles" class="rol">
                     <span>
-                                    <strong>{{key}}</strong><span class="right">{{rolNumInstances(key)}}</span>
+                                            <strong>{{key}}</strong><span class="right">{{rolNumInstances(key)}}</span>
                     </span>
                     <p>{{rol.entrypoint.domain}}</p>
                 </div>
             </div>
             <p><u>Website:</u> {{website}}</p>
-            <p><u>Links:</u> {{links}}</p>
-            <p><u>Volumes:</u> {{volumes}}</p>
+            <p>
+                <span>
+                <u>Links:</u> {{links}}
+                <p>
+                    <u>Volumes:</u> {{volumes}}
+                    <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
+                </p>
+                </span>
+                <i class="fa fa-check-circle" aria-hidden="true"></i>
+            </p>
         </div>
         <div class="card-footer" v-if="false" />
     </div>
@@ -57,7 +65,7 @@ export default class Card extends Vue {
     }
     get rolNumInstances(): Function {
         return function (rol): number {
-            return this.$store.getters.getRolNumInstances(this.deploymentId, rol);
+            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
         }
     }
     get website(): String {
@@ -92,6 +100,11 @@ $padding: 10px;
 .card-header-right {
     color: grey;
     padding-left: padding;
+}
+
+.fa-check-circle {
+    color: #93c47d;
+    font-size: 12em;
 }
 
 .NORMAL {
