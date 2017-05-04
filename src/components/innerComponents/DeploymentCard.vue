@@ -43,35 +43,39 @@ import { Rol, state as StateType } from './../../connection';
     }
 })
 export default class Card extends Vue {
-    deploymentId: String = this.deploymentId;
+    deploymentId: string = this.deploymentId;
     // Computed
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
     };
 
-    get shortTitle(): String {
+    get shortTitle(): string {
         return this.$store.getters.getDeploymentShortTitle(this.deploymentId);
     }
 
-    get longTitle(): String {
+    get longTitle(): string {
         return this.$store.getters.getDeploymentLongTitle(this.deploymentId);
     }
 
-    get service(): String {
-        return this.$store.getters.getDeploymentService(this.deploymentId);
+    get service(): string {
+        //return this.$store.getters.getDeploymentService(this.deploymentId);
+        return '';
     }
-    get roles(): { [key: string]: Rol } {
-        return this.$store.getters.getDeploymentRoles(this.deploymentId);
+    get roles() {
+        //return this.$store.getters.getDeploymentRoles(this.deploymentId);
+        return '';
     }
     get rolNumInstances(): Function {
         return function (rol): number {
-            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
+            //return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
+            return 1;
         }
     }
-    get website(): String {
-        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
+    get website(): string {
+        //return this.$store.getters.getDeploymentWebsite(this.deploymentId);
+        return '';
     }
-    get links(): Array<String> {
+    get links(): Array<string> {
         return this.$store.getters.getDeploymentLinks(this.deploymentId);
     }
 

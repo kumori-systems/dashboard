@@ -1,7 +1,7 @@
 export default {
-  setDeployments(state, { deploymentList }) {
-    // añadimos los deployments al estado
-    state.deploymentList = deploymentList;
+  setStampState(state, { stampState }) {
+    // actualizamos el estado del stamp
+    state.stampState = stampState;
   },
   addDeploymentMenuItem(state, { deploymentList }) {
     // obtenemos el menuitem deployments

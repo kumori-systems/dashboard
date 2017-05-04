@@ -2,7 +2,6 @@ import * as connection from './../connection';
 import { DeploymentItem } from './../components';
 
 export default {
-
     expandMenu({ commit }, menuItem) {
         if (menuItem) {
             menuItem.expanded = menuItem.expanded || false;
@@ -11,12 +10,12 @@ export default {
     },
 
     getStampState({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getStampState().then(function (deploymentList) {
+        connection.getStampState().then(function (stampState) {
             // Guardamos los deployments en el estado
-            commit('setDeployments', { deploymentList });
+            commit('setStampState', { stampState });
 
             let res = [];
-            for (let key in deploymentList) {
+            for (let key in stampState.deployedServices) {
                 res.push({
                     'name': key,
                     'path': key,
