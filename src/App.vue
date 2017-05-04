@@ -48,7 +48,7 @@ export default class App extends Vue {
 		window.addEventListener('resize', handler)
 
 		 // Enviamos una petición para obtener los deployments antes de que el componente se monte
-        this.$store.dispatch('getDeployments',{vueInstanceReference: this});
+        this.$store.dispatch('getStampState',{vueInstanceReference: this});
 	}
 
 	get SideBar(){

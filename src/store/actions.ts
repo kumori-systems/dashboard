@@ -1,14 +1,17 @@
 import * as connection from './../connection';
 import { DeploymentItem } from './../components';
+
 export default {
+
     expandMenu({ commit }, menuItem) {
         if (menuItem) {
             menuItem.expanded = menuItem.expanded || false;
             commit('expandMenu', menuItem);
         }
     },
-    getDeployments({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getDeployments().then(function (deploymentList) {
+
+    getStampState({ dispatch, commit }, { vueInstanceReference }) {
+        connection.getStampState().then(function (deploymentList) {
             // Guardamos los deployments en el estado
             commit('setDeployments', { deploymentList });
 
@@ -26,22 +29,26 @@ export default {
             console.error('Error manejando los deployments: ' + error);
         });
     },
+
     hideEntrypoints({ commit }, { }) {
         commit('hideEntrypoints', {});
     },
+
     // TODO: no queda claro que hace falta para añadir una estáncia ni qué se devuelve
-    addInstance({ commit }, { rol }) {
-        connection.addInstance().then(function () {
-            commit('addInstance', { rol });
+    deploymentRolAddInstance({ commit }, { rol }) {
+        connection.deploymentRolAddInstance().then(function () {
+            commit('deploymentRolAddInstance', { rol });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('No se han podido añadir una instáncia nueva al rol \'' + rol + '\' por el error: ' + error);
         });
     },
-    removeInstance({ commit }, { rol }) {
-        connection.removeInstance().then(function () {
-            commit('removeInstance', { rol });
+
+    deploymentRolRemoveInstance({ commit }, { rol }) {
+        connection.deploymentRolRemoveInstance().then(function () {
+            commit('deploymentRolRemoveInstance', { rol });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('No se han podido eliminar una instáncia nueva al rol \'' + rol + '\' por el error: ' + error);
         });
     }
+
 };
