@@ -31,7 +31,7 @@ export default {
   },
   getDeploymentService: function (state): Function {
     return function (deploymentId): string {
-      return state.deploymentList[deploymentId].service;
+      return state.stampState.deployedServices[deploymentId].manifest.service.name;
     };
   },
   getDeploymentRoles: function (state): Function {

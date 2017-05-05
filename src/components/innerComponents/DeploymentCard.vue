@@ -58,8 +58,8 @@ export default class Card extends Vue {
     }
 
     get service(): string {
-        //return this.$store.getters.getDeploymentService(this.deploymentId);
-        return '';
+        return this.$store.getters.getDeploymentService(this.deploymentId);
+        
     }
     get roles() {
         //return this.$store.getters.getDeploymentRoles(this.deploymentId);
