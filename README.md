@@ -16,8 +16,11 @@ que posiblemente estos no queremos que aparezcan, pero que confirme contigo. Act
 Por lo que he visto, puede haber varios componentes ejecutando el mismo rol. En la vista overview del storyboard hay por cada rol una línea que apunta a un componente. Entiendo que entonces ¿sería correcto añadir una línea por cada componente? En este caso, entiendo que el número de instáncias sería representadas por componente, ¿me equivoco?.
 
 
-
-
+DECISIONES IMPORTANTES
+---------------------------------------------------------
+Los inner components no tendrán más props que el id del elemento que representen.
+Ésto es porque si cualquier parámetro del elemento al que representan cambia, deberíamos de tener un watch para el prop.
+Para evitar ésto, representamos cada parámetro pidiéndolo a la store.
 
 TODOS
 ---------------------------------------------------------
