@@ -3,11 +3,21 @@ Web dashboard para que los clientes puedan manejar sus instáncias de forma visu
 
 PREGUNTAS
 ---------------------------------------------------------
-El nombre en los deployments debería de estar partido en 2. No puedo diferenciar las dos partes actualmente.
-Los nombres contienen '/', que son un problema para el enrutado. Aunque posíblemente lo puedo arreglar.
+// Estado deployment
+¿Cómo detecto el estado de un deployment? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo, si prefieres que sea un parámetro que obtengo del JSON también me sirve.
 
-PALABRA=[estado de un deployment, website, links volumenes];
-¿Cómo detecto el $PALABRA? ¿Debería de decírmelo la plataforma con un argumento o debería de concluirlo yo analizando datos?
+// detección del website
+Para detectar el website Jero me ha explicado que tengo que mirar los deployments lincados, mirar si alguno es un servidor
+http-inbound, entrar en la definición del servício, y la dirección web debería ser el parámetro vhost.
+* No miro si el propio servicio es http-inbound. Por lo que aparece en la lista de servicios sin website. Jero me ha comentado
+que posiblemente estos no queremos que aparezcan, pero que confirme contigo. Actualmente aparecen.
+
+// Componentes y roles
+Por lo que he visto, puede haber varios componentes ejecutando el mismo rol. En la vista overview del storyboard hay por cada rol una línea que apunta a un componente. Entiendo que entonces ¿sería correcto añadir una línea por cada componente? En este caso, entiendo que el número de instáncias sería representadas por componente, ¿me equivoco?.
+
+
+
+
 
 TODOS
 ---------------------------------------------------------

@@ -1,4 +1,4 @@
-import * as connection from './../connection';
+import * as connection from './proxy';
 import { DeploymentItem } from './../components';
 
 export default {
@@ -9,20 +9,19 @@ export default {
         }
     },
 
-    getStampState({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getStampState().then(function (stampState) {
+    getDeploymentList({ dispatch, commit }, { vueInstanceReference }) {
+        connection.getDeploymentList().then(function (deploymentList) {
             // Guardamos los deployments en el estado
-            commit('setStampState', { stampState });
+            commit('setDeploymentList', { deploymentList });
 
+            // añadimos cada deployment como un deploymentMenuItem
             let res = [];
-            for (let key in stampState.deployedServices) {
+            for (let key in deploymentList) {
                 res.push({
                     'name': key,
                     'path': key,
                 });
             }
-
-            // añadimos cada deployment como un deploymentMenuItem
             commit('addDeploymentMenuItem', { deploymentList: res });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error manejando los deployments: ' + error);

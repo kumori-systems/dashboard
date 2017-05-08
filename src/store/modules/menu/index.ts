@@ -1,6 +1,6 @@
 import overview from './overview';
 import deployments from './deployments';
-import storage from './storage';
+import elements from './elements';
 import webDomains from './webDomains';
 import dataVolumes from './dataVolumes';
 import alarmsAndLogs from './alarmsAndLogs';
@@ -10,7 +10,7 @@ const state: any = {
     items: [
         overview,
         deployments,
-        storage,
+        elements,
         webDomains,
         dataVolumes,
         alarmsAndLogs,

@@ -1,4 +1,4 @@
-import { Deployment, Rol, state as StateType } from '../connection';
+import { Deployment, Rol, state as StateType } from './classes';
 export default {
 
   /* GENERAL */
@@ -13,10 +13,8 @@ export default {
   /* DEPLOYMENTS */
   getDeploymentList: function (state): Array<string> {
     let res: Array<string> = [];
-
-    for (let index in state.stampState.deployedServices)
-      res.push(index);
-
+    for (let index in state.deploymentList)
+      res.push((<Deployment>state.deploymentList[index]).name);
     return res;
   },
   getDeploymentShortTitle: function (state): Function {
@@ -31,18 +29,13 @@ export default {
   },
   getDeploymentService: function (state): Function {
     return function (deploymentId): string {
-      return state.stampState.deployedServices[deploymentId].manifest.service.name;
-    };
-  },
-  getDeploymentRoles: function (state): Function {
-    return function (deploymentId): { [key: string]: Rol } {
-      return state.deploymentList[deploymentId].roles;
+      return (<Deployment>state.deploymentList[deploymentId]).service;
     };
   },
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId): string {
       // TODO: Tenemos que saber de dónde obtener el website del sitio
-      return 'El website del sitio';
+      return '¿Website del entrypoint?';
     };
   },
   getDeploymentState: function (state): Function {
@@ -54,20 +47,26 @@ export default {
   getDeploymentLinks: function (state): Function {
     return function (deploymentId): Array<string> {
       // TODO: Tenemos que saber de dónde obtener los links
-      return ['', ''];
+      return ['¿involvedCNs?', 'myLink1'];
     };
   },
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId): Array<number> {
-      // TODO: Los volúmenes sé de dónde obte ner los de una instáncia concreta, no los de un rol
+      // TODO: Los volúmenes sé de dónde obtener los de una instáncia concreta, no los de un rol
       return [1, 2, 3];
     };
   },
 
-
-
-
   /* ROLES */
+  getDeploymentRoles: function (state): Function {
+    return function (deploymentId): Array<string> {
+      let res: Array<string> = [];
+      for (let index in state.stampState.deployedServices[deploymentId].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].roles) {
+        res.push(index);
+      }
+      return res;
+    };
+  },
   getDeploymentRolInfo: function (state) {
     return function (deploymentId, rolId) {
       return state.deploymentList[deploymentId].roles[rolId];

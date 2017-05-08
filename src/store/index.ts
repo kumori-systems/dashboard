@@ -16,7 +16,7 @@ export default new Vuex.Store({
             opened: true,
             hidden: false
         },
-        stampState: {},
+        deploymentList: [],
         hideEntrypoints: false
     },
     'getters': getters,

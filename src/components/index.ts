@@ -10,7 +10,7 @@ import SideBar from './layout/SideBar.vue';
 import Overview from './views/Overview.vue';
 import Deployments from './views/Deployments.vue';
 import DeploymentItem from './views/DeploymentItem.vue';
-import Storage from './views/Storage.vue';
+import Elements from './views/Elements.vue';
 import WebDomains from './views/WebDomains.vue';
 import DataVolumes from './views/DataVolumes.vue';
 import AlarmsAndLogs from './views/AlarmsAndLogs.vue';
@@ -24,7 +24,7 @@ import DeploymentCard from './innerComponents/DeploymentCard.vue';
 export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 
 // Export views
-export { Overview, Deployments, DeploymentItem, Storage, WebDomains, DataVolumes, AlarmsAndLogs, Help };
+export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help };
 
 // Export inner components
 export { DeploymentCard };

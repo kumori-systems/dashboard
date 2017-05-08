@@ -10,7 +10,7 @@
                 <p><u>Roles:</u></p>
                 <div v-for="rol, key in roles" class="rol">
                     <span>
-                                            <strong>{{key}}</strong><span class="right">{{rolNumInstances(key)}}</span>
+                        <strong>{{rol}}</strong><span class="right">{{rolNumInstances(key)}}</span>
                     </span>
                     <p>{{rol.entrypoint.domain}}</p>
                 </div>
@@ -34,16 +34,16 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Rol, state as StateType } from './../../connection';
+import { Rol, state as StateType, Deployment } from './../../store/classes';
 
 @Component({
     name: 'deployment-card',
     props: {
-        deploymentId: { required: true, type: String }
+        deploymentId: { required: true, type: Deployment }
     }
 })
 export default class Card extends Vue {
-    deploymentId: string = this.deploymentId;
+    deploymentId: Deployment = this.deploymentId;
     // Computed
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
@@ -59,21 +59,17 @@ export default class Card extends Vue {
 
     get service(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
-        
     }
     get roles() {
-        //return this.$store.getters.getDeploymentRoles(this.deploymentId);
-        return '';
+        return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
     get rolNumInstances(): Function {
         return function (rol): number {
-            //return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
-            return 1;
+            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
         }
     }
     get website(): string {
-        //return this.$store.getters.getDeploymentWebsite(this.deploymentId);
-        return '';
+        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
     get links(): Array<string> {
         return this.$store.getters.getDeploymentLinks(this.deploymentId);
