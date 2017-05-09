@@ -1,11 +1,10 @@
 <template>
     <div>
-    
         <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
         <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     
         <div class="tile" v-for="deployment in deploymentList">
-            <deployment-card v-bind:key="deployment.name" v-bind:deploymentId="deployment.name" />
+            <deployment-card v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
         </div>
     
     </div>
@@ -33,6 +32,12 @@ export default class Overview extends Vue {
         return this.$store.getters.getDeploymentList;
     }
 
+    get shouldHide(): Function {
+        return function (deploymentId): boolean {
+            if (!this.hideEntrypoints) return false;
+            return this.$store.getters.getIsEntryPoint(deploymentId);
+        }
+    }
     get hideEntrypoints(): boolean {
         return this.$store.getters.getHideEntrypoints;
     }

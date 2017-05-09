@@ -18,26 +18,33 @@ export function getDeploymentList() {
         for (let deployment in parsedBody.tcState.deployedServices) {
             let name = deployment;
             let service = parsedBody.tcState.deployedServices[deployment].manifest.service.name;
+
             let roles: Array<Rol> = [];
             let website: string = 'No website defined';
             let links: Array<Link> = [];
-            let anyadido: boolean;
-            for (let link in parsedBody.tcState.linkedServices) { // TODO: Esto puede ser optimizado
-                anyadido = false;
-                if (parsedBody.tcState.linkedServices[link].deployment1 === deployment) {
-                    links.push(new Link(parsedBody.tcState.linkedServices[link].deployment2));
-                    anyadido = true;
-                } else if (parsedBody.tcState.linkedServices[link].deployment2 === deployment) {
-                    links.push(new Link(parsedBody.tcState.linkedServices[link].deployment1));
-                    anyadido = true;
-                }
-                if (anyadido) { // ¿tenemos website?
-                    if (parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Es un inbound?
-                        website = parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
+
+            if (parsedBody.tcState.deployedServices[deployment].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Si es un http inbound él mismo tiene el website
+                website = parsedBody.tcState.deployedServices[deployment].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
+            } else { // Si no lo és, tiene que mirar en los links cuál es el http inbound correspondiente
+                let anyadido: boolean;
+                for (let link in parsedBody.tcState.linkedServices) { // TODO: Esto puede ser optimizado
+                    anyadido = false;
+                    if (parsedBody.tcState.linkedServices[link].deployment1 === deployment) {
+                        links.push(new Link(parsedBody.tcState.linkedServices[link].deployment2));
+                        anyadido = true;
+                    } else if (parsedBody.tcState.linkedServices[link].deployment2 === deployment) {
+                        links.push(new Link(parsedBody.tcState.linkedServices[link].deployment1));
+                        anyadido = true;
+                    }
+                    if (anyadido) { // ¿tenemos website?
+                        if (parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Es un inbound?
+                            website = parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
+                        }
                     }
                 }
             }
 
+            // TODO: Queda lincar el rol con el componente. Aquí se ha asumido que un componente tiene el mismo nombre que el rol
             for (let rol in parsedBody.tcState.deployedServices[deployment].manifest.arrangement) {
                 let name: string = rol;
                 let definitionURN: string = parsedBody.tcState.deployedServices[deployment].manifest.service.components[name];
@@ -76,8 +83,8 @@ export function getDeploymentList() {
                     }
                 }
 
-                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nnumInstances:' + numInstances + '\nruntime: ' + runtime + '\ninstances: ' + instances);
-                roles.push(new Rol(name, definitionURN, numInstances, runtime, instances));
+                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances);
+                roles.push(new Rol(name, definitionURN, runtime, instances));
             }
 
             console.log('New deployment (' + deployment + '): \ndep.service: ' + service + '\ndep.roles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));

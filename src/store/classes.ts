@@ -6,7 +6,8 @@ export class Deployment {
     roles: Array<Rol>;
     website: string;
     links: Array<Link>;
-    constructor(name: string, service: string, roles: Array<Rol>, website: string, links: Array<Link>) {
+
+    constructor(name: string, service: string,  roles: Array<Rol>, website: string, links: Array<Link>) {
         this.name = name;
         this.service = service;
         this.roles = roles;
@@ -18,13 +19,11 @@ export class Deployment {
 export class Rol {
     name: string;
     definitionURN: string;
-    numInstances: number;
     runtime: string;
     instances: Array<Instance>;
-    constructor(name: string, definitionURN: string, numInstances: number, runtime: string, instances: Array<Instance>) {
+    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>) {
         this.name = name;
         this.definitionURN = definitionURN;
-        this.numInstances = numInstances;
         this.runtime = runtime;
         this.instances = instances;
     }

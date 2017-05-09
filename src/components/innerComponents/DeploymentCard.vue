@@ -8,24 +8,24 @@
             <p><u>Service:</u> {{service}}</p>
             <div class="roles" v-if="roles">
                 <p><u>Roles:</u></p>
-                <div v-for="rol, key in roles" class="rol">
-                    <span>
-                        <strong>{{rol}}</strong><span class="right">{{rolNumInstances(key)}}</span>
-                    </span>
-                    <p>{{rol.entrypoint.domain}}</p>
+                <div v-for="rol in roles" class="rol">
+                    <span><strong>{{rol}}</strong></span>
+                    <p>{{rolComponentURN(rol)}} {{rolNumInstances(rol)}}</p>
                 </div>
             </div>
             <p><u>Website:</u> {{website}}</p>
-            <p>
-                <span>
-                <u>Links:</u> {{links}}
-                <p>
-                    <u>Volumes:</u> {{volumes}}
-                    <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
-                </p>
-                </span>
-                <i class="fa fa-check-circle" aria-hidden="true"></i>
-            </p>
+            <u>Links:</u>
+            <div v-for="link in links">{{link}}</div>
+            <u>Volumes:</u>
+            <div v-for="volume in volumes" class="volume">
+                <p>{{volume}}</p>
+            </div>
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+    
+            <router-link :to="'deployments/'+shortTitle + '/deployments/'+longTitle">
+                <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
+            </router-link>
+    
         </div>
         <div class="card-footer" v-if="false" />
     </div>
@@ -39,15 +39,15 @@ import { Rol, state as StateType, Deployment } from './../../store/classes';
 @Component({
     name: 'deployment-card',
     props: {
-        deploymentId: { required: true, type: Deployment }
+        deploymentId: { required: true, type: String }
     }
 })
 export default class Card extends Vue {
-    deploymentId: Deployment = this.deploymentId;
+    deploymentId: String = this.deploymentId;
     // Computed
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
-    };
+    }
 
     get shortTitle(): string {
         return this.$store.getters.getDeploymentShortTitle(this.deploymentId);
@@ -60,17 +60,27 @@ export default class Card extends Vue {
     get service(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
+
     get roles() {
         return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
-    get rolNumInstances(): Function {
-        return function (rol): number {
-            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rol);
+
+    get rolComponentURN(): Function {
+        return function (rolId): string {
+            return this.$store.getters.getDeploymentRolComponentURN(this.deploymentId, rolId);
         }
     }
+
+    get rolNumInstances(): Function {
+        return function (rolId): number {
+            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rolId);
+        }
+    }
+
     get website(): string {
         return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
+
     get links(): Array<string> {
         return this.$store.getters.getDeploymentLinks(this.deploymentId);
     }
@@ -102,9 +112,13 @@ $padding: 10px;
     padding-left: padding;
 }
 
+.fa-caret-square-o-down {
+    font-size: 8em;
+}
+
 .fa-check-circle {
     color: #93c47d;
-    font-size: 12em;
+    font-size: 8em;
 }
 
 .NORMAL {

@@ -1,4 +1,4 @@
-import { Deployment, Rol, state as StateType } from './classes';
+import { Deployment, Rol, state as StateType, Link, Volume } from './classes';
 export default {
 
   /* GENERAL */
@@ -27,15 +27,24 @@ export default {
       return deploymentId.substring(deploymentId.indexOf('deployments') + 12, deploymentId.length);
     };
   },
+  getIsEntryPoint: function (state, getters) {
+    return function (deploymentId): boolean {
+      if (getters.getDeploymentService(deploymentId) === 'eslap://eslap.cloud/services/http/inbound/1_0_0')
+        return true;
+      return false;
+    };
+  },
   getDeploymentService: function (state): Function {
     return function (deploymentId): string {
-      return (<Deployment>state.deploymentList[deploymentId]).service;
+      let deployment: Deployment = state.deploymentList.find(deployment => {
+        return deployment.name === deploymentId;
+      });
+      return deployment.service;
     };
   },
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId): string {
-      // TODO: Tenemos que saber de dónde obtener el website del sitio
-      return '¿Website del entrypoint?';
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).website;
     };
   },
   getDeploymentState: function (state): Function {
@@ -46,14 +55,24 @@ export default {
   },
   getDeploymentLinks: function (state): Function {
     return function (deploymentId): Array<string> {
-      // TODO: Tenemos que saber de dónde obtener los links
-      return ['¿involvedCNs?', 'myLink1'];
+      let res: Array<string> = [];
+      let links: Array<Link> = (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).links;
+      for (let index in links) {
+        res.push(links[index].connectedTo);
+      }
+      return res;
     };
   },
   getDeploymentVolumes: function (state): Function {
-    return function (deploymentId): Array<number> {
-      // TODO: Los volúmenes sé de dónde obtener los de una instáncia concreta, no los de un rol
-      return [1, 2, 3];
+    return function (deploymentId): Array<string> {
+      let res: Array<string> = [];
+      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.name === deploymentId; });
+      for (let rolIndex in deployment.roles) // Por cada rol buscamos en las instáncias los volúmenes que utilizan
+        for (let instanceIndex in deployment.roles[rolIndex].instances)
+          for (let volumeIndex in deployment.roles[rolIndex].instances[instanceIndex].volumes)
+            res.push(deployment.roles[rolIndex].instances[instanceIndex].volumes[volumeIndex].name);
+
+      return res;
     };
   },
 
@@ -61,22 +80,27 @@ export default {
   getDeploymentRoles: function (state): Function {
     return function (deploymentId): Array<string> {
       let res: Array<string> = [];
-      for (let index in state.stampState.deployedServices[deploymentId].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].roles) {
-        res.push(index);
+      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.name === deploymentId; });
+      for (let index in deployment.roles) {
+        res.push(deployment.roles[index].name);
       }
       return res;
     };
   },
+  getDeploymentRolComponentURN: function (state) {
+    return function (deploymentId, rolId) {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).definitionURN;
+    };
+  },
   getDeploymentRolInfo: function (state) {
     return function (deploymentId, rolId) {
-      return state.deploymentList[deploymentId].roles[rolId];
+      return state.deploymentList.find(deployment => { return deployment.name === deploymentId; }).roles.find(rol => { return rol.name === rolId; });
     };
   },
   getDeploymentRolNumInstances: function (state): Function {
     return function (deploymentId, rolId): number {
-      let res = 0;
-      for (let counter in state.deploymentList[deploymentId].roles[rolId].instances) res++;
-      return res;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances.length;
+
     };
   }
 };

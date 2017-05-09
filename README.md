@@ -15,6 +15,9 @@ que posiblemente estos no queremos que aparezcan, pero que confirme contigo. Act
 // Componentes y roles
 Por lo que he visto, puede haber varios componentes ejecutando el mismo rol. En la vista overview del storyboard hay por cada rol una línea que apunta a un componente. Entiendo que entonces ¿sería correcto añadir una línea por cada componente? En este caso, entiendo que el número de instáncias sería representadas por componente, ¿me equivoco?.
 
+// Cuando listas vacías
+¿Qué debería aparecer cuando las lsitas están vacías? Por ejemplo, en el caso de que no haya volúmenes asociados a un deployment,
+o que no haya links. ¿empty? ¿hago que desaparezca el parámetro?
 
 DECISIONES IMPORTANTES
 ---------------------------------------------------------
