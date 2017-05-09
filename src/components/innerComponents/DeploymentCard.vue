@@ -14,9 +14,9 @@
                 </div>
             </div>
             <p><u>Website:</u> {{website}}</p>
-            <u>Links:</u>
+            <p><u>Links:</u></p>
             <div v-for="link in links">{{link}}</div>
-            <u>Volumes:</u>
+            <p><u>Volumes:</u></p>
             <div v-for="volume in volumes" class="volume">
                 <p>{{volume}}</p>
             </div>
