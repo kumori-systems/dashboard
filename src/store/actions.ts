@@ -18,8 +18,8 @@ export default {
             let res = [];
             for (let key in deploymentList) {
                 res.push({
-                    'name': key,
-                    'path': key,
+                    'name': deploymentList[key].name,
+                    'path': deploymentList[key].name,
                 });
             }
             commit('addDeploymentMenuItem', { deploymentList: res });

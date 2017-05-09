@@ -1,5 +1,4 @@
 import overview from './overview';
-import deployments from './deployments';
 import elements from './elements';
 import webDomains from './webDomains';
 import dataVolumes from './dataVolumes';
@@ -9,7 +8,6 @@ import help from './help';
 const state: any = {
     items: [
         overview,
-        deployments,
         elements,
         webDomains,
         dataVolumes,

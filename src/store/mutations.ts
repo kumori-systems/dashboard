@@ -5,14 +5,17 @@ export default {
   },
   addDeploymentMenuItem(state, { deploymentList }) {
     // obtenemos el menuitem deployments
-    let deploymentsMenuItem = state.menu.items.filter(item => { return item.name === 'DEPLOYMENTS'; })[0];
+    let menuItem = state.menu.items.find(item => { return item.name === 'OVERVIEW'; });
+
+    console.log('El menuItem que tenemos es: ' + JSON.stringify(menuItem));
 
     // si no tiene la propiedad children la añadimos
-    if (!deploymentsMenuItem.children) deploymentsMenuItem.children = [];
+    if (!menuItem.children) menuItem.children = [];
 
     // añadimos cada deployment a la lista de children
     deploymentList.forEach(element => {
-      deploymentsMenuItem.children.push(element);
+      console.log('Los elementos son: ' + JSON.stringify(element));
+      menuItem.children.push(element);
     });
   },
   hideEntrypoints(state, { }) {
