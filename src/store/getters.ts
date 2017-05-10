@@ -50,7 +50,12 @@ export default {
   getDeploymentState: function (state): Function {
     return function (deploymentId): StateType {
       // TODO: Tenemos que saber de dónde obtener el estado
-      return StateType.NORMAL;
+      let ranNumber = Math.trunc(Math.random() * 3);
+      switch (ranNumber) {
+        case 0: return StateType.NORMAL;
+        case 1: return StateType.WARNING;
+        default: return StateType.ERROR;
+      }
     };
   },
   getDeploymentLinks: function (state): Function {

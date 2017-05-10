@@ -20,8 +20,9 @@
             <div v-for="volume in volumes" class="volume">
                 <p>{{volume}}</p>
             </div>
-            <i class="fa fa-check-circle" aria-hidden="true"></i>
-    
+            <span>
+                        <i v-bind:class="stateIcon" aria-hidden="true"></i>
+                    </span>
             <router-link :to="'deployments/'+shortTitle + '/deployments/'+longTitle">
                 <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
             </router-link>
@@ -47,6 +48,18 @@ export default class Card extends Vue {
     // Computed
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
+    }
+    get stateIcon(): string {
+        switch (this.state) {
+            case 'NORMAL':
+                return 'fa fa-check-circle';
+            case 'WARNING':
+                return 'fa fa-exclamation-triangle';
+            case 'ERROR':
+                return 'fa fa-exclamation-circle';
+            default:
+                return '';
+        }
     }
 
     get shortTitle(): string {
@@ -92,7 +105,11 @@ export default class Card extends Vue {
 </script>
 
 <style lang="scss">
-$padding: 10px;
+$padding:10px;
+$icon_size:8em;
+$color_normal:#93c47d;
+$color_warning:#f5d164;
+$color_error:#ff6666;
 
 .card {
     padding: $padding;
@@ -113,23 +130,33 @@ $padding: 10px;
 }
 
 .fa-caret-square-o-down {
-    font-size: 8em;
+    font-size: $icon_size;
 }
 
 .fa-check-circle {
-    color: #93c47d;
-    font-size: 8em;
+    color: $color_normal;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+    color: $color_warning;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+    color: $color_error;
+    font-size: $icon_size;
 }
 
 .NORMAL {
-    background: #93c47d;
+    background: $color_normal;
 }
 
 .WARNING {
-    background: #f5d164;
+    background: $color_warning;
 }
 
 .ERROR {
-    background: red;
+    background: $color_error;
 }
 </style>
