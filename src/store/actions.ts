@@ -2,13 +2,6 @@ import * as connection from './proxy';
 import { DeploymentItem } from './../components';
 
 export default {
-    expandMenu({ commit }, menuItem) {
-        if (menuItem) {
-            menuItem.expanded = menuItem.expanded || false;
-            commit('expandMenu', menuItem);
-        }
-    },
-
     getDeploymentList({ dispatch, commit }, { vueInstanceReference }) {
         connection.getDeploymentList().then(function (deploymentList) {
             // Guardamos los deployments en el estado

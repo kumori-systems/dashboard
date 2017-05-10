@@ -2,7 +2,7 @@
 	<div id="app">
 		<nprogress-container></nprogress-container>
 		<nav-bar v-bind:show="true"></nav-bar>
-		<side-bar title="Menu" v-bind:show="SideBar.opened && !SideBar.hidden"></side-bar>
+		<side-bar></side-bar>
 		<app-main></app-main>
 		<fab></fab>
 		<footer-bar></footer-bar>
@@ -48,10 +48,6 @@ export default class App extends Vue {
 
 		// Enviamos una petición para obtener los deployments
 		this.$store.dispatch('getDeploymentList', { vueInstanceReference: this });
-	}
-
-	get SideBar() {
-		return this.$store.getters.sidebar;
 	}
 }
 </script>

@@ -9,7 +9,7 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import LevelBar from './LevelBar'
+import LevelBar from './LevelBar.vue'
 
 @Component({
     name: 'app-main',

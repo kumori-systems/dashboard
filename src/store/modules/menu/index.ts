@@ -5,7 +5,7 @@ import dataVolumes from './dataVolumes';
 import alarmsAndLogs from './alarmsAndLogs';
 import help from './help';
 
-export let routes = [
+export let routes: Array<any> = [
     overview,
     elements,
     webDomains,
@@ -15,29 +15,46 @@ export let routes = [
 ];
 
 const state: any = {
-    items: routes
+    menuItemList: routes
 };
 
 const getters: any = {
-    menuitems: function (state) {
-        return state.items;
+    menuItems: function (state) {
+        return state.menuItemList;
+    },
+    menuItemIsExpanded: function (state): Function {
+        return function (menuItem): boolean {
+            return state.menuItemList.find(item => { return item.name === menuItem.name; }).expanded || false;
+        };
+    },
+    menuItemHasChildren: function (state): Function {
+        return function (menuItem): boolean {
+            if (menuItem.children) return true;
+            return false;
+        };
     }
+
 };
 
 const mutations: any = {
-    expandMenu(state, menuItem) {
-        if (menuItem.index > -1) {
-            if (state.items[menuItem.index] && state.items[menuItem.index].meta) {
-                state.items[menuItem.index].meta.expanded = menuItem.expanded;
-            }
-        } else if (menuItem.item && 'expanded' in menuItem.item.meta) {
-            menuItem.item.meta.expanded = menuItem.expanded;
+    menuItemExpandToggle(state, { menuItem }) {
+        let item = state.menuItemList.find(item => { return item.name === menuItem.name; });
+        if (!item.expanded) {
+            item.expanded = false;
         }
+        item.expanded = !item.expanded;
+    }
+};
+
+const actions: any = {
+    menuItemExpandToggle({ commit }, { menuItem }) {
+        commit('menuItemExpandToggle', { menuItem });
     }
 };
 
 export default {
     'state': state,
     'getters': getters,
-    'mutations': mutations
+    'mutations': mutations,
+    'actions': actions
 };

@@ -12,10 +12,6 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     strict: true, // Cuando se intenta mutar de una forma inadecuada lanza un error
     'state': {
-        sidebar: {
-            opened: true,
-            hidden: false
-        },
         deploymentList: [],
         hideEntrypoints: false
     },
