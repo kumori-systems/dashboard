@@ -5,15 +5,17 @@ import dataVolumes from './dataVolumes';
 import alarmsAndLogs from './alarmsAndLogs';
 import help from './help';
 
+export let routes = [
+    overview,
+    elements,
+    webDomains,
+    dataVolumes,
+    alarmsAndLogs,
+    help
+];
+
 const state: any = {
-    items: [
-        overview,
-        elements,
-        webDomains,
-        dataVolumes,
-        alarmsAndLogs,
-        help
-    ]
+    items: routes
 };
 
 const getters: any = {

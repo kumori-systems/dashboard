@@ -1,27 +1,20 @@
 <template>
   <aside class="menu app-sidebar animated" :class="{ slideInLeft: show, slideOutLeft: !show }">
-    <p class="menu-label">
-      General
-    </p>
     <ul class="menu-list">
       <li v-for="(item, index) in menu">
-        <router-link :to="item.path" :exact="true" :aria-expanded="isExpanded(item) ? 'true' : 'false'" v-if="item.path" @click.native="toggle(index, item)">
-          <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
-          <span class="icon is-small is-angle" v-if="item.children && item.children.length">
-            <i class="fa fa-angle-down"></i>
-          </span>
+  
+        <router-link v-bind:to="item.path" v-bind:exact="true" v-bind:aria-expanded="isExpanded(item) ? 'true' : 'false'" v-if="item.path" v-on:click.native="toggle(index, item)">
+          {{ item.name }}<span class="icon is-small is-angle" v-if="item.children && item.children.length"><i class="fa fa-angle-down"></i></span>
         </router-link>
-        <a :aria-expanded="isExpanded(item)" v-else @click="toggle(index, item)">
-          <span class="icon is-small"><i :class="['fa', item.meta.icon]"></i></span> {{ item.meta.label || item.name }}
-          <span class="icon is-small is-angle" v-if="item.children && item.children.length">
-                            <i class="fa fa-angle-down"></i>
-                          </span>
-        </a>
+  
+        <a v-bind:aria-expanded="isExpanded(item)" v-else v-on:click="toggle(index, item)">{{ item.name }}
+            <span class="icon is-small is-angle" v-if="item.children && item.children.length"><i class="fa fa-angle-down"></i></span>
+                  </a>
   
         <expanding v-if="item.children && item.children.length">
           <ul v-show="isExpanded(item)">
             <li v-for="subItem in item.children" v-if="subItem.path">
-              <router-link :to="generatePath(item, subItem)">
+              <router-link v-bind:to="generatePath(item, subItem)">
                 {{ subItem.meta && subItem.meta.label || subItem.name }}
               </router-link>
             </li>
@@ -46,35 +39,30 @@ import Expanding from 'vue-bulma-expanding/src/Expanding.vue';
   }
 })
 export default class Sidebar extends Vue {
-  /* DATA */
-  title: string = "";
-  isReady: boolean = false;
 
-  /* GETTERS */
+  // Computed
   get menu() {
-    return this.$store.getters.menuitems;
+
+    let res = this.$store.getters.menuitems;
+    console.log('Los objetos que tenemos en el menú son: ' + JSON.stringify(res));
+
+    return res;
   }
 
-  /* LIFEHOOK CYCLE */
-  mounted() {
-    let route = this.$route;
-    if (route.name) {
-      this.isReady = true;
-      this.shouldExpandMatchItem(route);
-    }
-  }
 
   /* METHODS */
-  // returns if a item is expanded or not
-  isExpanded(item):Boolean {
-    return item.meta.expanded;
+  /**
+   * Returns if a item is expanded or not
+   */
+  isExpanded(item): Boolean {
+    return item.expanded || false;
   }
 
   // change the state of the menuItem
   toggle(index, item) {
     this.expandMenu({
       index: index,
-      expanded: !item.meta.expanded
+      expanded: !item.expanded
     });
   }
 

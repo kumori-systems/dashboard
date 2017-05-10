@@ -1,9 +1,13 @@
+import { Overview, DeploymentItem } from '../../../components';
+
 export default {
     name: 'OVERVIEW',
     path: '/',
-    meta: {
-        link: 'src/components/views/Overview.vue',
-        expanded: false,
-    },
-    component: 'Overview'
+    component: Overview,
+    children: [
+        {
+            path: '/deployments/:deploymentId', name: 'deploymentId', component: DeploymentItem,
+            props: true
+        }
+    ]
 };

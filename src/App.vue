@@ -14,27 +14,26 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import NprogressContainer from 'vue-nprogress/src/NprogressContainer.vue'
-import {NavBar, AppMain, SideBar, FAB, FooterBar} from './components'
+import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components'
 
-@Component({	
-	name:'App',
-	components:{
-		'nprogress-container':NprogressContainer,
-		'nav-bar':NavBar,
-		'side-bar':SideBar,
-		'app-main':AppMain,
-		'fab':FAB,
-		'footer-bar':FooterBar
+@Component({
+	name: 'App',
+	components: {
+		'nprogress-container': NprogressContainer,
+		'nav-bar': NavBar,
+		'side-bar': SideBar,
+		'app-main': AppMain,
+		'fab': FAB,
+		'footer-bar': FooterBar
 	}
 })
 export default class App extends Vue {
-	name:string = 'App';
-       
-    
-	beforeMount ():void {
+	name: string = 'App';
+
+	beforeMount(): void {
 		const { body } = document
-		const WIDTH:number = 768;
-		const RATIO:number = 3;
+		const WIDTH: number = 768;
+		const RATIO: number = 3;
 		const handler = () => {
 			if (!document.hidden) {
 				let rect = body.getBoundingClientRect();
@@ -43,15 +42,15 @@ export default class App extends Vue {
 				// this.toggleSidebar(!isMobile)
 			}
 		}
-		document.addEventListener('visibilitychange', handler)
-		window.addEventListener('DOMContentLoaded', handler)
-		window.addEventListener('resize', handler)
+		document.addEventListener('visibilitychange', handler);
+		window.addEventListener('DOMContentLoaded', handler);
+		window.addEventListener('resize', handler);
 
-		 // Enviamos una petición para obtener los deployments antes de que el componente se monte
-        this.$store.dispatch('getDeploymentList',{vueInstanceReference: this});
+		// Enviamos una petición para obtener los deployments
+		this.$store.dispatch('getDeploymentList', { vueInstanceReference: this });
 	}
 
-	get SideBar(){
+	get SideBar() {
 		return this.$store.getters.sidebar;
 	}
 }
