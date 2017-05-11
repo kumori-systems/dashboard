@@ -21,6 +21,10 @@ export default {
         });
     },
 
+    toggleMenuItemExpanded({ commit }, { menuItem }) {
+        commit('toggleMenuItemExpanded', menuItem);
+    },
+
     hideEntrypoints({ commit }, { }) {
         commit('hideEntrypoints', {});
     },

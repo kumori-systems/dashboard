@@ -5,20 +5,19 @@ import mutations from './mutations';
 import getters from './getters';
 import actions from './actions';
 
-import menu from './modules/menu';
+/* MENU */
+import menuItemList from './../menu';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-    strict: true, // Cuando se intenta mutar de una forma inadecuada lanza un error
+    'strict': true, // Cuando se intenta mutar de una forma inadecuada lanza un error
     'state': {
-        deploymentList: [],
-        hideEntrypoints: false
+        'menuItemList': menuItemList,
+        'deploymentList': [],
+        'hideEntrypoints': false
     },
     'getters': getters,
     'mutations': mutations,
-    'actions': actions,
-    'modules': {
-        'menu': menu
-    }
+    'actions': actions
 });

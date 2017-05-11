@@ -2,24 +2,22 @@
   <aside class="menu app-sidebar animated slideInDown">
     <ul class="menu-list">
       <li v-for="menuItem in menuItems">
-        <router-link v-bind:to="menuItem.path" v-bind:exact="true" v-bind:aria-expanded="expanded(menuItem) ? 'true' : 'false'" v-on:click.native="menuItemExpandToggle(menuItem)">
+        <router-link v-bind:to="menuItem.path" v-on:click.native="onClick(menuItem)">
           {{ menuItem.name }}
-          <span class="icon is-small is-angle fa" v-if="hasChildren(menuItem)">
-            <i v-if="expanded" class="fa-angle-up"></i>
-            <i v-else class="fa-angle-left"></i>
+          <span class="icon is-small is-angle fa" v-if="menuItem.children">
+            <i v-if="menuItem.meta.expanded" class="fa-angle-down"></i>
+            <i v-else class="fa-angle-left"></i> 
           </span>
         </router-link>
-  
-        <expanding v-if="hasChildren(menuItem)">
-          <ul v-if="expanded(menuItem)">
+        <expanding  v-show="menuItem.meta.expanded">
+          <ul>
             <li v-for="subItem in menuItem.children">
               <router-link v-bind:to="menuItem.path">
-                {{ subItem.meta && subItem.name }}
+                {{ subItem.name }}
               </router-link>
             </li>
           </ul>
         </expanding>
-  
       </li>
     </ul>
   </aside>
@@ -42,21 +40,8 @@ export default class Sidebar extends Vue {
     return this.$store.getters.menuItems;
   }
 
-  get hasChildren(): Function {
-    return function (menuItem): boolean {
-      return this.$store.getters.menuItemHasChildren(menuItem);
-    }
-  }
-
-  get expanded(): Function {
-    return function (menuItem): boolean {
-      return this.$store.getters.menuItemIsExpanded(menuItem);
-    }
-  }
-
-  menuItemExpandToggle(menuItem) {
-    if (this.hasChildren(menuItem))
-      this.$store.dispatch('menuItemExpandToggle', { menuItem });
+  onClick(menuItem): void {
+    this.$store.dispatch('toggleMenuItemExpanded', { menuItem });
   }
 }
 </script>
