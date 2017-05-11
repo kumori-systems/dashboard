@@ -21,9 +21,9 @@
                 <p>{{volume}}</p>
             </div>
             <span>
-                        <i v-bind:class="stateIcon" aria-hidden="true"></i>
-                    </span>
-            <router-link :to="'deployments/'+shortTitle + '/deployments/'+longTitle">
+                            <i v-bind:class="stateIcon" aria-hidden="true"></i>
+                        </span>
+            <router-link :to="deploymentPath">
                 <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
             </router-link>
     
@@ -46,6 +46,9 @@ import { Rol, state as StateType, Deployment } from './../../store/classes';
 export default class Card extends Vue {
     deploymentId: String = this.deploymentId;
     // Computed
+    get deploymentPath() {
+        return this.$store.getters.getDeploymentPath(this.deploymentId);
+    }
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
     }

@@ -4,7 +4,7 @@
         <p>Service: {{serviceName}}</p>
         <p>Connected to: {{connectedTo}}</p>
         <div class="tile is-parent is-4">
-                <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
+            <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
         </div>
         <rol-card v-for="rol in roles" v-bind:key="rol.name" state="normal" v-bind:nombre="rol.name" v-bind:numInstancias="rol.numInstances" v-bind:id="rol.id" v-bind:runtime="rol.runtime" />
     </div>
@@ -23,11 +23,17 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
         'chart': Chart
     },
     props: {
-        deploymentId: {required: true, type: String}
+        deploymentRoute: { required: true, type: String }
     }
 })
 export default class DeploymentItem extends Vue {
-    deploymentId: string = this.deploymentId;
+    deploymentRoute:string = this.deploymentRoute;
+    deploymentId: string="";
+    // Correccion de la prop deploymentId
+    beforeMount(){
+        this.deploymentId = this.$store.getters.getDeploymentIdFromDeploymentRoute('deployments_'+this.deploymentRoute);
+    }
+    
     data = {
         datasets: [{
             label: 'mylabel',
@@ -63,6 +69,7 @@ export default class DeploymentItem extends Vue {
     };
 
     get roles() {
+        console.log('El deploymentId que tenemnos es: ' + this.deploymentId);
         return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
 

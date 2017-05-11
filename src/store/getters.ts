@@ -10,7 +10,7 @@ export default {
   menuItems: function (state) {
     return state.menuItemList;
   },
-  
+
   /* VIEWS */
   getHideEntrypoints: function (state): boolean {
     return state.hideEntrypoints;
@@ -22,6 +22,25 @@ export default {
     for (let index in state.deploymentList)
       res.push((<Deployment>state.deploymentList[index]).name);
     return res;
+  },
+  getDeploymentIdFromDeploymentRoute: function (state): Function {
+    return function (deploymentRoute: String): string {
+      // Tenemos que obtener el id a partir de la ruta, esto es
+      // Entrar en el menú, mirar qué elemento está utilizando esta ruta y pasar el nombre
+      let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+      return overview.children.find(menuItem => {
+        console.log('MenuItemPath es: ' + menuItem.path);
+        console.log('DeploymentRoute es: ' + deploymentRoute);
+        return menuItem.path === deploymentRoute;
+      }).name;
+    };
+  },
+  getDeploymentPath: function (state): Function {
+    return function (deploymentId: String): string {
+      // Obtenemos la vista que contiene los deployment == OVERVIEW
+      let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+      return overview.children.find(deploymentMenuItem => { return deploymentMenuItem.name === deploymentId; }).path;
+    };
   },
   getDeploymentShortTitle: function (state): Function {
     return function (deploymentId: string): string {
@@ -92,6 +111,7 @@ export default {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
       let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.name === deploymentId; });
+
       for (let index in deployment.roles) {
         res.push(deployment.roles[index].name);
       }

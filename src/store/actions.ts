@@ -9,10 +9,17 @@ export default {
 
             // añadimos cada deployment como un deploymentMenuItem
             let res = [];
+            let path: string;
             for (let key in deploymentList) {
+                path = deploymentList[key].name;
+                let index = path.indexOf('/');
+                while (index !== -1) {
+                    path = path.replace('/', '_');
+                    index = path.indexOf('/');
+                }
                 res.push({
                     'name': deploymentList[key].name,
-                    'path': deploymentList[key].name,
+                    'path': 'deployments_' + path,
                 });
             }
             commit('addDeploymentMenuItem', { deploymentList: res });

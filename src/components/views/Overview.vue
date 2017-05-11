@@ -1,5 +1,6 @@
 <template>
     <div>
+        <router-view/>
         <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
         <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     

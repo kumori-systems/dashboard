@@ -7,8 +7,8 @@ export default {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
 
-    // si no tiene la propiedad children la añadimos
-    if (!menuItem.children) menuItem.children = [];
+    // Quitamos los hijos anteriores para actualizar de cero
+    menuItem.children = [];
 
     // añadimos cada deployment a la lista de children
     deploymentList.forEach(element => {

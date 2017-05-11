@@ -17,9 +17,7 @@ import LevelBar from './LevelBar.vue'
         'level-bar': LevelBar
     }
 })
-export default class AppMain extends Vue{
-
-}
+export default class AppMain extends Vue{}
 </script>
 <style lang="scss">
 

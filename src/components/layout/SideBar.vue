@@ -12,7 +12,7 @@
         <expanding  v-show="menuItem.meta.expanded">
           <ul>
             <li v-for="subItem in menuItem.children">
-              <router-link v-bind:to="menuItem.path">
+              <router-link v-bind:to="subItem.path">
                 {{ subItem.name }}
               </router-link>
             </li>

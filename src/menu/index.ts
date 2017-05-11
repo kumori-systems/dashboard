@@ -1,9 +1,4 @@
-import { AlarmsAndLogs } from '../components';
-import { DataVolumes } from '../components';
-import { Elements } from '../components';
-import { Overview, DeploymentItem } from '../components';
-import { Help } from '../components';
-import { WebDomains } from '../components';
+import { Overview, DeploymentItem, AlarmsAndLogs, DataVolumes, Elements, Help, WebDomains } from '../components';
 
 export default [
     {
@@ -13,7 +8,7 @@ export default [
         component: Overview,
         children: [
             {
-                path: '/deployments/:deploymentId', name: 'deploymentId', component: DeploymentItem,
+                path: 'deployments_:deploymentRoute', name: 'deploymentId', component: DeploymentItem,
                 props: true
             }
         ]

@@ -1,13 +1,17 @@
 <template>
-    <nav class="level app-levelbar">
-        <div class="level-left">
-            <div class="level-item">
-                <h3 class="subtitle is-5">
-                                <strong><breadcrumb v-bind:list="getList()"></breadcrumb></strong>
-                            </h3>
+    <div>
+        
+        <nav class="level app-levelbar">
+            <div class="level-left">
+                <div class="level-item">
+                    <h3 class="subtitle is-5">
+                                    <strong><breadcrumb v-bind:list="list"></breadcrumb></strong>
+                                </h3>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+        
+    </div>
 </template>
 
 <script lang="ts">
@@ -25,7 +29,7 @@ import Breadcrumb from 'vue-bulma-breadcrumb/src/Breadcrumb.vue'
     }
 })
 export default class NavBar extends Vue {
-    getList() {
+    get list() {
         let res: any = this.$route.matched.filter(item => item.name);
         let parents = res[0].path.split('/');
 
@@ -38,11 +42,6 @@ export default class NavBar extends Vue {
 
         return res;
     }
-
-    // lifecycle hook
-    created() {
-        this.getList();
-    };
 
     // computed
     get codelink() {
