@@ -105,6 +105,35 @@ export default {
       return res;
     };
   },
+  getDeploymentChartData: function (state): Function {
+    return function (): Object {
+      return {
+        datasets: [{
+          label: 'mylabel',
+          backgroundColor: 'green',
+          data: [
+            { x: 0, y: 2 },
+            { x: 1, y: 1 }
+          ]
+        }, {
+          label: 'mylabel2',
+          backgroundColor: 'yellow',
+          data: [
+            { x: 0, y: 1 },
+            { x: 1, y: 3 }
+          ]
+        },
+        {
+          label: 'mylabel3',
+          backgroundColor: 'red',
+          data: [
+            { x: 0, y: 2.4 },
+            { x: 1, y: 1.5 }
+          ]
+        }]
+      };
+    };
+  },
 
   /* ROLES */
   getDeploymentRoles: function (state): Function {
@@ -131,6 +160,21 @@ export default {
   getDeploymentRolNumInstances: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
       return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances.length;
+    };
+  },
+  getDeploymentRolName: function (state): Function {
+    return function (deploymentId: string, rolId: string): string {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).name;
+    };
+  },
+  getDeploymentRolState: function (state): Function {
+    return function (deploymentId: string, rolId: string): StateType {
+      let ranNumber = Math.trunc(Math.random() * 3);
+      switch (ranNumber) {
+        case 0: return StateType.NORMAL;
+        case 1: return StateType.WARNING;
+        default: return StateType.ERROR;
+      }
     };
   }
 };

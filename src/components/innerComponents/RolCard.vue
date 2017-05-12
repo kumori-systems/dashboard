@@ -45,11 +45,8 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 @Component({
     name:'rol-card',
     props: {
-        state: {required:true, type: String},
-        nombre: {required:true, type: String},
-        numInstancias: {required:true, type: Number},
-        id: {required:true, type: String},
-        runtime: {required:true, type: String}
+        deploymentId: {required:true, type: String},
+        rolId: {required:true, type: String}
     },
     components:{
         'collapse':Collapse,

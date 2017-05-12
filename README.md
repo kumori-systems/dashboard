@@ -3,21 +3,56 @@ Web dashboard para que los clientes puedan manejar sus instáncias de forma visu
 
 PREGUNTAS
 ---------------------------------------------------------
-// Estado deployment
-¿Cómo detecto el estado de un deployment? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo, si prefieres que sea un parámetro que obtengo del JSON también me sirve.
+// Primer campo en el título de los deployments
+Actualmente en OVERVIEW en todos los deployments tengo 'slap://eslap.clod', donde en el storyboard pone 'CALCULATOR-5'.
+Pero entiendo que ésto no es correcto. He preguntado y no han sabido contestarme, entonces, ¿a qué campo en el JSON corresponde ésta parte del título?
 
-// detección del website
-Para detectar el website Jero me ha explicado que tengo que mirar los deployments lincados, mirar si alguno es un servidor
-http-inbound, entrar en la definición del servício, y la dirección web debería ser el parámetro vhost.
-* No miro si el propio servicio es http-inbound. Por lo que aparece en la lista de servicios sin website. Jero me ha comentado
-que posiblemente estos no queremos que aparezcan, pero que confirme contigo. Actualmente aparecen.
+// Estado Instáncias
+¿Cómo detecto el estado de una instáncia? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo o si prefieres que sea un parámetro en el JSON también me sirve.
+Por otro lado, entiendo que el estado del rol y el estado del deployment van a depender de éste. La forma que tenía pensada
+es todo bien, excepto si  nºwarnings>0 (que sería warning) y en el caso que  nºerrores > 1 SIEMPRE se mostraría error, tanto en los roles como en el deployment.
 
+// Datos monitorización para una instáncia
+Me hace falta una representación de cómo voy a recibir los datos de monitorización de una instáncia. Con esto me refiero
+a la estructura con la que voy a recibir los datos, si van a estar metidos dentro del JSON que recibo al principio en algún campo
+o si voy a tener que hacer alguna llamada aparte al servidor para obtener éstos datos.
+
+//¿Media o suma?
+Respecto a los distintos datos representados en un instáncia, a medida que van acumulándose para representar los roles y los deployments, tengo que saber cáda uno cómo se 'acumula'. Entiendo que lo que me respondas servirá tanto para datosInstancia->datosRol como para datosRol->datosDeployments.
+- CPU ¿media o suma?
+- MEM ¿media o suma?
+- NET ¿media o suma?
+- **Hay dos campos que no entiendo, lo siento
+
+/**************************************************************/
+/* A PARTIR DE AQUÍ PUEDE ESPERAR, PERO POR DEJARLO PLANTEADO */
+/**************************************************************/
+
+// Cuándo listas vacías
+¿Qué debería aparecer cuando las listas están vacías?
+-Cuando no hay deployments (servicios) todavía
+-Cuando no hay roles en un deployments (se puede dar el caso?)
+-Cuando no hay instáncias de un rol en un deployment (se puede dar el caso?)
+-Cuando no hay links
+
+// ¿Preferéncias de representación de espera de finalización de petición?
+Hay alguna preferéncia en qué hacer MIENTRAS el usuario está esperando a que el servidor conteste una petición?
+Te propongo varias alternativas, si no tenías nada pensado;
+    -> Mensaje al lado del botón 'apply' "in process.." que cambia a "done"/"retry" cuando la acción acaba.
+    -> Círculo estilo el de android que va dando vueltas hasta que la acción acaba. En este caso habría que pensar
+        cómo avisar al ususario de que la acción ha acabado correctamente o no.
+    
 // Componentes y roles
-Por lo que he visto, puede haber varios componentes ejecutando el mismo rol. En la vista overview del storyboard hay por cada rol una línea que apunta a un componente. Entiendo que entonces ¿sería correcto añadir una línea por cada componente? En este caso, entiendo que el número de instáncias sería representadas por componente, ¿me equivoco?.
+Aquí tengo un poco de jaleo porque entendí que varios componentes pueden comportarse como el mismo rol. Actualmente
+asumo que el componente y el rol tienen el mismo nombre.
+Por lo que entendí, Jero me comentó que actualmente hay algo intermedio, en el que un rol únicamente puede ser llevado por un componente, en cuyo caso tendría sentido lo que está hecho ahora. Cambiarlo no cuesta mucho, simplemente no encontraba
+el objeto que relaciona ambos. Lo dejo anotado y cuando tenga un tiempo lo arreglo.
 
-// Cuando listas vacías
-¿Qué debería aparecer cuando las lsitas están vacías? Por ejemplo, en el caso de que no haya volúmenes asociados a un deployment,
-o que no haya links. ¿empty? ¿hago que desaparezca el parámetro?
+// Componentes, roles e instáncias
+Siguiendo con el caso anterior, las instáncias a representar serían por rol o por componente?
+Lo pregunto por que aparece un número de instáncias que vamos cambiando.
+
+
 
 DECISIONES IMPORTANTES
 ---------------------------------------------------------
@@ -26,29 +61,15 @@ Los inner components no tendrán más props que el id del elemento que represent
 Para evitar ésto, representamos cada parámetro pidiéndolo a la store.
 
 TODOS
----------------------------------------------------------
-    SideBar
-        - El botón para desplegar a los hijos no muestra un funcionamiento correcto:
-            1 - No aparece al iniciar la página (hay que pulsar en la sidebar)
-            2 - Ocurren solapes cuando, al principio, pulsamos otros elementos de la sidebar
-    
-    connection
+---------------------------------------------------------    
+    Proxy -> Connexión
         - Si intento instalar swagger, acaba metiendo dependencias que dan un error y, según parece, puede ser solucionado
             cambiando la configuración de webpack. No lo he hecho porque no me parece limpio y muchos después dicen tener
             problemas con otras cosas. Solución: https://github.com/request/request/issues/1529#issuecomment-103454943
 
-    Sidebar & LevelBar
-        - La función whatch sigue sin estar clara en typescript. Teóricamente poniéndola en @Component debería de funcionar,
-            pero perdemos toda posible referéncia a métodos de dentro de la clase, por lo que resulta inútil.
-    
     Deployments
-        - Proponer que la vista 'Overview' pase a ser la página de deployments
-        - El nombre de los hijos no aparece en la ruta
+        - El nombre de los hijos no aparece en la ruta de la navbar (breadcrumb)
         - El contenido de la vista de deployments debería ser sustituido si router-view tiene contenido
-
-    Rol-Card
-=>        - Debería de aparecer en deploymentItem
-=>        - Solucionar problemas con las gráficas; actualmente no aparecen
 
 DONE
 ---------------------------------------------------------
@@ -67,6 +88,16 @@ DONE
     SideBar
         - Debería de aparecer un icono para desplegar en aquellos elementos que tienen hijos.
         - Falta por hacer que aparezcan distintos deployments
+        - El botón para desplegar a los hijos no muestra un funcionamiento correcto:
+            1 - No aparece al iniciar la página (hay que pulsar en la sidebar)
+            2 - Ocurren solapes cuando, al principio, pulsamos otros elementos de la sidebar    
 
     Deployments
         - Los childs de deployments aparecen evitando la llamada a this.$router.addRoutes(routes)
+    
+    Rol-Card
+        - Debería de aparecer en deploymentItem
+        - Solucionar problemas con las gráficas; actualmente no aparecen
+
+    Sidebar & LevelBar
+        - Sustituida función whatch grácias a la store.

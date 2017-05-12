@@ -9,7 +9,6 @@ import SideBar from './layout/SideBar.vue';
 // Views
 import Overview from './views/Overview.vue';
 import Deployments from './views/Deployments.vue';
-import DeploymentItem from './views/DeploymentItem.vue';
 import Elements from './views/Elements.vue';
 import WebDomains from './views/WebDomains.vue';
 import DataVolumes from './views/DataVolumes.vue';
@@ -18,6 +17,7 @@ import Help from './views/Help.vue';
 
 // Inner components
 import DeploymentCard from './innerComponents/DeploymentCard.vue';
+import DeploymentItem from './innerComponents/DeploymentItem.vue';
 
 
 // Export layouts
