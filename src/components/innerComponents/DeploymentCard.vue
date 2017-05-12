@@ -5,24 +5,31 @@
             <span class="card-header-right">{{longTitle}}</span>
         </div>
         <div class="card-body">
-            <p><u>Service:</u> {{service}}</p>
-            <div class="roles" v-if="roles">
-                <p><u>Roles:</u></p>
-                <div v-for="rol in roles" class="rol">
-                    <span><strong>{{rol}}</strong></span>
-                    <p>{{rolComponentURN(rol)}} {{rolNumInstances(rol)}}</p>
+            <p>
+                <u>Service:</u> {{service}}
+            </p>
+            <p class="roles" v-if="roles">
+                <div><u>Roles:</u>
+                    <div v-for="rol in roles" class="inner-content">
+                        <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
+                        <div>{{rolComponentURN(rol)}}</div>
+                    </div>
                 </div>
-            </div>
-            <p><u>Website:</u> {{website}}</p>
-            <p><u>Links:</u></p>
-            <div v-for="link in links">{{link}}</div>
-            <p><u>Volumes:</u></p>
-            <div v-for="volume in volumes" class="volume">
-                <p>{{volume}}</p>
-            </div>
-            <span>
-                            <i v-bind:class="stateIcon" aria-hidden="true"></i>
-                        </span>
+            </p>
+            <p>
+                <u>Website:</u> {{website}}
+            </p>
+            <p>
+                <u>Links:</u>
+                <div v-for="link in links" class="inner-content">{{link}}</div>
+            </p>
+            <p>
+                <u>Volumes:</u>
+                <div v-for="volume in volumes" class="inner-content">
+                    <div>{{volume}}</div>
+                </div>
+            </p>
+            <i v-bind:class="stateIcon" aria-hidden="true"></i>
             <router-link :to="deploymentPath">
                 <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
             </router-link>
@@ -123,10 +130,6 @@ $color_error:#ff6666;
     padding: $padding;
 }
 
-.rol {
-    padding-left: $padding;
-}
-
 .card-header-right {
     color: grey;
     padding-left: padding;
@@ -149,6 +152,10 @@ $color_error:#ff6666;
 .fa-exclamation-circle {
     color: $color_error;
     font-size: $icon_size;
+}
+
+.inner-content {
+    padding: $padding;
 }
 
 .NORMAL {
