@@ -6,7 +6,7 @@
           {{ menuItem.name }}
           <span class="icon is-small is-angle fa" v-if="menuItem.children">
             <i v-if="menuItem.meta.expanded" class="fa-angle-down"></i>
-            <i v-else class="fa-angle-left"></i> 
+            <i v-else class="fa-angle-right"></i> 
           </span>
         </router-link>
         <expanding  v-show="menuItem.meta.expanded">
