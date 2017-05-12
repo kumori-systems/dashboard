@@ -20,36 +20,41 @@ export default {
   getDeploymentList: function (state): Array<string> {
     let res: Array<string> = [];
     for (let index in state.deploymentList)
-      res.push((<Deployment>state.deploymentList[index]).name);
+      res.push((<Deployment>state.deploymentList[index]).id);
     return res;
   },
   getDeploymentIdFromDeploymentRoute: function (state): Function {
-    return function (deploymentRoute: String): string {
+    return function (deploymentRoute: string): string {
       // Tenemos que obtener el id a partir de la ruta, esto es
       // Entrar en el menú, mirar qué elemento está utilizando esta ruta y pasar el nombre
       let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+      
+      // Eliminamos el primer \ y cambiamos el resto por /
+      while (deploymentRoute.indexOf('\\') !== -1) {
+        deploymentRoute = deploymentRoute.replace('\\', '/');
+      }
+      deploymentRoute = deploymentRoute.substring(1, deploymentRoute.length);
+
+      // Tenemos que deshacer el cambio para poder reconocer el id
       return overview.children.find(menuItem => {
-        console.log('MenuItemPath es: ' + menuItem.path);
-        console.log('DeploymentRoute es: ' + deploymentRoute);
-        return menuItem.path === deploymentRoute;
-      }).name;
+        return menuItem.meta.id === deploymentRoute;
+      }).meta.id;
     };
   },
   getDeploymentPath: function (state): Function {
     return function (deploymentId: String): string {
       // Obtenemos la vista que contiene los deployment == OVERVIEW
       let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
-      return overview.children.find(deploymentMenuItem => { return deploymentMenuItem.name === deploymentId; }).path;
+      return overview.children.find(deploymentMenuItem => {
+        return deploymentMenuItem.meta.id === deploymentId;
+      }).path;
     };
   },
-  getDeploymentShortTitle: function (state): Function {
+  getDeploymentName: function (state): Function {
     return function (deploymentId: string): string {
-      return deploymentId.substring(0, deploymentId.indexOf('deployments') - 1);
-    };
-  },
-  getDeploymentLongTitle: function (state): Function {
-    return function (deploymentId: string): string {
-      return deploymentId.substring(deploymentId.indexOf('deployments') + 12, deploymentId.length);
+      return state.deploymentList.find(deployment => {
+        return deployment.id === deploymentId;
+      }).name;
     };
   },
   getIsEntryPoint: function (state, getters) {
@@ -62,14 +67,14 @@ export default {
   getDeploymentService: function (state): Function {
     return function (deploymentId: string): string {
       let deployment: Deployment = state.deploymentList.find(deployment => {
-        return deployment.name === deploymentId;
+        return deployment.id === deploymentId;
       });
       return deployment.service;
     };
   },
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).website;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).website;
     };
   },
   getDeploymentState: function (state): Function {
@@ -84,19 +89,15 @@ export default {
     };
   },
   getDeploymentLinks: function (state): Function {
-    return function (deploymentId: string): Array<string> {
+    return function (deploymentId: string): Array<Link> {
       let res: Array<string> = [];
-      let links: Array<Link> = (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).links;
-      for (let index in links) {
-        res.push(links[index].connectedTo);
-      }
-      return res;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).links;
     };
   },
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
-      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.name === deploymentId; });
+      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
       for (let rolIndex in deployment.roles) // Por cada rol buscamos en las instáncias los volúmenes que utilizan
         for (let instanceIndex in deployment.roles[rolIndex].instances)
           for (let volumeIndex in deployment.roles[rolIndex].instances[instanceIndex].volumes)
@@ -139,7 +140,7 @@ export default {
   getDeploymentRoles: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
-      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.name === deploymentId; });
+      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
 
       for (let index in deployment.roles) {
         res.push(deployment.roles[index].name);
@@ -149,22 +150,22 @@ export default {
   },
   getDeploymentRolComponentURN: function (state) {
     return function (deploymentId: string, rolId: string) {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).definitionURN;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).definitionURN;
     };
   },
   getDeploymentRolInfo: function (state) {
     return function (deploymentId: string, rolId: string) {
-      return state.deploymentList.find(deployment => { return deployment.name === deploymentId; }).roles.find(rol => { return rol.name === rolId; });
+      return state.deploymentList.find(deployment => { return deployment.id === deploymentId; }).roles.find(rol => { return rol.name === rolId; });
     };
   },
   getDeploymentRolNumInstances: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances.length;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances.length;
     };
   },
   getDeploymentRolName: function (state): Function {
     return function (deploymentId: string, rolId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).name;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).name;
     };
   },
   getDeploymentRolState: function (state): Function {
@@ -175,6 +176,40 @@ export default {
         case 1: return StateType.WARNING;
         default: return StateType.ERROR;
       }
+    };
+  },
+  getDeploymentRolRuntime: function (state): Function {
+    return function (deploymentId: string, rolId: string): string {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).runtime;
+    };
+  },
+  getDeploymentRolChartData: function (state): Function {
+    return function (): Object {
+      return {
+        datasets: [{
+          label: 'mylabel',
+          backgroundColor: 'green',
+          data: [
+            { x: 0, y: 2 },
+            { x: 1, y: 1 }
+          ]
+        }, {
+          label: 'mylabel2',
+          backgroundColor: 'yellow',
+          data: [
+            { x: 0, y: 1 },
+            { x: 1, y: 3 }
+          ]
+        },
+        {
+          label: 'mylabel3',
+          backgroundColor: 'red',
+          data: [
+            { x: 0, y: 2.4 },
+            { x: 1, y: 1.5 }
+          ]
+        }]
+      };
     };
   }
 };

@@ -8,7 +8,7 @@ export default [
         component: Overview,
         children: [
             {
-                path: 'deployments_:deploymentRoute', name: 'deploymentId', component: DeploymentItem,
+                path: 'deployments\:deploymentRoute', name: ' ', component: DeploymentItem,
                 props: true
             }
         ]

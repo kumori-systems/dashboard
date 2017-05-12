@@ -1,13 +1,15 @@
 export enum state { NORMAL, WARNING, ERROR };
 
 export class Deployment {
+    id: string;
     name: string;
     service: string;
     roles: Array<Rol>;
     website: string;
     links: Array<Link>;
 
-    constructor(name: string, service: string,  roles: Array<Rol>, website: string, links: Array<Link>) {
+    constructor(id: string, name: string, service: string, roles: Array<Rol>, website: string, links: Array<Link>) {
+        this.id = id;
         this.name = name;
         this.service = service;
         this.roles = roles;
@@ -31,7 +33,11 @@ export class Rol {
 
 export class Link {
     connectedTo: string;
-    constructor(connectedTo: string) {
+    myChannel: string;
+    hisChannel: string;
+    constructor(myChannel: string, hisChannel: string, connectedTo: string) {
+        this.myChannel = myChannel;
+        this.hisChannel = hisChannel;
         this.connectedTo = connectedTo;
     }
 }

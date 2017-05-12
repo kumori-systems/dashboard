@@ -1,8 +1,8 @@
 <template>
     <div class="card">
         <div class="card-header title" v-bind:class="state">
-            <span class="card-header-left">{{shortTitle}}</span>
-            <span class="card-header-right">{{longTitle}}</span>
+            <span class="card-header-left">{{name}}</span>
+            <span class="card-header-right">{{shotDeploymentId}}</span>
         </div>
         <div class="card-body">
             <p>
@@ -21,7 +21,7 @@
             </p>
             <p>
                 <u>Links:</u>
-                <div v-for="link in links" class="inner-content">{{link}}</div>
+                <div v-for="link in links" class="inner-content">{{link.connectedTo}}</div>
             </p>
             <p>
                 <u>Volumes:</u>
@@ -56,6 +56,9 @@ export default class Card extends Vue {
     get deploymentPath() {
         return this.$store.getters.getDeploymentPath(this.deploymentId);
     }
+    get shotDeploymentId() {
+        return this.deploymentId.substring(this.deploymentId.indexOf('/deployments/') + 13, this.deploymentId.length);
+    }
     get state(): string {
         return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
     }
@@ -72,12 +75,8 @@ export default class Card extends Vue {
         }
     }
 
-    get shortTitle(): string {
-        return this.$store.getters.getDeploymentShortTitle(this.deploymentId);
-    }
-
-    get longTitle(): string {
-        return this.$store.getters.getDeploymentLongTitle(this.deploymentId);
+    get name(): string {
+        return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
     get service(): string {

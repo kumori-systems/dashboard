@@ -12,7 +12,7 @@
                 <span>MEM</span>
                 <span>CPU</span>
                 <span>NET</span>
-    
+
                 <!-- kill instance -->
                 <input type="checkbox" id="killInstance">
                 <label for="killInstance">kill instance</label>    

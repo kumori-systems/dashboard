@@ -4,8 +4,9 @@ Web dashboard para que los clientes puedan manejar sus instáncias de forma visu
 PREGUNTAS
 ---------------------------------------------------------
 // Primer campo en el título de los deployments
-Actualmente en OVERVIEW en todos los deployments tengo 'slap://eslap.clod', donde en el storyboard pone 'CALCULATOR-5'.
-Pero entiendo que ésto no es correcto. He preguntado y no han sabido contestarme, entonces, ¿a qué campo en el JSON corresponde ésta parte del título?
+El primer campo en el título de los deployments, donde en el storyboard pone 'CALCULATOR-5'.
+He preguntado y no han sabido contestarme, entonces, ¿a qué campo en el JSON corresponde ésta parte del título?
+
 
 // Estado Instáncias
 ¿Cómo detecto el estado de una instáncia? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo o si prefieres que sea un parámetro en el JSON también me sirve.
@@ -29,11 +30,11 @@ Respecto a los distintos datos representados en un instáncia, a medida que van 
 /**************************************************************/
 
 // Cuándo listas vacías
-¿Qué debería aparecer cuando las listas están vacías?
--Cuando no hay deployments (servicios) todavía
--Cuando no hay roles en un deployments (se puede dar el caso?)
--Cuando no hay instáncias de un rol en un deployment (se puede dar el caso?)
--Cuando no hay links
+¿Qué debería aparecer cuando las listas están vacías? 
+-Cuando no hay deployments (servicios)
+-Cuando no hay roles en un deployments (se puede dar el caso?). Propuesta. "empty"(en gris)
+-Cuando no hay instáncias de un rol en un deployment (se puede dar el caso?). Propuesta. "empty"(en gris)
+-Cuando no hay links. Propuesta. "empty"(en gris)
 
 // ¿Preferéncias de representación de espera de finalización de petición?
 Hay alguna preferéncia en qué hacer MIENTRAS el usuario está esperando a que el servidor conteste una petición?

@@ -16,11 +16,12 @@ export function getDeploymentList() {
         let parsedBody = stampStateExample;
         let res: Array<Deployment> = [];
         for (let deployment in parsedBody.tcState.deployedServices) {
-            let name = deployment;
+            let id = deployment;
+            let name = 'DeploymentNAME';
             let service = parsedBody.tcState.deployedServices[deployment].manifest.service.name;
 
             let roles: Array<Rol> = [];
-            let website: string = 'No website defined';
+            let website: string = '';
             let links: Array<Link> = [];
 
             if (parsedBody.tcState.deployedServices[deployment].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Si es un http inbound él mismo tiene el website
@@ -30,10 +31,18 @@ export function getDeploymentList() {
                 for (let link in parsedBody.tcState.linkedServices) { // TODO: Esto puede ser optimizado
                     anyadido = false;
                     if (parsedBody.tcState.linkedServices[link].deployment1 === deployment) {
-                        links.push(new Link(parsedBody.tcState.linkedServices[link].deployment2));
+                        links.push(new Link(
+                            parsedBody.tcState.linkedServices[link].channel1, // my channel
+                            parsedBody.tcState.linkedServices[link].channel2, // his channel
+                            parsedBody.tcState.linkedServices[link].deployment2 // him
+                        ));
                         anyadido = true;
                     } else if (parsedBody.tcState.linkedServices[link].deployment2 === deployment) {
-                        links.push(new Link(parsedBody.tcState.linkedServices[link].deployment1));
+                        links.push(new Link(
+                            parsedBody.tcState.linkedServices[link].channel2, // my channel
+                            parsedBody.tcState.linkedServices[link].channel1, // his channel
+                            parsedBody.tcState.linkedServices[link].deployment1 // him
+                        ));
                         anyadido = true;
                     }
                     if (anyadido) { // ¿tenemos website?
@@ -87,8 +96,8 @@ export function getDeploymentList() {
                 roles.push(new Rol(name, definitionURN, runtime, instances));
             }
 
-            console.log('New deployment (' + deployment + '): \ndep.service: ' + service + '\ndep.roles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));
-            res.push(new Deployment(name, service, roles, website, links));
+            console.log('New deployment (' + id + '): \nname: ' + name + '\nservice: ' + service + '\nroles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));
+            res.push(new Deployment(id, name, service, roles, website, links));
         }
 
         // Gestión de errores de conexión
