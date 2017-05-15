@@ -55,13 +55,15 @@ export class Rol {
     runtime: string;
     instances: Array<Instance>;
     arrangement: Arrangement;
+    domain: string;
 
-    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>, arrangement: Arrangement) {
+    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>, arrangement: Arrangement, domain: string) {
         this.name = name;
         this.definitionURN = definitionURN;
         this.runtime = runtime;
         this.instances = instances;
         this.arrangement = arrangement;
+        this.domain = domain;
     }
 }
 
