@@ -310,7 +310,7 @@ export default {
     let aux: string;
     for (let index in state.deploymentList) {
       aux = (<Deployment>state.deploymentList[index]).service;
-      if (!res.find(serv => { return serv === aux }))
+      if (!res.find(serv => { return serv === aux; }))
         res.push(aux);
     }
     return res;
@@ -324,6 +324,20 @@ export default {
         aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
         if (!res.find(runtim => { return runtim === aux; }))
           res.push(aux);
+      }
+    }
+    return res;
+  },
+  getWebDomainList: function (state) {
+    // Buscamos en todos los roles los dominios web que hay para añadirlos
+    let res = [];
+    let aux: string;
+    for (let deploymentIndex in state.deploymentList) {
+      for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
+        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).domain;
+        if (!res.find(dom => { return dom === aux; }))
+          if (aux && aux.length > 0)
+            res.push(aux);
       }
     }
     return res;

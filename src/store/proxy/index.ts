@@ -107,8 +107,16 @@ export function getDeploymentList() {
                 let mininstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].mininstances;
                 let arrangement = new Arrangement(failurezones, bandwidth, memory, cpu, maxinstances, __instances, __cpu, __memory, __ioperf, __iopsintensive, __bandwidth, __resilience, mininstances);
 
-                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement));
-                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement));
+                let config = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0']['components-configuration'][rol].config;
+                let domain;
+                for (let index in config) {
+                    if (config[index].domain)
+                        domain = config[index].domain;
+                }
+
+
+                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement) + '\ndomain: ' + domain);
+                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement, domain));
             }
 
             console.log('New deployment (' + id + '): \nname: ' + name + '\nservice: ' + service + '\nroles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));

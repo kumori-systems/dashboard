@@ -24,6 +24,15 @@ Respecto a los distintos datos representados en un instáncia, a medida que van 
 - NET ¿media o suma?
 - **Hay dos campos que no entiendo, lo siento
 
+// Third party elements
+¿Cómo reconozco aquellos elementos de terceras personas?
+
+// Web domains
+Actualmente están los dominios web que están en uso. ¿Cómo encuentro un dominio web que no está en uso?
+
+// Data volumes
+¿Cómo detecto los data volumes que NO están en uso?
+
 /**************************************************************/
 /* A PARTIR DE AQUÍ PUEDE ESPERAR, PERO POR DEJARLO PLANTEADO */
 /**************************************************************/
