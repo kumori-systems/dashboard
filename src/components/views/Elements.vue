@@ -4,19 +4,13 @@
         <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         <collapse>
             <collapse-item title="Components">
-                    <p>Component 1</p>
-                    <p>Component 2</p>
-                    <p>Component 3</p>
+                <p v-for="component in componentList" v-bind:key="component">{{component}}</p>
             </collapse-item>
             <collapse-item title="Services">
-                    <p>Service 1</p>
-                    <p>Service 2</p>
-                    <p>Service 3</p>
+                <p v-for="service in serviceList" v-bind:key="service">{{service}}</p>
             </collapse-item>
             <collapse-item title="Runtimes">
-                    <p>Runtime 1</p>
-                    <p>Runtime 2</p>
-                    <p>Runtime 3</p>
+                <p v-for="runtime in runtimesList" v-bind:key="runtime">{{runtime}}</p>
             </collapse-item>
         </collapse>
     </div>
@@ -26,18 +20,29 @@
 
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import {Collapse, Item as CollapseItem}from 'vue-bulma-collapse';
+import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 
 @Component({
     name: 'Storage',
     components: {
-        'collapse':Collapse,
-        'collapse-item':CollapseItem
+        'collapse': Collapse,
+        'collapse-item': CollapseItem
     }
 })
-export default class Storage extends Vue{
+export default class Storage extends Vue {
+    get componentList() {
+        return this.$store.getters.getComponentList;
+    }
 
+    get serviceList() {
+        return this.$store.getters.getServiceList;
+    }
+
+    get runtimeList() {
+        return this.$store.getters.getRuntimeList;
+    }
 }
 </script>
 <style lang="scss">
+
 </style>

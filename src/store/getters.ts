@@ -289,5 +289,43 @@ export default {
         }]
       };
     };
+  },
+  getComponentList: function (state): Array<string> {
+    // Buscamos en cada deployment todos los componentes que poseen
+    let res = [];
+    let aux: string;
+    for (let deploymentIndex in state.deploymentList) {
+      for (let rolIndex in state.deploymentList[deploymentIndex].roles) {
+        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).definitionURN;
+        if (!res.find(comp => { return comp === aux; }))
+          res.push(aux);
+      }
+
+    }
+    return res;
+  },
+  getServiceList: function (state): Array<string> {
+    // Buscamos en cada deployment todos los servicios
+    let res = [];
+    let aux: string;
+    for (let index in state.deploymentList) {
+      aux = (<Deployment>state.deploymentList[index]).service;
+      if (!res.find(serv => { return serv === aux }))
+        res.push(aux);
+    }
+    return res;
+  },
+  getRuntimeList: function (state): Array<string> {
+    // Buscamos todos los runtime en los roles de los deployments
+    let res = [];
+    let aux: string;
+    for (let deploymentIndex in state.deploymentList) {
+      for (let rolIndex in state.deploymentList[deploymentIndex].roles) {
+        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
+        if (!res.find(runtim => { return runtim === aux; }))
+          res.push(aux);
+      }
+    }
+    return res;
   }
 };
