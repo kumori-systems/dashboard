@@ -10,7 +10,7 @@
                 <p v-for="service in serviceList" v-bind:key="service">{{service}}</p>
             </collapse-item>
             <collapse-item title="Runtimes">
-                <p v-for="runtime in runtimesList" v-bind:key="runtime">{{runtime}}</p>
+                <p v-for="runtime in runtimeList" v-bind:key="runtime">{{runtime}}</p>
             </collapse-item>
         </collapse>
     </div>

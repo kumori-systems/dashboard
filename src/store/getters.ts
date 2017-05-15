@@ -320,7 +320,7 @@ export default {
     let res = [];
     let aux: string;
     for (let deploymentIndex in state.deploymentList) {
-      for (let rolIndex in state.deploymentList[deploymentIndex].roles) {
+      for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
         aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
         if (!res.find(runtim => { return runtim === aux; }))
           res.push(aux);
