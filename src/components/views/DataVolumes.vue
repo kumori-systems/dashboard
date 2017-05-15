@@ -3,8 +3,7 @@
         <p v-for="dataVolume in dataVolumeList">
             {{dataVolume.name}}
             <span class="warning">in use</span>
-            by {{dataVolume.user}}
-            {{dataVolume.number}} chunks
+            by {{dataVolume.user}} {{dataVolume.number}} chunks
         </p>
     
         <p>
@@ -27,6 +26,9 @@ import Component from 'vue-class-component'
     name: 'DataVolumes'
 })
 export default class DataVolumes extends Vue {
+    get dataVolumeList() { 
+        return this.$store.getters.getDataVolumesList;
+    }
 
 }
 </script>
