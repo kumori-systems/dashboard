@@ -66,6 +66,12 @@ html {
 	background-color: whitesmoke;
 }
 
+$color_normal:#93c47d;
+$color_warning:#f5d164;
+$color_error:#ff6666;
+$padding: 10px;
+$icon_size: 100px;
+$state_icon_size: 50px;
 .nprogress-container {
 	position: fixed !important;
 	width: 100%;
@@ -85,5 +91,55 @@ html {
 			border-left-color: $color;
 		}
 	}
+}
+
+.NORMAL {
+	background: $color_normal;
+}
+
+.NORMAL_COLOR {
+	color: $color_normal;
+	font-size: $state_icon_size;
+}
+
+.WARNING {
+	background: $color_warning;
+}
+
+.WARNING_COLOR {
+	color: $color_warning;
+	font-size: $state_icon_size;
+}
+
+.ERROR {
+	background: $color_error;
+}
+
+.ERROR_COLOR {
+	color: $color_error;
+	font-size: $state_icon_size;
+}
+
+.fa-caret-square-o-down {
+	font-size: $icon_size;
+}
+
+.fa-check-circle {
+	color: $color_normal;
+	font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+	color: $color_warning;
+	font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+	color: $color_error;
+	font-size: $icon_size;
+}
+
+.inner-content {
+	padding: $padding;
 }
 </style>

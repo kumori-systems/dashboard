@@ -21,10 +21,15 @@ export default {
   hideEntrypoints(state, { }) {
     state.hideEntrypoints = !state.hideEntrypoints;
   },
-  addInstance(state, { rol }) {
-    state[rol].instances++;
-  },
-  removeInstance(state, { rol }) {
-    state[rol].instances--;
+  changeTemporaryState(state, { deploymentId, rolId, numInstances }) {
+    console.log('ENTRAMOS EN LA MUTACION con: ' + deploymentId + ' ' + rolId + ' ' + numInstances);
+    if (numInstances > 0) {
+      if (!state.temporaryState[deploymentId]) {
+        state.temporaryState[deploymentId] = {};
+        state.temporaryState[deploymentId][rolId] = {};
+      }
+      state.temporaryState[deploymentId][rolId]['numInstances'] = numInstances;
+    }
+    console.log('SALIMOS DE LA MUTACION');
   }
 };

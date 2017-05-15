@@ -1,4 +1,4 @@
-import { Deployment, Rol, Link, Instance, Volume } from './../classes';
+import { Deployment, Rol, Link, Instance, Volume, Arrangement } from './../classes';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -92,8 +92,23 @@ export function getDeploymentList() {
                     }
                 }
 
-                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances);
-                roles.push(new Rol(name, definitionURN, runtime, instances));
+                let failurezones: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].failurezones;
+                let bandwidth: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].bandwidth;
+                let memory: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].memory;
+                let cpu: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].cpu;
+                let maxinstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].maxinstances;
+                let __instances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__instances;
+                let __cpu: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__cpu;
+                let __memory: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__memory;
+                let __ioperf: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__ioperf;
+                let __iopsintensive: boolean = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__iopsintensive;
+                let __bandwidth: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__bandwidth;
+                let __resilience: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__resilience;
+                let mininstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].mininstances;
+                let arrangement = new Arrangement(failurezones, bandwidth, memory, cpu, maxinstances, __instances, __cpu, __memory, __ioperf, __iopsintensive, __bandwidth, __resilience, mininstances);
+
+                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement));
+                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement));
             }
 
             console.log('New deployment (' + id + '): \nname: ' + name + '\nservice: ' + service + '\nroles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));
@@ -114,3 +129,7 @@ export function deploymentRolAddInstance() {
     return auxFunction();
 }
 export function deploymentRolRemoveInstance() { return auxFunction(); }
+
+export function undeployDeployment(deploymentId: string): void {
+    console.log('Realizamos undeploy de: ' + deploymentId);
+}

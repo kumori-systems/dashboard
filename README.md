@@ -7,7 +7,6 @@ PREGUNTAS
 El primer campo en el título de los deployments, donde en el storyboard pone 'CALCULATOR-5'.
 He preguntado y no han sabido contestarme, entonces, ¿a qué campo en el JSON corresponde ésta parte del título?
 
-
 // Estado Instáncias
 ¿Cómo detecto el estado de una instáncia? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo o si prefieres que sea un parámetro en el JSON también me sirve.
 Por otro lado, entiendo que el estado del rol y el estado del deployment van a depender de éste. La forma que tenía pensada
@@ -53,7 +52,11 @@ el objeto que relaciona ambos. Lo dejo anotado y cuando tenga un tiempo lo arreg
 Siguiendo con el caso anterior, las instáncias a representar serían por rol o por componente?
 Lo pregunto por que aparece un número de instáncias que vamos cambiando.
 
+// CPU, MEM y NET de una instáncia
+Actualmente se muestran los correspondientes al rol, ya que no he podido encontrar el dato relativo a cada instáncia. Si ésto se cambia en el futuro lo actualizo.
 
+// Runtimes
+¿Puede un servicio tener más de un runtime? Actualmente sólo cuento con que haya uno
 
 DECISIONES IMPORTANTES
 ---------------------------------------------------------

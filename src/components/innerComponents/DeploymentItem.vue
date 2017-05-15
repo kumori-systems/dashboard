@@ -1,18 +1,27 @@
 <template>
     <div>
-        <p class="title">{{deploymentId}}</p>
-        <p>Service: {{deploymentService}}</p>
-        <p>
-            Connected to:
-            <div v-for="link in links" class="inner-content">
-                {{link.myChannel}} -> {{link.connectedTo}} ({{link.hisChannel}})
+        <span class="title">{{deploymentName}}</span>
+        <button v-on:click="applyChanges">APPLY CHANGES</button>
+        <button v-on:click="cancelChanges">CANCEL</button>
+        <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
+        <div class="tile">
+            <div>
+                <p>
+                    Service: {{deploymentService}}
+                    <button v-on:click="undeploy">UNDEPLOY</button>
+                </p>
+                <p>
+                    Connected to:
+                    <div v-for="link in links" class="inner-content">
+                        {{link.myChannel}} -> {{link.connectedTo}} ({{link.hisChannel}})
+                    </div>
+                </p>
             </div>
-        </p>
-        <div class="tile is-parent is-4">
-            <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
+            <div class="tile">
+                <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
+            </div>
         </div>
         <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRolName(deploymentRol)" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRolName(deploymentRol)" />
-    
     </div>
 </template>
 <script lang="ts">
@@ -38,18 +47,15 @@ export default class DeploymentItem extends Vue {
     deploymentRoute: string = this.deploymentRoute;
     deploymentId: string;
 
-    deploymentChartOptions = {
-        tooltips: { mode: 'label' },
-        title: {
-            text: "Hola mundo"
-        },
-        showLines: true,
-        spanGaps: false,
-    };
+    deploymentChartOptions = {};
 
     beforeMount() {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
         this.deploymentId = this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
+    }
+
+    get deploymentName(): string {
+        return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
     get deploymentChartData(): Array<any> {
@@ -72,6 +78,29 @@ export default class DeploymentItem extends Vue {
     }
     get links(): Array<Link> {
         return this.$store.getters.getDeploymentLinks(this.deploymentId);
+    }
+    get state(): string {
+        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+            case 0: //NORMAL
+                return 'NORMAL_COLOR';
+            case 1:
+                return 'WARNING_COLOR';
+            case 2:
+                return 'ERROR_COLOR';
+            default:
+                return '';
+        }
+    }
+
+    applyChanges(): void {
+        // Entramos dentro de cada rol-card, miramos los cambios y los enviamos
+    }
+    cancelChanges(): void {
+        // Entramos dentro de cada rol-card y descartamos los cambios
+    }
+    undeploy(): void {
+        // TODO: Mensaje de confirmación del usuario
+        this.$store.dispatch('undeployDeployment', { deploymentId: this.deploymentId });
     }
 }
 </script>

@@ -1,4 +1,4 @@
-import { Deployment, Rol, state as StateType, Link, Volume } from './classes';
+import { Deployment, Rol, state as StateType, Link, Volume, Instance } from './classes';
 export default {
 
   /* GENERAL */
@@ -28,7 +28,7 @@ export default {
       // Tenemos que obtener el id a partir de la ruta, esto es
       // Entrar en el menú, mirar qué elemento está utilizando esta ruta y pasar el nombre
       let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
-      
+
       // Eliminamos el primer \ y cambiamos el resto por /
       while (deploymentRoute.indexOf('\\') !== -1) {
         deploymentRoute = deploymentRoute.replace('\\', '/');
@@ -79,7 +79,6 @@ export default {
   },
   getDeploymentState: function (state): Function {
     return function (deploymentId: string): StateType {
-      // TODO: Tenemos que saber de dónde obtener el estado
       let ranNumber = Math.trunc(Math.random() * 3);
       switch (ranNumber) {
         case 0: return StateType.NORMAL;
@@ -107,7 +106,7 @@ export default {
     };
   },
   getDeploymentChartData: function (state): Function {
-    return function (): Object {
+    return function (deploymentId: string): Object {
       return {
         datasets: [{
           label: 'mylabel',
@@ -141,7 +140,6 @@ export default {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
       let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
-
       for (let index in deployment.roles) {
         res.push(deployment.roles[index].name);
       }
@@ -180,11 +178,91 @@ export default {
   },
   getDeploymentRolRuntime: function (state): Function {
     return function (deploymentId: string, rolId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.name === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).runtime;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).runtime;
     };
   },
   getDeploymentRolChartData: function (state): Function {
-    return function (): Object {
+    return function (deploymentId: string, rolId: string): Object {
+      return {
+        datasets: [{
+          label: 'mylabel',
+          backgroundColor: 'green',
+          data: [
+            { x: 0, y: 2 },
+            { x: 1, y: 1 }
+          ]
+        }, {
+          label: 'mylabel2',
+          backgroundColor: 'yellow',
+          data: [
+            { x: 0, y: 1 },
+            { x: 1, y: 3 }
+          ]
+        },
+        {
+          label: 'mylabel3',
+          backgroundColor: 'red',
+          data: [
+            { x: 0, y: 2.4 },
+            { x: 1, y: 1.5 }
+          ]
+        }]
+      };
+    };
+  },
+  getDeploymentRolMemNumber: function (state): Function {
+    return function (deploymentId: string, rolId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.memory;
+    };
+  },
+  getDeploymentRolCPUNumber: function (state): Function {
+    return function (deploymentId: string, rolId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.cpu;
+    };
+  },
+  getDeploymentRolNetNumber: function (state): Function {
+    return function (deploymentId: string, rolId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.bandwidth;
+    };
+  },
+  getDeploymentRolInstances: function (state) {
+    return function (deploymentId: string, rolId: string): Array<string> {
+      let res: Array<string> = [];
+      let instances: Array<Instance> = (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances;
+      for (let index in instances)
+        res.push(instances[index].name);
+      return res;
+    };
+  },
+
+
+  getDeploymetRolTemporaryState: function (state) {
+    return function (deploymentId: string, rolId: string) {
+      if (state.temporaryState[deploymentId])
+        return state.temporaryState[deploymentId][rolId];
+      else
+        return state.temporaryState[deploymentId];
+    };
+  },
+  /* INSTANCES */
+
+  getDeploymentRolInstanceMem: function (state): Function {
+    return function (deploymentId: string, rolId: string, InstanceId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.memory;
+    };
+  },
+  getDeploymentRolInstanceCPU: function (state): Function {
+    return function (deploymentId: string, rolId: string, InstanceId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.cpu;
+    };
+  },
+  getDeploymentRolInstanceNet: function (state): Function {
+    return function (deploymentId: string, rolId: string, InstanceId: string): number {
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.bandwidth;
+    };
+  },
+  getDeploymentRolInstanceChartData: function (state): Function {
+    return function (deploymentId: string, rolId: string, InstanceId: string): Object {
       return {
         datasets: [{
           label: 'mylabel',

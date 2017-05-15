@@ -39,6 +39,7 @@ export default class Overview extends Vue {
             return this.$store.getters.getIsEntryPoint(deploymentId);
         }
     }
+    
     get hideEntrypoints(): boolean {
         return this.$store.getters.getHideEntrypoints;
     }

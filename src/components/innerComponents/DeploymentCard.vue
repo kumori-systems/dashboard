@@ -5,35 +5,38 @@
             <span class="card-header-right">{{shotDeploymentId}}</span>
         </div>
         <div class="card-body">
-            <p>
-                <u>Service:</u> {{service}}
-            </p>
-            <p class="roles" v-if="roles">
-                <div><u>Roles:</u>
-                    <div v-for="rol in roles" class="inner-content">
-                        <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
-                        <div>{{rolComponentURN(rol)}}</div>
-                    </div>
+            <div class="tile">
+                <div>
+                    <p>
+                        <u>Service:</u> {{service}}
+                    </p>
+                    <p class="roles" v-if="roles">
+                        <div><u>Roles:</u>
+                            <div v-for="rol in roles" class="inner-content">
+                                <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
+                                <div>{{rolComponentURN(rol)}}</div>
+                            </div>
+                        </div>
+                    </p>
+                    <p>
+                        <u>Website:</u> {{website}}
+                    </p>
+                    <p>
+                        <u>Links:</u>
+                        <div v-for="link in links" class="inner-content">{{link.connectedTo}}</div>
+                    </p>
+                    <p>
+                        <u>Volumes:</u>
+                        <div v-for="volume in volumes" class="inner-content">
+                            <div>{{volume}}</div>
+                        </div>
+                    </p>
+                    <router-link :to="deploymentPath">
+                        <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
+                    </router-link>
                 </div>
-            </p>
-            <p>
-                <u>Website:</u> {{website}}
-            </p>
-            <p>
-                <u>Links:</u>
-                <div v-for="link in links" class="inner-content">{{link.connectedTo}}</div>
-            </p>
-            <p>
-                <u>Volumes:</u>
-                <div v-for="volume in volumes" class="inner-content">
-                    <div>{{volume}}</div>
-                </div>
-            </p>
-            <i v-bind:class="stateIcon" aria-hidden="true"></i>
-            <router-link :to="deploymentPath">
-                <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
-            </router-link>
-    
+                <i v-bind:class="stateIcon" aria-hidden="true"></i>
+            </div>
         </div>
         <div class="card-footer" v-if="false" />
     </div>
@@ -116,9 +119,7 @@ export default class Card extends Vue {
 <style lang="scss">
 $padding:10px;
 $icon_size:8em;
-$color_normal:#93c47d;
-$color_warning:#f5d164;
-$color_error:#ff6666;
+
 
 .card {
     padding: $padding;
@@ -132,40 +133,5 @@ $color_error:#ff6666;
 .card-header-right {
     color: grey;
     padding-left: padding;
-}
-
-.fa-caret-square-o-down {
-    font-size: $icon_size;
-}
-
-.fa-check-circle {
-    color: $color_normal;
-    font-size: $icon_size;
-}
-
-.fa-exclamation-triangle {
-    color: $color_warning;
-    font-size: $icon_size;
-}
-
-.fa-exclamation-circle {
-    color: $color_error;
-    font-size: $icon_size;
-}
-
-.inner-content {
-    padding: $padding;
-}
-
-.NORMAL {
-    background: $color_normal;
-}
-
-.WARNING {
-    background: $color_warning;
-}
-
-.ERROR {
-    background: $color_error;
 }
 </style>

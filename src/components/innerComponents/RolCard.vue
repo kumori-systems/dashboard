@@ -1,33 +1,34 @@
 <template>
     <div class="card">
-        <div class="card-header title normal" v-bind:class="state">
+        <div class="card-header title">
             <span class="card-header-left">{{rolId}}</span>
-            <span class="card-header-right">{{rolNumInstances}}</span>
+            <span class="card-header-right">{{numInstances}}</span>
+            <button class="fa fa-angle-up fa-lg" v-on:click="numInstances(1)"></button>
+            <button class="fa fa-angle-down fa-lg" v-on:click="numInstances(-1)"></button>
     
-            <!-- Botones para añadir y quitar instancias -->
-            <div class="tile">
-                <button class="fa fa-angle-up fa-lg" v-on:click="addInstance" />
-                <button class="fa fa-angle-down fa-lg" v-on:click="removeInstance" />
-            </div>
+            <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
+    
         </div>
-        <div class="card-body">
-            <p>Component: {{componentURN}}</p>
-            <p>Runtime: {{rolRuntime}}</p>
+        <div class="card-body tile">
             <div>
-                <button>CPU</button>
-                <button>MEM</button>
-                <button>RED</button>
+                <p>Component: {{componentURN}}</p>
+                <p>Runtime: {{rolRuntime}}</p>
+                <div>
+                    <span>MEM {{memNumber}}</span>
+                    <span>CPU {{cpuNumber}}</span>
+                    <span>NET {{netNumber}}</span>
+                </div>
+                <p>Connected to: jalsdkfjsdalfsdj</p>
             </div>
-            <p>Connected to: jalsdkfjsdalfsdj</p>
             <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
             </div>
-            <collapse>
-                <collapse-item title="View instances">
-                    <instance-card name="myInstanceName" state="normal" />
-                </collapse-item>
-            </collapse>
         </div>
+        <collapse class="tile">
+            <collapse-item title="View instances">
+                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
+            </collapse-item>
+        </collapse>
         <div class="card-footer" v-if="false"></div>
     </div>
 </template>
@@ -65,26 +66,36 @@ export default class Card extends Vue {
         spanGaps: false,
     };
 
-    // Methods
-    addInstance = function () {
-        console.log('Entramos en addInstance');
-        this.$store.dispatch('addInstance', { rol: this.nombre });
-        console.log('Después de llamar a la store');
-    };
-    removeInstance = function () {
-        console.log('Entramos en removeInstance');
-        this.$store.dispatch('removeInstance', { rol: this.nombre });
-    };
+    get state(): string {
+        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+            case 0:
+                return 'NORMAL_COLOR';
+            case 1:
+                return 'WARNING_COLOR';
+            case 2:
+                return 'ERROR_COLOR';
+            default:
+                return '';
+        }
+    }
+    get numInstances(): number {
+        let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
+        if (!temporaryState)
+            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, this.rolId);
+        else return temporaryState.numInstances;
+    }
 
-    get state() {
-        return this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId);
+    set numInstances(x: number) {
+       
+        /*
+                let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
+                if (temporaryState)
+                    this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: temporaryState.numInstances + x });
+                else
+                    this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: this.numInstances + x });
+        */
     }
-    get rolNumInstances(): string {
-        let numInstances: number = this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, this.rolId);
-        let text: string = 'Instances';
-        if (numInstances === 1) text = 'Instance';
-        return numInstances + ' ' + text;
-    }
+
     get componentURN() {
         return this.$store.getters.getDeploymentRolComponentURN(this.deploymentId, this.rolId);
     }
@@ -95,12 +106,27 @@ export default class Card extends Vue {
     get rolChartData() {
         return this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
     }
+
+    get rolInstances() {
+        return this.$store.getters.getDeploymentRolInstances(this.deploymentId, this.rolId);
+    }
+
+    get memNumber(): number {
+        return this.$store.getters.getDeploymentRolMemNumber(this.deploymentId, this.rolId);
+    }
+
+    get cpuNumber(): number {
+        return this.$store.getters.getDeploymentRolCPUNumber(this.deploymentId, this.rolId);
+    }
+
+    get netNumber(): number {
+        return this.$store.getters.getDeploymentRolNetNumber(this.deploymentId, this.rolId);
+    }
 }
 </script>
 
 <style lang="scss">
 $padding: 10px;
-
 .card {
     padding: $padding;
     margin: $padding;
@@ -113,17 +139,5 @@ $padding: 10px;
 .card-header-right {
     color: grey;
     padding-left: 10px;
-}
-
-.normal {
-    background: green;
-}
-
-.warning {
-    background: yellow;
-}
-
-.error {
-    background: red;
 }
 </style>

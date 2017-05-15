@@ -1,28 +1,24 @@
 <template>
     <div class="card">
-        <div class="card-header title" v-bind:class="state">
-    
-            <span class="card-header-left">{{name}}</span>
-            <span class="card-header-right"></span>
-    
-        </div>
-        <div class="card-body">
-            <span>
-                <!-- resources -->
-                <span>MEM</span>
-                <span>CPU</span>
-                <span>NET</span>
-
-                <!-- kill instance -->
-                <input type="checkbox" id="killInstance">
-                <label for="killInstance">kill instance</label>    
-            </span>
-
-            <!--chart-->
-            <div class="tile is-parent is-4">
-                <chart v-bind:type="'line'" v-bind:data="data" v-bind:options="options"></chart>
+        <div class="card-header title">
+            <div class="card-header-left">{{instanceId}}</div>
+            <div class="card-header-right">
+                <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
             </div>
-
+        </div>
+        <div class="card-body tile">
+            <div class="tile">
+                <!-- resources -->
+                <span>MEM {{instanceMem}}</span>
+                <span>CPU {{instanceCPU}}</span>
+                <span>NET {{instanceNet}}</span>
+                <!-- kill instance -->
+                <button>Kill instance</button>
+                <!--chart-->
+            </div>
+            <div>
+                <chart v-bind:type="'line'" v-bind:data="instanceChartData" v-bind:options="instanceChartOptions" />
+            </div>
         </div>
         <div class="card-footer" v-if="false" />
     </div>
@@ -36,8 +32,9 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 @Component({
     name: 'instance-card',
     props: {
-        state: {required:true, type: String},
-        name: {required:true, type: String}
+        deploymentId: { required: true, type: String },
+        rolId: { required: true, type: String },
+        instanceId: { required: true, type: String }
     },
     components: {
         'collapse': Collapse,
@@ -46,32 +43,10 @@ import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
     }
 })
 export default class Card extends Vue {
-    data = {
-        datasets: [{
-            label: 'mylabel',
-            backgroundColor: 'green',
-            data: [
-                { x: 0, y: 1 },
-                { x: 1, y: 1 }
-            ]
-        }, {
-            label: 'mylabel2',
-            backgroundColor: 'yellow',
-            data: [
-                { x: 0, y: 1 },
-                { x: 1, y: 1 }
-            ]
-        },
-        {
-            label: 'mylabel3',
-            backgroundColor: 'red',
-            data: [
-                { x: 0, y: 1 },
-                { x: 1, y: 1 }
-            ]
-        }]
-    };
-    options = {
+    deploymentId: string = this.deploymentId;
+    rolId: string = this.rolId;
+    instanceId: string = this.instanceId;
+    instanceChartOptions = {
         tooltips: { mode: 'label' },
         title: {
             text: "Hola mundo"
@@ -80,7 +55,34 @@ export default class Card extends Vue {
         spanGaps: false,
     };
 
-    mounted() { }
+    get state(): string {
+        switch (this.$store.getters.getDeploymentState(this.deploymentId, this.rolId, this.instanceId)) {
+            case 0: //NORMAL
+                return 'NORMAL_COLOR';
+            case 1:
+                return 'WARNING_COLOR';
+            case 2:
+                return 'ERROR_COLOR';
+            default:
+                return '';
+        }
+    }
+
+    get instanceMem(): number {
+        return this.$store.getters.getDeploymentRolInstanceMem(this.deploymentId, this.rolId, this.instanceId);
+    }
+
+    get instanceCPU(): number {
+        return this.$store.getters.getDeploymentRolInstanceCPU(this.deploymentId, this.rolId, this.instanceId);
+    }
+
+    get instanceNet(): number {
+        return this.$store.getters.getDeploymentRolInstanceNet(this.deploymentId, this.rolId, this.instanceId);
+    }
+
+    get instanceChartData(): any {
+        return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+    }
 }
 </script>
 

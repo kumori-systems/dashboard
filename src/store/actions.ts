@@ -39,22 +39,10 @@ export default {
     hideEntrypoints({ commit }, { }) {
         commit('hideEntrypoints', {});
     },
-
-    // TODO: no queda claro que hace falta para añadir una estáncia ni qué se devuelve
-    deploymentRolAddInstance({ commit }, { rol }) {
-        connection.deploymentRolAddInstance().then(function () {
-            commit('deploymentRolAddInstance', { rol });
-        }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('No se han podido añadir una instáncia nueva al rol \'' + rol + '\' por el error: ' + error);
-        });
+    undeployDeployment({ commit }, { deploymentId }) {
+        connection.undeployDeployment(deploymentId);
     },
-
-    deploymentRolRemoveInstance({ commit }, { rol }) {
-        connection.deploymentRolRemoveInstance().then(function () {
-            commit('deploymentRolRemoveInstance', { rol });
-        }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('No se han podido eliminar una instáncia nueva al rol \'' + rol + '\' por el error: ' + error);
-        });
+    changeTemporaryState({ commit }, { deploymentId, rolId, numInstances }) {
+        commit('changeTemporaryState', { deploymentId, rolId, numInstances });
     }
-
 };
