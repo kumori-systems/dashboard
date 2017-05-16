@@ -45,13 +45,12 @@ import { Link } from '../../store/classes';
 })
 export default class DeploymentItem extends Vue {
     deploymentRoute: string = this.deploymentRoute;
-    deploymentId: string;
-
     deploymentChartOptions = {};
 
-    beforeMount() {
+
+    get deploymentId() {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
-        this.deploymentId = this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
+        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
     }
 
     get deploymentName(): string {
