@@ -345,15 +345,15 @@ export default {
   getDataVolumesList: function (state) {
     // Los volumenes los tengo almacenados por instáncia!!
     let res = [];
-    let aux: string;
+    let aux: Volume;
     for (let deploymentIndex in state.deploymentList) {
       for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
         for (let instanceIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances)
           for (let volumeIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].volumes) {
-            aux = (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].volumes[volumeIndex].name;
-            if (!res.find(vol => { return vol === aux; }))
-              if (aux && aux.length > 0)
-                res.push(aux);
+            aux = (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].volumes[volumeIndex];
+            if (!res.find(vol => { return vol === aux.name; }))
+              if (aux)
+                res.push({ 'name': aux.name, 'user': (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].name, 'number': aux.num });
           }
       }
     }

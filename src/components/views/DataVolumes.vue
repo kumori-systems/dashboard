@@ -4,13 +4,6 @@
             {{dataVolume.name}}
             <span class="warning">in use</span>
             by {{dataVolume.user}} {{dataVolume.number}} chunks
-        </p>
-    
-        <p>
-            <span>BLABLA_DATA</span>
-            <span class="warning">in use</span>
-            <span>by worker</span>
-            <span>3 chunks</span>
             <button class="fa fa-info" />
             <button class="fa fa-times" />
         </p>
@@ -32,6 +25,3 @@ export default class DataVolumes extends Vue {
 
 }
 </script>
-<style lang="scss">
-
-</style>
