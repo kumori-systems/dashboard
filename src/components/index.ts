@@ -15,6 +15,10 @@ import DataVolumes from './views/DataVolumes.vue';
 import AlarmsAndLogs from './views/AlarmsAndLogs.vue';
 import Help from './views/Help.vue';
 
+import NewHTTPEntrypoint from './views/NewHTTPEntrypoint.vue';
+import NewWebService from './views/NewWebService.vue';
+import NewWebServiceAdvanced from './views/NewWebServiceAdvanced.vue';
+
 // Inner components
 import DeploymentCard from './innerComponents/DeploymentCard.vue';
 import DeploymentItem from './innerComponents/DeploymentItem.vue';
@@ -24,7 +28,7 @@ import DeploymentItem from './innerComponents/DeploymentItem.vue';
 export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 
 // Export views
-export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help };
+export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced };
 
 // Export inner components
 export { DeploymentCard };
