@@ -12,13 +12,19 @@
 
 <script lang="ts">
 
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { FabElement } from '../../store/classes';
 
 @Component({
     name: 'DataVolumes'
 })
 export default class DataVolumes extends Vue {
+     mounted() {
+        let fabElementsList: Array<FabElement> = [];
+        fabElementsList.push(new FabElement('Add new data volume', ''));
+        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+    }
     get dataVolumeList() { 
         return this.$store.getters.getDataVolumesList;
     }

@@ -3,6 +3,9 @@ export default {
     // actualizamos el estado del stamp
     state.deploymentList = deploymentList;
   },
+  setFabElements(state, { fabElementsList }) {
+    state.fabElements = fabElementsList;
+  },
   addDeploymentMenuItem(state, { deploymentList }) {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });

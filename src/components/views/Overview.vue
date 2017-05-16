@@ -18,7 +18,7 @@ import Component from 'vue-class-component';
 // Componentes
 import DeploymentCard from './../innerComponents/DeploymentCard.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
-import { Deployment } from '../../store/classes';
+import { Deployment, FabElement } from '../../store/classes';
 
 @Component({
     name: 'Overview',
@@ -31,8 +31,15 @@ import { Deployment } from '../../store/classes';
 export default class Overview extends Vue {
     // computed
     get route(): boolean {
-        if (this.$route.name === 'OVERVIEW')
+        if (this.$route.name === 'OVERVIEW') {
+            let fabElementsList: Array<FabElement> = [];
+            fabElementsList.push(new FabElement('Deploy a new HTTP Entrypoint', ''));
+            fabElementsList.push(new FabElement('Deploy a new Web Service', ''));
+            fabElementsList.push(new FabElement('Deploy a new Web Service (advanced mode)', ''));
+            this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
             return false;
+        }
+
         return true;
     }
     get deploymentList(): Array<string> {

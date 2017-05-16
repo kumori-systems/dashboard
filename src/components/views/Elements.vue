@@ -21,15 +21,20 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
+import { FabElement } from '../../store/classes';
 
 @Component({
-    name: 'Storage',
+    name: 'Elements',
     components: {
         'collapse': Collapse,
         'collapse-item': CollapseItem
     }
 })
-export default class Storage extends Vue {
+export default class Elements extends Vue {
+     mounted() {
+        let fabElementsList: Array<FabElement> = [];
+        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+    }
     get componentList() {
         return this.$store.getters.getComponentList;
     }
