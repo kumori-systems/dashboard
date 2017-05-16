@@ -1,13 +1,14 @@
 <template>
     <div>
-        <router-view/>
-        <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
-        <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
+        <router-view v-if="route" />
+        <div v-else>
+            <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
+            <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     
-        <div class="tile" v-for="deployment in deploymentList">
-            <deployment-card v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
+            <div class="tile" v-for="deployment in deploymentList">
+                <deployment-card v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
+            </div>
         </div>
-    
     </div>
 </template>
 <script lang="ts">
@@ -29,6 +30,11 @@ import { Deployment } from '../../store/classes';
 })
 export default class Overview extends Vue {
     // computed
+    get route(): boolean {
+        if (this.$route.name === 'OVERVIEW')
+            return false;
+        return true;
+    }
     get deploymentList(): Array<string> {
         return this.$store.getters.getDeploymentList;
     }
@@ -39,7 +45,7 @@ export default class Overview extends Vue {
             return this.$store.getters.getIsEntryPoint(deploymentId);
         }
     }
-    
+
     get hideEntrypoints(): boolean {
         return this.$store.getters.getHideEntrypoints;
     }
