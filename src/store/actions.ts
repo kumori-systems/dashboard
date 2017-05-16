@@ -31,6 +31,9 @@ export default {
             console.error('Error manejando los deployments: ' + error);
         });
     },
+    setFabElements({ commit }, { fabElementsList }) {
+        commit('setFabElements', { fabElementsList });
+    },
 
     toggleMenuItemExpanded({ commit }, { menuItem }) {
         commit('toggleMenuItemExpanded', menuItem);

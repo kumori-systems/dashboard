@@ -14,17 +14,21 @@
                 <p>Component: {{componentURN}}</p>
                 <p>Runtime: {{rolRuntime}}</p>
                 <div>
-                    <span>MEM {{memNumber}}</span>
-                    <span>CPU {{cpuNumber}}</span>
-                    <span>NET {{netNumber}}</span>
+                    <span>{{memNumber}} MEM</span>
+                    <span>{{cpuNumber}} CPU</span>
+                    <span>{{netNumber}} NET</span>
                 </div>
-                <p>Connected to: jalsdkfjsdalfsdj</p>
+                <div>Connected to:
+                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="link.providers[0] && link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</div>
+                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="link.providers[0] && !link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}</div>
+                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="!link.providers[0] && link.dependents[0]">-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</div>
+                </div>
             </div>
             <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
             </div>
         </div>
-        <collapse class="tile">
+        <collapse>
             <collapse-item title="View instances">
                 <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
             </collapse-item>
@@ -39,6 +43,7 @@ import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
+import { Link } from '../../store/classes';
 
 @Component({
     name: 'rol-card',
@@ -86,7 +91,7 @@ export default class Card extends Vue {
     }
 
     set numInstances(x: number) {
-       
+        // Vue no reconoce la llamada a esta función
         /*
                 let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
                 if (temporaryState)
@@ -121,6 +126,12 @@ export default class Card extends Vue {
 
     get netNumber(): number {
         return this.$store.getters.getDeploymentRolNetNumber(this.deploymentId, this.rolId);
+    }
+
+    get rolConnectedTo(): Array<Link> {
+        let res = this.$store.getters.getDeploymentRolConnectedTo(this.deploymentId, this.rolId);
+        console.log('Los links que obtenemos son: ' + JSON.stringify(res));
+        return res;
     }
 }
 </script>

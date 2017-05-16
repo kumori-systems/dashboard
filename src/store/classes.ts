@@ -56,14 +56,16 @@ export class Rol {
     instances: Array<Instance>;
     arrangement: Arrangement;
     domain: string;
+    links: Array<{ providers: any, dependents: any }>;
 
-    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>, arrangement: Arrangement, domain: string) {
+    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>, arrangement: Arrangement, domain: string, links: Array<{ providers: any, dependents: any }>) {
         this.name = name;
         this.definitionURN = definitionURN;
         this.runtime = runtime;
         this.instances = instances;
         this.arrangement = arrangement;
         this.domain = domain;
+        this.links = links;
     }
 }
 
@@ -95,5 +97,14 @@ export class Volume {
         this.name = name;
         this.type = type;
         this.num = num;
+    }
+}
+
+export class FabElement {
+    name: string;
+    to: string;
+    constructor(name: string, to: string) {
+        this.name = name;
+        this.to = to;
     }
 }

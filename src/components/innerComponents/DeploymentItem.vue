@@ -31,7 +31,7 @@ import RolCard from './../innerComponents/RolCard.vue';
 
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 
-import { Link } from '../../store/classes';
+import { Link, FabElement } from '../../store/classes';
 
 @Component({
     name: 'DeploymentItem',
@@ -47,6 +47,10 @@ export default class DeploymentItem extends Vue {
     deploymentRoute: string = this.deploymentRoute;
     deploymentChartOptions = {};
 
+    mounted() {
+        let fabElementsList: Array<FabElement> = [];
+        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+    }
 
     get deploymentId() {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando

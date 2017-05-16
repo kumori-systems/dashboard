@@ -16,7 +16,8 @@ export default new Vuex.Store({
         'menuItemList': menuItemList,
         'deploymentList': [],
         'hideEntrypoints': false,
-        'temporaryState': {}
+        'temporaryState': {},
+        'fabElements': {}
     },
     'getters': getters,
     'mutations': mutations,

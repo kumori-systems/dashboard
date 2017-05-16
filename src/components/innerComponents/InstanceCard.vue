@@ -1,26 +1,10 @@
 <template>
     <div class="card">
-        <div class="card-header title">
-            <div class="card-header-left">{{instanceId}}</div>
-            <div class="card-header-right">
-                <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
-            </div>
-        </div>
-        <div class="card-body tile">
-            <div class="tile">
-                <!-- resources -->
-                <span>MEM {{instanceMem}}</span>
-                <span>CPU {{instanceCPU}}</span>
-                <span>NET {{instanceNet}}</span>
-                <!-- kill instance -->
-                <button>Kill instance</button>
-                <!--chart-->
-            </div>
-            <div>
-                <chart v-bind:type="'line'" v-bind:data="instanceChartData" v-bind:options="instanceChartOptions" />
-            </div>
-        </div>
-        <div class="card-footer" v-if="false" />
+        <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
+        <span class="title">{{instanceId}}</span> {{instanceMem}} MEM {{instanceCPU}} CPU {{instanceNet}} NET
+        <input type="checkbox" id="killInstance">
+        <label for="killInstance">kill instance</label>
+        <chart v-bind:type="'line'" v-bind:data="instanceChartData" v-bind:options="instanceChartOptions" />
     </div>
 </template>
 <script lang="ts">

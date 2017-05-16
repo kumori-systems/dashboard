@@ -114,9 +114,20 @@ export function getDeploymentList() {
                         domain = config[index].domain;
                 }
 
+                let rolLinks: Array<any> = [];
+                for (let connector in parsedBody.tcState.deployedServices[deployment].manifest.service.connectors) {
+                    // Tenemos que diferenciar entre canales a roles y canales a servicio
+                    let myChannel = null;
+                    let hisChannel = null;
+                    let him = null;
+                    rolLinks.push({
+                        providers: parsedBody.tcState.deployedServices[deployment].manifest.service.connectors[connector].providers,
+                        dependents: parsedBody.tcState.deployedServices[deployment].manifest.service.connectors[connector].dependents
+                    });
+                }
 
-                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement) + '\ndomain: ' + domain);
-                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement, domain));
+                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement) + '\ndomain: ' + domain + '\nlinks: ' + JSON.stringify(rolLinks));
+                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement, domain, rolLinks));
             }
 
             console.log('New deployment (' + id + '): \nname: ' + name + '\nservice: ' + service + '\nroles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));
