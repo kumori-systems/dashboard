@@ -41,6 +41,12 @@ Actualmente están los dominios web que están en uso. ¿Cómo encuentro un domi
 // Data volumes
 ¿Cómo detecto los data volumes que NO están en uso?
 
+// Creación de un deployment advanced mode: random domain
+Entiendo que, finalmente, tendrá que seguir algunos patrones. Por ejemplo, que siempre acabe en *.iti.es.
+¿De dónde debería de sacar estos patrones?
+
+
+
 /**************************************************************/
 /* A PARTIR DE AQUÍ PUEDE ESPERAR, PERO POR DEJARLO PLANTEADO */
 /**************************************************************/

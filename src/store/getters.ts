@@ -239,13 +239,7 @@ export default {
   },
   getDeploymentRolConnectedTo: function (state) {
     return function (deploymentId: string, rolId: string): Array<{ providers: any, dependents: any }> {
-      let deployment = (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; }));
-      let rol = deployment.roles.find(rol => { return rol.name === rolId; });
-      let res = rol.links;
-
-      console.log('El deploymentID con el que entramos es: ' + deploymentId + ' rolID: ' + rolId);
-      console.log('El ROL que obtenemos es: ' + JSON.stringify(rol));
-      return res;
+      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).links;
     };
   },
 
@@ -371,5 +365,8 @@ export default {
       }
     }
     return res;
+  },
+  getCertificateList: function(state){
+    
   }
 };

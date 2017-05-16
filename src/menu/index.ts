@@ -6,12 +6,6 @@ export default [
         path: '/',
         meta: { expanded: false },
         component: Overview,
-        children: [
-            {
-                path: 'deployments\:deploymentRoute', name: ' ', component: DeploymentItem,
-                props: true
-            }
-        ]
     },
     {
         name: 'ELEMENTS',

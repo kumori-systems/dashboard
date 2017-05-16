@@ -33,9 +33,9 @@ export default class Overview extends Vue {
     get route(): boolean {
         if (this.$route.name === 'OVERVIEW') {
             let fabElementsList: Array<FabElement> = [];
-            fabElementsList.push(new FabElement('Deploy a new HTTP Entrypoint', ''));
-            fabElementsList.push(new FabElement('Deploy a new Web Service', ''));
-            fabElementsList.push(new FabElement('Deploy a new Web Service (advanced mode)', ''));
+            fabElementsList.push(new FabElement('Deploy a new HTTP Entrypoint', 'newHTTPEntrypoint'));
+            fabElementsList.push(new FabElement('Deploy a new Web Service', 'newWebService'));
+            fabElementsList.push(new FabElement('Deploy a new Web Service (advanced mode)', 'newWebServiceAdvanced'));
             this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
             return false;
         }
