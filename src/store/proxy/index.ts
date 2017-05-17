@@ -1,4 +1,4 @@
-import { Deployment, Rol, Link, Instance, Volume, Arrangement } from './../classes';
+import { Deployment, Rol, Link, Instance, Resource, Arrangement } from './../classes';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -70,7 +70,7 @@ export function getDeploymentList() {
                     let component = rol; // TODO: comprobar los componentes del rol
                     if (parsedBody.tcState.deployedServices[deployment].instanceList[instance].component === component) {
                         let name: string = instance;
-                        let volumes: Array<Volume> = [];
+                        let volumes: Array<Resource> = [];
 
                         if (parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration']) {
                             for (let resource in parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources) {
@@ -79,8 +79,9 @@ export function getDeploymentList() {
                                     let type = parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources[resource].type;
                                     let num = -1;
 
-                                    console.log('New volume (' + name + '):\ntype: ' + type + '\nnumber: ' + num);
-                                    volumes.push(new Volume(name, type, num));
+                                    let configuration = {};
+                                    console.log('New volume (' + name + '):\ntype: ' + type + '\nnumber: ' + num + '\nconfiguration: ' + JSON.stringify(configuration));
+                                    volumes.push(new Resource(name, type, num, configuration));
                                 }
                             }
                         } else {
@@ -115,7 +116,7 @@ export function getDeploymentList() {
                 }
 
 
-                    //TODO: Crear roles en servicio.
+                //TODO: Crear roles en servicio.
                 let rolLinks: Array<any> = [];
                 for (let connector in parsedBody.tcState.deployedServices[deployment].manifest.service.connectors) {
                     // Tenemos que diferenciar entre canales a roles y canales a servicio

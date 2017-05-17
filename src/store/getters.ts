@@ -1,4 +1,4 @@
-import { Deployment, Rol, state as StateType, Link, Volume, Instance, FabElement } from './classes';
+import { Deployment, Rol, state as StateType, Link, Resource, Instance, FabElement } from './classes';
 export default {
 
   /* GENERAL */
@@ -102,8 +102,8 @@ export default {
       let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
       for (let rolIndex in deployment.roles) // Por cada rol buscamos en las instáncias los volúmenes que utilizan
         for (let instanceIndex in deployment.roles[rolIndex].instances)
-          for (let volumeIndex in deployment.roles[rolIndex].instances[instanceIndex].volumes)
-            res.push(deployment.roles[rolIndex].instances[instanceIndex].volumes[volumeIndex].name);
+          for (let volumeIndex in deployment.roles[rolIndex].instances[instanceIndex].resources)
+            res.push(deployment.roles[rolIndex].instances[instanceIndex].resources[volumeIndex].name);
 
       return res;
     };
@@ -352,15 +352,15 @@ export default {
   getDataVolumesList: function (state) {
     // Los volumenes los tengo almacenados por instáncia!!
     let res = [];
-    let aux: Volume;
+    let aux: Resource;
     for (let deploymentIndex in state.deploymentList) {
       for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
         for (let instanceIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances)
-          for (let volumeIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].volumes) {
-            aux = (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].volumes[volumeIndex];
+          for (let volumeIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].resources) {
+            aux = (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].resources[volumeIndex];
             if (!res.find(vol => { return vol === aux.name; }))
               if (aux)
-                res.push({ 'name': aux.name, 'user': (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].name, 'number': aux.num });
+                res.push({ 'name': aux.name, 'user': (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].name, 'number': aux.numElements });
           }
       }
     }

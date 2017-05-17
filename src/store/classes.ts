@@ -82,23 +82,23 @@ export class Link {
 // TODO: Faltan params
 export class Instance {
     name: string;
-    volumes: Array<Volume>;
-    constructor(name: string, volumes: Array<Volume>) {
+    resources: Array<Resource>;
+    constructor(name: string, resources: Array<Resource>) {
         this.name = name;
-        this.volumes = volumes;
+        this.resources = resources;
     }
 }
 
-// TODO: Falta config del volumen
-// Volume => resources
-export class Volume {
+export class Resource {
     name: string;
     type: string;
-    num: number;
-    constructor(name: string, type: string, num: number) {
+    numElements: number;
+    configuration: any;
+    constructor(name: string, type: string, numElements: number, configuration: any) {
         this.name = name;
         this.type = type;
-        this.num = num;
+        this.numElements = numElements;
+        this.configuration = configuration;
     }
 }
 
