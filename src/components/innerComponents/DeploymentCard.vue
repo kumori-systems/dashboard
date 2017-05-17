@@ -45,7 +45,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Rol, state as StateType, Deployment } from './../../store/classes';
+import { Rol, State, Deployment } from './../../store/classes';
 
 @Component({
     name: 'deployment-card',
@@ -63,7 +63,7 @@ export default class Card extends Vue {
         return this.deploymentId.substring(this.deploymentId.indexOf('/deployments/') + 13, this.deploymentId.length);
     }
     get state(): string {
-        return StateType[this.$store.getters.getDeploymentState(this.deploymentId)];
+        return State[this.$store.getters.getDeploymentState(this.deploymentId)];
     }
     get stateIcon(): string {
         switch (this.state) {

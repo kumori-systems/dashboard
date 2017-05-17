@@ -66,9 +66,9 @@ html {
 	background-color: whitesmoke;
 }
 
-$color_normal:#93c47d;
-$color_warning:#f5d164;
-$color_error:#ff6666;
+$color_active:#93c47d;
+$color_no_active:#f5d164;
+$color_on_progress:#ff6666;
 $padding: 10px;
 $icon_size: 100px;
 $state_icon_size: 50px;
@@ -93,30 +93,30 @@ $state_icon_size: 50px;
 	}
 }
 
-.NORMAL {
-	background: $color_normal;
+.ACTIVE {
+	background: $color_active;
 }
 
-.NORMAL_COLOR {
-	color: $color_normal;
+.ACTIVE_COLOR {
+	color: $color_active;
 	font-size: $state_icon_size;
 }
 
-.WARNING {
-	background: $color_warning;
+.NO_ACTIVE {
+	background: $color_no_active;
 }
 
-.WARNING_COLOR {
-	color: $color_warning;
+.NO_ACTIVE_COLOR {
+	color: $color_no_active;
 	font-size: $state_icon_size;
 }
 
-.ERROR {
-	background: $color_error;
+.ON_PROGRESS {
+	background: $color_on_progress;
 }
 
-.ERROR_COLOR {
-	color: $color_error;
+.ON_PROGRESS_COLOR {
+	color: $color_on_progress;
 	font-size: $state_icon_size;
 }
 
@@ -125,17 +125,17 @@ $state_icon_size: 50px;
 }
 
 .fa-check-circle {
-	color: $color_normal;
+	color: $color_active;
 	font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-	color: $color_warning;
+	color: $color_no_active;
 	font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-	color: $color_error;
+	color: $color_on_progress;
 	font-size: $icon_size;
 }
 

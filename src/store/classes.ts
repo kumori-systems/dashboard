@@ -1,4 +1,4 @@
-export enum state { NORMAL, WARNING, ERROR };
+export enum State { ACTIVE, NO_ACTIVE, ON_PROGRESS };
 
 export class Deployment {
     id: string;
@@ -100,12 +100,17 @@ export class Link {
         this.connectedTo = connectedTo;
     }
 }
-// TODO: Faltan params
+
+/**
+ * Cada instancia de un componente
+ */
 export class Instance {
     name: string;
+    state: State;
     resources: Array<Resource>;
-    constructor(name: string, resources: Array<Resource>) {
+    constructor(name: string, state: State, resources: Array<Resource>) {
         this.name = name;
+        this.state = state;
         this.resources = resources;
     }
 }
