@@ -85,11 +85,11 @@ export default class DeploymentItem extends Vue {
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case 0: //NORMAL
-                return 'NORMAL_COLOR';
+                return 'ACTIVE_COLOR';
             case 1:
-                return 'WARNING_COLOR';
+                return 'NO_ACTIVE_COLOR';
             case 2:
-                return 'ERROR_COLOR';
+                return 'ON_PROGRESS_COLOR';
             default:
                 return '';
         }

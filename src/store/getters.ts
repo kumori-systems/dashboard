@@ -1,4 +1,4 @@
-import { Deployment, Rol, state as StateType, Link, Resource, Instance, FabElement } from './classes';
+import { Deployment, Rol, State as StateType, Link, Resource, Instance, FabElement } from './classes';
 export default {
 
   /* GENERAL */
@@ -84,9 +84,9 @@ export default {
     return function (deploymentId: string): StateType {
       let ranNumber = Math.trunc(Math.random() * 3);
       switch (ranNumber) {
-        case 0: return StateType.NORMAL;
-        case 1: return StateType.WARNING;
-        default: return StateType.ERROR;
+        case 0: return StateType.ACTIVE;
+        case 1: return StateType.NO_ACTIVE;
+        default: return StateType.ON_PROGRESS;
       }
     };
   },
@@ -173,9 +173,9 @@ export default {
     return function (deploymentId: string, rolId: string): StateType {
       let ranNumber = Math.trunc(Math.random() * 3);
       switch (ranNumber) {
-        case 0: return StateType.NORMAL;
-        case 1: return StateType.WARNING;
-        default: return StateType.ERROR;
+        case 0: return StateType.ACTIVE;
+        case 1: return StateType.NO_ACTIVE;
+        default: return StateType.ON_PROGRESS;
       }
     };
   },

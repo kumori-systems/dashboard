@@ -1,4 +1,4 @@
-import { Deployment, Rol, Link, Instance, Resource, Arrangement, Service, ServiceRol } from './../classes';
+import { State, Deployment, Rol, Link, Instance, Resource, Arrangement, Service, ServiceRol } from './../classes';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -83,8 +83,15 @@ export function getDeploymentList() {
                     let component = rol; // TODO: comprobar los componentes del rol
                     if (parsedBody.tcState.deployedServices[deployment].instanceList[instance].component === component) {
                         let name: string = instance;
-                        let volumes: Array<Resource> = [];
 
+                        let state: State = State.ON_PROGRESS; // Caso en que no está definido
+                        if (parsedBody.tcState.deployedServices[deployment].instanceList[instance].connected) {
+                            state = State.ACTIVE;
+                        } else {
+                            state = State.NO_ACTIVE;
+                        }
+
+                        let volumes: Array<Resource> = [];
                         if (parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration']) {
                             for (let resource in parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources) {
                                 if (parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources[resource].type.startsWith('eslap://eslap.cloud/resource/volume/')) {
@@ -101,8 +108,8 @@ export function getDeploymentList() {
                             console.log('WARNING: Componente sin instance-configuration: ' + component); // Esto impide que se puedan conocer los vloúmenes
                         }
 
-                        console.log('New instance (' + name + '):\nvolumes: ' + volumes);
-                        instances.push(new Instance(name, volumes));
+                        console.log('New instance (' + name + '):\nvolumes: ' + volumes + '\nstate: ' + state);
+                        instances.push(new Instance(name, state, volumes));
                     }
                 }
 
