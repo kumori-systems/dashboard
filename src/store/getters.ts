@@ -72,7 +72,7 @@ export default {
       let deployment: Deployment = state.deploymentList.find(deployment => {
         return deployment.id === deploymentId;
       });
-      return deployment.service;
+      return deployment.service.name;
     };
   },
   getDeploymentWebsite: function (state): Function {
@@ -268,6 +268,7 @@ export default {
       return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.bandwidth;
     };
   },
+
   getDeploymentRolInstanceChartData: function (state): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): Object {
       return {
@@ -297,6 +298,7 @@ export default {
       };
     };
   },
+
   getComponentList: function (state): Array<string> {
     // Buscamos en cada deployment todos los componentes que poseen
     let res = [];
@@ -311,17 +313,19 @@ export default {
     }
     return res;
   },
-  getServiceList: function (state): Array<string> {
-    // Buscamos en cada deployment todos los servicios
+
+  /**
+   * Devolvemos una lista de servicios web disponibles para el usuario
+   */
+  getWebServiceList: function (state): Array<string> {
     let res = [];
-    let aux: string;
-    for (let index in state.deploymentList) {
-      aux = (<Deployment>state.deploymentList[index]).service;
-      if (!res.find(serv => { return serv === aux; }))
-        res.push(aux);
-    }
+    for (let index in state.deploymentList)
+      res.push((<Deployment>state.deploymentList[index]).service.name);
     return res;
   },
+  /**
+   * Devolvemos una lista de runtimes disponibles para el usuario
+   */
   getRuntimeList: function (state): Array<string> {
     // Buscamos todos los runtime en los roles de los deployments
     let res = [];
@@ -366,7 +370,7 @@ export default {
     }
     return res;
   },
-  getCertificateList: function(state){
-    
+  getCertificateList: function (state) {
+
   }
 };

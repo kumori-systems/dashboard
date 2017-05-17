@@ -3,17 +3,38 @@ export enum state { NORMAL, WARNING, ERROR };
 export class Deployment {
     id: string;
     name: string;
-    service: string;
+    service: Service;
     roles: Array<Rol>;
     website: string;
     links: Array<Link>;
-    constructor(id: string, name: string, service: string, roles: Array<Rol>, website: string, links: Array<Link>) {
+    constructor(id: string, name: string, service: Service, roles: Array<Rol>, website: string, links: Array<Link>) {
         this.id = id;
         this.name = name;
         this.service = service;
         this.roles = roles;
         this.website = website;
         this.links = links;
+    }
+}
+export class ServiceRol {
+    name: string;
+    component: string;
+    resources: any;
+    parameters: any;
+    constructor(name: string, component: string, resources: any, parameters: any) {
+        this.name = name;
+        this.component = component;
+        this.resources = resources;
+        this.parameters = parameters;
+    }
+}
+
+export class Service {
+    name: string;
+    roles: Array<ServiceRol>;
+    constructor(name: string, roles: Array<ServiceRol>) {
+        this.name = name;
+        this.roles = roles;
     }
 }
 
