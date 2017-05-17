@@ -6,46 +6,17 @@ PREGUNTAS
 // Primer campo en el título de los deployments
 El primer campo en el título de los deployments, donde en el storyboard pone 'CALCULATOR-5'.
 He preguntado y no han sabido contestarme, entonces, ¿a qué campo en el JSON corresponde ésta parte del título?
+-> Lo obtendré en el estado del Stamp
 
 // Estado Instáncias
-¿Cómo detecto el estado de una instáncia? Si me dices que parámetros tengo que tener en cuenta puedo hacer el cálculo o si prefieres que sea un parámetro en el JSON también me sirve.
-Por otro lado, entiendo que el estado del rol y el estado del deployment van a depender de éste. La forma que tenía pensada
-es todo bien, excepto si  nºwarnings>0 (que sería warning) y en el caso que  nºerrores > 1 SIEMPRE se mostraría error, tanto en los roles como en el deployment.
+¿Cómo detecto el estado de una instáncia?
+-> satate.deployedServices[DeploymentId].instanceList[instance].connected
 
-// Datos monitorización para una instáncia
-Me hace falta una representación de cómo voy a recibir los datos de monitorización de una instáncia. Con esto me refiero
-a la estructura con la que voy a recibir los datos, si van a estar metidos dentro del JSON que recibo al principio en algún campo
-o si voy a tener que hacer alguna llamada aparte al servidor para obtener éstos datos.
-
-// ¿Media o suma?
-Respecto a los distintos datos representados en un instáncia, a medida que van acumulándose para representar los roles y los deployments, tengo que saber cáda uno cómo se 'acumula'. Entiendo que lo que me respondas servirá tanto para datosInstancia->datosRol como para datosRol->datosDeployments.
-- CPU ¿media o suma?
-- MEM ¿media o suma?
-- NET ¿media o suma?
-- **Hay dos campos que no entiendo, lo siento
-
-// Conexiones de los roles
-En las conexiones de los roles puedo encontrar conexiones con providers y sin providers, con dependents y sin dependents.
-La forma que tengo de representarlo actualmente, posiblemente no sea la correcta;
-    providerChannel provider -> dependentChannel dependent
-En el caso de que falte cualquier parámetro, símplemente lo omito de la vista.
-El caso en que haya N providers x 1 dependent o 1 provider x N dependent tampoco sé cómo representarlo.
-¿Repito las conexiones?
-
-// Third party elements
-En la vista Elements ¿Cómo reconozco aquellos elementos de terceras personas?
-
--> No hay que buscar los vol dentro de los deployments
+-> No hay que buscar los vol dentro de los deployments. Json de storage state
 // Web domains
 Actualmente están los dominios web que están en uso. ¿Cómo encuentro un dominio web que no está en uso?
 // Data volumes
 ¿Cómo detecto los data volumes que NO están en uso?
-
-// Creación de un deployment advanced mode: random domain
-Entiendo que, finalmente, tendrá que seguir algunos patrones. Por ejemplo, que siempre acabe en *.iti.es.
-¿De dónde debería de sacar estos patrones?
-
-
 
 /**************************************************************/
 /* A PARTIR DE AQUÍ PUEDE ESPERAR, PERO POR DEJARLO PLANTEADO */
