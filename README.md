@@ -35,9 +35,9 @@ El caso en que haya N providers x 1 dependent o 1 provider x N dependent tampoco
 // Third party elements
 En la vista Elements ¿Cómo reconozco aquellos elementos de terceras personas?
 
+-> No hay que buscar los vol dentro de los deployments
 // Web domains
 Actualmente están los dominios web que están en uso. ¿Cómo encuentro un dominio web que no está en uso?
-
 // Data volumes
 ¿Cómo detecto los data volumes que NO están en uso?
 

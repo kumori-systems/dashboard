@@ -114,6 +114,8 @@ export function getDeploymentList() {
                         domain = config[index].domain;
                 }
 
+
+                    //TODO: Crear roles en servicio.
                 let rolLinks: Array<any> = [];
                 for (let connector in parsedBody.tcState.deployedServices[deployment].manifest.service.connectors) {
                     // Tenemos que diferenciar entre canales a roles y canales a servicio

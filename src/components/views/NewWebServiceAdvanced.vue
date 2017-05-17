@@ -55,6 +55,7 @@ export default class NewWebServiceAdvanced extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get domainList() {
+        // TODO: Obtener los dominios del storage
         return this.$store.getters.getWebDomainList;
     }
     get certificateList(){
@@ -62,6 +63,3 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

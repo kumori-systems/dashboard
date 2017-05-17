@@ -79,7 +79,7 @@ export class Link {
         this.connectedTo = connectedTo;
     }
 }
-
+// TODO: Faltan params
 export class Instance {
     name: string;
     volumes: Array<Volume>;
@@ -89,6 +89,8 @@ export class Instance {
     }
 }
 
+// TODO: Falta config del volumen
+// Volume => resources
 export class Volume {
     name: string;
     type: string;
