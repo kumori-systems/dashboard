@@ -1,4 +1,4 @@
-import { State, Deployment, Rol, Link, Instance, Resource, Arrangement, Service, ServiceRol } from './../classes';
+import { State, Deployment, DeploymentRol, Channel, Instance, Resource, Arrangement, Service, ServiceRol } from './../classes';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -10,151 +10,103 @@ function auxFunction(): Promise<{ response: string, body: string }> {
 
 let stampStateExample = require('./tc-state-example.json');
 
-export function getDeploymentList() {
-    // Preguntamos por el stampstate, organizamos en deployments y guardamos
+/**
+ * Preguntamos por el estado del stamp.
+ * Con el estado creamos dos listas;
+ * DeploymentList y serviceList
+ * Devolvemos un objeto que contenga las dos listas 
+ */
+export function getStampState() {
+
     return auxFunction().then(function ({ response, body }) {
         let parsedBody = stampStateExample;
-        let res: Array<Deployment> = [];
-        for (let deployment in parsedBody.tcState.deployedServices) {
-            let id = deployment;
-            let name = 'DeploymentNAME';
+        let deploymentList: { [deploymentId: string]: Deployment } = {};
+        let serviceList: { [serviceId: string]: Service } = {};
 
-            let serviceRoles: Array<ServiceRol> = [];
-            for (let rol in parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].service.roles) {
-                let name = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].service.roles[rol].name;
-                let component = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].service.roles[rol].component;
-                let resources = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].service.roles[rol].resources;
-                let parameters = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].service.roles[rol].parameters;
-                serviceRoles.push(new ServiceRol(name, component, resources, parameters));
-            }
 
-            let service = new Service(
-                parsedBody.tcState.deployedServices[deployment].manifest.service.name, // service.name
-                serviceRoles // service.roles
-            );
+        // Por la forma en la que obtenemos el estado, lo recorreremos por deployments
+        for (let deploymentId in parsedBody.tcState.deployedServices) {
 
-            let roles: Array<Rol> = [];
-            let website: string = '';
-            let links: Array<Link> = [];
+            // Primero resolvemos todo lo referente al servicio de un deployment
+            let service = parsedBody.tcState.deployedServices[deploymentId].service;
+            // Comprobamos que no existe ya el servicio en la lista de servicios
+            let serviceId = service.name;
+            if (!serviceList[serviceId]) { // Si no está definido lo añadimos
 
-            if (parsedBody.tcState.deployedServices[deployment].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Si es un http inbound él mismo tiene el website
-                website = parsedBody.tcState.deployedServices[deployment].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
-            } else { // Si no lo és, tiene que mirar en los links cuál es el http inbound correspondiente
-                let anyadido: boolean;
-                for (let link in parsedBody.tcState.linkedServices) { // TODO: Esto puede ser optimizado
-                    anyadido = false;
-                    if (parsedBody.tcState.linkedServices[link].deployment1 === deployment) {
-                        links.push(new Link(
-                            parsedBody.tcState.linkedServices[link].channel1, // my channel
-                            parsedBody.tcState.linkedServices[link].channel2, // his channel
-                            parsedBody.tcState.linkedServices[link].deployment2 // him
-                        ));
-                        anyadido = true;
-                    } else if (parsedBody.tcState.linkedServices[link].deployment2 === deployment) {
-                        links.push(new Link(
-                            parsedBody.tcState.linkedServices[link].channel2, // my channel
-                            parsedBody.tcState.linkedServices[link].channel1, // his channel
-                            parsedBody.tcState.linkedServices[link].deployment1 // him
-                        ));
-                        anyadido = true;
+                let version = parsedBody.tcState.deployedServices[deploymentId].versions['http://eslap.cloud/manifest/deployment/1_0_0'];
+                let serviceResources: { [resourceId: string]: Resource } = {}; // Las resources las encontramos dentro de la versión 1
+                for (let resourceIndex in version.resources) {
+                    serviceResources[resourceIndex] = new Resource(
+                        version.resources[resourceIndex].resource.name,
+                        version.resources[resourceIndex].resource.parameters
+                    );
+                }
+                let serviceParameters: Array<string> = version.configuration.parameters;
+                let serviceRoles: { [rolId: string]: ServiceRol } = {};
+
+                for (let rolIndex in version.service.roles) {
+                    serviceRoles[version.service.roles[rolIndex].name] = new ServiceRol(
+                        version.service.roles[rolIndex].component,
+                        version.service.roles[rolIndex].resources, // Viene con el formato que vamos a utilizar
+                        version.service.roles[rolIndex].parameters,
+                    );
+                }
+
+                let serviceProChannels: { [channelId: string]: Channel };
+                for (let reqChannelIndex in version.service.channels.provides) {
+                    let channelId = version.service.channels.provides[reqChannelIndex].name;
+                    // Buscamos las conexiones del canal
+                    let connections: Array<{ channelName: string, rolName?: string }> = [];
+                    let connectorList = version.service.connectors.provided.find(connector => { return connector.depended.endpoint === channelId; });
+                   for (let connectorIndex in connectorList) {
+                        connections.push({
+                            channelName: connectorList[connectorIndex].provided.endpoint,
+                            rolName: connectorList[connectorIndex].provided.role,
+                        });
                     }
-                    if (anyadido) { // ¿tenemos website?
-                        if (parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Es un inbound?
-                            website = parsedBody.tcState.deployedServices[links[links.length - 1].connectedTo].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
-                        }
+
+                    // Añadimos el canal
+                    serviceProChannels[channelId] = new Channel(
+                        version.service.channels.provides[reqChannelIndex].type,
+                        version.service.channels.provides[reqChannelIndex].protocol,
+                        connections
+                    );
+                }
+
+                let serviceReqChannels: { [channelId: string]: Channel };
+                for (let reqChannelIndex in version.service.channels.requires) {
+                    // Buscamos las conexiones del canal
+                    let channelId = version.service.channels.requires[reqChannelIndex].name;
+                    let connections: Array<{ channelName: string, rolName?: string }> = [];
+                    let connectorList = version.service.connectors.depended.filter(connector => { return connector.depended.endpoint === channelId; });
+                    for (let connectorIndex in connectorList) {
+                        connections.push({
+                            channelName: connectorList[connectorIndex].depended.endpoint,
+                            rolName: connectorList[connectorIndex].depended.role,
+                        });
                     }
-                }
-            }
 
-            // TODO: Queda lincar el rol con el componente. Aquí se ha asumido que un componente tiene el mismo nombre que el rol
-            for (let rol in parsedBody.tcState.deployedServices[deployment].manifest.arrangement) {
-                let name: string = rol;
-                let definitionURN: string = parsedBody.tcState.deployedServices[deployment].manifest.service.components[name];
-                let numInstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__instances;
-
-                let runtime: string;
-                for (let index in parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'].runtimes) {
-                    runtime = index; // Únicamente debería de haber un runtime
+                    // Añadimos el canal
+                    serviceReqChannels[channelId] = new Channel(
+                        version.service.channels.requires[reqChannelIndex].type,
+                        version.service.channels.requires[reqChannelIndex].protocol,
+                        connections
+                    );
                 }
 
-                let instances: Array<Instance> = [];
-                for (let instance in parsedBody.tcState.deployedServices[deployment].instanceList) {
-                    // Tenemos que comprobar que el componente de la instáncia corresponde al rol
-                    let component = rol; // TODO: comprobar los componentes del rol
-                    if (parsedBody.tcState.deployedServices[deployment].instanceList[instance].component === component) {
-                        let name: string = instance;
+                serviceList[serviceId] = new Service(serviceResources, serviceParameters, serviceRoles, serviceProChannels, serviceReqChannels);
+            }// En este punto el servicio ya está en la lista de servicios
 
-                        let state: State = State.ON_PROGRESS; // Caso en que no está definido
-                        if (parsedBody.tcState.deployedServices[deployment].instanceList[instance].connected) {
-                            state = State.ACTIVE;
-                        } else {
-                            state = State.NO_ACTIVE;
-                        }
-
-                        let volumes: Array<Resource> = [];
-                        if (parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration']) {
-                            for (let resource in parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources) {
-                                if (parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources[resource].type.startsWith('eslap://eslap.cloud/resource/volume/')) {
-                                    let name = resource;
-                                    let type = parsedBody.tcState.deployedServices[deployment].manifest['instance-configuration'][instance].resources[resource].type;
-                                    let num = -1;
-
-                                    let configuration = {};
-                                    console.log('New volume (' + name + '):\ntype: ' + type + '\nnumber: ' + num + '\nconfiguration: ' + JSON.stringify(configuration));
-                                    volumes.push(new Resource(name, type, num, configuration));
-                                }
-                            }
-                        } else {
-                            console.log('WARNING: Componente sin instance-configuration: ' + component); // Esto impide que se puedan conocer los vloúmenes
-                        }
-
-                        console.log('New instance (' + name + '):\nvolumes: ' + volumes + '\nstate: ' + state);
-                        instances.push(new Instance(name, state, volumes));
-                    }
-                }
-
-                let failurezones: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].failurezones;
-                let bandwidth: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].bandwidth;
-                let memory: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].memory;
-                let cpu: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].cpu;
-                let maxinstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].maxinstances;
-                let __instances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__instances;
-                let __cpu: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__cpu;
-                let __memory: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__memory;
-                let __ioperf: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__ioperf;
-                let __iopsintensive: boolean = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__iopsintensive;
-                let __bandwidth: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__bandwidth;
-                let __resilience: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].__resilience;
-                let mininstances: number = parsedBody.tcState.deployedServices[deployment].manifest.arrangement[rol].mininstances;
-                let arrangement = new Arrangement(failurezones, bandwidth, memory, cpu, maxinstances, __instances, __cpu, __memory, __ioperf, __iopsintensive, __bandwidth, __resilience, mininstances);
-
-                let config = parsedBody.tcState.deployedServices[deployment].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0']['components-configuration'][rol].config;
-                let domain;
-                for (let index in config) {
-                    if (config[index].domain)
-                        domain = config[index].domain;
-                }
+            // Ahora resolvemos todo lo referente al deployment
+            let deploymentName: string = 'DeploymentNAME';
+            let deploymentServiceId: string = serviceId;
+            let deploymentResourcesConfig: { [resource: string]: string };
+            let deploymentParameters: Array<string>;
+            let deploymentRoles: { [rolName: string]: DeploymentRol };
+            let deploymentWebsite: string;
+            deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentRarameters, deploymentRoles, deploymentWebsite);
 
 
-                // TODO: Crear roles en servicio.
-                let rolLinks: Array<any> = [];
-                for (let connector in parsedBody.tcState.deployedServices[deployment].manifest.service.connectors) {
-                    // Tenemos que diferenciar entre canales a roles y canales a servicio
-                    let myChannel = null;
-                    let hisChannel = null;
-                    let him = null;
-                    rolLinks.push({
-                        providers: parsedBody.tcState.deployedServices[deployment].manifest.service.connectors[connector].providers,
-                        dependents: parsedBody.tcState.deployedServices[deployment].manifest.service.connectors[connector].dependents
-                    });
-                }
-
-                console.log('New rol (' + name + '):\ndefinitionURN: ' + definitionURN + '\nruntime: ' + runtime + '\ninstances: ' + instances + '\narrangement:' + JSON.stringify(arrangement) + '\ndomain: ' + domain + '\nlinks: ' + JSON.stringify(rolLinks));
-                roles.push(new Rol(name, definitionURN, runtime, instances, arrangement, domain, rolLinks));
-            }
-
-            console.log('New deployment (' + id + '): \nname: ' + name + '\nservice: ' + service + '\nroles: ' + roles + '\nwebsite: ' + website + '\nlinks: ' + JSON.stringify(links));
-            res.push(new Deployment(id, name, service, roles, website, links));
         }
 
         // Gestión de errores de conexión
@@ -164,7 +116,7 @@ export function getDeploymentList() {
             Promise.reject(new Error('Error de conexión al intentar obtener estado: ' + response));
         }
 
-        return res;
+        return { 'deploymentList': deploymentList, 'serviceList': serviceList };
     });
 }
 export function deploymentRolAddInstance() {

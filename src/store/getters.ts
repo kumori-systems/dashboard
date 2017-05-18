@@ -1,4 +1,4 @@
-import { Deployment, Rol, State as StateType, Link, Resource, Instance, FabElement } from './classes';
+import { Deployment, DeploymentRol, State as StateType, Link, Resource, Instance, FabElement } from './classes';
 export default {
 
   /* GENERAL */
@@ -305,7 +305,7 @@ export default {
     let aux: string;
     for (let deploymentIndex in state.deploymentList) {
       for (let rolIndex in state.deploymentList[deploymentIndex].roles) {
-        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).definitionURN;
+        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).definitionURN;
         if (!res.find(comp => { return comp === aux; }))
           res.push(aux);
       }
@@ -332,7 +332,7 @@ export default {
     let aux: string;
     for (let deploymentIndex in state.deploymentList) {
       for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
-        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
+        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
         if (!res.find(runtim => { return runtim === aux; }))
           res.push(aux);
       }
@@ -345,7 +345,7 @@ export default {
     let aux: string;
     for (let deploymentIndex in state.deploymentList) {
       for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
-        aux = (<Rol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).domain;
+        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).domain;
         if (!res.find(dom => { return dom === aux; }))
           if (aux && aux.length > 0)
             res.push(aux);

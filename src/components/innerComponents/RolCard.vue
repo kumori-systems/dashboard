@@ -43,7 +43,7 @@ import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
-import { Link } from '../../store/classes';
+import { Channel } from '../../store/classes';
 
 @Component({
     name: 'rol-card',

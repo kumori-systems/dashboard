@@ -14,7 +14,8 @@ export default new Vuex.Store({
     'strict': true, // Cuando se intenta mutar de una forma inadecuada lanza un error
     'state': {
         'menuItemList': menuItemList,
-        'deploymentList': [],
+        'deploymentList': {},
+        'serviceList': {},
         'hideEntrypoints': false,
         'temporaryState': {},
         'fabElements': {}

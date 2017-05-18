@@ -45,7 +45,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Rol, State, Deployment } from './../../store/classes';
+import { DeploymentRol, State, Deployment } from './../../store/classes';
 
 @Component({
     name: 'deployment-card',

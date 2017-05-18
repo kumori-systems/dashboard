@@ -1,109 +1,5 @@
 export enum State { ACTIVE, NO_ACTIVE, ON_PROGRESS };
 
-export class Deployment {
-    id: string;
-    name: string;
-    service: Service;
-    roles: Array<Rol>;
-    website: string;
-    links: Array<Link>;
-    constructor(id: string, name: string, service: Service, roles: Array<Rol>, website: string, links: Array<Link>) {
-        this.id = id;
-        this.name = name;
-        this.service = service;
-        this.roles = roles;
-        this.website = website;
-        this.links = links;
-    }
-}
-export class ServiceRol {
-    name: string;
-    component: string;
-    resources: any;
-    parameters: any;
-    constructor(name: string, component: string, resources: any, parameters: any) {
-        this.name = name;
-        this.component = component;
-        this.resources = resources;
-        this.parameters = parameters;
-    }
-}
-
-export class Service {
-    name: string;
-    roles: Array<ServiceRol>;
-    constructor(name: string, roles: Array<ServiceRol>) {
-        this.name = name;
-        this.roles = roles;
-    }
-}
-
-/* TODO: Revisar esta clase cuando se hayan eliminado duplicados */
-export class Arrangement {
-    failurezones: number;
-    bandwidth: number;
-    memory: number;
-    cpu: number;
-    maxinstances: number;
-    __instances: number;
-    __cpu: number;
-    __memory: number;
-    __ioperf: number;
-    __iopsintensive: boolean;
-    __bandwidth: number;
-    __resilience: number;
-    mininstances: number;
-    constructor(failurezones: number, bandwidth: number, memory: number, cpu: number, maxinstances: number, __instances: number, __cpu: number, __memory: number, __ioperf: number, __iopsintensive: boolean, __bandwidth: number, __resilience: number, mininstances: number) {
-        this.failurezones = failurezones;
-        this.bandwidth = bandwidth;
-        this.memory = memory;
-        this.cpu = cpu;
-        this.maxinstances = maxinstances;
-        this.__instances = __instances;
-        this.__cpu = cpu;
-        this.__memory = __memory;
-        this.__ioperf = __ioperf;
-        this.__iopsintensive = __iopsintensive;
-        this.__bandwidth = bandwidth;
-        this.__resilience = __resilience;
-        this.mininstances = mininstances;
-    }
-}
-
-export class Rol {
-    name: string;
-    definitionURN: string;
-    runtime: string;
-    instances: Array<Instance>;
-    arrangement: Arrangement;
-    domain: string;
-    links: Array<{ providers: any, dependents: any }>;
-
-    constructor(name: string, definitionURN: string, runtime: string, instances: Array<Instance>, arrangement: Arrangement, domain: string, links: Array<{ providers: any, dependents: any }>) {
-        this.name = name;
-        this.definitionURN = definitionURN;
-        this.runtime = runtime;
-        this.instances = instances;
-        this.arrangement = arrangement;
-        this.domain = domain;
-        this.links = links;
-    }
-}
-
-export class Link {
-    connectedTo: string;
-    myChannel: string;
-    hisChannel: string;
-    constructor(myChannel: string, hisChannel: string, connectedTo: string) {
-        this.myChannel = myChannel;
-        this.hisChannel = hisChannel;
-        this.connectedTo = connectedTo;
-    }
-}
-
-/**
- * Cada instancia de un componente
- */
 export class Instance {
     name: string;
     state: State;
@@ -115,19 +11,96 @@ export class Instance {
     }
 }
 
-export class Resource {
-    name: string;
-    type: string;
-    numElements: number;
-    configuration: any;
-    constructor(name: string, type: string, numElements: number, configuration: any) {
-        this.name = name;
-        this.type = type;
-        this.numElements = numElements;
-        this.configuration = configuration;
+export class DeploymentRol {
+    instances: number;
+    cpu: number;
+    memory: number;
+    ioperf: number;
+    iopsintensive: boolean;
+    bandwith: number;
+    resilence: number;
+    instanceList: { [instanceId: string]: Instance };
+    constructor(instances: number, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwith: number, resilence: number, instanceList: { [instanceId: string]: Instance }) {
+        this.instances = instances;
+        this.cpu = cpu;
+        this.memory = memory;
+        this.ioperf = ioperf;
+        this.iopsintensive = iopsintensive;
+        this.bandwith = bandwith;
+        this.resilence = resilence;
+        this.instanceList = instanceList;
     }
 }
 
+export class Deployment {
+    name: string; // nombre amistoso para el usuario
+    serviceId: string; // servicio que define el despliegue
+    resourcesConfig: { [resource: string]: string }; // encaja cómo llama el servicio a las resources con la definición real de las resources
+    parameters: Array<string>;
+    roles: { [rolName: string]: DeploymentRol };
+    website: string;
+    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: string }, parameters: Array<string>, roles: { [rolName: string]: DeploymentRol }, website: string) {
+        this.name = name;
+        this.serviceId = serviceId;
+        this.resourcesConfig = resourcesConfig;
+        this.parameters = parameters;
+        this.roles = roles;
+        this.website = website;
+    }
+}
+
+export class ServiceRol {
+    component: string;
+    resources: { [resourceId: string]: string };
+    parameters: Array<string>;
+
+    constructor(component: string, resources: { [resourceId: string]: string }, parameters: Array<string>) {
+        this.component = component;
+        this.resources = resources;
+        this.parameters = parameters;
+    }
+}
+
+export class Channel {
+    type: string;
+    protocol: string;
+    connectedTo: Array<{
+        channelName: string;
+        rolName?: string;
+    }>;
+
+    constructor(type: string, protocol: string, connectedTo: Array<{ channelName: string; rolName?: string; }>) {
+        this.type = type;
+        this.protocol = protocol;
+        this.connectedTo = connectedTo;
+    }
+}
+
+export class Resource {
+    realName: string;
+    parameters: Object;
+    constructor(realName: string, parameters: Object) {
+        this.realName = realName;
+        this.parameters = parameters;
+    }
+}
+
+export class Service {
+    resources: { [resourceId: string]: Resource };
+    parameters: Array<string>;
+    roles: { [rolId: string]: ServiceRol };
+    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    constructor(resources: { [resourceId: string]: Resource }, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }) {
+        this.resources = resources;
+        this.parameters = parameters;
+        this.roles = roles;
+        this.proChannels = proChannels;
+        this.reqChannels = reqChannels;
+    }
+}
+
+/* CLASES INDEPENDIENTES */
 export class FabElement {
     name: string;
     to: string;
