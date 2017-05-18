@@ -40,7 +40,7 @@ export default class Elements extends Vue {
     }
 
     get serviceList() {
-        return this.$store.getters.getServiceList;
+        return this.$store.getters.getWebServiceList;
     }
 
     get runtimeList() {
