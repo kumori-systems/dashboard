@@ -58,7 +58,7 @@ export function getStampState() {
                     // Buscamos las conexiones del canal
                     let connections: Array<{ channelName: string, rolName?: string }> = [];
                     let connectorList = version.service.connectors.provided.find(connector => { return connector.depended.endpoint === channelId; });
-                   for (let connectorIndex in connectorList) {
+                    for (let connectorIndex in connectorList) {
                         connections.push({
                             channelName: connectorList[connectorIndex].provided.endpoint,
                             rolName: connectorList[connectorIndex].provided.role,
@@ -100,13 +100,13 @@ export function getStampState() {
             // Ahora resolvemos todo lo referente al deployment
             let deploymentName: string = 'DeploymentNAME';
             let deploymentServiceId: string = serviceId;
+
+            // TODO: Me he quedado por aquí!
             let deploymentResourcesConfig: { [resource: string]: string };
             let deploymentParameters: Array<string>;
             let deploymentRoles: { [rolName: string]: DeploymentRol };
             let deploymentWebsite: string;
-            deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentRarameters, deploymentRoles, deploymentWebsite);
-
-
+            deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentParameters, deploymentRoles, deploymentWebsite);
         }
 
         // Gestión de errores de conexión
