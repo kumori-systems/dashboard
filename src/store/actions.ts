@@ -4,25 +4,25 @@ import { Deployment } from './classes';
 
 export default {
     getDeploymentList({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getDeploymentList().then(function (deploymentList) {
+        connection.getStampState().then(function (stampState) {
             // Guardamos los deployments en el estado
-            commit('setDeploymentList', { deploymentList });
-
+            commit('setStampState', { stampState });
+            
             // añadimos cada deployment como un deploymentMenuItem
             let res = [];
             let path: string;
-            for (let key in deploymentList) {
-                path = (<Deployment>deploymentList[key]).id;
+            for (let key in stampState.deploymentList) {
+                path = key;
                 let index = path.indexOf('/');
                 while (index !== -1) {
                     path = path.replace('/', '\\');
                     index = path.indexOf('/');
                 }
                 res.push({
-                    'name': deploymentList[key].name,
+                    'name': stampState.deploymentList[key].name,
                     'path': 'deployments\\' + path,
                     'meta': {
-                        'id': deploymentList[key].id
+                        'id': key
                     }
                 });
             }

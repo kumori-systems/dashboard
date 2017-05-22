@@ -1,4 +1,4 @@
-import { Deployment, DeploymentRol, State as StateType, Link, Resource, Instance, FabElement } from './classes';
+import { Deployment, DeploymentRol, Component, Service, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
 
   /* GENERAL */
@@ -23,7 +23,7 @@ export default {
   getDeploymentList: function (state): Array<string> {
     let res: Array<string> = [];
     for (let index in state.deploymentList)
-      res.push((<Deployment>state.deploymentList[index]).id);
+      res.push(index);
     return res;
   },
   getDeploymentIdFromDeploymentRoute: function (state): Function {
@@ -55,9 +55,12 @@ export default {
   },
   getDeploymentName: function (state): Function {
     return function (deploymentId: string): string {
-      return state.deploymentList.find(deployment => {
-        return deployment.id === deploymentId;
-      }).name;
+      return (<Deployment>state.deploymentList[deploymentId]).name
+    };
+  },
+  getDeploymentService: function (state): Function {
+    return function (deploymentId: string): string {
+      return (<Deployment>state.deploymentList[deploymentId]).serviceId;
     };
   },
   getIsEntryPoint: function (state, getters) {
@@ -67,17 +70,9 @@ export default {
       return false;
     };
   },
-  getDeploymentService: function (state): Function {
-    return function (deploymentId: string): string {
-      let deployment: Deployment = state.deploymentList.find(deployment => {
-        return deployment.id === deploymentId;
-      });
-      return deployment.service.name;
-    };
-  },
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).website;
+      return (<Deployment>state.deploymentList[deploymentId]).website;
     };
   },
   getDeploymentState: function (state): Function {
@@ -91,19 +86,25 @@ export default {
     };
   },
   getDeploymentLinks: function (state): Function {
-    return function (deploymentId: string): Array<Link> {
-      let res: Array<string> = [];
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).links;
+    return function (deploymentId: string): { [channelId: string]: Channel } {
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let res: { [channelId: string]: Channel } = {
+        ...(<Service>state.serviceList[serviceId]).proChannels,
+        ...(<Service>state.serviceList[serviceId]).reqChannels
+      };
+      return res;
     };
   },
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
-      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
-      for (let rolIndex in deployment.roles) // Por cada rol buscamos en las instáncias los volúmenes que utilizan
-        for (let instanceIndex in deployment.roles[rolIndex].instances)
-          for (let volumeIndex in deployment.roles[rolIndex].instances[instanceIndex].resources)
-            res.push(deployment.roles[rolIndex].instances[instanceIndex].resources[volumeIndex].name);
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let resources = (<Service>state.serviceList[serviceId]).resources;
+
+      for (let resourceIndex in resources) {
+        if (resources[resourceIndex].realName.split('/')[2] === 'volume')
+          res.push(resourceIndex);
+      }
 
       return res;
     };
@@ -142,33 +143,27 @@ export default {
   getDeploymentRoles: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
-      let deployment: Deployment = state.deploymentList.find(deployment => { return deployment.id === deploymentId; });
-      for (let index in deployment.roles) {
-        res.push(deployment.roles[index].name);
+      let deployment: Deployment = state.deploymentList[deploymentId];
+      for (let rolId in deployment.roles) {
+        res.push(rolId);
       }
       return res;
     };
   },
+
   getDeploymentRolComponentURN: function (state) {
     return function (deploymentId: string, rolId: string) {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).definitionURN;
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      return (<Service>state.serviceList[serviceId]).roles[rolId].component
     };
   },
-  getDeploymentRolInfo: function (state) {
-    return function (deploymentId: string, rolId: string) {
-      return state.deploymentList.find(deployment => { return deployment.id === deploymentId; }).roles.find(rol => { return rol.name === rolId; });
-    };
-  },
+
   getDeploymentRolNumInstances: function (state): Function {
-    return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances.length;
+    return function (deploymentId: string, rolId: string) {
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instances;
     };
   },
-  getDeploymentRolName: function (state): Function {
-    return function (deploymentId: string, rolId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).name;
-    };
-  },
+
   getDeploymentRolState: function (state): Function {
     return function (deploymentId: string, rolId: string): StateType {
       let ranNumber = Math.trunc(Math.random() * 3);
@@ -181,7 +176,9 @@ export default {
   },
   getDeploymentRolRuntime: function (state): Function {
     return function (deploymentId: string, rolId: string): string {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).runtime;
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+      return (<Service>state.serviceList[serviceId]).components[componentId].runtime;
     };
   },
   getDeploymentRolChartData: function (state): Function {
@@ -215,31 +212,32 @@ export default {
   },
   getDeploymentRolMemNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.memory;
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].memory;
     };
   },
   getDeploymentRolCPUNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.cpu;
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].cpu;
     };
   },
   getDeploymentRolNetNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.bandwidth;
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].bandwith;
     };
   },
   getDeploymentRolInstances: function (state) {
     return function (deploymentId: string, rolId: string): Array<string> {
       let res: Array<string> = [];
-      let instances: Array<Instance> = (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).instances;
-      for (let index in instances)
-        res.push(instances[index].name);
+      for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList)
+        res.push(instanceId);
       return res;
     };
   },
   getDeploymentRolConnectedTo: function (state) {
-    return function (deploymentId: string, rolId: string): Array<{ providers: any, dependents: any }> {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).links;
+    return function (deploymentId: string, rolId: string): { providers: any, dependents: any } {
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+      return { providers: (<Service>state.serviceList[serviceId]).components[componentId].proChannels, dependents: (<Service>state.serviceList[serviceId]).components[componentId].reqChannels };
     };
   },
 
@@ -253,19 +251,19 @@ export default {
   },
   /* INSTANCES */
 
-  getDeploymentRolInstanceMem: function (state): Function {
-    return function (deploymentId: string, rolId: string, InstanceId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.memory;
+  getDeploymentRolInstanceMem: function (state, getters): Function {
+    return function (deploymentId: string, rolId: string, instanceId: string): number {
+      return getters.getDeploymentRolMemNumber;
     };
   },
-  getDeploymentRolInstanceCPU: function (state): Function {
+  getDeploymentRolInstanceCPU: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.cpu;
+      return getters.getDeploymentRolCPUNumber;
     };
   },
-  getDeploymentRolInstanceNet: function (state): Function {
+  getDeploymentRolInstanceNet: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
-      return (<Deployment>state.deploymentList.find(deployment => { return deployment.id === deploymentId; })).roles.find(rol => { return rol.name === rolId; }).arrangement.bandwidth;
+      return getters.getDeploymentRolNETNumber;
     };
   },
 
@@ -300,16 +298,12 @@ export default {
   },
 
   getComponentList: function (state): Array<string> {
-    // Buscamos en cada deployment todos los componentes que poseen
+    // Buscamos en cada servicio todos los componentes que poseen
     let res = [];
-    let aux: string;
-    for (let deploymentIndex in state.deploymentList) {
-      for (let rolIndex in state.deploymentList[deploymentIndex].roles) {
-        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).definitionURN;
-        if (!res.find(comp => { return comp === aux; }))
-          res.push(aux);
+    for (let servicetIndex in state.serviceList) {
+      for (let componentId in (<Service>state.serviceList[servicetIndex]).components) {
+        res.push(componentId);
       }
-
     }
     return res;
   },
@@ -319,8 +313,8 @@ export default {
    */
   getWebServiceList: function (state): Array<string> {
     let res = [];
-    for (let index in state.deploymentList)
-      res.push((<Deployment>state.deploymentList[index]).service.name);
+    for (let serviceId in state.serviceList)
+      res.push(serviceId);
     return res;
   },
   /**
@@ -330,44 +324,37 @@ export default {
     // Buscamos todos los runtime en los roles de los deployments
     let res = [];
     let aux: string;
-    for (let deploymentIndex in state.deploymentList) {
-      for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
-        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).runtime;
-        if (!res.find(runtim => { return runtim === aux; }))
+    for (let serviceId in state.serviceList) {
+      for (let componentId in (<Service>state.serviceList[serviceId]).components) {
+        aux = (<Component>(<Service>state.serviceList[serviceId]).components[componentId]).runtime
+        if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
           res.push(aux);
       }
     }
     return res;
   },
   getWebDomainList: function (state) {
-    // Buscamos en todos los roles los dominios web que hay para añadirlos
+    // Buscamos los inbound
     let res = [];
     let aux: string;
-    for (let deploymentIndex in state.deploymentList) {
-      for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
-        aux = (<DeploymentRol>(<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex]).domain;
-        if (!res.find(dom => { return dom === aux; }))
-          if (aux && aux.length > 0)
-            res.push(aux);
-      }
+    for (let deploymentId in state.deploymentList) {
+      aux = (<Deployment>state.deploymentList[deploymentId]).website;
+      if (!res.find(dom => { return dom === aux; }))
+        res.push(aux);
     }
+
     return res;
   },
-  getDataVolumesList: function (state) {
+  getDataVolumesList: function (state, getters) {
     // Los volumenes los tengo almacenados por instáncia!!
     let res = [];
-    let aux: Resource;
-    for (let deploymentIndex in state.deploymentList) {
-      for (let rolIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles) {
-        for (let instanceIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances)
-          for (let volumeIndex in (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].resources) {
-            aux = (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].instances[instanceIndex].resources[volumeIndex];
-            if (!res.find(vol => { return vol === aux.name; }))
-              if (aux)
-                res.push({ 'name': aux.name, 'user': (<Deployment>state.deploymentList[deploymentIndex]).roles[rolIndex].name, 'number': aux.numElements });
-          }
+    for (let deploymentId in state.deploymentList) {
+      for (let volumeId in getters.getDeploymentVolumes(deploymentId)) {
+        if (!res.find(vol => { return vol === volumeId; }))
+          res.push(volumeId);
       }
     }
+
     return res;
   },
   getCertificateList: function (state) {

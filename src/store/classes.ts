@@ -1,13 +1,9 @@
 export enum State { ACTIVE, NO_ACTIVE, ON_PROGRESS };
 
 export class Instance {
-    name: string;
     state: State;
-    resources: Array<Resource>;
-    constructor(name: string, state: State, resources: Array<Resource>) {
-        this.name = name;
+    constructor(state: State) {
         this.state = state;
-        this.resources = resources;
     }
 }
 
@@ -79,11 +75,10 @@ export class Channel {
         rolName?: string;
     }>;
 
-    constructor(type: string, protocol: string, connectedTo?: Array<{ channelName: string; rolName?: string; }>) {
+    constructor(type: string, protocol: string, connectedTo: Array<{ channelName: string; rolName?: string; }>) {
         this.type = type;
         this.protocol = protocol;
-        if (connectedTo)
-            this.connectedTo = connectedTo;
+        this.connectedTo = connectedTo;
     }
 }
 
@@ -91,11 +86,13 @@ export class Component {
     runtime: string;
     resourcesConfig: { [resourceName: string]: string }; // El dato almacenado finalmente es el parametro tipo del manifiesto del componente
     parameters: Object;
-    proChannels: { [channelId: string]: Channel }; // canal SIN conexiones
-    reqChannels: { [channelId: string]: Channel }; // canal SIN conexiones
-    constructor(runtime: string, resourcesConfig: { [resourceName: string]: string }, parameters: Object,
-        proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }) {
-
+    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    constructor(runtime: string, resourcesConfig: { [resourceName: string]: string }, parameters: Object, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }) {
+        this.runtime = runtime;
+        this.resourcesConfig = resourcesConfig;
+        this.proChannels = proChannels;
+        this.reqChannels = reqChannels;
     }
 }
 

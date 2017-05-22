@@ -31,7 +31,7 @@ import RolCard from './../innerComponents/RolCard.vue';
 
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 
-import { Link, FabElement } from '../../store/classes';
+import { Channel, FabElement } from '../../store/classes';
 
 @Component({
     name: 'DeploymentItem',
@@ -79,7 +79,7 @@ export default class DeploymentItem extends Vue {
     get deploymentService(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
-    get links(): Array<Link> {
+    get links(): Array<Channel> {
         return this.$store.getters.getDeploymentLinks(this.deploymentId);
     }
     get state(): string {

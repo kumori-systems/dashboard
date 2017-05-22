@@ -128,7 +128,7 @@ export default class Card extends Vue {
         return this.$store.getters.getDeploymentRolNetNumber(this.deploymentId, this.rolId);
     }
 
-    get rolConnectedTo(): Array<Link> {
+    get rolConnectedTo(): Array<Channel> {
         return this.$store.getters.getDeploymentRolConnectedTo(this.deploymentId, this.rolId);
     }
 }
