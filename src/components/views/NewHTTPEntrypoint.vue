@@ -29,12 +29,15 @@
         <div>
             Resilence {{resilence}}
         </div>
+    
     </div>
 </template>
 
 <script lang="ts">
+
 // TODO: No se pueden listar dominios que ya estén en uso
 // TODO: Los certificados los tenemos que obtener de otro documento distinto al stamp state
+
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../store/classes';
@@ -43,6 +46,7 @@ import { FabElement } from '../../store/classes';
     name: 'new-httpentrypoint'
 })
 export default class NewHTTPEntrypoint extends Vue {
+
     usePlatformGeneratedDomain: boolean = false;
     selectedDomain: string = "";
     selectedCertificate: string = "";
@@ -50,15 +54,18 @@ export default class NewHTTPEntrypoint extends Vue {
     requireClientCertificates: boolean = false;
     instances: number = 0;
     resilence: number = 0;
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
+
     get domainList() {
         return this.$store.getters.getWebDomainList;
     }
-    get certificateList(){
+    get certificateList() {
         return this.$store.getters.getCertificateList;
     }
 }
 </script>
+

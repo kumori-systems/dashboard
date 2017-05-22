@@ -55,6 +55,7 @@ export class Resource {
     }
 }
 
+
 export class ServiceRol {
     component: string;
     resources: { [resourceId: string]: string };
@@ -64,6 +65,7 @@ export class ServiceRol {
         this.component = component;
         this.resources = resources;
         this.parameters = parameters;
+
     }
 }
 

@@ -14,6 +14,7 @@ import { FabElement } from '../../store/classes';
     name: 'new-webservice-advanced'
 })
 export default class NewWebServiceAdvanced extends Vue {
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });

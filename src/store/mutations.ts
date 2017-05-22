@@ -7,6 +7,9 @@ export default {
   setFabElements(state, { fabElementsList }) {
     state.fabElements = fabElementsList;
   },
+  setFabElements(state, { fabElementsList }) {
+    state.fabElements = fabElementsList;
+  },
   addDeploymentMenuItem(state, { deploymentList }) {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
