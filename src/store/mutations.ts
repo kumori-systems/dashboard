@@ -1,11 +1,8 @@
 export default {
-  setStampState(state, { stampstate }) {
+  setStampState(state, {deploymentList, serviceList}) {
     // actualizamos el estado del stamp
-    state.deploymentList = stampstate.deploymentList;
-    state.dserviceList = stampstate.serviceList;
-  },
-  setFabElements(state, { fabElementsList }) {
-    state.fabElements = fabElementsList;
+    state.deploymentList = deploymentList;
+    state.serviceList = serviceList;
   },
   setFabElements(state, { fabElementsList }) {
     state.fabElements = fabElementsList;

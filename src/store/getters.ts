@@ -55,7 +55,7 @@ export default {
   },
   getDeploymentName: function (state): Function {
     return function (deploymentId: string): string {
-      return (<Deployment>state.deploymentList[deploymentId]).name
+      return (<Deployment>state.deploymentList[deploymentId]).name;
     };
   },
   getDeploymentService: function (state): Function {
@@ -100,9 +100,8 @@ export default {
       let res: Array<string> = [];
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let resources = (<Service>state.serviceList[serviceId]).resources;
-
       for (let resourceIndex in resources) {
-        if (resources[resourceIndex].realName.split('/')[2] === 'volume')
+        if (resources[resourceIndex].realName && resources[resourceIndex].realName.split('/')[4] === 'volume')
           res.push(resourceIndex);
       }
 
@@ -154,7 +153,7 @@ export default {
   getDeploymentRolComponentURN: function (state) {
     return function (deploymentId: string, rolId: string) {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      return (<Service>state.serviceList[serviceId]).roles[rolId].component
+      return (<Service>state.serviceList[serviceId]).roles[rolId].component;
     };
   },
 
@@ -326,7 +325,7 @@ export default {
     let aux: string;
     for (let serviceId in state.serviceList) {
       for (let componentId in (<Service>state.serviceList[serviceId]).components) {
-        aux = (<Component>(<Service>state.serviceList[serviceId]).components[componentId]).runtime
+        aux = (<Component>(<Service>state.serviceList[serviceId]).components[componentId]).runtime;
         if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
           res.push(aux);
       }

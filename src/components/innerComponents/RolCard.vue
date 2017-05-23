@@ -3,8 +3,8 @@
         <div class="card-header title">
             <span class="card-header-left">{{rolId}}</span>
             <span class="card-header-right">{{numInstances}}</span>
-            <button class="fa fa-angle-up fa-lg" v-on:click="numInstances(1)"></button>
-            <button class="fa fa-angle-down fa-lg" v-on:click="numInstances(-1)"></button>
+            <button class="fa fa-angle-up fa-lg" v-on:click="numInstances = 1"></button>
+            <button class="fa fa-angle-down fa-lg" v-on:click="numInstances = -1"></button>
     
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
     
@@ -19,9 +19,15 @@
                     <span>{{netNumber}} NET</span>
                 </div>
                 <div>Connected to:
-                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="link.providers[0] && link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</div>
-                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="link.providers[0] && !link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}</div>
-                    <div class="inner-content" v-for="link in rolConnectedTo" v-if="!link.providers[0] && link.dependents[0]">-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</div>
+    
+                    <!--
+                        <div class="inner-content" v-for="link in rolConnectedTo">
+                            <p class="inner-content" v-if="link.providers[0] && link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</p>
+                            <p class="inner-content" v-if="link.providers[0] && !link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}</p>
+                            <p class="inner-content" v-if="!link.providers[0] && link.dependents[0]">-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</p>
+                        </div>
+    -->
+    
                 </div>
             </div>
             <div class="tile is-parent is-4">

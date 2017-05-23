@@ -18,8 +18,8 @@
 
 <script lang="ts">
 
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
 
@@ -40,11 +40,7 @@ export default class Elements extends Vue {
     }
 
     get serviceList() {
-<<<<<<< HEAD
         return this.$store.getters.getWebServiceList;
-=======
-        return this.$store.getters.getServiceList;
->>>>>>> eae2d09832dba770dd5858ac8b82b27af89aae80
     }
 
     get runtimeList() {

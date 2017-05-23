@@ -47,7 +47,7 @@ export default class App extends Vue {
 		window.addEventListener('resize', handler);
 
 		// Enviamos una petición para obtener los deployments
-		this.$store.dispatch('getDeploymentList', { vueInstanceReference: this });
+		this.$store.dispatch('getStampState', { vueInstanceReference: this });
 	}
 }
 </script>

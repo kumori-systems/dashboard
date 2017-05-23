@@ -31,13 +31,8 @@ export function getStampState() {
             // Comprobamos que no existe ya el servicio en la lista de servicios
             let serviceId = parsedBody.tcState.deployedServices[deploymentId].manifest.service.name;
 
-            console.log('El nombre del deployment es: ' + deploymentId);
-            console.log('El nombre del servicio es: ' + serviceId);
-
-
             let version = parsedBody.tcState.deployedServices[deploymentId].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'];
             if (!serviceList[serviceId]) { // Si no está definido lo añadimos
-                console.log('DEFINIENDO SERVICIO..');
                 let serviceResources: { [resourceId: string]: Resource } = {}; // Las resources las encontramos dentro de la versión 1
                 for (let resourceIndex in version.resources) {
                     serviceResources[resourceIndex] = new Resource(
@@ -74,7 +69,7 @@ export function getStampState() {
                     for (let connectorIndex in connectorList) {
                         let dependedConector = connectorList[connectorIndex].depended.find(dependedConnector => { return dependedConnector.endpoint === channelId; });
 
-                        if (dependedConector != undefined) {
+                        if (dependedConector !== undefined) {
 
                             for (let providedConnectorIndex in connectorList[connectorIndex].provided)
                                 connections.push({
@@ -101,17 +96,14 @@ export function getStampState() {
 
                 let serviceReqChannels: { [channelId: string]: Channel } = {};
                 for (let reqChannelIndex in version.service.channels.requires) {
-                    console.log('Entramos en el bucle REQUIRES'); // TODO: Tengo que probar esto
                     let channelId = version.service.channels.requires[reqChannelIndex].name;
                     // Buscamos las conexiones del canal
-                    console.log('El canal que tenemos es: ' + channelId);
                     let connections: Array<{ channelName: string, rolName?: string }> = [];
                     let connectorList = version.service.connectors;
-                    console.log('La lista de conectores es: ' + JSON.stringify(connectorList));
                     for (let connectorIndex in connectorList) {
                         let providedConector = connectorList[connectorIndex].provided.find(providedConnector => { return providedConnector.endpoint === channelId; });
 
-                        if (providedConector != undefined) {
+                        if (providedConector !== undefined) {
                             for (let dependedConnectorIndex in connectorList[connectorIndex].depended)
                                 connections.push({
                                     channelName: connectorList[connectorIndex].depended[dependedConnectorIndex].endpoint,
@@ -141,7 +133,7 @@ export function getStampState() {
 
                 for (let componentIndex in components) {
                     // Resources
-                    let componentResources: { [resourceName: string]: string };
+                    let componentResources: { [resourceName: string]: string } = {};
                     for (let componentResourceIndex in components[componentIndex].configuration.resources) {
                         componentResources[components[componentIndex].configuration.resources[componentResourceIndex].name] = components[componentIndex].configuration.resources[componentResourceIndex].type;
                     }
@@ -175,12 +167,10 @@ export function getStampState() {
                     // Require channels
                     let reqChannels: { [channelId: string]: Channel } = {};
                     for (let reqChannelIndex in components[componentIndex].channels.requires) {
-                        console.log('ESTO FUNCIONA');
                         // Buscamos las conexiones del canal
                         let channelId = components[componentIndex].channels.requires[reqChannelIndex].name;
                         let connections: Array<{ channelName: string, rolName?: string }> = [];
-                        let connectorList = version.service.connectors;//.depended.filter(connector => { return connector.depended.endpoint === channelId; });
-                        console.log('La lista de conectores que tenemos es: ' + JSON.stringify(connectorList));
+                        let connectorList = version.service.connectors;
                         for (let connectorIndex in connectorList) {
                             connections.push({
                                 channelName: connectorList[connectorIndex].depended.endpoint,
@@ -230,17 +220,15 @@ export function getStampState() {
             let deploymentName: string = 'DeploymentNAME';
             let deploymentServiceId: string = serviceId;
 
-            let deploymentResourcesConfig: { [resource: string]: string };
-
+            let deploymentResourcesConfig: { [resource: string]: string } = {};
             for (let resourceId in parsedBody.tcState.deployedServices[deploymentId].manifest.resources) {
                 deploymentResourcesConfig[resourceId] = parsedBody.tcState.deployedServices[deploymentId].manifest.resources[resourceId].resource.type;
             }
 
             let deploymentParameters: Array<string> = [];
             let deploymentRoles: { [rolName: string]: DeploymentRol } = {};
-
             for (let rolId in version.roles) {
-                let instanceList: { [instanceId: string]: Instance };
+                let instanceList: { [instanceId: string]: Instance } = {};
 
                 for (let instanceId in parsedBody.tcState.deployedServices[deploymentId].instanceList) {
                     if (parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].component ===
@@ -248,7 +236,6 @@ export function getStampState() {
                     )
                         instanceList[instanceId] = new Instance(parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].connected);
                 }
-
                 deploymentRoles[rolId] = new DeploymentRol(
                     version.roles[rolId].resources.__instances,
                     version.roles[rolId].resources.__cpu,
@@ -260,15 +247,10 @@ export function getStampState() {
                     instanceList
                 );
             }
-
             let deploymentWebsite: string = null;
-            console.log('Vamos a por el website');
             if (parsedBody.tcState.deployedServices[deploymentId].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Si es un http inbound él mismo tiene el website
-                console.log('ES un HTTP inbound');
                 deploymentWebsite = parsedBody.tcState.deployedServices[deploymentId].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
             }
-            console.log('Website finalizado');
-
 
             deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentParameters, deploymentRoles, deploymentWebsite);
 

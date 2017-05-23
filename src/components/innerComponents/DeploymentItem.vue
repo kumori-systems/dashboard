@@ -21,7 +21,7 @@
                 <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
             </div>
         </div>
-        <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRolName(deploymentRol)" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRolName(deploymentRol)" />
+        <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" />
     </div>
 </template>
 <script lang="ts">
@@ -70,12 +70,6 @@ export default class DeploymentItem extends Vue {
     }
 
     /* Rol atributes */
-    get deploymentRolName(): Function {
-        return function (deploymentRolId: string): string {
-            return this.$store.getters.getDeploymentRolName(this.deploymentId, deploymentRolId);
-        }
-    }
-
     get deploymentService(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }

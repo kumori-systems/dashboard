@@ -3,15 +3,14 @@ import { DeploymentItem } from './../components';
 import { Deployment } from './classes';
 
 export default {
-    getDeploymentList({ dispatch, commit }, { vueInstanceReference }) {
-        connection.getStampState().then(function (stampState) {
+    getStampState({ dispatch, commit }, { vueInstanceReference }) {
+        connection.getStampState().then(function ({ deploymentList, serviceList }) {
             // Guardamos los deployments en el estado
-            commit('setStampState', { stampState });
-            
+            commit('setStampState', { deploymentList, serviceList });
             // añadimos cada deployment como un deploymentMenuItem
             let res = [];
             let path: string;
-            for (let key in stampState.deploymentList) {
+            for (let key in deploymentList) {
                 path = key;
                 let index = path.indexOf('/');
                 while (index !== -1) {
@@ -19,14 +18,14 @@ export default {
                     index = path.indexOf('/');
                 }
                 res.push({
-                    'name': stampState.deploymentList[key].name,
+                    'name': deploymentList[key].name,
                     'path': 'deployments\\' + path,
                     'meta': {
                         'id': key
                     }
                 });
             }
-            commit('addDeploymentMenuItem', { deploymentList: res });
+            commit('addDeploymentMenuItem', { 'deploymentList': res });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error manejando los deployments: ' + error);
         });
