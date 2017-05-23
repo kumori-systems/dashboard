@@ -274,11 +274,97 @@ export function getStampState() {
         return { 'deploymentList': deploymentList, 'serviceList': serviceList };
     });
 }
-export function deploymentRolAddInstance() {
-    return auxFunction();
-}
-export function deploymentRolRemoveInstance() { return auxFunction(); }
 
 export function undeployDeployment(deploymentId: string): void {
-    console.log('Realizamos undeploy de: ' + deploymentId);
+    console.log('INFO: Realizamos undeploy de: ' + deploymentId);
+}
+let registeredElements = require('./registeredElements.json');
+export function getRegisteredElements() {
+    return auxFunction().then(function ({ response, body }) {
+        let parsedBody = registeredElements.data;
+
+        // parsedbody nos devolverá una array de elementos.
+        // Lo pasamos a diccionario
+        let res: { [id: string]: Object } = {};
+        for (let element in parsedBody) {
+            res[parsedBody[element]] = null;
+        }
+        return { 'registeredElements': res };
+    });
+}
+
+let ejemploObtencionManifiesto = require('./ejemplo-obtencion-manifiesto.json');
+export function getManifest(uri: string) {
+    return auxFunction().then(function ({ response, body }) {
+        let parsedBody = ejemploObtencionManifiesto.data;
+        // Dependiendo del tipo de elemento, deberíamos de parsearlo como la clase que tenemos internamente
+        let element;
+        let elementIndex = parsedBody.data.name;
+        let splited: Array<string> = (<string>parsedBody.data.spec).split('/');
+        switch (splited[3]) {
+            case 'components': // Caso en que el elemento por el que hemos preguntado sea un componente
+                let resourcesConfig: { [resourceId: string]: string } = {};
+                for (let resourceIndex in parsedBody.data.configuration.resources) {
+                    resourcesConfig[parsedBody.data.configuration.resources[resourceIndex].name] = parsedBody.data.configuration.resources[resourceIndex].type;
+                }
+                // Provide channels
+                let proChannels: { [channelId: string]: Channel } = {};
+                for (let proChannelIndex in parsedBody.data.channels.provides) {
+                    let channelId = parsedBody.data.channels.provides[proChannelIndex].name;
+                    // Añadimos el canal
+                    proChannels[channelId] = new Channel(
+                        parsedBody.data.channels.provides[proChannelIndex].type, // tipo
+                        parsedBody.data.channels.provides[proChannelIndex].protocol, // protocolo
+                        null // conexiones -> Este dato no lo podemos calcular aquí
+                    );
+                }
+                // Require channels
+                let reqChannels: { [channelId: string]: Channel } = {};
+                for (let reqChannelIndex in parsedBody.data.channels.requires) {
+                    let channelId = parsedBody.data.channels.requires[reqChannelIndex].name;
+                    // Añadimos el canal
+                    reqChannels[channelId] = new Channel(
+                        parsedBody.data.channels.requires[reqChannelIndex].type, // tipo
+                        parsedBody.data.channels.requires[reqChannelIndex].protocol, // protocolo
+                        null // conexiones -> Este dato no lo podemos calcular aquí
+                    );
+                }
+
+                element = new Component(
+                    parsedBody.data.runtime, // runtime
+                    resourcesConfig, // resourcesConfig
+                    parsedBody.data.configuration.parameters, // parameters
+                    proChannels, // proChannels
+                    reqChannels // reqChannels
+                );
+                console.log('NEW component received (' + elementIndex
+                    + '):\nruntime: ' + element.runtime
+                    + '\nresources: ' + JSON.stringify(element.resourcesConfig)
+                    + '\nparameters: ' + element.parameters
+                    + '\nproChannels: ' + element.proChannels
+                    + '\nreqChannels: ' + element.reqChannels);
+                break;
+            case 'runtime': // Caso en que el elemento por el que hemos preguntado sea un runtime
+                element = null; // TODO: no he visto manifiestos de runtimes por ningún lado
+                throw new Error('Error obtaining a runtime..');
+            // break;
+            case 'resources':
+                element = new Resource(
+                    parsedBody.data.name,
+                    parsedBody.data.parameters
+                );
+                console.log('NEW resource received(' + elementIndex
+                    + '):\nname: ' + element.realName
+                    + '\nparameters: ' + element.parameters);
+                break;
+            case 'services':
+                element = null; // TODO: No estoy seguro que haga falta obtener todo el servicio
+                throw new Error('Error obtaining a service..');
+            // break;
+        }
+
+        // parsedbody nos devolverá una array de elementos.
+        // Lo pasamos a diccionario
+        return [elementIndex, element];
+    });
 }

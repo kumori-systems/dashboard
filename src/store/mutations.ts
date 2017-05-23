@@ -1,8 +1,17 @@
 export default {
-  setStampState(state, {deploymentList, serviceList}) {
+  setStampState(state, { deploymentList, serviceList }) {
     // actualizamos el estado del stamp
     state.deploymentList = deploymentList;
     state.serviceList = serviceList;
+  },
+  setRegisteredElements(state, { registeredElements }) {
+    // actualizamos la lista de elementos registrados
+    state.registeredElements = registeredElements;
+  },
+  setElementData(state, { element }) {
+    console.log('ENTRAMOS EN SETELEMENTDATA');
+    let [elementId, elementData] = element;
+    state.registeredElements[elementId] = elementData;
   },
   setFabElements(state, { fabElementsList }) {
     state.fabElements = fabElementsList;

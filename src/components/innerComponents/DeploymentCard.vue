@@ -66,7 +66,6 @@ export default class Card extends Vue {
         return State[this.$store.getters.getDeploymentState(this.deploymentId)];
     }
     get stateIcon(): string {
-        console.log('EL ESTADO QUE DEVUELVE ES: ' + this.state);
         switch (this.state) {
             case 'ACTIVE':
                 return 'fa fa-check-circle';

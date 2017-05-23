@@ -61,7 +61,7 @@ export default class NewHTTPEntrypoint extends Vue {
     }
 
     get domainList() {
-        return this.$store.getters.getWebDomainList;
+        return this.$store.getters.getFreeWebDomainList;
     }
     get certificateList() {
         return this.$store.getters.getCertificateList;

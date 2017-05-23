@@ -1,0 +1,34 @@
+{
+    "success": true,
+    "message": "Manifest obtained",
+    "data": {
+        "spec": "http://eslap.cloud/manifest/component/1_0_0",
+        "name": "eslap://sampleservicecalculator/components/cfe/1_0_0",
+        "runtime": "eslap://eslap.cloud/runtime/native/1_0_0",
+        "code": "c680fddc4efe7b618a534255098ebb022c72baa9",
+        "channels": {
+            "provides": [
+                {
+                    "name": "sepdest",
+                    "type": "eslap://eslap.cloud/channel/reply/1_0_0",
+                    "protocol": "TBD"
+                }
+            ],
+            "requires": [
+                {
+                    "name": "req",
+                    "type": "eslap://eslap.cloud/channel/request/1_0_0",
+                    "protocol": "TBD"
+                }
+            ]
+        },
+        "configuration": {
+            "resources": [],
+            "parameters": []
+        },
+        "profile": {
+            "threadability": "*"
+        },
+        "codelocator": "eslap://sampleservicecalculator/components/cfe/1_0_0/image.tgz"
+    }
+}

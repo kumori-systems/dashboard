@@ -332,17 +332,39 @@ export default {
     }
     return res;
   },
-  getWebDomainList: function (state) {
+
+  getWebDomainList: function (state): Array<string> {
+    console.log('ENTRAMOS EN GETWEBDOMAINLIST---NORMAL---');
+    let splited; let res: Array<string> = [];
+    for (let element in state.registeredElements) {
+      splited = element.split('/');
+      if (splited[3] === 'resources' && splited[4] === 'vhost') {
+        if (state.registeredElements[element] === null) {
+          this.$store.dispatch('getManifest', { 'uri': element });
+        } else {
+          res.push((<Resource>state.registeredElements[element]).parameters['vhost']);
+        }
+      }
+    }
+    return res;
+  },
+
+  getFreeWebDomainList: function (state, getters) {
+    console.log('ENTRAMOS EN GETFREEWEBDOMAINLIST');
     // Buscamos los inbound
-    let res = [];
-    let aux: string;
+    let allWebDomains: Array<string> = getters.getWebDomainList;
+    console.log('allwebDomains contiene: ' + JSON.stringify(allWebDomains));
+    let usedWebdomain: string;
+    let index: number;
     for (let deploymentId in state.deploymentList) {
-      aux = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (!res.find(dom => { return dom === aux; }))
-        res.push(aux);
+      usedWebdomain = (<Deployment>state.deploymentList[deploymentId]).website;
+      index = allWebDomains.indexOf(usedWebdomain);
+      if (index > -1) {
+        allWebDomains.splice(index, 1);
+      }
     }
 
-    return res;
+    return allWebDomains;
   },
   getDataVolumesList: function (state, getters) {
     // Los volumenes los tengo almacenados por instáncia!!
