@@ -370,7 +370,7 @@ export function getManifest(uri: string) {
         return [elementIndex, element];
     });
 }
-export function createNewDeployment(params: {
+export function createNewHTTPENtrypoint(params: {
     'usePlatformGeneratedDomain': boolean,
     'domain': string,
     'accept-tls': boolean,
@@ -379,6 +379,6 @@ export function createNewDeployment(params: {
     'resilence': number
 }) {
     return auxFunction().then(function ({ response, body }) {
-        console.log('Enviada la petición para crear un nuevo deployment: ' + JSON.stringify(params));
+        console.log('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
     });
 }

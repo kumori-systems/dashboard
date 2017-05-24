@@ -373,5 +373,18 @@ export default {
   },
   getCertificateList: function (state) {
     return ['cert1', 'cert2', 'cert3'];
+  },
+  getServiceRoles: function (state) {
+    return function (serviceId: string) {
+      if (serviceId == null) return [];
+      let res: Array<string> = [];
+      for (let rol in (<Service>state.serviceList[serviceId]).roles) {
+        res.push(rol);
+      }
+      return res;
+    };
+  },
+  getTemporaryState: function(state){
+    return state.temporaryState;
   }
 };

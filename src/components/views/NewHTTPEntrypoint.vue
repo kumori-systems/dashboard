@@ -72,7 +72,7 @@ export default class NewHTTPEntrypoint extends Vue {
     }
     createNewDeployment() {
         this.usePlatformGeneratedDomain
-        this.$store.dispatch('createNewDeployment', {
+        this.$store.dispatch('createNewHTTPENtrypoint', {
             'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
             'domain': this.selectedDomain,
             'accept-tls': this.acceptTLSSSL,

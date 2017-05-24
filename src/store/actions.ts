@@ -26,12 +26,6 @@ export default {
                 });
             }
             commit('addDeploymentMenuItem', { 'deploymentList': res });
-
-
-
-
-
-
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error manejando los deployments: ' + error);
         });
@@ -67,10 +61,10 @@ export default {
     undeployDeployment({ commit }, { deploymentId }) {
         connection.undeployDeployment(deploymentId);
     },
-    changeTemporaryState({ commit }, { deploymentId, rolId, numInstances }) {
-        commit('changeTemporaryState', { deploymentId, rolId, numInstances });
+    setTemporaryState({ commit }, temporaryState) {
+        commit('setTemporaryState', temporaryState);
     },
-    createNewDeployment({ },  params ) {
-        connection.createNewDeployment(params);
+    createNewHTTPENtrypoint({ },  params ) {
+        connection.createNewHTTPENtrypoint(params);
     }
 };
