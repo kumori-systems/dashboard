@@ -1,5 +1,8 @@
 export enum State { ACTIVE, NO_ACTIVE, ON_PROGRESS };
 
+export class Runtime {
+}
+
 export class Instance {
     state: State;
     constructor(state: State) {
@@ -34,13 +37,17 @@ export class Deployment {
     resourcesConfig: { [resource: string]: string }; // encaja cómo llama el servicio a las resources con la definición real de las resources
     parameters: Array<string>;
     roles: { [rolName: string]: DeploymentRol };
+    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     website: string;
-    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: string }, parameters: Array<string>, roles: { [rolName: string]: DeploymentRol }, website: string) {
+    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: string }, parameters: Array<string>, roles: { [rolName: string]: DeploymentRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, website: string) {
         this.name = name;
         this.serviceId = serviceId;
         this.resourcesConfig = resourcesConfig;
         this.parameters = parameters;
         this.roles = roles;
+        this.proChannels = proChannels;
+        this.reqChannels = reqChannels;
         this.website = website;
     }
 }
@@ -60,7 +67,6 @@ export class ServiceRol {
     component: string;
     resources: { [resourceId: string]: string };
     parameters: Array<string>;
-
     constructor(component: string, resources: { [resourceId: string]: string }, parameters: Array<string>) {
         this.component = component;
         this.resources = resources;
@@ -76,7 +82,6 @@ export class Channel {
         channelName: string;
         rolName?: string;
     }>;
-
     constructor(type: string, protocol: string, connectedTo: Array<{ channelName: string; rolName?: string; }>) {
         this.type = type;
         this.protocol = protocol;
@@ -102,15 +107,11 @@ export class Service {
     resources: { [resourceId: string]: Resource };
     parameters: Array<string>;
     roles: { [rolId: string]: ServiceRol };
-    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
-    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     components: { [componentId: string]: Component };
-    constructor(resources: { [resourceId: string]: Resource }, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, components: { [componentId: string]: Component }) {
+    constructor(resources: { [resourceId: string]: Resource }, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, components: { [componentId: string]: Component }) {
         this.resources = resources;
         this.parameters = parameters;
         this.roles = roles;
-        this.proChannels = proChannels;
-        this.reqChannels = reqChannels;
         this.components = components;
     }
 }

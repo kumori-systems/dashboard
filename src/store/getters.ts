@@ -87,10 +87,9 @@ export default {
   },
   getDeploymentLinks: function (state): Function {
     return function (deploymentId: string): { [channelId: string]: Channel } {
-      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let res: { [channelId: string]: Channel } = {
-        ...(<Service>state.serviceList[serviceId]).proChannels,
-        ...(<Service>state.serviceList[serviceId]).reqChannels
+        ...(<Deployment>state.deploymentList[deploymentId]).proChannels,
+        ...(<Deployment>state.deploymentList[deploymentId]).reqChannels
       };
       return res;
     };
@@ -334,23 +333,17 @@ export default {
   },
 
   getWebDomainList: function (state): Array<string> {
-    console.log('ENTRAMOS EN GETWEBDOMAINLIST---NORMAL---');
-    let splited; let res: Array<string> = [];
-    for (let element in state.registeredElements) {
-      splited = element.split('/');
-      if (splited[3] === 'resources' && splited[4] === 'vhost') {
-        if (state.registeredElements[element] === null) {
-          this.$store.dispatch('getManifest', { 'uri': element });
-        } else {
-          res.push((<Resource>state.registeredElements[element]).parameters['vhost']);
-        }
-      }
-    }
-    return res;
+    return [
+      'monitor-ticket740.slap53.iti.es',
+      'admission-ticket740.slap53.iti.es',
+      'acs-ticket740.slap53.iti.es',
+      'another-webdomain.slap53.iti.es',
+      'another2-webdomain.slap53.iti.es',
+      'another3-webdomain.slap53.iti.es'
+    ];
   },
 
   getFreeWebDomainList: function (state, getters) {
-    console.log('ENTRAMOS EN GETFREEWEBDOMAINLIST');
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
     console.log('allwebDomains contiene: ' + JSON.stringify(allWebDomains));
@@ -379,6 +372,6 @@ export default {
     return res;
   },
   getCertificateList: function (state) {
-
+    return ['cert1', 'cert2', 'cert3'];
   }
 };

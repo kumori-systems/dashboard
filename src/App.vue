@@ -8,7 +8,6 @@
 		<footer-bar></footer-bar>
 	</div>
 </template>
-
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
@@ -48,12 +47,9 @@ export default class App extends Vue {
 
 		// Enviamos una petición para obtener los deployments
 		this.$store.dispatch('getStampState', { vueInstanceReference: this });
-		// Enviamos una petición para obtener los elementos almacenados (para que se incluyan aquellos que NO están en uso)
-		this.$store.dispatch('getRegisteredElements', { vueInstanceReference: this });
 	}
 }
 </script>
-
 <style lang="scss">
 @import '~animate.css';
 .animated {

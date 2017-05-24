@@ -7,7 +7,7 @@
             </select>
             <input type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain" />
             <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
-            <button>Deploy</button>
+            <button v-on:click="createNewDeployment">Deploy</button>
         </div>
         <div class="inner-content">
             <div>
@@ -25,9 +25,13 @@
         </div>
         <div>
             Instances {{instances}}
+            <button class="fa fa-angle-up fa-lg" v-on:click="instances += 1"></button>
+            <button class="fa fa-angle-down fa-lg" v-on:click="instances>0? instances--:0"></button>
         </div>
         <div>
             Resilence {{resilence}}
+            <button class="fa fa-angle-up fa-lg" v-on:click="resilence += 1"></button>
+            <button class="fa fa-angle-down fa-lg" v-on:click="resilence>0? resilence--:0"></button>
         </div>
     
     </div>
@@ -65,6 +69,17 @@ export default class NewHTTPEntrypoint extends Vue {
     }
     get certificateList() {
         return this.$store.getters.getCertificateList;
+    }
+    createNewDeployment() {
+        this.usePlatformGeneratedDomain
+        this.$store.dispatch('createNewDeployment', {
+            'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
+            'domain': this.selectedDomain,
+            'accept-tls': this.acceptTLSSSL,
+            'require-client-certificates': this.requireClientCertificates,
+            'instances': this.instances,
+            'resilence': this.resilence
+        });
     }
 }
 </script>

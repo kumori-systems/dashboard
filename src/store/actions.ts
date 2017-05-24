@@ -3,7 +3,7 @@ import { DeploymentItem } from './../components';
 import { Deployment } from './classes';
 
 export default {
-    getStampState({ commit }) {
+    getStampState({ commit, dispatch }) {
         connection.getStampState().then(function ({ deploymentList, serviceList }) {
             // Guardamos los deployments en el estado
             commit('setStampState', { deploymentList, serviceList });
@@ -26,6 +26,12 @@ export default {
                 });
             }
             commit('addDeploymentMenuItem', { 'deploymentList': res });
+
+
+
+
+
+
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error manejando los deployments: ' + error);
         });
@@ -63,5 +69,8 @@ export default {
     },
     changeTemporaryState({ commit }, { deploymentId, rolId, numInstances }) {
         commit('changeTemporaryState', { deploymentId, rolId, numInstances });
+    },
+    createNewDeployment({ },  params ) {
+        connection.createNewDeployment(params);
     }
 };
