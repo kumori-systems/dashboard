@@ -10,6 +10,22 @@ export class Instance {
     }
 }
 
+/*
+    Describe la unión entre deployments
+*/
+export class Link {
+    deploymentOne: string;
+    channelOne: string;
+    deploymentTwo: string;
+    channelTwo: string;
+    constructor(deploymentOne: string, channelOne: string, deploymentTwo: string, channelTwo: string) {
+        this.deploymentOne = deploymentOne;
+        this.channelOne = channelOne;
+        this.deploymentTwo = deploymentTwo;
+        this.channelTwo = channelTwo;
+    }
+}
+
 export class DeploymentRol {
     instances: number;
     cpu: number;
@@ -34,20 +50,16 @@ export class DeploymentRol {
 export class Deployment {
     name: string; // nombre amistoso para el usuario
     serviceId: string; // servicio que define el despliegue
-    resourcesConfig: { [resource: string]: string }; // encaja cómo llama el servicio a las resources con la definición real de las resources
+    resourcesConfig: { [resource: string]: any }; // encaja cómo llama el servicio a las resources con la definición real de las resources
     parameters: Array<string>;
     roles: { [rolName: string]: DeploymentRol };
-    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
-    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     website: string;
-    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: string }, parameters: Array<string>, roles: { [rolName: string]: DeploymentRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, website: string) {
+    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: Array<string>, roles: { [rolName: string]: DeploymentRol }, website: string) {
         this.name = name;
         this.serviceId = serviceId;
         this.resourcesConfig = resourcesConfig;
         this.parameters = parameters;
         this.roles = roles;
-        this.proChannels = proChannels;
-        this.reqChannels = reqChannels;
         this.website = website;
     }
 }
@@ -104,14 +116,20 @@ export class Component {
 }
 
 export class Service {
-    resources: { [resourceId: string]: Resource };
+    name: string;
+    resources: Array<string>;
     parameters: Array<string>;
     roles: { [rolId: string]: ServiceRol };
+    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     components: { [componentId: string]: Component };
-    constructor(resources: { [resourceId: string]: Resource }, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, components: { [componentId: string]: Component }) {
+    constructor(name: string, resources: Array<string>, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, components: { [componentId: string]: Component }) {
+        this.name = name;
         this.resources = resources;
         this.parameters = parameters;
         this.roles = roles;
+        this.proChannels = proChannels;
+        this.reqChannels = reqChannels;
         this.components = components;
     }
 }

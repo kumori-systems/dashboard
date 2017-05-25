@@ -1,8 +1,12 @@
 export default {
-  setStampState(state, { deploymentList, serviceList }) {
+  setStampState(state, stampState) {
     // actualizamos el estado del stamp
-    state.deploymentList = deploymentList;
-    state.serviceList = serviceList;
+    state.deploymentList = stampState.deploymentList;
+    state.serviceList = stampState.serviceList;
+    state.linkList = stampState.linkList;
+    state.componentList = stampState.componentList;
+    state.resourcesList = stampState.resourcesList;
+    state.runtimesList = stampState.runtimesList;
   },
   setRegisteredElements(state, { registeredElements }) {
     // actualizamos la lista de elementos registrados

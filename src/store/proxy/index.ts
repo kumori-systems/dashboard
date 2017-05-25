@@ -1,4 +1,4 @@
-import { State, Deployment, DeploymentRol, Runtime, Channel, Instance, Resource, Component, Service, ServiceRol } from './../classes';
+import { State, Deployment, Link, DeploymentRol, Runtime, Channel, Instance, Resource, Component, Service, ServiceRol } from './../classes';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -21,11 +21,11 @@ export function getStampState() {
     return auxFunction().then(function ({ response, body }) {
         let parsedBody = stampStateExample;
         let deploymentList: { [deploymentId: string]: Deployment } = {};
+        let linkList: Array<Link> = [];
         let serviceList: { [serviceId: string]: Service } = {};
         let componentList: { [componentid: string]: Component } = {};
         let resourcesList: { [resourceId: string]: Resource } = {};
         let runtimeList: { [runtimeId: string]: Runtime } = {};
-
 
         // Por la forma en la que obtenemos el estado, lo recorreremos por deployments
         for (let deploymentId in parsedBody.tcState.deployedServices) {
@@ -36,15 +36,17 @@ export function getStampState() {
 
             let version = parsedBody.tcState.deployedServices[deploymentId].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'];
             if (!serviceList[serviceId]) { // Si no está definido lo añadimos
-                let serviceResources: { [resourceId: string]: Resource } = {}; // Las resources las encontramos dentro de la versión 1
+                let serviceName: string = 'ServiceName[' + serviceId + ']';
+                let serviceResources: Array<string> = []; // Las resources las encontramos dentro de la versión 1
                 for (let resourceIndex in version.resources) {
-                    serviceResources[resourceIndex] = new Resource(
+                    serviceResources.push(resourceIndex);
+                    resourcesList[resourceIndex] = new Resource(
                         version.resources[resourceIndex].resource.name,
                         version.resources[resourceIndex].resource.parameters
                     );
                     console.log('NEW resource(' + resourceIndex
-                        + '):\nname: ' + serviceResources[resourceIndex].realName
-                        + '\nparameters: ' + serviceResources[resourceIndex].parameters);
+                        + '):\nname: ' + resourcesList[resourceIndex].realName
+                        + '\nparameters: ' + JSON.stringify(resourcesList[resourceIndex].parameters));
                 }
                 let serviceParameters: Array<string> = version.configuration.parameters;
                 let serviceRoles: { [rolId: string]: ServiceRol } = {};
@@ -59,6 +61,76 @@ export function getStampState() {
                         + '):\ncomponent: ' + serviceRoles[version.service.roles[rolIndex].name].component
                         + '\nresources: ' + JSON.stringify(serviceRoles[version.service.roles[rolIndex].name].resources)
                         + '\nparameters: ' + JSON.stringify(serviceRoles[version.service.roles[rolIndex].name].parameters));
+                }
+
+                let serviceProChannels: { [channelId: string]: Channel } = {};
+                for (let proChannelIndex in version.service.channels.provides) {
+                    let channelId = version.service.channels.provides[proChannelIndex].name;
+                    // Buscamos las conexiones del canal
+                    let connections: Array<{ channelName: string, rolName?: string }> = [];
+
+                    let connectorList = version.service.connectors;
+
+                    for (let connectorIndex in connectorList) {
+                        let dependedConector = connectorList[connectorIndex].depended.find(dependedConnector => { return dependedConnector.endpoint === channelId; });
+
+                        if (dependedConector !== undefined) {
+
+                            for (let providedConnectorIndex in connectorList[connectorIndex].provided)
+                                connections.push({
+                                    channelName: connectorList[connectorIndex].provided[providedConnectorIndex].endpoint,
+                                    rolName: connectorList[connectorIndex].provided[providedConnectorIndex].role,
+                                });
+                        }
+
+                    }
+
+                    // Añadimos el canal
+                    serviceProChannels[channelId] = new Channel(
+                        version.service.channels.provides[proChannelIndex].type,
+                        version.service.channels.provides[proChannelIndex].protocol,
+                        connections
+                    );
+
+                    console.log('NEW service-proChannel(' + channelId
+                        + '):\ntype: ' + serviceProChannels[channelId].type
+                        + '):\nprotocol: ' + serviceProChannels[channelId].protocol
+                        + '):\nconnectedTo: ' + JSON.stringify(serviceProChannels[channelId].connectedTo)
+                    );
+                }
+
+                let serviceReqChannels: { [channelId: string]: Channel } = {};
+                for (let reqChannelIndex in version.service.channels.requires) {
+                    let channelId = version.service.channels.requires[reqChannelIndex].name;
+                    // Buscamos las conexiones del canal
+                    let connections: Array<{ channelName: string, rolName?: string }> = [];
+                    let connectorList = version.service.connectors;
+                    for (let connectorIndex in connectorList) {
+                        let providedConector = connectorList[connectorIndex].provided.find(providedConnector => { return providedConnector.endpoint === channelId; });
+
+                        if (providedConector !== undefined) {
+                            for (let dependedConnectorIndex in connectorList[connectorIndex].depended)
+                                connections.push({
+                                    channelName: connectorList[connectorIndex].depended[dependedConnectorIndex].endpoint,
+                                    rolName: connectorList[connectorIndex].depended[dependedConnectorIndex].role,
+                                });
+                        }
+
+                    }
+
+                    // Añadimos el canal
+                    serviceReqChannels[channelId] = new Channel(
+                        version.service.channels.requires[reqChannelIndex].type,
+                        version.service.channels.requires[reqChannelIndex].protocol,
+                        connections
+                    );
+
+                    console.log('NEW service-reqChannel(' + channelId
+                        + '):\ntype: ' + serviceReqChannels[channelId].type
+                        + '):\nprotocol: ' + serviceReqChannels[channelId].protocol
+                        + '):\nconnectedTo: ' + JSON.stringify(serviceReqChannels[channelId].connectedTo)
+                    );
+
                 }
 
                 let serviceComponents: { [componentId: string]: Component } = {};
@@ -138,11 +210,13 @@ export function getStampState() {
                         + '\nreqChannels: ' + serviceComponents[componentIndex].reqChannels);
                 }
 
-                serviceList[serviceId] = new Service(serviceResources, serviceParameters, serviceRoles, serviceComponents);
+                serviceList[serviceId] = new Service(serviceName, serviceResources, serviceParameters, serviceRoles, serviceProChannels, serviceReqChannels, serviceComponents);
                 console.log('NEW service created (' + serviceId
                     + '):\nresources: ' + JSON.stringify(serviceList[serviceId].resources)
                     + '\nparameters: ' + JSON.stringify(serviceList[serviceId].parameters)
                     + '\nroles: ' + serviceList[serviceId].roles
+                    + '\nproChannels: ' + serviceList[serviceId].proChannels
+                    + '\nreqChannels: ' + serviceList[serviceId].reqChannels
                     + '\ncomponents: ' + JSON.stringify(serviceList[serviceId].components)
                 );
             }// En este punto el servicio ya está en la lista de servicios
@@ -151,9 +225,11 @@ export function getStampState() {
             let deploymentName: string = 'DeploymentNAME';
             let deploymentServiceId: string = serviceId;
 
-            let deploymentResourcesConfig: { [resource: string]: string } = {};
+            let deploymentResourcesConfig: { [resource: string]: any } = {};
+
+            console.log('DE DONDE VAMOS A OBTENER LOS DATOS ES: ' + JSON.stringify(parsedBody.tcState.deployedServices[deploymentId].manifest.resources));
             for (let resourceId in parsedBody.tcState.deployedServices[deploymentId].manifest.resources) {
-                deploymentResourcesConfig[resourceId] = parsedBody.tcState.deployedServices[deploymentId].manifest.resources[resourceId].resource.type;
+                deploymentResourcesConfig[resourceId] = parsedBody.tcState.deployedServices[deploymentId].manifest.resources[resourceId].resource;
             }
 
             let deploymentParameters: Array<string> = [];
@@ -179,92 +255,27 @@ export function getStampState() {
                 );
             }
 
-            let deploymentProChannels: { [channelId: string]: Channel } = {};
-            for (let proChannelIndex in version.service.channels.provides) {
-                let channelId = version.service.channels.provides[proChannelIndex].name;
-                // Buscamos las conexiones del canal
-                let connections: Array<{ channelName: string, rolName?: string }> = [];
-
-                let connectorList = version.service.connectors;
-
-                for (let connectorIndex in connectorList) {
-                    let dependedConector = connectorList[connectorIndex].depended.find(dependedConnector => { return dependedConnector.endpoint === channelId; });
-
-                    if (dependedConector !== undefined) {
-
-                        for (let providedConnectorIndex in connectorList[connectorIndex].provided)
-                            connections.push({
-                                channelName: connectorList[connectorIndex].provided[providedConnectorIndex].endpoint,
-                                rolName: connectorList[connectorIndex].provided[providedConnectorIndex].role,
-                            });
-                    }
-
-                }
-
-                // Añadimos el canal
-                deploymentProChannels[channelId] = new Channel(
-                    version.service.channels.provides[proChannelIndex].type,
-                    version.service.channels.provides[proChannelIndex].protocol,
-                    connections
-                );
-
-                console.log('NEW deployment-proChannel(' + channelId
-                    + '):\ntype: ' + deploymentProChannels[channelId].type
-                    + '):\nprotocol: ' + deploymentProChannels[channelId].protocol
-                    + '):\nconnectedTo: ' + JSON.stringify(deploymentProChannels[channelId].connectedTo)
-                );
-            }
-
-            let deploymentReqChannels: { [channelId: string]: Channel } = {};
-            for (let reqChannelIndex in version.service.channels.requires) {
-                let channelId = version.service.channels.requires[reqChannelIndex].name;
-                // Buscamos las conexiones del canal
-                let connections: Array<{ channelName: string, rolName?: string }> = [];
-                let connectorList = version.service.connectors;
-                for (let connectorIndex in connectorList) {
-                    let providedConector = connectorList[connectorIndex].provided.find(providedConnector => { return providedConnector.endpoint === channelId; });
-
-                    if (providedConector !== undefined) {
-                        for (let dependedConnectorIndex in connectorList[connectorIndex].depended)
-                            connections.push({
-                                channelName: connectorList[connectorIndex].depended[dependedConnectorIndex].endpoint,
-                                rolName: connectorList[connectorIndex].depended[dependedConnectorIndex].role,
-                            });
-                    }
-
-                }
-
-                // Añadimos el canal
-                deploymentReqChannels[channelId] = new Channel(
-                    version.service.channels.requires[reqChannelIndex].type,
-                    version.service.channels.requires[reqChannelIndex].protocol,
-                    connections
-                );
-
-                console.log('NEW deployment-reqChannel(' + channelId
-                    + '):\ntype: ' + deploymentReqChannels[channelId].type
-                    + '):\nprotocol: ' + deploymentReqChannels[channelId].protocol
-                    + '):\nconnectedTo: ' + JSON.stringify(deploymentReqChannels[channelId].connectedTo)
-                );
-
-            }
-
             let deploymentWebsite: string = null;
             if (parsedBody.tcState.deployedServices[deploymentId].manifest.servicename === 'eslap://eslap.cloud/services/http/inbound/1_0_0') { // Si es un http inbound él mismo tiene el website
                 deploymentWebsite = parsedBody.tcState.deployedServices[deploymentId].manifest['components-resources'].__service.vhost.resource.parameters.vhost;
             }
 
-            deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentParameters, deploymentRoles, deploymentProChannels, deploymentReqChannels, deploymentWebsite);
+            deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentParameters, deploymentRoles, deploymentWebsite);
 
             console.log('NEW deployment created (' + deploymentId
                 + '):\nname: ' + deploymentList[deploymentId].name
                 + '\nservice: ' + deploymentList[deploymentId].serviceId
-                + '\nresourcesConfig: ' + deploymentList[deploymentId].resourcesConfig
+                + '\nresourcesConfig: ' + JSON.stringify(deploymentList[deploymentId].resourcesConfig)
                 + '\nparameters: ' + deploymentList[deploymentId].parameters
                 + '\nroles: ' + deploymentList[deploymentId].roles
                 + '\nwebsite: ' + deploymentList[deploymentId].website
             );
         }
+
+
+        // Resolvemos linkList, que es lo más fácil de este mundo
+        linkList = parsedBody.tcState.linkedServices;
+        console.log('Links in the state: ' + JSON.stringify(linkList));
 
         // Gestión de errores de conexión
         // TODO: hay que comprobar los valores de cuando se lanza un error y de cuándo no se lanzan
@@ -273,7 +284,14 @@ export function getStampState() {
             Promise.reject(new Error('Error de conexión al intentar obtener estado: ' + response));
         }
 
-        return { 'deploymentList': deploymentList, 'serviceList': serviceList };
+        return {
+            'deploymentList': deploymentList,
+            'serviceList': serviceList,
+            'componentList': componentList,
+            'resourcesList': resourcesList,
+            'linkList': linkList,
+            'runtimeList': runtimeList
+        };
     });
 }
 

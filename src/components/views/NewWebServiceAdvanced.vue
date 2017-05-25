@@ -1,49 +1,80 @@
 <template>
     <div>
         <p>
-            Service:
+            SERVICE:
             <select v-model="selectedService">
                 <option disabled value="">Please select one</option>
                 <option v-for="service in serviceList">{{service}}</option>
             </select>
-            <button>Deploy</button>
+            <button v-on:click="createNewDeployment">Deploy</button>
         </p>
-        <p>
-            Name:
+        <p v-if="selectedService !=null">
+            NAME:
             <input v-model="deploymentName" placeholder="Deployment name">
         </p>
-        <p v-if="serviceRolList.length>0">
-            Roles
+        <p v-if="serviceRolList.length > 0">
+            ROLES
             <div v-for="rol, index in serviceRolList" v-bind:key="rol">
-                {{rol}} MEM
-                <input v-model.number="rolMem[index]" type="number"> CPU
-                <input v-model.number="rolCPU[index]" type="number"> NET
-                <input v-model.number="rolNet[index]" type="number">
+                {{rol}}
+                <div class="inner-content">
+                    MEM
+                    <input v-model.number="rolMem[index]" type="number"> CPU
+                    <input v-model.number="rolCPU[index]" type="number"> NET
+                    <input v-model.number="rolNet[index]" type="number">
     
-                <p>
-                    Instances
-                    <input v-model.number="rolInstances[index]" type="number"> Resilence
-                    <input v-model.number="rolResilence[index]" type="number">
-                </p>
+                    <p>
+                        Instances
+                        <input v-model.number="rolInstances[index]" type="number"> Resilence
+                        <input v-model.number="rolResilence[index]" type="number">
+                    </p>
+                </div>
             </div>
         </p>
-        <p v-if="serviceChannelList.length>0">
-            Channels
-            PROVIDES
-            <div v-for="channel, index in serviceProChannelList" v-bind:key="channel">
+        <p v-if="serviceProChannelList.length>0">
+            CHANNELS PROVIDES
+            <div class="inner-content" v-for="channel, index in serviceProChannelList" v-bind:key="channel">
+                {{channel}} ->
+                <select v-model="selectedRequiredChannel[index]">
+                    <option disabled value="">Please select one</option>
+                    <option v-for="requiredChannel in totalRequiredDeploymentChannels">{{requiredChannel}}</option>
+                </select>
+            </div>
+        </p>
+        <p v-if="serviceReqChannelList.length>0">
+            CHANNELS REQUIRES
+            <div class="inner-content" v-for="channel, index in serviceReqChannelList" v-bind:key="channel">
                 {{channel}}
-            </div>
-            REQUIRES
-            <div v-for="channel, index in serviceReqChannelList" v-bind:key="channel">
-                {{channel}}
-            </div>
-        </p>
-        <p v-if="serviceConfigurationList.length>0">
-            Configuration
-            <div v-for="configuration, index in serviceConfigurationList" v-bind:key="configuration">
-                {{configuration}}
+                <- <select v-model="selectedProvidedChannel[index]">
+                    <option disabled value="">Please select one</option>
+                    <option v-for="providedChannel in totalProvidedDeploymentChannels">{{providedChannel}}</option>
+                    </select>
             </div>
         </p>
+        <div v-if="selectedService!=null">
+            <p>CONFIGURATION</p>
+            <div v-if="serviceResourcesList.length>0">
+    
+                <div v-for="resource, index in serviceResourcesList" v-bind:key="resource">
+                    {{resource}}
+    
+                    <select v-model="selectedResourceConfig[index]">
+                        <option disabled value="">Please select one</option>
+                        <option v-for="resourceConfig in totalResourceConfig(resource)">{{resourceConfig}}</option>
+                    </select>
+    
+                    <p class="inner-content">
+                        <textarea v-model="resourceConfig[index]" placeholder="text/json"></textarea>
+                    </p>
+                    </select>
+                </div>
+    
+            </div>
+    
+            {{selectedService}}config:
+            <p class="inner-content">
+                <textarea v-model="serviceConfig" placeholder="text/json"></textarea>
+            </p>
+        </div>
     </div>
 </template>
 
@@ -64,6 +95,11 @@ export default class NewWebServiceAdvanced extends Vue {
     rolNet: Array<number> = [];
     rolInstances: Array<number> = [];
     rolResilence: Array<number> = [];
+    resourceConfig: Array<string> = [];
+    serviceConfig: string = null;
+    selectedRequiredChannel: Array<string> = [];
+    selectedProvidedChannel: Array<string> = [];
+    selectedResourceConfig: Array<string> = [];
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -71,7 +107,7 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 
     get serviceList() {
-        return this.$store.getters.getWebServiceList;
+        return this.$store.getters.getWebServiceNameList;
     }
 
     get serviceRolList(): Array<string> {
@@ -85,25 +121,36 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 
 
-    get serviceChannelList(): Array<string> {
-
-        // TODO: ME HE QUEDADO POR AQUÍ!!!
-        /*
-        CREO QUE ES MEJOR SEPARAR LA PARTE VISUAL EN DOS TIPOS; PROVIDES Y REQUIRED
-
-
-        Tendré que unir los canales que proveen de este deployment con canales que requieren de otro deployment.
-        De la misma forma, tendré que unir canales que requieren de este deployment con canales que proveen de otro deployment.
-        
-        */
-
-
-
-        return this.$store.getters.getServiceRoles(this.selectedService);
+    get serviceProChannelList(): Array<string> {
+        return this.$store.getters.getServiceProChannels(this.selectedService);
+    }
+    get serviceReqChannelList(): Array<string> {
+        return this.$store.getters.getServiceReqChannels(this.selectedService);
     }
 
-    get serviceConfigurationList(): Array<string> {
-        return ['b'];
+    get serviceResourcesList(): Array<string> {
+        let resourceList = this.$store.getters.getServiceResources(this.selectedService);
+        this.resourceConfig = new Array<string>()
+        return resourceList;
+    }
+
+    get totalProvidedDeploymentChannels() {
+        return this.$store.getters.getTotalProvidedDeploymentChannels;
+    }
+
+    get totalRequiredDeploymentChannels() {
+        return this.$store.getters.getTotalRequiredDeploymentChannels;
+    }
+
+    get totalResourceConfig() {
+        return (resourceId) => { return this.$store.getters.getFreeResource(resourceId); }
+    }
+    
+    createNewDeployment() {
+        // Tenemos que reorganizar los roles
+        this.$store.dispatch('createNewDeployment', {
+
+        });
     }
 }
 </script>

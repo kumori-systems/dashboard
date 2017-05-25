@@ -4,13 +4,13 @@ import { Deployment } from './classes';
 
 export default {
     getStampState({ commit, dispatch }) {
-        connection.getStampState().then(function ({ deploymentList, serviceList }) {
+        connection.getStampState().then(function (stampState) {
             // Guardamos los deployments en el estado
-            commit('setStampState', { deploymentList, serviceList });
+            commit('setStampState', stampState);
             // añadimos cada deployment como un deploymentMenuItem
             let res = [];
             let path: string;
-            for (let key in deploymentList) {
+            for (let key in stampState.deploymentList) {
                 path = key;
                 let index = path.indexOf('/');
                 while (index !== -1) {
@@ -18,7 +18,7 @@ export default {
                     index = path.indexOf('/');
                 }
                 res.push({
-                    'name': deploymentList[key].name,
+                    'name': stampState.deploymentList[key].name,
                     'path': 'deployments\\' + path,
                     'meta': {
                         'id': key

@@ -15,6 +15,7 @@ export default new Vuex.Store({
     'state': {
         'menuItemList': menuItemList,
         'deploymentList': {},
+        'linkList': [],
         'serviceList': {},
         'componentList': {},
         'resourcesList': {},

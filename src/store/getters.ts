@@ -87,23 +87,29 @@ export default {
   },
   getDeploymentLinks: function (state): Function {
     return function (deploymentId: string): { [channelId: string]: Channel } {
+      /*
       let res: { [channelId: string]: Channel } = {
         ...(<Deployment>state.deploymentList[deploymentId]).proChannels,
         ...(<Deployment>state.deploymentList[deploymentId]).reqChannels
       };
       return res;
+      */
+
+      return {};
     };
   },
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      let resources = (<Service>state.serviceList[serviceId]).resources;
-      for (let resourceIndex in resources) {
-        if (resources[resourceIndex].realName && resources[resourceIndex].realName.split('/')[4] === 'volume')
+      let serviceResources = (<Service>state.serviceList[serviceId]).resources;
+      for (let resourceIndex in serviceResources) {
+        console.log('resourceIndex vale: ' + serviceResources[resourceIndex]);
+        console.log('resourcesList vale: ' + JSON.stringify(state.resourcesList));
+        if ((<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName && (<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName.split('/')[4] === 'volume')
           res.push(resourceIndex);
       }
-
+      console.log('LOS VOLUMENES QUE TENGO SON: ' + JSON.stringify(res));
       return res;
     };
   },
@@ -315,6 +321,12 @@ export default {
       res.push(serviceId);
     return res;
   },
+  getWebServiceNameList: function (state): Array<string> {
+    let res = [];
+    for (let serviceId in state.serviceList)
+      res.push((<Service>state.serviceList[serviceId]).name);
+    return res;
+  },
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
@@ -375,16 +387,125 @@ export default {
     return ['cert1', 'cert2', 'cert3'];
   },
   getServiceRoles: function (state) {
-    return function (serviceId: string) {
-      if (serviceId == null) return [];
+    return function (serviceName: string) {
+      if (serviceName == null) return [];
       let res: Array<string> = [];
-      for (let rol in (<Service>state.serviceList[serviceId]).roles) {
-        res.push(rol);
+
+      // Tenemos que buscar el servicio por su nombre
+      for (let serviceId in state.serviceList) {
+        if (state.serviceList[serviceId].name === serviceName) {
+          // Y obtener sus roles
+          for (let rol in (<Service>state.serviceList[serviceId]).roles) {
+            res.push(rol);
+          }
+        }
       }
       return res;
     };
   },
-  getTemporaryState: function(state){
+  getServiceResources: function (state) {
+    return (serviceName: string) => {
+      if (serviceName == null) return [];
+      let res: Array<string> = [];
+
+      // Tenemos que buscar el servicio por su nombre
+      for (let serviceId in state.serviceList) {
+        if (state.serviceList[serviceId].name === serviceName) {
+          // Y obtener sus resources
+          for (let resourceIndex in (<Service>state.serviceList[serviceId]).resources) {
+            res.push((<Service>state.serviceList[serviceId]).resources[resourceIndex]);
+          }
+        }
+      }
+      return res;
+    };
+  },
+  getServiceProChannels: function (state) {
+    return (serviceName: string) => {
+      if (serviceName == null) return [];
+      let res: Array<string> = [];
+
+      // Tenemos que buscar el servicio por su nombre
+      for (let serviceId in state.serviceList) {
+        if (state.serviceList[serviceId].name === serviceName) {
+          // Y obtener sus proChannels
+          for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
+            res.push(proChannel);
+          }
+        }
+      }
+      return res;
+    };
+  },
+  getServiceReqChannels: function (state) {
+    return (serviceName: string) => {
+      if (serviceName == null) return [];
+      let res: Array<string> = [];
+
+      // Tenemos que buscar el servicio por su nombre
+      for (let serviceId in state.serviceList) {
+        if (state.serviceList[serviceId].name === serviceName) {
+          // Y obtener sus reqChannels
+          for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
+            res.push(reqChannel);
+          }
+        }
+      }
+      return res;
+    };
+  },
+  getTotalProvidedDeploymentChannels: function (state) {
+    // Recorremos los deployments y añadimos todos los identificadores de los canales provided
+    let res = [];
+
+    for (let deploymentId in state.deploymentList) {
+      // Obtenemos el servicio del deployment
+      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      for (let providedChannelId in (<Service>state.serviceList[serviceId]).proChannels)
+        res.push(deploymentId + ' + ' + providedChannelId);
+    }
+    return res;
+  },
+  getTotalRequiredDeploymentChannels: function (state) {
+    // Recorremos los deployments y añadimos todos los identificadores de los canales provided
+    let res = [];
+
+    for (let deploymentId in state.deploymentList) {
+      // Obtenemos el servicio del deployment
+      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      for (let requiredChannelId in (<Service>state.serviceList[serviceId]).reqChannels)
+        res.push(deploymentId + ' + ' + requiredChannelId);
+    }
+    return res;
+  },
+  getFreeResource: function (state) {
+    return (configId) => {
+      let res: Array<string> = [];
+
+      // Miramos el tipo de configId
+      if ((<Resource>state.resourcesList[configId]).realName) {
+        let type = (<Resource>state.resourcesList[configId]).realName.split('/')[4];
+
+        for (let resourceId in (<Array<Resource>>state.resourcesList)) {
+          if ((<Resource>state.resourcesList[resourceId]).realName && (<Resource>state.resourcesList[resourceId]).realName.split('/')[4] === type) {
+            res.push(resourceId);
+          }
+        }
+      }
+      
+      // Debemos de eliminar las resources ya utilizadas
+      for (let deploymentId in (<Array<Deployment>>state.deploymentList)) {
+        for (let resourceId in (<Deployment>state.deploymentList[deploymentId]).resourcesConfig) {
+          let index = res.indexOf(resourceId);
+          if (index > -1)
+            res.splice(index, 1);
+        }
+      }
+
+      return res;
+    };
+  },
+  getTemporaryState: function (state) {
     return state.temporaryState;
   }
 };
