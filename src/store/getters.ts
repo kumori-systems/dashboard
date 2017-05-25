@@ -79,8 +79,8 @@ export default {
     return function (deploymentId: string): StateType {
       let ranNumber = Math.trunc(Math.random() * 3);
       switch (ranNumber) {
-        case 0: return StateType.ACTIVE;
-        case 1: return StateType.NO_ACTIVE;
+        case 0: return StateType.CONNECTED;
+        case 1: return StateType.DISCONNECTED;
         default: return StateType.ON_PROGRESS;
       }
     };
@@ -104,12 +104,9 @@ export default {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let serviceResources = (<Service>state.serviceList[serviceId]).resources;
       for (let resourceIndex in serviceResources) {
-        console.log('resourceIndex vale: ' + serviceResources[resourceIndex]);
-        console.log('resourcesList vale: ' + JSON.stringify(state.resourcesList));
         if ((<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName && (<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName.split('/')[4] === 'volume')
-          res.push(resourceIndex);
+          res.push(serviceResources[resourceIndex]);
       }
-      console.log('LOS VOLUMENES QUE TENGO SON: ' + JSON.stringify(res));
       return res;
     };
   },
@@ -170,12 +167,20 @@ export default {
 
   getDeploymentRolState: function (state): Function {
     return function (deploymentId: string, rolId: string): StateType {
-      let ranNumber = Math.trunc(Math.random() * 3);
-      switch (ranNumber) {
-        case 0: return StateType.ACTIVE;
-        case 1: return StateType.NO_ACTIVE;
-        default: return StateType.ON_PROGRESS;
+
+      // Entramos en los roles
+      // Por cada instancia del rol, si alguno tiene estado DISCONNECTED => estado DISCONNECTED
+      // Por cada instancia del rol, si alguno tiene estado ON_PROGRESS => estado ON_PROGRESS
+      // CONNECTED
+      let onProgress = false;
+      for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
+        if ((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state === StateType.DISCONNECTED)
+          return StateType.DISCONNECTED;
+        if ((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state === StateType.ON_PROGRESS)
+          onProgress = true;
       }
+      if (onProgress) return StateType.ON_PROGRESS;
+      return StateType.CONNECTED;
     };
   },
   getDeploymentRolRuntime: function (state): Function {
@@ -254,7 +259,11 @@ export default {
     };
   },
   /* INSTANCES */
-
+  getDeploymentRolInstanceState: function (state) {
+    return function (deploymentId: string, rolId: string, instanceId: string): number {
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state;
+    };
+  },
   getDeploymentRolInstanceMem: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, instanceId: string): number {
       return getters.getDeploymentRolMemNumber;
@@ -358,7 +367,6 @@ export default {
   getFreeWebDomainList: function (state, getters) {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
-    console.log('allwebDomains contiene: ' + JSON.stringify(allWebDomains));
     let usedWebdomain: string;
     let index: number;
     for (let deploymentId in state.deploymentList) {
@@ -492,7 +500,7 @@ export default {
           }
         }
       }
-      
+
       // Debemos de eliminar las resources ya utilizadas
       for (let deploymentId in (<Array<Deployment>>state.deploymentList)) {
         for (let resourceId in (<Deployment>state.deploymentList[deploymentId]).resourcesConfig) {

@@ -1,12 +1,21 @@
-export enum State { ACTIVE, NO_ACTIVE, ON_PROGRESS };
+export enum State { CONNECTED, DISCONNECTED, ON_PROGRESS };
 
 export class Runtime {
 }
 
 export class Instance {
     state: State;
-    constructor(state: State) {
-        this.state = state;
+    constructor(state: boolean) {
+        switch (state) {
+            case true:
+                this.state = State.CONNECTED;
+                break;
+            case false:
+                this.state = State.DISCONNECTED;
+                break;
+            default:
+                this.state = State.ON_PROGRESS;
+        }
     }
 }
 

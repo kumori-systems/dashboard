@@ -40,11 +40,11 @@ export default class Card extends Vue {
     };
 
     get state(): string {
-        switch (this.$store.getters.getDeploymentState(this.deploymentId, this.rolId, this.instanceId)) {
+        switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
             case 0:
-                return 'ACTIVE_COLOR';
+                return 'CONNECTED_COLOR';
             case 1:
-                return 'NO_ACTIVE_COLOR';
+                return 'DISCONNECTED_COLOR';
             case 2:
                 return 'ON_PROGRESS_COLOR';
             default:
@@ -87,15 +87,4 @@ $padding: 10px;
     padding-left: 10px;
 }
 
-.normal {
-    background: green;
-}
-
-.warning {
-    background: yellow;
-}
-
-.error {
-    background: red;
-}
 </style>

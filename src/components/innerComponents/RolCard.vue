@@ -80,9 +80,9 @@ export default class Card extends Vue {
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case 0:
-                return 'ACTIVE_COLOR';
+                return 'CONNECTED_COLOR';
             case 1:
-                return 'NO_ACTIVE_COLOR';
+                return 'DISCONNECTED_COLOR';
             case 2:
                 return 'ON_PROGRESS_COLOR';
             default:

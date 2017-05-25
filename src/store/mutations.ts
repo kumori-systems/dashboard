@@ -13,7 +13,6 @@ export default {
     state.registeredElements = registeredElements;
   },
   setElementData(state, { element }) {
-    console.log('ENTRAMOS EN SETELEMENTDATA');
     let [elementId, elementData] = element;
     state.registeredElements[elementId] = elementData;
   },

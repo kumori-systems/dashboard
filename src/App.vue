@@ -91,20 +91,21 @@ $state_icon_size: 50px;
 	}
 }
 
-.ACTIVE {
+
+.CONNECTED {
 	background: $color_active;
 }
 
-.ACTIVE_COLOR {
+.CONNECTED_COLOR {
 	color: $color_active;
 	font-size: $state_icon_size;
 }
 
-.NO_ACTIVE {
+.DISCONNECTED {
 	background: $color_no_active;
 }
 
-.NO_ACTIVE_COLOR {
+.DISCONNECTED_COLOR {
 	color: $color_no_active;
 	font-size: $state_icon_size;
 }

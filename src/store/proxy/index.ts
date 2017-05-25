@@ -227,7 +227,6 @@ export function getStampState() {
 
             let deploymentResourcesConfig: { [resource: string]: any } = {};
 
-            console.log('DE DONDE VAMOS A OBTENER LOS DATOS ES: ' + JSON.stringify(parsedBody.tcState.deployedServices[deploymentId].manifest.resources));
             for (let resourceId in parsedBody.tcState.deployedServices[deploymentId].manifest.resources) {
                 deploymentResourcesConfig[resourceId] = parsedBody.tcState.deployedServices[deploymentId].manifest.resources[resourceId].resource;
             }
@@ -236,12 +235,15 @@ export function getStampState() {
             let deploymentRoles: { [rolName: string]: DeploymentRol } = {};
             for (let rolId in version.roles) {
                 let instanceList: { [instanceId: string]: Instance } = {};
-
                 for (let instanceId in parsedBody.tcState.deployedServices[deploymentId].instanceList) {
                     if (parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].component ===
-                        serviceList[serviceId].roles[rolId].component
-                    )
+                        serviceList[serviceId].roles[rolId].component.split('/')[4]
+                    ) {
                         instanceList[instanceId] = new Instance(parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].connected);
+                        console.log('NEW instance created (' + instanceId
+                            + '):\nstate: ' + JSON.stringify(instanceList[instanceId].state)
+                        );
+                    }
                 }
                 deploymentRoles[rolId] = new DeploymentRol(
                     version.roles[rolId].resources.__instances,
@@ -252,6 +254,17 @@ export function getStampState() {
                     version.roles[rolId].resources.__bandwith,
                     version.roles[rolId].resources.__resilence,
                     instanceList
+                );
+
+                console.log('NEW deploymentRol created (' + rolId
+                    + '):\ninstances: ' + deploymentRoles[rolId].instances
+                    + '\ncpu: ' + deploymentRoles[rolId].cpu
+                    + '\nmemory: ' + deploymentRoles[rolId].memory
+                    + '\nioperf: ' + deploymentRoles[rolId].ioperf
+                    + '\niopsintensive: ' + deploymentRoles[rolId].iopsintensive
+                    + '\nbandwith: ' + deploymentRoles[rolId].bandwith
+                    + '\nresilence: ' + deploymentRoles[rolId].resilence
+                    + '\ninstanceList: ' + deploymentRoles[rolId].instanceList
                 );
             }
 
