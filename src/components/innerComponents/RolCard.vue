@@ -49,7 +49,7 @@ import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
-import { Channel } from '../../store/classes';
+import { Channel, State } from '../../store/classes';
 
 @Component({
     name: 'rol-card',
@@ -78,12 +78,12 @@ export default class Card extends Vue {
     };
 
     get state(): string {
-        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case 0:
+        switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
+            case State.CONNECTED:
                 return 'CONNECTED_COLOR';
-            case 1:
+            case State.DISCONNECTED:
                 return 'DISCONNECTED_COLOR';
-            case 2:
+            case State.ON_PROGRESS:
                 return 'ON_PROGRESS_COLOR';
             default:
                 return '';

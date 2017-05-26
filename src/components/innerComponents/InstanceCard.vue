@@ -12,6 +12,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
+import { State } from '../../store/classes';
 
 @Component({
     name: 'instance-card',
@@ -41,11 +42,11 @@ export default class Card extends Vue {
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
-            case 0:
+             case State.CONNECTED:
                 return 'CONNECTED_COLOR';
-            case 1:
+            case State.DISCONNECTED:
                 return 'DISCONNECTED_COLOR';
-            case 2:
+            case State.ON_PROGRESS:
                 return 'ON_PROGRESS_COLOR';
             default:
                 return '';

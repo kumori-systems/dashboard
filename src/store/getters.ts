@@ -75,14 +75,18 @@ export default {
       return (<Deployment>state.deploymentList[deploymentId]).website;
     };
   },
-  getDeploymentState: function (state): Function {
+  getDeploymentState: function (state, getters): Function {
     return function (deploymentId: string): StateType {
-      let ranNumber = Math.trunc(Math.random() * 3);
-      switch (ranNumber) {
-        case 0: return StateType.CONNECTED;
-        case 1: return StateType.DISCONNECTED;
-        default: return StateType.ON_PROGRESS;
+      let onProgress = false;
+      for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
+        switch (getters.getDeploymentRolState(deploymentId, rolId)) {
+          case StateType.DISCONNECTED: return StateType.DISCONNECTED;
+          case StateType.ON_PROGRESS: onProgress = true; break;
+          default:
+        }
       }
+      if (onProgress === true) return StateType.ON_PROGRESS;
+      return StateType.CONNECTED;
     };
   },
   getDeploymentLinks: function (state): Function {
@@ -165,21 +169,17 @@ export default {
     };
   },
 
-  getDeploymentRolState: function (state): Function {
+  getDeploymentRolState: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): StateType {
-
-      // Entramos en los roles
-      // Por cada instancia del rol, si alguno tiene estado DISCONNECTED => estado DISCONNECTED
-      // Por cada instancia del rol, si alguno tiene estado ON_PROGRESS => estado ON_PROGRESS
-      // CONNECTED
       let onProgress = false;
       for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
-        if ((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state === StateType.DISCONNECTED)
-          return StateType.DISCONNECTED;
-        if ((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state === StateType.ON_PROGRESS)
-          onProgress = true;
+        switch (getters.getDeploymentRolInstanceState(deploymentId, rolId, instanceId)) {
+          case StateType.DISCONNECTED: return StateType.DISCONNECTED;
+          case StateType.ON_PROGRESS: onProgress = true; break;
+          default:
+        }
       }
-      if (onProgress) return StateType.ON_PROGRESS;
+      if (onProgress === true) return StateType.ON_PROGRESS;
       return StateType.CONNECTED;
     };
   },

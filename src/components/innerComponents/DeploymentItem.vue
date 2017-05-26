@@ -31,7 +31,7 @@ import RolCard from './../innerComponents/RolCard.vue';
 
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 
-import { Channel, FabElement } from '../../store/classes';
+import { Channel, FabElement ,State} from '../../store/classes';
 
 @Component({
     name: 'DeploymentItem',
@@ -78,11 +78,11 @@ export default class DeploymentItem extends Vue {
     }
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case 0:
-                return 'ACTIVE_COLOR';
-            case 1:
-                return 'NO_ACTIVE_COLOR';
-            case 2:
+            case State.CONNECTED:
+                return 'CONNECTED_COLOR';
+            case State.DISCONNECTED:
+                return 'DISCONNECTED_COLOR';
+            case State.ON_PROGRESS:
                 return 'ON_PROGRESS_COLOR';
             default:
                 return '';

@@ -63,15 +63,24 @@ export default class Card extends Vue {
         return this.deploymentId.substring(this.deploymentId.indexOf('/deployments/') + 13, this.deploymentId.length);
     }
     get state(): string {
-        return State[this.$store.getters.getDeploymentState(this.deploymentId)];
+        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+            case State.CONNECTED:
+                return 'CONNECTED';
+            case State.DISCONNECTED:
+                return 'DISCONNECTED';
+            case State.ON_PROGRESS:
+                return 'ON_PROGRESS';
+            default:
+                return '';
+        }
     }
     get stateIcon(): string {
         switch (this.state) {
-            case 'ACTIVE':
+            case 'CONNECTED':
                 return 'fa fa-check-circle';
-            case 'NO_ACTIVE':
-                return 'fa fa-exclamation-triangle';
             case 'ON_PROGRESS':
+                return 'fa fa-exclamation-triangle';
+            case 'DISCONNECTED':
                 return 'fa fa-exclamation-circle';
             default:
                 return '';

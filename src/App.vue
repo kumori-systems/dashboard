@@ -64,9 +64,9 @@ html {
 	background-color: whitesmoke;
 }
 
-$color_active:#93c47d;
-$color_no_active:#f5d164;
-$color_on_progress:#ff6666;
+$color_green:#93c47d;
+$color_yellow:#f5d164;
+$color_red:#ff6666;
 $padding: 10px;
 $icon_size: 100px;
 $state_icon_size: 50px;
@@ -93,29 +93,29 @@ $state_icon_size: 50px;
 
 
 .CONNECTED {
-	background: $color_active;
+	background: $color_green;
 }
 
 .CONNECTED_COLOR {
-	color: $color_active;
+	color: $color_green;
 	font-size: $state_icon_size;
 }
 
 .DISCONNECTED {
-	background: $color_no_active;
+	background: $color_red;
 }
 
 .DISCONNECTED_COLOR {
-	color: $color_no_active;
+	color: $color_red;
 	font-size: $state_icon_size;
 }
 
 .ON_PROGRESS {
-	background: $color_on_progress;
+	background: $color_yellow;
 }
 
 .ON_PROGRESS_COLOR {
-	color: $color_on_progress;
+	color: $color_yellow;
 	font-size: $state_icon_size;
 }
 
@@ -124,17 +124,17 @@ $state_icon_size: 50px;
 }
 
 .fa-check-circle {
-	color: $color_active;
+	color: $color_green;
 	font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-	color: $color_no_active;
+	color: $color_yellow;
 	font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-	color: $color_on_progress;
+	color: $color_red;
 	font-size: $icon_size;
 }
 
