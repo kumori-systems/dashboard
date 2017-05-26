@@ -6,7 +6,7 @@
                 <option disabled value="">Please select one</option>
                 <option v-for="service in serviceList">{{service}}</option>
             </select>
-            <button v-on:click="createNewDeployment">Deploy</button>
+            <button v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
         </p>
         <p v-if="selectedService !=null">
             NAME:
@@ -82,7 +82,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, DeploymentRol } from '../../store/classes';
+import { FabElement, Deployment, DeploymentRol, Resource } from '../../store/classes';
 
 @Component({
     name: 'new-webservice-advanced'
@@ -145,11 +145,72 @@ export default class NewWebServiceAdvanced extends Vue {
     get totalResourceConfig() {
         return (resourceId) => { return this.$store.getters.getFreeResource(resourceId); }
     }
-    
+
+    get allSelected() {
+
+        if (this.selectedService === undefined) return false;
+        if (this.deploymentName == null || this.deploymentName.length < 1) return false;
+        for (let index in this.rolMem) {
+            if (this.rolMem[index] === undefined) return false
+        }
+        for (let index in this.rolCPU) {
+            if (this.rolCPU[index] === undefined) return false
+        }
+        for (let index in this.rolNet) {
+            if (this.rolNet[index] === undefined) return false
+        }
+        for (let index in this.rolInstances) {
+            if (this.rolInstances[index] === undefined) return false
+        }
+        for (let index in this.rolResilence) {
+            if (this.rolResilence[index] === undefined) return false
+        }
+        for (let index in this.resourceConfig) {
+            if (this.resourceConfig[index] === undefined) return false
+        }
+        for (let index in this.selectedRequiredChannel) {
+            if (this.selectedRequiredChannel[index] === undefined) return false
+        }
+        for (let index in this.selectedProvidedChannel) {
+            if (this.selectedProvidedChannel[index] === undefined) return false
+        }
+        return true;
+    }
+
     createNewDeployment() {
         // Tenemos que reorganizar los roles
-        this.$store.dispatch('createNewDeployment', {
+        // Organizamos la configuracion
+        let config = {};
+        for (let resourceIndex in this.serviceResourcesList) {
+            config[this.serviceResourcesList[resourceIndex]] = this.resourceConfig[resourceIndex];
+        }
 
+        let roles = {};
+
+        for (let rolIndex in this.serviceRolList) {
+            roles[this.serviceRolList[rolIndex]] = new DeploymentRol(
+                this.rolInstances[rolIndex],
+                this.rolCPU[rolIndex],
+                this.rolMem[rolIndex],
+                0, //ioperf
+                false,//iopsensitive
+                this.rolNet[rolIndex],
+                this.rolResilence[rolIndex],
+                {}
+            );
+        }
+
+
+        let website = "";
+        this.$store.dispatch('createNewDeployment', {
+            deployment: new Deployment(
+                this.deploymentName,
+                this.selectedService,
+                config,
+                this.serviceConfig,
+                roles,
+                website
+            )
         });
     }
 }
