@@ -133,7 +133,7 @@ export function getStampState() {
 
                 }
 
-                let serviceComponents: { [componentId: string]: Component } = {};
+                let serviceComponents: Array<string> = [];
                 let components = version.components;
 
                 for (let componentIndex in components) {
@@ -195,7 +195,8 @@ export function getStampState() {
                         );
                     }
 
-                    serviceComponents[componentIndex] = new Component(
+                    serviceComponents.push(componentIndex);
+                    componentList[componentIndex] = new Component(
                         components[componentIndex].runtime,
                         componentResources,
                         components[componentIndex].configuration.parameters,
@@ -203,11 +204,11 @@ export function getStampState() {
                         reqChannels);
 
                     console.log('NEW component created (' + componentIndex
-                        + '):\nruntime: ' + serviceComponents[componentIndex].runtime
-                        + '\nresources: ' + JSON.stringify(serviceComponents[componentIndex].resourcesConfig)
-                        + '\nparameters: ' + serviceComponents[componentIndex].parameters
-                        + '\nproChannels: ' + serviceComponents[componentIndex].proChannels
-                        + '\nreqChannels: ' + serviceComponents[componentIndex].reqChannels);
+                        + '):\nruntime: ' + componentList[componentIndex].runtime
+                        + '\nresources: ' + JSON.stringify(componentList[componentIndex].resourcesConfig)
+                        + '\nparameters: ' + componentList[componentIndex].parameters
+                        + '\nproChannels: ' + componentList[componentIndex].proChannels
+                        + '\nreqChannels: ' + componentList[componentIndex].reqChannels);
                 }
 
                 serviceList[serviceId] = new Service(serviceName, serviceResources, serviceParameters, serviceRoles, serviceProChannels, serviceReqChannels, serviceComponents);
@@ -251,7 +252,7 @@ export function getStampState() {
                     version.roles[rolId].resources.__memory,
                     version.roles[rolId].resources.__ioperf,
                     version.roles[rolId].resources.__iopsintensive,
-                    version.roles[rolId].resources.__bandwith,
+                    version.roles[rolId].resources.__bandwidth,
                     version.roles[rolId].resources.__resilence,
                     instanceList
                 );
@@ -262,7 +263,7 @@ export function getStampState() {
                     + '\nmemory: ' + deploymentRoles[rolId].memory
                     + '\nioperf: ' + deploymentRoles[rolId].ioperf
                     + '\niopsintensive: ' + deploymentRoles[rolId].iopsintensive
-                    + '\nbandwith: ' + deploymentRoles[rolId].bandwith
+                    + '\nbandwith: ' + deploymentRoles[rolId].bandwidth
                     + '\nresilence: ' + deploymentRoles[rolId].resilence
                     + '\ninstanceList: ' + deploymentRoles[rolId].instanceList
                 );

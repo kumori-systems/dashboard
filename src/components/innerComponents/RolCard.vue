@@ -13,22 +13,19 @@
             <div>
                 <p>Component: {{componentURN}}</p>
                 <p>Runtime: {{rolRuntime}}</p>
-                <div>
-                    <span>{{memNumber}} MEM</span>
-                    <span>{{cpuNumber}} CPU</span>
-                    <span>{{netNumber}} NET</span>
-                </div>
-                <div>Connected to:
-    
-                    <!--
-                        <div class="inner-content" v-for="link in rolConnectedTo">
-                            <p class="inner-content" v-if="link.providers[0] && link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</p>
-                            <p class="inner-content" v-if="link.providers[0] && !link.dependents[0]">{{link.providers[0].channel}} {{link.providers[0].component}}</p>
-                            <p class="inner-content" v-if="!link.providers[0] && link.dependents[0]">-> {{link.dependents[0].channel}} {{link.dependents[0].component}}</p>
-                        </div>
-    -->
-    
-                </div>
+                <p>
+                    {{memNumber}} MEM {{cpuNumber}} CPU {{netNumber}} NET
+                </p>
+                <p v-if="dataVolumesList.length>0">
+                    Data Volumes:
+                    <div class="inner-content" v-for="dataVolume in dataVolumesList">{{dataVolume}}</div>
+                </p>
+                <p>
+                    Connected to:
+                    <div class="inner-content" v-for="connection in rolConnectedTo">
+                        <div class="inner-content">{{connection}}</div>
+                    </div>
+                </p>
             </div>
             <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
@@ -70,11 +67,8 @@ export default class Card extends Vue {
 
     rolChartOptions: any = {
         tooltips: { mode: 'label' },
-        title: {
-            text: "Hola mundo"
-        },
         showLines: true,
-        spanGaps: false,
+        spanGaps: false
     };
 
     get state(): string {
@@ -97,14 +91,13 @@ export default class Card extends Vue {
     }
 
     set numInstances(x: number) {
-        // Vue no reconoce la llamada a esta función
-        /*
-                let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
-                if (temporaryState)
-                    this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: temporaryState.numInstances + x });
-                else
-                    this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: this.numInstances + x });
-        */
+
+        let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
+        if (temporaryState)
+            this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: temporaryState.numInstances + x });
+        else
+            this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: this.numInstances + x });
+
     }
 
     get componentURN() {
@@ -132,6 +125,9 @@ export default class Card extends Vue {
 
     get netNumber(): number {
         return this.$store.getters.getDeploymentRolNetNumber(this.deploymentId, this.rolId);
+    }
+    get dataVolumesList() {
+        return this.$store.getters.getDeploymentRolVolumeList(this.deploymentId, this.rolId);
     }
 
     get rolConnectedTo(): Array<Channel> {

@@ -41,16 +41,16 @@ export class DeploymentRol {
     memory: number;
     ioperf: number;
     iopsintensive: boolean;
-    bandwith: number;
+    bandwidth: number;
     resilence: number;
     instanceList: { [instanceId: string]: Instance };
-    constructor(instances: number, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwith: number, resilence: number, instanceList: { [instanceId: string]: Instance }) {
+    constructor(instances: number, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilence: number, instanceList: { [instanceId: string]: Instance }) {
         this.instances = instances;
         this.cpu = cpu;
         this.memory = memory;
         this.ioperf = ioperf;
         this.iopsintensive = iopsintensive;
-        this.bandwith = bandwith;
+        this.bandwidth = bandwidth;
         this.resilence = resilence;
         this.instanceList = instanceList;
     }
@@ -131,8 +131,8 @@ export class Service {
     roles: { [rolId: string]: ServiceRol };
     proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
-    components: { [componentId: string]: Component };
-    constructor(name: string, resources: Array<string>, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, components: { [componentId: string]: Component }) {
+    components: Array<string>;
+    constructor(name: string, resources: Array<string>, parameters: Array<string>, roles: { [rolId: string]: ServiceRol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, components: Array<string>) {
         this.name = name;
         this.resources = resources;
         this.parameters = parameters;

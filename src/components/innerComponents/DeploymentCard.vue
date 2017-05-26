@@ -121,9 +121,7 @@ export default class Card extends Vue {
     }
 
     get links(): Array<string> {
-        let res = this.$store.getters.getDeploymentLinks(this.deploymentId);
-        console.log('Los links que nos devuelve son: ' + JSON.stringify(res));
-        return res;
+        return this.$store.getters.getDeploymentLinks(this.deploymentId);
     }
 
     get volumes(): Array<number> {

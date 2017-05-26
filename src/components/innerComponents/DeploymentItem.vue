@@ -13,7 +13,7 @@
                 <p>
                     Connected to:
                     <div v-for="link in links" class="inner-content">
-                        {{link.myChannel}} -> {{link.connectedTo}} ({{link.hisChannel}})
+                        {{link.myChannel}} -> {{link.toDeployment}} ({{link.toChannel}})
                     </div>
                 </p>
             </div>
@@ -31,7 +31,7 @@ import RolCard from './../innerComponents/RolCard.vue';
 
 import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
 
-import { Channel, FabElement ,State} from '../../store/classes';
+import { Channel, FabElement, State } from '../../store/classes';
 
 @Component({
     name: 'DeploymentItem',
@@ -40,7 +40,7 @@ import { Channel, FabElement ,State} from '../../store/classes';
         'chart': Chart
     },
     props: {
-        deploymentRoute: { required: true, type: String }
+        deploymentRoute: { type: String }
     }
 })
 export default class DeploymentItem extends Vue {
@@ -55,6 +55,7 @@ export default class DeploymentItem extends Vue {
     get deploymentId() {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
+        
     }
 
     get deploymentName(): string {

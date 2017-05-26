@@ -82,7 +82,7 @@ export default {
           if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website != null)
             return (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website;
         }
-       if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
+        if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
           if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website != null)
             return (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website;
         }
@@ -111,13 +111,15 @@ export default {
         if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
           res.push({
             'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
-            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name
+            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
+            'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
           });
         }
         if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
           res.push({
             'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
-            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name
+            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
+            'toChannel': (<Link>state.linkList[linkIndex]).channelOne
           });
         }
       }
@@ -209,7 +211,7 @@ export default {
     return function (deploymentId: string, rolId: string): string {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
-      return (<Service>state.serviceList[serviceId]).components[componentId].runtime;
+      return (<Component>state.componentList[componentId]).runtime;
     };
   },
   getDeploymentRolChartData: function (state): Function {
@@ -253,7 +255,24 @@ export default {
   },
   getDeploymentRolNetNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
-      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].bandwith;
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].bandwidth;
+    };
+  },
+  getDeploymentRolVolumeList: function (state) {
+    return (deploymentId, rolId) => {
+      let res = [];
+      // Obtenemos el servicio
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let resources = (<Service>state.serviceList[serviceId]).roles[rolId].resources;
+      for (let resourceId in resources) {
+        // Buscamos las resources que sean volumenes
+        if ((<Resource>state.resourcesList[resources[resourceId]]).realName.split[4] === 'volume') {
+          res.push(resources[resourceId]);
+        }
+      }
+
+      console.log('LOS VOLUMENES DEL ROL SON: ' + JSON.stringify(res));
+      return res;
     };
   },
   getDeploymentRolInstances: function (state) {
@@ -265,10 +284,13 @@ export default {
     };
   },
   getDeploymentRolConnectedTo: function (state) {
-    return function (deploymentId: string, rolId: string): { providers: any, dependents: any } {
+    return function (deploymentId: string, rolId: string) {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
-      return { providers: (<Service>state.serviceList[serviceId]).components[componentId].proChannels, dependents: (<Service>state.serviceList[serviceId]).components[componentId].reqChannels };
+      return {
+        ...(<Component>state.componentList[componentId]).proChannels,
+        ...(<Component>state.componentList[componentId]).reqChannels
+      };
     };
   },
 
@@ -366,8 +388,8 @@ export default {
     let res = [];
     let aux: string;
     for (let serviceId in state.serviceList) {
-      for (let componentId in (<Service>state.serviceList[serviceId]).components) {
-        aux = (<Component>(<Service>state.serviceList[serviceId]).components[componentId]).runtime;
+      for (let componentId in (<Component>state.componentList)) {
+        aux = (<Component>state.componentList[componentId]).runtime;
         if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
           res.push(aux);
       }

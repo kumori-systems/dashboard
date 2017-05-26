@@ -16,6 +16,7 @@ let overview = routes.find(route => { return route.name === 'OVERVIEW'; });
 overview['children'] = [
   {
     path: 'deployments\:deploymentRoute', name: ' ', component: DeploymentItem,
+    meta: { id: null },
     props: true
   }
 ];
