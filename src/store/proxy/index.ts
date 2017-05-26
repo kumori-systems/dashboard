@@ -237,7 +237,7 @@ export function getStampState() {
                 let instanceList: { [instanceId: string]: Instance } = {};
                 for (let instanceId in parsedBody.tcState.deployedServices[deploymentId].instanceList) {
                     if (parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].component ===
-                        serviceList[serviceId].roles[rolId].component.split('/')[4]
+                        rolId
                     ) {
                         instanceList[instanceId] = new Instance(parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].connected);
                         console.log('NEW instance created (' + instanceId
