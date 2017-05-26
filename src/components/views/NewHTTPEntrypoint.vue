@@ -7,7 +7,7 @@
             </select>
             <input type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain" />
             <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
-            <button v-on:click="createNewDeployment">Deploy</button>
+            <button v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
         </div>
         <div class="inner-content">
             <div>
@@ -50,7 +50,6 @@ import { FabElement } from '../../store/classes';
     name: 'new-httpentrypoint'
 })
 export default class NewHTTPEntrypoint extends Vue {
-
     usePlatformGeneratedDomain: boolean = false;
     selectedDomain: string = "";
     selectedCertificate: string = "";
