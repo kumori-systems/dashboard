@@ -18,14 +18,19 @@
                             </div>
                         </div>
                     </p>
-                    <p>
+                    <p v-if="website!=null">
                         <u>Website:</u> {{website}}
                     </p>
-                    <p>
+                    <p v-if="links.length > 0">
                         <u>Links:</u>
-                        <div v-for="link in links" class="inner-content">{{link.connectedTo}}</div>
+                        <div v-for="link in links" class="inner-content">
+                            {{link.myChannel}}
+                            <p>
+                                Connnected to -> {{link.toDeployment}}
+                            </p>
+                            </div>
                     </p>
-                    <p>
+                    <p v-if="volumes.length>0">
                         <u>Volumes:</u>
                         <div v-for="volume in volumes" class="inner-content">
                             <div>{{volume}}</div>
@@ -116,7 +121,9 @@ export default class Card extends Vue {
     }
 
     get links(): Array<string> {
-        return this.$store.getters.getDeploymentLinks(this.deploymentId);
+        let res = this.$store.getters.getDeploymentLinks(this.deploymentId);
+        console.log('Los links que nos devuelve son: ' + JSON.stringify(res));
+        return res;
     }
 
     get volumes(): Array<number> {

@@ -287,7 +287,16 @@ export function getStampState() {
 
 
         // Resolvemos linkList, que es lo más fácil de este mundo
-        linkList = parsedBody.tcState.linkedServices;
+        // linkList = parsedBody.tcState.linkedServices;
+        for (let linkIndex in parsedBody.tcState.linkedServices) {
+            linkList.push(
+                new Link(
+                    parsedBody.tcState.linkedServices[linkIndex].deployment1,
+                    parsedBody.tcState.linkedServices[linkIndex].channel1,
+                    parsedBody.tcState.linkedServices[linkIndex].deployment2,
+                    parsedBody.tcState.linkedServices[linkIndex].channel2,
+                ));
+        }
         console.log('Links in the state: ' + JSON.stringify(linkList));
 
         // Gestión de errores de conexión
