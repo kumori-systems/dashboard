@@ -16,7 +16,9 @@
                 </p>
                 <p v-if="dataVolumesList.length>0">
                     Data Volumes:
-                    <div class="inner-content" v-for="dataVolume in dataVolumesList">{{dataVolume}}</div>
+                    <div class="inner-content" v-for="dataVolume in dataVolumesList">
+                        <i class="fa fa-hdd-o" aria-hidden="true"></i> {{dataVolume}}
+                    </div>
                 </p>
                 <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
                     <p>

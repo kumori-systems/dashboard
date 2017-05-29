@@ -128,6 +128,10 @@ $state_icon_size: 50px;
 	font-size: $icon_size;
 }
 
+.fa-hdd-o {
+	font-size: 30px;
+}
+
 .fa-exclamation-triangle {
 	color: $color_yellow;
 	font-size: $icon_size;
