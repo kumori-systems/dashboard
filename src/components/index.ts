@@ -22,6 +22,7 @@ import NewWebServiceAdvanced from './views/NewWebServiceAdvanced.vue';
 // Inner components
 import DeploymentCard from './innerComponents/DeploymentCard.vue';
 import DeploymentItem from './innerComponents/DeploymentItem.vue';
+import Chart from './innerComponents/Chart.vue';
 
 
 // Export layouts
@@ -31,4 +32,4 @@ export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced };
 
 // Export inner components
-export { DeploymentCard };
+export { DeploymentCard, Chart };

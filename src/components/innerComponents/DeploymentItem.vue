@@ -21,7 +21,7 @@
                 </p>
                 </div>
                 <div class="tile">
-                    <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
+                    <chart v-bind:data="deploymentChartData"></chart>
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" />
@@ -32,7 +32,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import RolCard from './../innerComponents/RolCard.vue';
 
-import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
+import Chart from './Chart.vue';
 
 import { Channel, FabElement, State } from '../../store/classes';
 
@@ -48,7 +48,6 @@ import { Channel, FabElement, State } from '../../store/classes';
 })
 export default class DeploymentItem extends Vue {
     deploymentRoute: string = this.deploymentRoute;
-    deploymentChartOptions = {};
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];

@@ -35,7 +35,7 @@
     
                 </div>
                 <div class="tile is-parent is-4">
-                    <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
+                    <chart v-bind:data="rolChartData"></chart>
                 </div>
     
             </div>
@@ -53,7 +53,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
-import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
+import Chart from './Chart.vue';
 import { Channel, State } from '../../store/classes';
 
 @Component({

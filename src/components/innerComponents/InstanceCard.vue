@@ -4,14 +4,14 @@
         <span class="title">{{instanceId}}</span> {{instanceMem}} MEM {{instanceCPU}} CPU {{instanceNet}} NET
         <input type="checkbox" id="killInstance">
         <label for="killInstance">kill instance</label>
-        <chart v-bind:type="'line'" v-bind:data="instanceChartData" v-bind:options="instanceChartOptions" />
+        <chart v-bind:data="instanceChartData"></chart>
     </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
-import Chart from 'vue-bulma-chartjs/src/Chartjs.vue';
+import Chart from './Chart.vue';
 import { State } from '../../store/classes';
 
 @Component({
@@ -31,15 +31,10 @@ export default class Card extends Vue {
     deploymentId: string = this.deploymentId;
     rolId: string = this.rolId;
     instanceId: string = this.instanceId;
-    instanceChartOptions = {
-        tooltips: { mode: 'label' },
-        showLines: true,
-        spanGaps: false,
-    };
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
-             case State.CONNECTED:
+            case State.CONNECTED:
                 return 'CONNECTED_COLOR';
             case State.DISCONNECTED:
                 return 'DISCONNECTED_COLOR';
@@ -84,5 +79,4 @@ $padding: 10px;
     color: grey;
     padding-left: 10px;
 }
-
 </style>

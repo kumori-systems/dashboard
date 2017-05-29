@@ -24,3 +24,6 @@ Cuando mantengamos el volúmen, debería de aparecer, según el dashboard 'muest
 
 //Vista new Web Service (normal)
 Falta por definir
+
+// Memoria, CPU y NET de una instáncia
+Actualmente las estoy cogiendo del rol. Sé que deberían de ser los mismos, pero ¿Quieres añadir los datos para cada instáncia o la solución actual te parece bien?
