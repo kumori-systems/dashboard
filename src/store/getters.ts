@@ -378,6 +378,18 @@ export default {
       return res;
     };
   },
+  getDeploymentRolProConnectedTo: function (state): Function {
+    return function (deploymentId: string, rolId: string): Array<[string, Channel]> {
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+      let res = [];
+      for (let connectionIndex in (<Component>state.componentList[componentId]).proChannels) {
+        res.push([connectionIndex, (<Component>state.componentList[componentId]).proChannels[connectionIndex]]);
+      }
+      console.log('Res contiene: ' + JSON.stringify(res));
+      return res;
+    };
+  },
 
   getDeploymetRolTemporaryState: function (state) {
     return function (deploymentId: string, rolId: string) {

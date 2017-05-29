@@ -136,19 +136,20 @@ export function getStampState() {
                 let serviceComponents: Array<string> = [];
                 let components = version.components;
 
+                
                 for (let componentIndex in components) {
                     // Resources
                     let componentResources: { [resourceName: string]: string } = {};
                     for (let componentResourceIndex in components[componentIndex].configuration.resources) {
-                        componentResources[components[componentIndex].configuration.resources[componentResourceIndex].name] = components[componentIndex].configuration.resources[componentResourceIndex].type;
+                        componentResources[components[componentIndex].configuration.resources[componentResourceIndex]] =
+                        components[componentIndex].configuration.resources[componentResourceIndex].type;
                     }
-
                     // Provide channels
                     let proChannels: { [channelId: string]: Channel } = {};
                     console.log('INI');
-                    for (let proChannelIndex in components[componentIndex].provided) {
+                    for (let proChannelIndex in components[componentIndex].channels.provides) {
                        // Buscamos las conexiones del canal
-                        let channelId = components[componentIndex].channels.provided[proChannelIndex].name;
+                        let channelId = components[componentIndex].channels.provides[proChannelIndex].name;
                         let connections: Array<{ channelName: string, rolName?: string }> = [];
                         let connectorList = version.service.connectors;
                         for (let connectorIndex in connectorList) {

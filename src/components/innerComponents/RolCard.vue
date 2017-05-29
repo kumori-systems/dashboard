@@ -5,9 +5,7 @@
             <span class="card-header-right">{{numInstances}}</span>
             <button class="fa fa-angle-up fa-lg" v-on:click="numInstances = 1"></button>
             <button class="fa fa-angle-down fa-lg" v-on:click="numInstances = -1"></button>
-    
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
-    
         </div>
         <div class="card-body tile">
             <div>
@@ -20,26 +18,32 @@
                     Data Volumes:
                     <div class="inner-content" v-for="dataVolume in dataVolumesList">{{dataVolume}}</div>
                 </p>
-                <div v-if="rolReqConnectedTo.length > 0">
+                <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
                     <p>
                         Connected to:
-                        <div class="inner-content" v-for="connection in rolReqConnectedTo">
-                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}} <- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                        <div class="inner-content" v-for="connection in rolProConnectedTo">
+                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
                         </div>
+                        <div class="inner-content" v-for="connection in rolReqConnectedTo">
+                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}}
+                                <- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                            </div>
                     </p>
+                    </div>
+    
                 </div>
+                <div class="tile is-parent is-4">
+                    <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
+                </div>
+    
             </div>
-            <div class="tile is-parent is-4">
-                <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>
-            </div>
+            <collapse>
+                <collapse-item title="View instances">
+                    <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
+                </collapse-item>
+            </collapse>
+            <div class="card-footer" v-if="false"></div>
         </div>
-        <collapse>
-            <collapse-item title="View instances">
-                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
-            </collapse-item>
-        </collapse>
-        <div class="card-footer" v-if="false"></div>
-    </div>
 </template>
 
 <script lang="ts">
@@ -134,6 +138,10 @@ export default class Card extends Vue {
 
     get rolReqConnectedTo(): Array<Channel> {
         return this.$store.getters.getDeploymentRolReqConnectedTo(this.deploymentId, this.rolId);
+    }
+
+    get rolProConnectedTo(): Array<Channel> {
+        return this.$store.getters.getDeploymentRolProConnectedTo(this.deploymentId, this.rolId);
     }
 }
 </script>
