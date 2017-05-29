@@ -20,12 +20,14 @@
                     Data Volumes:
                     <div class="inner-content" v-for="dataVolume in dataVolumesList">{{dataVolume}}</div>
                 </p>
-                <p>
-                    Connected to:
-                    <div class="inner-content" v-for="connection in rolConnectedTo">
-                        <div class="inner-content">{{connection}}</div>
-                    </div>
-                </p>
+                <div v-if="rolConnectedTo.length > 0">
+                    <p>
+                        Connected to:
+                        <div class="inner-content" v-for="connection in rolConnectedTo">
+                            <div class="inner-content">{{connection}}</div>
+                        </div>
+                    </p>
+                </div>
             </div>
             <div class="tile is-parent is-4">
                 <chart v-bind:type="'line'" v-bind:data="rolChartData" v-bind:options="rolChartOptions"></chart>

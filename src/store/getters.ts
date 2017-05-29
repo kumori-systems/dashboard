@@ -264,14 +264,19 @@ export default {
       // Obtenemos el servicio
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let resources = (<Service>state.serviceList[serviceId]).roles[rolId].resources;
+
+      console.log('DeploymentId: ' + deploymentId);
+      console.log('RolId: ' + rolId);
+      console.log('Las resources del rol son: ' + JSON.stringify(resources));
+
+      console.log('resourcesListcontiene: ' + JSON.stringify(state.resourcesList));
+
       for (let resourceId in resources) {
         // Buscamos las resources que sean volumenes
-        if ((<Resource>state.resourcesList[resources[resourceId]]).realName.split[4] === 'volume') {
+        if ((<Resource>state.resourcesList[resources[resourceId]]).realName.split('/')[4] === 'volume') {
           res.push(resources[resourceId]);
         }
       }
-
-      console.log('LOS VOLUMENES DEL ROL SON: ' + JSON.stringify(res));
       return res;
     };
   },
@@ -287,6 +292,7 @@ export default {
     return function (deploymentId: string, rolId: string) {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+      console.log('CORREGIR LAS CONEXIONES. DEVOLVER ARRAY Y NO OBJETO');
       return {
         ...(<Component>state.componentList[componentId]).proChannels,
         ...(<Component>state.componentList[componentId]).reqChannels
