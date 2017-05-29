@@ -20,11 +20,11 @@
                     Data Volumes:
                     <div class="inner-content" v-for="dataVolume in dataVolumesList">{{dataVolume}}</div>
                 </p>
-                <div v-if="rolConnectedTo.length > 0">
+                <div v-if="rolReqConnectedTo.length > 0">
                     <p>
                         Connected to:
-                        <div class="inner-content" v-for="connection in rolConnectedTo">
-                            <div class="inner-content">{{connection}}</div>
+                        <div class="inner-content" v-for="connection in rolReqConnectedTo">
+                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}} <- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
                         </div>
                     </p>
                 </div>
@@ -132,8 +132,8 @@ export default class Card extends Vue {
         return this.$store.getters.getDeploymentRolVolumeList(this.deploymentId, this.rolId);
     }
 
-    get rolConnectedTo(): Array<Channel> {
-        return this.$store.getters.getDeploymentRolConnectedTo(this.deploymentId, this.rolId);
+    get rolReqConnectedTo(): Array<Channel> {
+        return this.$store.getters.getDeploymentRolReqConnectedTo(this.deploymentId, this.rolId);
     }
 }
 </script>

@@ -103,6 +103,91 @@ export default {
       return StateType.CONNECTED;
     };
   },
+
+  /**
+   * Buscamos las conexiones definidas por el servicio del deployment.
+   * Buscaremos también los links para saber aquellas conexiones que están siendo utilizadas y cuales no
+  */
+  getDeploymentProvideChannels: function (state) {
+    return (deploymentId: string) => {
+      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let res = [];
+      for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
+        let encontrado: boolean = false;
+        for (let linkIndex in state.linkList) {
+          if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
+            if ((<Link>state.linkList[linkIndex]).channelOne === proChannel) {
+              res.push({
+                'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
+                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
+                'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
+              });
+              encontrado = true;
+            }
+
+          }
+          if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
+            if ((<Link>state.linkList[linkIndex]).channelTwo === proChannel) {
+              res.push({
+                'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
+                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
+                'toChannel': (<Link>state.linkList[linkIndex]).channelOne
+              });
+              encontrado = true;
+            }
+          }
+        }
+        if (!encontrado) { // Se utiliza para cubrir el caso en que el canal de servicio no tenga link
+          res.push({
+            'myChannel': proChannel,
+            'toDeployment': 'none',
+            'toChannel': 'none'
+          });
+        }
+      }
+      return res;
+    };
+  },
+  getDeploymentRequireChannels: function (state) {
+    return (deploymentId: string) => {
+      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      let res = [];
+      for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
+        let encontrado: boolean = false;
+        for (let linkIndex in state.linkList) {
+          if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
+            if ((<Link>state.linkList[linkIndex]).channelOne === reqChannel) {
+              res.push({
+                'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
+                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
+                'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
+              });
+              encontrado = true;
+            }
+
+          }
+          if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
+            if ((<Link>state.linkList[linkIndex]).channelTwo === reqChannel) {
+              res.push({
+                'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
+                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
+                'toChannel': (<Link>state.linkList[linkIndex]).channelOne
+              });
+              encontrado = true;
+            }
+          }
+        }
+        if (!encontrado) { // Se utiliza para cubrir el caso en el que el canal de servicio no tenga link
+          res.push({
+            'myChannel': reqChannel,
+            'toDeployment': 'none',
+            'toChannel': 'none'
+          });
+        }
+      }
+      return res;
+    };
+  },
   getDeploymentLinks: function (state): Function {
     return function (deploymentId: string) {
       let res = [];
@@ -282,15 +367,15 @@ export default {
       return res;
     };
   },
-  getDeploymentRolConnectedTo: function (state) {
-    return function (deploymentId: string, rolId: string) {
+  getDeploymentRolReqConnectedTo: function (state): Function {
+    return function (deploymentId: string, rolId: string): Array<[string, Channel]> {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
-      console.log('CORREGIR LAS CONEXIONES. DEVOLVER ARRAY Y NO OBJETO');
-      return {
-        ...(<Component>state.componentList[componentId]).proChannels,
-        ...(<Component>state.componentList[componentId]).reqChannels
-      };
+      let res = [];
+      for (let connectionIndex in (<Component>state.componentList[componentId]).reqChannels) {
+        res.push([connectionIndex, (<Component>state.componentList[componentId]).reqChannels[connectionIndex]]);
+      }
+      return res;
     };
   },
 
@@ -374,10 +459,21 @@ export default {
       res.push(serviceId);
     return res;
   },
-  getWebServiceNameList: function (state): Array<string> {
+  getServiceNameList: function (state): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList)
       res.push((<Service>state.serviceList[serviceId]).name);
+    return res;
+  },
+  /**
+   * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
+   */
+  getNoEPServiceNameList: function (state): Array<string> {
+    let res = [];
+    for (let serviceId in state.serviceList) {
+      if (serviceId.split('/')[5] !== 'inbound')
+        res.push((<Service>state.serviceList[serviceId]).name);
+    }
     return res;
   },
   /**

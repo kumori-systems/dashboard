@@ -107,7 +107,7 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 
     get serviceList() {
-        return this.$store.getters.getWebServiceNameList;
+        return this.$store.getters.getNoEPServiceNameList;
     }
 
     get serviceRolList(): Array<string> {

@@ -10,19 +10,22 @@
                     Service: {{deploymentService}}
                     <button v-on:click="undeploy">UNDEPLOY</button>
                 </p>
-                <p>
+                <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
                     Connected to:
-                    <div v-for="link in links" class="inner-content">
-                        {{link.myChannel}} -> {{link.toDeployment}} ({{link.toChannel}})
+                    <div v-for="proChannel in serviceProvideChannels" class="inner-content">
+                        {{proChannel.myChannel}} -> {{proChannel.toDeployment}} ({{proChannel.toChannel}})
                     </div>
+                    <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
+                        {{reqChannel.myChannel}}
+                        <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                 </p>
+                </div>
+                <div class="tile">
+                    <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
+                </div>
             </div>
-            <div class="tile">
-                <chart v-bind:type="'line'" v-bind:data="deploymentChartData" v-bind:options="deploymentChartOptions"></chart>
-            </div>
+            <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" />
         </div>
-        <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" />
-    </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
@@ -55,7 +58,7 @@ export default class DeploymentItem extends Vue {
     get deploymentId() {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
-        
+
     }
 
     get deploymentName(): string {
@@ -74,9 +77,14 @@ export default class DeploymentItem extends Vue {
     get deploymentService(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
-    get links(): Array<Channel> {
-        return this.$store.getters.getDeploymentLinks(this.deploymentId);
+    get serviceProvideChannels(): Array<Channel> {
+        return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
+
+    get serviceRequireChannels(): Array<Channel> {
+        return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
+    }
+
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case State.CONNECTED:
