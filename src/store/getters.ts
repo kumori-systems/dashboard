@@ -265,12 +265,6 @@ export default {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let resources = (<Service>state.serviceList[serviceId]).roles[rolId].resources;
 
-      console.log('DeploymentId: ' + deploymentId);
-      console.log('RolId: ' + rolId);
-      console.log('Las resources del rol son: ' + JSON.stringify(resources));
-
-      console.log('resourcesListcontiene: ' + JSON.stringify(state.resourcesList));
-
       for (let resourceId in resources) {
         // Buscamos las resources que sean volumenes
         if ((<Resource>state.resourcesList[resources[resourceId]]).realName.split('/')[4] === 'volume') {
