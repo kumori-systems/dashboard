@@ -407,17 +407,17 @@ export default {
   },
   getDeploymentRolInstanceMem: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, instanceId: string): number {
-      return getters.getDeploymentRolMemNumber;
+      return getters.getDeploymentRolMemNumber(deploymentId, rolId);
     };
   },
   getDeploymentRolInstanceCPU: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
-      return getters.getDeploymentRolCPUNumber;
+      return getters.getDeploymentRolCPUNumber(deploymentId, rolId);
     };
   },
   getDeploymentRolInstanceNet: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
-      return getters.getDeploymentRolNETNumber;
+      return getters.getDeploymentRolNetNumber(deploymentId, rolId);
     };
   },
 

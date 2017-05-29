@@ -33,9 +33,6 @@ export default class Card extends Vue {
     instanceId: string = this.instanceId;
     instanceChartOptions = {
         tooltips: { mode: 'label' },
-        title: {
-            text: "Hola mundo"
-        },
         showLines: true,
         spanGaps: false,
     };
