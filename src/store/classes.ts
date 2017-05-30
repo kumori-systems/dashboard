@@ -5,6 +5,11 @@ export class Runtime {
 
 export class Instance {
     state: State;
+    cpu: Array<number>;
+    mem: Array<number>;
+    net: Array<number>;
+    rpm: Array<number>;
+    res: Array<number>;
     constructor(state: boolean) {
         switch (state) {
             case true:
@@ -15,6 +20,39 @@ export class Instance {
                 break;
             default:
                 this.state = State.ON_PROGRESS;
+        }
+        this.cpu = [];
+        this.mem = [];
+        this.net = [];
+        this.rpm = [];
+        this.res = [];
+    }
+    addCpu(cpu: Array<number>) {
+        for (let cpuIndex in cpu) {
+            this.cpu.push(cpu[cpuIndex]);
+        }
+    }
+    addMem(mem: Array<number>) {
+        for (let memIndex in mem) {
+            this.mem.push(mem[memIndex]);
+        }
+    }
+    // La red será una suma de la red de subida y la red de bajada
+    addNet(net: Array<number>) {
+        for (let netIndex in net) {
+            this.net.push(net[netIndex]);
+        }
+    }
+    // Request per minute
+    addRpm(rpm: Array<number>) {
+        for (let rpmIndex in rpm) {
+            this.rpm.push(rpm[rpmIndex]);
+        }
+    }
+    // Response Time
+    addRes(res: Array<number>) {
+        for (let resIndex in res) {
+            this.res.push(res[resIndex]);
         }
     }
 }

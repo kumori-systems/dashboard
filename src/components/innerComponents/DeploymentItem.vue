@@ -65,7 +65,7 @@ export default class DeploymentItem extends Vue {
     }
 
     get deploymentChartData(): Array<any> {
-        return this.$store.getters.getDeploymentChartData();
+        return this.$store.getters.getDeploymentChartData(this.deploymentId);
     }
 
     get deploymentRoles(): Array<string> {
@@ -109,6 +109,3 @@ export default class DeploymentItem extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

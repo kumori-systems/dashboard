@@ -39,12 +39,18 @@ export default {
         });
     },
     getManifest({ commit }, { uri }) {
-        console.log('NOS PIDEN EL MANIFIESTO DE ALGO');
         connection.getManifest(uri).then(function (element) {
             // Guardamos los elementos
             commit('setElementData', { element });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error Obteniendo elementos registrados: ' + error);
+        });
+    },
+    getMetrics({ commit }) {
+        connection.getMetrics().then(function (metrics) {
+            commit('addMetrics', metrics);
+        }).catch(function (error) {
+            console.log('Error obteniendo las métricas: ' + error);
         });
     },
     setFabElements({ commit }, { fabElementsList }) {
@@ -64,7 +70,7 @@ export default {
     setTemporaryState({ commit }, temporaryState) {
         commit('setTemporaryState', temporaryState);
     },
-    createNewHTTPENtrypoint({ },  params ) {
+    createNewHTTPENtrypoint({ }, params) {
         connection.createNewHTTPENtrypoint(params);
     }
 };

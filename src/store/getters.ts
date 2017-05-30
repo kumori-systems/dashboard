@@ -223,33 +223,13 @@ export default {
       return res;
     };
   },
-  getDeploymentChartData: function (state): Function {
+  getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
-      return {
-        datasets: [{
-          label: 'mylabel',
-          backgroundColor: 'green',
-          data: [
-            { x: 0, y: 2 },
-            { x: 1, y: 1 }
-          ]
-        }, {
-          label: 'mylabel2',
-          backgroundColor: 'yellow',
-          data: [
-            { x: 0, y: 1 },
-            { x: 1, y: 3 }
-          ]
-        },
-        {
-          label: 'mylabel3',
-          backgroundColor: 'red',
-          data: [
-            { x: 0, y: 2.4 },
-            { x: 1, y: 1.5 }
-          ]
-        }]
-      };
+      // Buscamos todas las instancias del rol
+      for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
+        // TODO: Esto va mal, devuelve el valor del primer rol y no suma
+        return getters.getDeploymentRolChartData(deploymentId, rolId);
+      }
     };
   },
 
@@ -299,33 +279,13 @@ export default {
       return (<Component>state.componentList[componentId]).runtime;
     };
   },
-  getDeploymentRolChartData: function (state): Function {
+  getDeploymentRolChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): Object {
-      return {
-        datasets: [{
-          label: 'mylabel',
-          backgroundColor: 'green',
-          data: [
-            { x: 0, y: 2 },
-            { x: 1, y: 1 }
-          ]
-        }, {
-          label: 'mylabel2',
-          backgroundColor: 'yellow',
-          data: [
-            { x: 0, y: 1 },
-            { x: 1, y: 3 }
-          ]
-        },
-        {
-          label: 'mylabel3',
-          backgroundColor: 'red',
-          data: [
-            { x: 0, y: 2.4 },
-            { x: 1, y: 1.5 }
-          ]
-        }]
-      };
+      // Buscamos todas las instancias del rol
+      for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
+        // TODO: Esto va mal, devuelve el valor de la primera instancia, y no suma
+        return getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId);
+      }
     };
   },
   getDeploymentRolMemNumber: function (state): Function {
@@ -386,7 +346,6 @@ export default {
       for (let connectionIndex in (<Component>state.componentList[componentId]).proChannels) {
         res.push([connectionIndex, (<Component>state.componentList[componentId]).proChannels[connectionIndex]]);
       }
-      console.log('Res contiene: ' + JSON.stringify(res));
       return res;
     };
   },
@@ -423,31 +382,7 @@ export default {
 
   getDeploymentRolInstanceChartData: function (state): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): Object {
-      return {
-        datasets: [{
-          label: 'mylabel',
-          backgroundColor: 'green',
-          data: [
-            { x: 0, y: 2 },
-            { x: 1, y: 1 }
-          ]
-        }, {
-          label: 'mylabel2',
-          backgroundColor: 'yellow',
-          data: [
-            { x: 0, y: 1 },
-            { x: 1, y: 3 }
-          ]
-        },
-        {
-          label: 'mylabel3',
-          backgroundColor: 'red',
-          data: [
-            { x: 0, y: 2.4 },
-            { x: 1, y: 1.5 }
-          ]
-        }]
-      };
+      return [10, 20, 40, 5, 35];
     };
   },
 

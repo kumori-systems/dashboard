@@ -8,7 +8,7 @@ function auxFunction(): Promise<{ response: string, body: string }> {
     return promesa;
 }
 
-let stampStateExample = require('./tc-state-example.json');
+let stampStateExample = require('./tc_state_example.json');
 
 /**
  * Preguntamos por el estado del stamp.
@@ -136,19 +136,19 @@ export function getStampState() {
                 let serviceComponents: Array<string> = [];
                 let components = version.components;
 
-                
+
                 for (let componentIndex in components) {
                     // Resources
                     let componentResources: { [resourceName: string]: string } = {};
                     for (let componentResourceIndex in components[componentIndex].configuration.resources) {
                         componentResources[components[componentIndex].configuration.resources[componentResourceIndex]] =
-                        components[componentIndex].configuration.resources[componentResourceIndex].type;
+                            components[componentIndex].configuration.resources[componentResourceIndex].type;
                     }
                     // Provide channels
                     let proChannels: { [channelId: string]: Channel } = {};
                     console.log('INI');
                     for (let proChannelIndex in components[componentIndex].channels.provides) {
-                       // Buscamos las conexiones del canal
+                        // Buscamos las conexiones del canal
                         let channelId = components[componentIndex].channels.provides[proChannelIndex].name;
                         let connections: Array<{ channelName: string, rolName?: string }> = [];
                         let connectorList = version.service.connectors;
@@ -338,7 +338,7 @@ export function getStampState() {
 export function undeployDeployment(deploymentId: string): void {
     console.log('INFO: Realizamos undeploy de: ' + deploymentId);
 }
-let registeredElements = require('./registeredElements.json');
+let registeredElements = require('./registered_elements_example.json');
 export function getRegisteredElements() {
     return auxFunction().then(function ({ response, body }) {
         let parsedBody = registeredElements.data;
@@ -353,7 +353,7 @@ export function getRegisteredElements() {
     });
 }
 
-let ejemploObtencionManifiesto = require('./ejemplo-obtencion-manifiesto.json');
+let ejemploObtencionManifiesto = require('./get_manifest_example.json');
 export function getManifest(uri: string) {
     return auxFunction().then(function ({ response, body }) {
         let parsedBody = ejemploObtencionManifiesto.data;
@@ -438,5 +438,56 @@ export function createNewHTTPENtrypoint(params: {
 }) {
     return auxFunction().then(function ({ response, body }) {
         console.log('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let ejemploMetricas = require('./metrics_example.json');
+export function getMetrics() {
+    return auxFunction().then(function ({ response, body }) {
+        let parsedBody = ejemploMetricas;
+
+        let res: {
+            [deploymentId: string]: {
+                [rolId: string]: {
+                    [instanceId: string]: {
+                        'cpu': Array<number>,
+                        'mem': Array<number>,
+                        'net': Array<number>,
+                        'rpm': Array<number>,
+                        'res': Array<number>
+                    }
+                }
+            }
+        } = {};
+        // Deberíamos de devolver una estructura que se pueda utilizar para añadi diréctamente
+
+        // DeploymentId
+            // Rol
+                // Instáncia
+                    // Métrica CPU
+                    // Métrica MEM
+                    // Métrica NET
+                    // Métrica RPM (Request Per Minute)
+                    // Métrica RES (Response Time)
+
+        return res;
     });
 }

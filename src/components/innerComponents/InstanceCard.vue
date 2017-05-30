@@ -74,9 +74,4 @@ $padding: 10px;
 .title {
     padding: $padding;
 }
-
-.card-header-right {
-    color: grey;
-    padding-left: 10px;
-}
 </style>
