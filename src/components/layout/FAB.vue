@@ -28,11 +28,13 @@ export default class FAB extends Vue {
     get fabElements(): Array<FabElement> {
         return this.$store.getters.getFabElements;
     }
-
 }
 </script>
 <style lang="scss">
+
 #fab {
-    margin-left: 180px;
+    margin-left: 950px;
+    margin-top: 50px;
+    position: fixed;
 }
 </style>

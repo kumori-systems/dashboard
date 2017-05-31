@@ -1,16 +1,18 @@
 <template>
     <div>
-        
+    
         <nav class="level app-levelbar">
             <div class="level-left">
                 <div class="level-item">
                     <h3 class="subtitle is-5">
-                                    <strong><breadcrumb v-bind:list="list"></breadcrumb></strong>
-                                </h3>
+                        <strong>
+                            <breadcrumb v-bind:list="list"></breadcrumb>
+                        </strong>
+                    </h3>
                 </div>
             </div>
         </nav>
-        
+    
     </div>
 </template>
 

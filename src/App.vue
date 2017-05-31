@@ -2,9 +2,9 @@
 	<div id="app">
 		<nprogress-container></nprogress-container>
 		<nav-bar v-bind:show="true"></nav-bar>
+		<fab></fab>
 		<side-bar></side-bar>
 		<app-main></app-main>
-		<fab></fab>
 		<footer-bar></footer-bar>
 	</div>
 </template>
