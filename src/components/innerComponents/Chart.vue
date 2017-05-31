@@ -17,7 +17,7 @@ const RES_COLOR = '#e87e14';
 const TIME_FORMAT = 'YYYY/MM/DDTHH:mm:ssZ';
 
 function newDate(days) {
-    return moment(days).toDate().toLocaleString()
+    return moment(days).toDate();
 }
 
 @Component({
@@ -45,13 +45,21 @@ export default class Card extends Vue {
             position: 'right',
             labels: {
                 boxWidth: 15,
-                padding: 15
+                padding: 10
             }
         },
         scales: {
             xAxes: [{
-                display: true,
-                time: {}
+                type: "time",
+                time: {
+                    format: TIME_FORMAT,
+                    // round: 'day'
+                    tooltipFormat: 'll HH:mm'
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Date'
+                }
             }],
             yAxes: [{
                 display: true,
