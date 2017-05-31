@@ -7,8 +7,8 @@
             <button class="fa fa-angle-down fa-lg" v-on:click="numInstances = -1"></button>
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
         </div>
-        <div class="card-body tile">
-            <div>
+        <div class="card-body tile inner-content">
+            <div class="inner-content">
                 <p>Component: {{componentURN}}</p>
                 <p>Runtime: {{rolRuntime}}</p>
                 <p>
@@ -23,29 +23,30 @@
                 <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
                     <p>
                         Connected to:
-                        <div class="inner-content" v-for="connection in rolProConnectedTo">
-                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
-                        </div>
-                        <div class="inner-content" v-for="connection in rolReqConnectedTo">
-                            <div v-for="connectedTo in connection[1].connectedTo" class="inner-content">{{connection[0]}}
-                                <- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                        <div class="left-padding">
+                            <div v-for="connection in rolProConnectedTo">
+                                <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
                             </div>
+                            <div v-for="connection in rolReqConnectedTo">
+                                <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                            </div>
+                        </div>
                     </p>
-                    </div>
-    
-                </div>
-                <div class="tile is-parent is-4">
-                    <chart v-bind:data="rolChartData"></chart>
                 </div>
     
             </div>
-            <collapse>
-                <collapse-item title="View instances">
-                    <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
-                </collapse-item>
-            </collapse>
-            <div class="card-footer" v-if="false"></div>
+            <div class="tile is-child is-4">
+                <chart v-bind:data="rolChartData"></chart>
+            </div>
+    
         </div>
+        <collapse>
+            <collapse-item title="View instances">
+                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
+            </collapse-item>
+        </collapse>
+        <div class="card-footer" v-if="false"></div>
+    </div>
 </template>
 
 <script lang="ts">

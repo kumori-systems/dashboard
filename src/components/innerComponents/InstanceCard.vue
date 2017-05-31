@@ -1,10 +1,20 @@
 <template>
-    <div class="card">
-        <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
-        <span class="title">{{instanceId}}</span> {{instanceMem}} MEM {{instanceCPU}} CPU {{instanceNet}} NET
-        <input type="checkbox" id="killInstance">
-        <label for="killInstance">kill instance</label>
-        <chart v-bind:data="instanceChartData"></chart>
+    <div class="tile">
+        <div class="content" id="instancecontent">
+            <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
+            <span class="title">{{instanceId}}</span>
+            <span>{{instanceMem}} MEM</span>
+            <span>{{instanceCPU}} CPU</span>
+            <span>{{instanceNet}} NET</span>
+            <span>
+                <span>&#160;</span>
+                <input type="checkbox" id="killInstance">
+                <label for="killInstance">kill instance</label>
+            </span>
+        </div>
+        <div class="tile is-child is-4">
+            <chart v-bind:data="instanceChartData"></chart>
+        </div>
     </div>
 </template>
 <script lang="ts">
@@ -62,16 +72,8 @@ export default class Card extends Vue {
     }
 }
 </script>
-
 <style lang="scss">
-$padding: 10px;
-
-.card {
-    padding: $padding;
-    margin: $padding;
-}
-
-.title {
-    padding: $padding;
+#instancecontent{
+    padding-top: 100px;
 }
 </style>

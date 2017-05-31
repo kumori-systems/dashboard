@@ -46,15 +46,17 @@ export default class Card extends Vue {
             xAxes: [{
                 display: true,
                 scaleLabel: {
-                    display: true,
-                    labelString: 'Time'
+                    display: true
                 }
             }],
             yAxes: [{
                 display: true,
                 scaleLabel: {
-                    display: true,
-                    labelString: 'Value'
+                    display: true
+                },
+                ticks: {
+                    suggestedMin: 0,
+                    suggestedMax: 100
                 }
             }]
         }

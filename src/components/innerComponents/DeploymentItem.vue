@@ -20,7 +20,7 @@
                         <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                 </p>
                 </div>
-                <div class="tile">
+                <div class="tile is-parent">
                     <chart v-bind:data="deploymentChartData"></chart>
                 </div>
             </div>

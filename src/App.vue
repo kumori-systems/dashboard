@@ -145,4 +145,8 @@ $state_icon_size: 50px;
 .inner-content {
 	padding: $padding;
 }
+
+.left-padding {
+	padding-left: $padding;
+}
 </style>
