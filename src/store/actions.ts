@@ -26,6 +26,7 @@ export default {
                 });
             }
             commit('addDeploymentMenuItem', { 'deploymentList': res });
+            dispatch('getMetrics');
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
             console.error('Error manejando los deployments: ' + error);
         });

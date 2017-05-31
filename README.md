@@ -6,6 +6,8 @@ DECISIONES IMPORTANTES
 - Sólo los innerComponents tendrán props y será el id del elemento al que representan.
 - No se obtendrán elementos de la estore complejos (Objetos), ya que se ha comprobado que puede dar problemas al refrescar.
 
+- He cambiado los valores de los identificadores en el archivo de métricas para que coincidan con los deployment locales.
+- He añadido un parámetro en el archivo de métricas. Este parámetro es para saber a qué instáncia corresponde cada métrica.
 
 PREGUNTAS
 ---------------------------------------------------------

@@ -467,27 +467,110 @@ export function getMetrics() {
         let res: {
             [deploymentId: string]: {
                 [rolId: string]: {
-                    [instanceId: string]: {
-                        'cpu': Array<number>,
-                        'mem': Array<number>,
-                        'net': Array<number>,
-                        'rpm': Array<number>,
-                        'res': Array<number>
-                    }
+                    [instanceId: string]: Array<{
+                        'time': string,
+                        'cpu': number,
+                        'mem': number,
+                        'net_in': number,
+                        'net_out': number,
+                        'rpm': number,
+                        'res': number
+                    }>
                 }
             }
         } = {};
-        // Deberíamos de devolver una estructura que se pueda utilizar para añadi diréctamente
 
-        // DeploymentId
-            // Rol
-                // Instáncia
-                    // Métrica CPU
-                    // Métrica MEM
-                    // Métrica NET
-                    // Métrica RPM (Request Per Minute)
-                    // Métrica RES (Response Time)
+        // Cogemos el intervalo, calculamos el tiempo que hay entre los dos
 
+        // TODO: pasar timeInterval al tipo Date
+        let tiempoInicio = parsedBody.timeinterval.init;
+        let tiempoFin = parsedBody.timeinterval.end;
+        let intervaloTiempo = tiempoFin - tiempoInicio;
+        // dividimos el resultado en 4
+        let incremento = intervaloTiempo / 4;
+
+        // Recorremos los servicios
+        for (let serviceId in parsedBody.deployments) {
+            console.log('serviceId: ' + serviceId);
+            // Por cada servicio entramos en el deployment
+            for (let deploymentId in parsedBody.deployments[serviceId]) {
+                console.log('deploymentId: ' + deploymentId);
+                for (let componentId in parsedBody.deployments[serviceId][deploymentId]) {
+                    console.log('componentId: ' + componentId);
+                    for (let rolId in parsedBody.deployments[serviceId][deploymentId][componentId]) {
+                        console.log('rolId: ' + rolId);
+                        for (let instanceId in parsedBody.deployments[serviceId][deploymentId][componentId][rolId]) {
+                            console.log('instanceId: ' + instanceId);
+                            console.log('CREAMOS LISTA');
+                            if (!res[deploymentId]) res[deploymentId] = {};
+                            if (!res[deploymentId][rolId]) res[deploymentId][rolId] = {};
+                            res[deploymentId][rolId][instanceId] = [];
+                            console.log('LISTA CREADA');
+
+                            if (serviceId.split('/')[5] === 'inbound') {
+                                console.log('ES UN INBOUND');
+                            } else {
+
+                                let cpu = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter1;
+                                console.log('OBTENIDA CPU');
+                                let mem = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter1;
+                                console.log('OBTENIDA MEM');
+                                let netIn = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter1;
+                                console.log('OBTENIDA NET_IN');
+                                let netOut = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter1;
+                                console.log('OBTENIDA NET_OUT');
+
+                                res[deploymentId][rolId][instanceId].push( // Primer cuarto
+                                    {
+                                        'time': tiempoInicio,
+                                        'cpu': cpu,
+                                        'mem': mem,
+                                        'net_in': netIn,
+                                        'net_out': netOut,
+                                        'rpm': 0,
+                                        'res': 0
+                                    }
+                                );
+                                res[deploymentId][rolId][instanceId].push( // Segundo cuarto
+                                    {
+                                        'time': tiempoInicio + incremento,
+                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter2,
+                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter2,
+                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter2,
+                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter2,
+                                        'rpm': 0,
+                                        'res': 0
+                                    }
+                                );
+                                res[deploymentId][rolId][instanceId].push( // Tercer cuarto
+                                    {
+                                        'time': tiempoInicio + incremento + incremento,
+                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter3,
+                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter3,
+                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter3,
+                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter3,
+                                        'rpm': 0,
+                                        'res': 0
+                                    }
+                                );
+                                res[deploymentId][rolId][instanceId].push( // Cuarto cuarto
+                                    {
+                                        'time': tiempoFin,
+                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter4,
+                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter4,
+                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter4,
+                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter4,
+                                        'rpm': 0,
+                                        'res': 0
+                                    }
+                                );
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return res;
     });
 }

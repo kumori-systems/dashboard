@@ -1,3 +1,4 @@
+import { Deployment } from './classes';
 export default {
   setStampState(state, stampState) {
     // actualizamos el estado del stamp
@@ -45,5 +46,26 @@ export default {
     console.log('Reiniciamos el estado temporal');
     state.temporaryState = {};
   },
+  addMetrics(state, metrics) {
+    console.log('LAS METRICAS QUE LEGAN A LA MUTACION SON: ' + JSON.stringify(metrics));
+
+    for (let deploymentId in metrics) {
+      for (let rolId in metrics[deploymentId]) {
+        for (let instanceId in metrics[deploymentId][rolId]) {
+          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
+            metrics[deploymentId][rolId][instanceId].time,
+            metrics[deploymentId][rolId][instanceId].cpu,
+            metrics[deploymentId][rolId][instanceId].mem,
+            metrics[deploymentId][rolId][instanceId].net_in,
+            metrics[deploymentId][rolId][instanceId].net_out,
+            metrics[deploymentId][rolId][instanceId].rpm,
+            metrics[deploymentId][rolId][instanceId].res
+          );
+        }
+      }
+    }
+
+
+  }
 
 };

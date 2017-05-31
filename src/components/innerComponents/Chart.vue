@@ -14,7 +14,7 @@ const MEM_COLOR = '#3b80ef';
 const NET_COLOR = '#d7e516';
 const RPM_COLOR = '#47f75f';
 const RES_COLOR = '#e87e14';
-const TIME_FORMAT = 'YYYY/MM/DDTHH:mm:ssZ';
+const TIME_FORMAT = 'YYYYMMDDTHH:mm:ssZ';
 
 function newDate(days) {
     return moment(days).toDate();
@@ -52,13 +52,12 @@ export default class Card extends Vue {
             xAxes: [{
                 type: "time",
                 time: {
-                    format: TIME_FORMAT,
+                    // format: TIME_FORMAT,
                     // round: 'day'
-                    tooltipFormat: 'll HH:mm'
+                    // tooltipFormat: 'll HH:mm'
                 },
                 scaleLabel: {
-                    display: true,
-                    labelString: 'Date'
+                    display: true
                 }
             }],
             yAxes: [{
