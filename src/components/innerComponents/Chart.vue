@@ -7,12 +7,18 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import VueCharts from 'vue-bulma-chartjs/src/Chartjs.vue';
+import moment from 'moment';
 
 const CPU_COLOR = '#f44141';
 const MEM_COLOR = '#3b80ef';
 const NET_COLOR = '#d7e516';
 const RPM_COLOR = '#47f75f';
 const RES_COLOR = '#e87e14';
+const TIME_FORMAT = 'YYYY/MM/DDTHH:mm:ssZ';
+
+function newDate(days) {
+    return moment(days).toDate().toLocaleString()
+}
 
 @Component({
     name: 'chart',
@@ -37,17 +43,15 @@ export default class Card extends Vue {
         legend: {
             display: true,
             position: 'right',
-            labels:{
-                boxWidth:15,
-                padding: 20
+            labels: {
+                boxWidth: 15,
+                padding: 15
             }
         },
         scales: {
             xAxes: [{
                 display: true,
-                scaleLabel: {
-                    display: true
-                }
+                time: {}
             }],
             yAxes: [{
                 display: true,
@@ -64,7 +68,8 @@ export default class Card extends Vue {
 
     get chartData() {
         return {
-            labels: ["1/1/17", "2/1/17", "3/1/17", "4/1/17", "5/1/17", "6/1/17", "7/1/17"],
+            labels: [newDate("20130208T080910"), newDate("20130208T080911"), newDate("20130208T080912"),
+            newDate("20130208T080913"), newDate("20130208T080914"), newDate("20130208T080915"), newDate("20130208T080916")],
             datasets: [
                 {
                     label: "CPU",
