@@ -68,8 +68,8 @@ export default {
     undeployDeployment({ commit }, { deploymentId }) {
         connection.undeployDeployment(deploymentId);
     },
-    setTemporaryState({ commit }, temporaryState) {
-        commit('setTemporaryState', temporaryState);
+    aplyingChangesToDeployment({ commit }, changes) {
+        connection.aplyChangesToDeployment(changes);
     },
     createNewHTTPENtrypoint({ }, params) {
         connection.createNewHTTPENtrypoint(params);

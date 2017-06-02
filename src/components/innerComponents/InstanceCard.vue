@@ -8,7 +8,7 @@
             <span>{{instanceNet}} NET</span>
             <span>
                 <span>&#160;</span>
-                <input type="checkbox" id="killInstance">
+                <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
                 <label for="killInstance">kill instance</label>
             </span>
         </div>
@@ -29,7 +29,8 @@ import { State } from '../../store/classes';
     props: {
         deploymentId: { required: true, type: String },
         rolId: { required: true, type: String },
-        instanceId: { required: true, type: String }
+        instanceId: { required: true, type: String },
+        clear: { required: true, type: Boolean } // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
     },
     components: {
         'collapse': Collapse,
@@ -41,6 +42,15 @@ export default class Card extends Vue {
     deploymentId: string = this.deploymentId;
     rolId: string = this.rolId;
     instanceId: string = this.instanceId;
+    killInstance: boolean = false;
+    mounted(){
+        this.$watch('clear', function(value){
+            if(value == true){
+                this.killInstance = false;
+            }
+        })
+    }
+
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
@@ -70,10 +80,18 @@ export default class Card extends Vue {
     get instanceChartData(): any {
         return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
     }
+
+    /**
+     * Éste método se utiliza para enviar una notificación al componente superior para que lea que
+     * se ha cambiado el valor de 'kill instance'
+     */
+    killInstanceChange() {
+        this.$emit('killInstanceChange', [this.instanceId, this.killInstance]);
+    }
 }
 </script>
 <style lang="scss">
-#instancecontent{
+#instancecontent {
     padding-top: 100px;
 }
 </style>

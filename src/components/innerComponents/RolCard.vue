@@ -42,7 +42,7 @@
         </div>
         <collapse>
             <collapse-item title="View instances">
-                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" />
+                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear" />
             </collapse-item>
         </collapse>
         <div class="card-footer" v-if="false"></div>
@@ -61,7 +61,8 @@ import { Channel, State } from '../../store/classes';
     name: 'rol-card',
     props: {
         deploymentId: { required: true, type: String },
-        rolId: { required: true, type: String }
+        rolId: { required: true, type: String },
+        clear: { required: true, type: Boolean } // Se utiliza para limpiar los cambios cuando se cancelan
     },
     components: {
         'collapse': Collapse,
@@ -73,12 +74,23 @@ import { Channel, State } from '../../store/classes';
 export default class Card extends Vue {
     deploymentId: string = this.deploymentId;
     rolId: string = this.rolId;
+    localNumInstances: number = -1;
 
     rolChartOptions: any = {
         tooltips: { mode: 'label' },
         showLines: true,
         spanGaps: false
     };
+
+    mounted() {
+        this.$watch('clear', function (value) {
+            if (value === true) {
+                // Limpiamos el estado temporal
+                this.localNumInstances = -1;
+                this.$emit('clearedRol');
+            }
+        });
+    }
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
@@ -93,19 +105,18 @@ export default class Card extends Vue {
         }
     }
     get numInstances(): number {
-        let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
-        if (!temporaryState)
-            return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, this.rolId);
-        else return temporaryState.numInstances;
+        // Miramos el número de instáncias local. ¿Está inicializado?
+        if (this.localNumInstances < 0) {
+            this.localNumInstances = this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, this.rolId);
+        }
+        return this.localNumInstances;
     }
 
     set numInstances(x: number) {
-
-        let temporaryState = this.$store.getters.getDeploymetRolTemporaryState(this.deploymentId, this.rolId);
-        if (temporaryState)
-            this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: temporaryState.numInstances + x });
-        else
-            this.$store.dispatch('changeTemporaryState', { deploymentId: this.deploymentId, rolId: this.rolId, numInstances: this.numInstances + x });
+        if (this.localNumInstances !== 0 || x != -1) {
+            this.localNumInstances += x;
+            this.$emit('numInstancesChange', [this.rolId, this.localNumInstances]);
+        }
 
     }
 
@@ -145,6 +156,14 @@ export default class Card extends Vue {
 
     get rolProConnectedTo(): Array<Channel> {
         return this.$store.getters.getDeploymentRolProConnectedTo(this.deploymentId, this.rolId);
+    }
+    /**
+     * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo
+     * al deployment para que lo almacene en un estado temporal
+     */
+    handleKillInstanceChange(payload) {
+        this.$emit('killInstanceChange', [this.rolId, ...payload]);
+
     }
 }
 </script>

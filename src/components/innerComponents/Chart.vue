@@ -126,7 +126,6 @@ export default class Card extends Vue {
             'res': number
         }> = this.$store.getters.getChartData(this.deploymentId, this.rolId, this.instanceId);
 
-
         for (let metricsIndex in metrics) {
             // Esto es lo que está dando error
             res.labels.push(metrics[metricsIndex].time);
@@ -136,8 +135,6 @@ export default class Card extends Vue {
             res.datasets[3].data.push(metrics[metricsIndex].rpm);
             res.datasets[4].data.push(metrics[metricsIndex].res);
         }
-
-
 
         return res;
     }

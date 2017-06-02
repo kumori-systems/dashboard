@@ -507,3 +507,7 @@ export function getMetrics() {
         return res;
     });
 }
+
+export function aplyChangesToDeployment(changes) {
+    console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
+}
