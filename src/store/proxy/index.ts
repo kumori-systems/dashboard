@@ -1,5 +1,5 @@
 import { State, Deployment, Link, DeploymentRol, Runtime, Channel, Instance, Resource, Component, Service, ServiceRol } from './../classes';
-
+import moment from 'moment';
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
     const promesa = new Promise(function (resolve, reject) {
@@ -44,7 +44,7 @@ export function getStampState() {
                         version.resources[resourceIndex].resource.name,
                         version.resources[resourceIndex].resource.parameters
                     );
-                    console.log('NEW resource(' + resourceIndex
+                    console.info('NEW resource(' + resourceIndex
                         + '):\nname: ' + resourcesList[resourceIndex].realName
                         + '\nparameters: ' + JSON.stringify(resourcesList[resourceIndex].parameters));
                 }
@@ -57,7 +57,7 @@ export function getStampState() {
                         version.service.roles[rolIndex].resources, // Viene con el formato que vamos a utilizar
                         version.service.roles[rolIndex].parameters,
                     );
-                    console.log('NEW rol(' + version.service.roles[rolIndex].name
+                    console.info('NEW rol(' + version.service.roles[rolIndex].name
                         + '):\ncomponent: ' + serviceRoles[version.service.roles[rolIndex].name].component
                         + '\nresources: ' + JSON.stringify(serviceRoles[version.service.roles[rolIndex].name].resources)
                         + '\nparameters: ' + JSON.stringify(serviceRoles[version.service.roles[rolIndex].name].parameters));
@@ -92,7 +92,7 @@ export function getStampState() {
                         connections
                     );
 
-                    console.log('NEW service-proChannel(' + channelId
+                    console.info('NEW service-proChannel(' + channelId
                         + '):\ntype: ' + serviceProChannels[channelId].type
                         + '):\nprotocol: ' + serviceProChannels[channelId].protocol
                         + '):\nconnectedTo: ' + JSON.stringify(serviceProChannels[channelId].connectedTo)
@@ -125,7 +125,7 @@ export function getStampState() {
                         connections
                     );
 
-                    console.log('NEW service-reqChannel(' + channelId
+                    console.info('NEW service-reqChannel(' + channelId
                         + '):\ntype: ' + serviceReqChannels[channelId].type
                         + '):\nprotocol: ' + serviceReqChannels[channelId].protocol
                         + '):\nconnectedTo: ' + JSON.stringify(serviceReqChannels[channelId].connectedTo)
@@ -146,7 +146,6 @@ export function getStampState() {
                     }
                     // Provide channels
                     let proChannels: { [channelId: string]: Channel } = {};
-                    console.log('INI');
                     for (let proChannelIndex in components[componentIndex].channels.provides) {
                         // Buscamos las conexiones del canal
                         let channelId = components[componentIndex].channels.provides[proChannelIndex].name;
@@ -172,13 +171,12 @@ export function getStampState() {
                             connections
                         );
 
-                        console.log('NEW component-proChannel(' + channelId
+                        console.info('NEW component-proChannel(' + channelId
                             + '):\ntype: ' + proChannels[channelId].type
                             + '):\nprotocol: ' + proChannels[channelId].protocol
                             + '):\nconnectedTo: ' + JSON.stringify(proChannels[channelId].connectedTo)
                         );
                     }
-                    console.log('FIN');
 
                     // Require channels
                     let reqChannels: { [channelId: string]: Channel } = {};
@@ -206,7 +204,7 @@ export function getStampState() {
                             components[componentIndex].channels.requires[reqChannelIndex].protocol,
                             connections
                         );
-                        console.log('NEW component-reqChannel(' + channelId
+                        console.info('NEW component-reqChannel(' + channelId
                             + '):\ntype: ' + reqChannels[channelId].type
                             + '):\nprotocol: ' + reqChannels[channelId].protocol
                             + '):\nconnectedTo: ' + JSON.stringify(reqChannels[channelId].connectedTo)
@@ -220,7 +218,7 @@ export function getStampState() {
                         proChannels,
                         reqChannels);
 
-                    console.log('NEW component created (' + componentIndex
+                    console.info('NEW component created (' + componentIndex
                         + '):\nruntime: ' + componentList[componentIndex].runtime
                         + '\nresources: ' + JSON.stringify(componentList[componentIndex].resourcesConfig)
                         + '\nparameters: ' + componentList[componentIndex].parameters
@@ -229,7 +227,7 @@ export function getStampState() {
                 }
 
                 serviceList[serviceId] = new Service(serviceName, serviceResources, serviceParameters, serviceRoles, serviceProChannels, serviceReqChannels, serviceComponents);
-                console.log('NEW service created (' + serviceId
+                console.info('NEW service created (' + serviceId
                     + '):\nresources: ' + JSON.stringify(serviceList[serviceId].resources)
                     + '\nparameters: ' + JSON.stringify(serviceList[serviceId].parameters)
                     + '\nroles: ' + serviceList[serviceId].roles
@@ -258,7 +256,7 @@ export function getStampState() {
                         rolId
                     ) {
                         instanceList[instanceId] = new Instance(parsedBody.tcState.deployedServices[deploymentId].instanceList[instanceId].connected);
-                        console.log('NEW instance created (' + instanceId
+                        console.info('NEW instance created (' + instanceId
                             + '):\nstate: ' + JSON.stringify(instanceList[instanceId].state)
                         );
                     }
@@ -274,7 +272,7 @@ export function getStampState() {
                     instanceList
                 );
 
-                console.log('NEW deploymentRol created (' + rolId
+                console.info('NEW deploymentRol created (' + rolId
                     + '):\ninstances: ' + deploymentRoles[rolId].instances
                     + '\ncpu: ' + deploymentRoles[rolId].cpu
                     + '\nmemory: ' + deploymentRoles[rolId].memory
@@ -293,7 +291,7 @@ export function getStampState() {
 
             deploymentList[deploymentId] = new Deployment(deploymentName, deploymentServiceId, deploymentResourcesConfig, deploymentParameters, deploymentRoles, deploymentWebsite);
 
-            console.log('NEW deployment created (' + deploymentId
+            console.info('NEW deployment created (' + deploymentId
                 + '):\nname: ' + deploymentList[deploymentId].name
                 + '\nservice: ' + deploymentList[deploymentId].serviceId
                 + '\nresourcesConfig: ' + JSON.stringify(deploymentList[deploymentId].resourcesConfig)
@@ -315,7 +313,7 @@ export function getStampState() {
                     parsedBody.tcState.linkedServices[linkIndex].channel2,
                 ));
         }
-        console.log('Links in the state: ' + JSON.stringify(linkList));
+        console.info('Links in the state: ' + JSON.stringify(linkList));
 
         // Gestión de errores de conexión
         // TODO: hay que comprobar los valores de cuando se lanza un error y de cuándo no se lanzan
@@ -336,7 +334,7 @@ export function getStampState() {
 }
 
 export function undeployDeployment(deploymentId: string): void {
-    console.log('INFO: Realizamos undeploy de: ' + deploymentId);
+    console.info('INFO: Realizamos undeploy de: ' + deploymentId);
 }
 let registeredElements = require('./registered_elements_example.json');
 export function getRegisteredElements() {
@@ -397,7 +395,7 @@ export function getManifest(uri: string) {
                     proChannels, // proChannels
                     reqChannels // reqChannels
                 );
-                console.log('NEW component received (' + elementIndex
+                console.info('NEW component received (' + elementIndex
                     + '):\nruntime: ' + element.runtime
                     + '\nresources: ' + JSON.stringify(element.resourcesConfig)
                     + '\nparameters: ' + element.parameters
@@ -413,7 +411,7 @@ export function getManifest(uri: string) {
                     parsedBody.data.name,
                     parsedBody.data.parameters
                 );
-                console.log('NEW resource received(' + elementIndex
+                console.info('NEW resource received(' + elementIndex
                     + '):\nname: ' + element.realName
                     + '\nparameters: ' + element.parameters);
                 break;
@@ -437,38 +435,21 @@ export function createNewHTTPENtrypoint(params: {
     'resilence': number
 }) {
     return auxFunction().then(function ({ response, body }) {
-        console.log('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
+        console.info('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 let ejemploMetricas = require('./metrics_example.json');
 export function getMetrics() {
     return auxFunction().then(function ({ response, body }) {
+
         let parsedBody = ejemploMetricas;
 
         let res: {
             [deploymentId: string]: {
                 [rolId: string]: {
                     [instanceId: string]: Array<{
-                        'time': string,
+                        'time': Date,
                         'cpu': number,
                         'mem': number,
                         'net_in': number,
@@ -480,91 +461,43 @@ export function getMetrics() {
             }
         } = {};
 
-        // Cogemos el intervalo, calculamos el tiempo que hay entre los dos
+        for (let metricsIndex in parsedBody.metrics) { // Por cada métrica obtenida
+            for (let serviceId in parsedBody.metrics[metricsIndex].deployments) { // Recorremos los servicios
+                for (let deploymentId in parsedBody.metrics[metricsIndex].deployments[serviceId]) { // Por cada deployment del servicio
+                    for (let componentId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId]) { // Por cada componente del deployment
+                        for (let rolId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId]) { // Por cada rol del componente
+                            for (let instanceId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId]) { // Por cada instáncia del rol
+                                // Si no habíamos instanciado el deployment en el resultado lo hacemos
+                                if (!res[deploymentId]) res[deploymentId] = {};
+                                // Si no habíamos instanciado el rol en el resultado lo hacemos
+                                if (!res[deploymentId][rolId]) res[deploymentId][rolId] = {};
+                                // Inicializamos el array de la instancia en el resultado
+                                if (!res[deploymentId][rolId][instanceId]) res[deploymentId][rolId][instanceId] = [];
 
-        // TODO: pasar timeInterval al tipo Date
-        let tiempoInicio = parsedBody.timeinterval.init;
-        let tiempoFin = parsedBody.timeinterval.end;
-        let intervaloTiempo = tiempoFin - tiempoInicio;
-        // dividimos el resultado en 4
-        let incremento = intervaloTiempo / 4;
-
-        // Recorremos los servicios
-        for (let serviceId in parsedBody.deployments) {
-            console.log('serviceId: ' + serviceId);
-            // Por cada servicio entramos en el deployment
-            for (let deploymentId in parsedBody.deployments[serviceId]) {
-                console.log('deploymentId: ' + deploymentId);
-                for (let componentId in parsedBody.deployments[serviceId][deploymentId]) {
-                    console.log('componentId: ' + componentId);
-                    for (let rolId in parsedBody.deployments[serviceId][deploymentId][componentId]) {
-                        console.log('rolId: ' + rolId);
-                        for (let instanceId in parsedBody.deployments[serviceId][deploymentId][componentId][rolId]) {
-                            console.log('instanceId: ' + instanceId);
-                            console.log('CREAMOS LISTA');
-                            if (!res[deploymentId]) res[deploymentId] = {};
-                            if (!res[deploymentId][rolId]) res[deploymentId][rolId] = {};
-                            res[deploymentId][rolId][instanceId] = [];
-                            console.log('LISTA CREADA');
-
-                            if (serviceId.split('/')[5] === 'inbound') {
-                                console.log('ES UN INBOUND');
-                            } else {
-
-                                let cpu = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter1;
-                                console.log('OBTENIDA CPU');
-                                let mem = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter1;
-                                console.log('OBTENIDA MEM');
-                                let netIn = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter1;
-                                console.log('OBTENIDA NET_IN');
-                                let netOut = parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter1;
-                                console.log('OBTENIDA NET_OUT');
-
-                                res[deploymentId][rolId][instanceId].push( // Primer cuarto
-                                    {
-                                        'time': tiempoInicio,
-                                        'cpu': cpu,
-                                        'mem': mem,
-                                        'net_in': netIn,
-                                        'net_out': netOut,
-                                        'rpm': 0,
-                                        'res': 0
-                                    }
-                                );
-                                res[deploymentId][rolId][instanceId].push( // Segundo cuarto
-                                    {
-                                        'time': tiempoInicio + incremento,
-                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter2,
-                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter2,
-                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter2,
-                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter2,
-                                        'rpm': 0,
-                                        'res': 0
-                                    }
-                                );
-                                res[deploymentId][rolId][instanceId].push( // Tercer cuarto
-                                    {
-                                        'time': tiempoInicio + incremento + incremento,
-                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter3,
-                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter3,
-                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter3,
-                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter3,
-                                        'rpm': 0,
-                                        'res': 0
-                                    }
-                                );
-                                res[deploymentId][rolId][instanceId].push( // Cuarto cuarto
-                                    {
-                                        'time': tiempoFin,
-                                        'cpu': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.meanQuarter4,
-                                        'mem': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.meanQuarter4,
-                                        'net_in': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.meanQuarter4,
-                                        'net_out': parsedBody.deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.meanQuarter4,
-                                        'rpm': 0,
-                                        'res': 0
-                                    }
-                                );
-
+                                if (serviceId.split('/')[5] === 'inbound') { // Si es un inbound
+                                } else { // Si no es un inbound (servicio normal)
+                                    res[deploymentId][rolId][instanceId].push(
+                                        {
+                                            'time': moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
+                                            'cpu': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.mean * 100),
+                                            'mem': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.mean),
+                                            'net_in': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.mean * 100),
+                                            'net_out': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.mean * 100),
+                                            'rpm': 0,
+                                            'res': 0
+                                        }
+                                    );
+                                    console.info(
+                                        'NEW metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
+                                        + '):\ntime: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].time
+                                        + '\ncpu: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].cpu
+                                        + '\nmem: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].mem
+                                        + '\nnet_in: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].net_in
+                                        + '\nnet_out: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].net_out
+                                        + '\nrpm: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].rpm
+                                        + '\nres: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].res
+                                    );
+                                }
                             }
                         }
                     }

@@ -39,33 +39,29 @@ export default {
     state.hideEntrypoints = !state.hideEntrypoints;
   },
   setTemporaryState(state, temporaryState) {
-    console.log('Cambiamos el estado temporal a: ' + JSON.stringify(temporaryState));
     state.temporaryState = { ...temporaryState };
   },
   clearTemporaryState(state) {
-    console.log('Reiniciamos el estado temporal');
     state.temporaryState = {};
   },
   addMetrics(state, metrics) {
-    console.log('LAS METRICAS QUE LEGAN A LA MUTACION SON: ' + JSON.stringify(metrics));
 
     for (let deploymentId in metrics) {
       for (let rolId in metrics[deploymentId]) {
         for (let instanceId in metrics[deploymentId][rolId]) {
-          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
-            metrics[deploymentId][rolId][instanceId].time,
-            metrics[deploymentId][rolId][instanceId].cpu,
-            metrics[deploymentId][rolId][instanceId].mem,
-            metrics[deploymentId][rolId][instanceId].net_in,
-            metrics[deploymentId][rolId][instanceId].net_out,
-            metrics[deploymentId][rolId][instanceId].rpm,
-            metrics[deploymentId][rolId][instanceId].res
-          );
+          for (let metrica in metrics[deploymentId][rolId][instanceId])
+            (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
+              metrics[deploymentId][rolId][instanceId][metrica].time,
+              metrics[deploymentId][rolId][instanceId][metrica].cpu,
+              metrics[deploymentId][rolId][instanceId][metrica].mem,
+              metrics[deploymentId][rolId][instanceId][metrica].net_in,
+              metrics[deploymentId][rolId][instanceId][metrica].net_out,
+              metrics[deploymentId][rolId][instanceId][metrica].rpm,
+              metrics[deploymentId][rolId][instanceId][metrica].res
+            );
         }
       }
     }
-
-
   }
 
 };

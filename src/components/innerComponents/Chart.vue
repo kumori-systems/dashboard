@@ -1,5 +1,5 @@
 <template>
-    <chartjs v-bind:data="chartData" v-bind:type="'line'" v-bind:options="options">
+    <chartjs class ="box" v-bind:data="chartData" v-bind:type="'line'" v-bind:options="options">
     </chartjs>
 </template>
 <script lang="ts">
@@ -14,28 +14,22 @@ const MEM_COLOR = '#3b80ef';
 const NET_COLOR = '#d7e516';
 const RPM_COLOR = '#47f75f';
 const RES_COLOR = '#e87e14';
-const TIME_FORMAT = 'YYYYMMDDTHH:mm:ssZ';
-
-function newDate(days) {
-    return moment(days).toDate();
-}
 
 @Component({
     name: 'chart',
-    props: {
-        data: { required: true }
+    props: { // Lo mejor es obtener los datos del componente al que representa
+        deploymentId: { required: true, type: String },
+        rolId: { required: false, type: String },
+        instanceId: { required: false, type: String }
     },
     components: {
         'chartjs': VueCharts
     }
 })
 export default class Card extends Vue {
-    data = this.data;
-    cpuData = [80, 85, 90, 70, 75, 80, 85];
-    memData = [50, 55, 60, 65, 70, 75, 80];
-    netData = [20, 22, 24, 15, 17, 20, 22];
-    rpmData = [100, 200, 350, 450, 200, 250, 350];
-    resData = [5, 10, 5, 5, 5, 5, 5];
+    deploymentId: string = this.deploymentId; // SIEMPRE tendremos este valor
+    rolId: string = this.rolId; // No tendremos este valor si es un deployment
+    instanceId: string = this.instanceId; // No tendremos este valor si es un rol o un deployment
 
     options = {
         responsive: true,
@@ -52,12 +46,19 @@ export default class Card extends Vue {
             xAxes: [{
                 type: "time",
                 time: {
-                    // format: TIME_FORMAT,
-                    // round: 'day'
-                    // tooltipFormat: 'll HH:mm'
-                },
-                scaleLabel: {
-                    display: true
+                    /*
+                    displayFormats: { // COnfiguramos todos porque no sabemos el rango de tiempo que vamos a recibir
+                        'millisecond': 'MMM DD',
+                        'second': 'MMM DD',
+                        'minute': 'MMM DD',
+                        'hour': 'MMM DD',
+                        'day': 'MMM DD',
+                        'week': 'MMM DD',
+                        'month': 'MMM DD',
+                        'quarter': 'MMM DD',
+                        'year': 'MMM DD',
+                    }
+                    */
                 }
             }],
             yAxes: [{
@@ -74,47 +75,71 @@ export default class Card extends Vue {
     }
 
     get chartData() {
-        return {
-            labels: [newDate("20130208T080910"), newDate("20130208T080911"), newDate("20130208T080912"),
-            newDate("20130208T080913"), newDate("20130208T080914"), newDate("20130208T080915"), newDate("20130208T080916")],
-            datasets: [
+        let res = {
+            'labels': [],
+            'datasets': [
                 {
                     label: "CPU",
                     fill: false,
                     backgroundColor: CPU_COLOR,
                     borderColor: CPU_COLOR,
-                    data: this.cpuData
+                    data: []
                 },
                 {
                     label: "MEM",
                     fill: false,
                     backgroundColor: MEM_COLOR,
                     borderColor: MEM_COLOR,
-                    data: this.memData
+                    data: []
                 },
                 {
                     label: "NET",
                     fill: false,
                     backgroundColor: NET_COLOR,
                     borderColor: NET_COLOR,
-                    data: this.netData
+                    data: []
                 },
                 {
-                    label: "RPM", // Request Per Minute
+                    label: "RPM",
                     fill: false,
                     backgroundColor: RPM_COLOR,
                     borderColor: RPM_COLOR,
-                    data: this.rpmData
+                    data: []
                 },
                 {
-                    label: "RES", // Response Time
+                    label: "RES",
                     fill: false,
                     backgroundColor: RES_COLOR,
                     borderColor: RES_COLOR,
-                    data: this.resData
+                    data: []
                 }
             ]
+        };
+
+        let metrics: Array<{
+            'time': Date,
+            'cpu': number,
+            'mem': number,
+            'net_in': number,
+            'net_out': number,
+            'rpm': number,
+            'res': number
+        }> = this.$store.getters.getChartData(this.deploymentId, this.rolId, this.instanceId);
+
+
+        for (let metricsIndex in metrics) {
+            // Esto es lo que está dando error
+            res.labels.push(metrics[metricsIndex].time);
+            res.datasets[0].data.push(metrics[metricsIndex].cpu);
+            res.datasets[1].data.push(metrics[metricsIndex].mem);
+            res.datasets[2].data.push(metrics[metricsIndex].net_in + metrics[metricsIndex].net_out);
+            res.datasets[3].data.push(metrics[metricsIndex].rpm);
+            res.datasets[4].data.push(metrics[metricsIndex].res);
         }
+
+
+
+        return res;
     }
 }
 </script>

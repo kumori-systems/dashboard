@@ -13,7 +13,7 @@
             </span>
         </div>
         <div class="tile is-child is-4">
-            <chart v-bind:data="instanceChartData"></chart>
+            <chart v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instanceId"></chart>
         </div>
     </div>
 </template>

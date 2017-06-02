@@ -6,7 +6,7 @@ export class Runtime {
 export class Instance {
     state: State;
     metrics: Array<{
-        'time': string,
+        'time': Date,
         'cpu': number,
         'mem': number,
         'net_in': number,
@@ -27,7 +27,7 @@ export class Instance {
         }
         this.metrics = [];
     }
-    addMetrics(time: string, cpu: number, mem: number, netIn: number, netOut: number, rpm: number, res: number) {
+    addMetrics(time: Date, cpu: number, mem: number, netIn: number, netOut: number, rpm: number, res: number) {
         this.metrics.push({
             'time': time,
             'cpu': cpu,

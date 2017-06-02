@@ -36,7 +36,7 @@
     
             </div>
             <div class="tile is-child is-4">
-                <chart v-bind:data="rolChartData"></chart>
+                <chart v-bind:deploymentId="deploymentId" v-bind:rolId="rolId"></chart>
             </div>
     
         </div>

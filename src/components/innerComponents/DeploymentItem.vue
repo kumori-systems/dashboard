@@ -20,8 +20,8 @@
                         <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                 </p>
                 </div>
-                <div class="tile is-parent">
-                    <chart v-bind:data="deploymentChartData"></chart>
+                <div class="tile is-child">
+                    <chart v-bind:deploymentId="deploymentId"></chart>
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" />

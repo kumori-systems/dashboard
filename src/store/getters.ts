@@ -1,6 +1,5 @@
 import { Deployment, DeploymentRol, Component, Service, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
-
   /* GENERAL */
   sidebar: function (state) {
     return state.sidebar;
@@ -379,12 +378,15 @@ export default {
       return getters.getDeploymentRolNetNumber(deploymentId, rolId);
     };
   },
-
   getDeploymentRolInstanceChartData: function (state): Function {
-    return function (deploymentId: string, rolId: string, InstanceId: string): Object {
-      return [10, 20, 40, 5, 35];
+    return function (deploymentId: string, rolId: string, instanceId: string): Array<{
+      'time': Date, 'cpu': number, 'mem': number, 'net_in': number, 'net_out': number, 'rpm': number, 'res': number
+    }> {
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
     };
   },
+
+
 
   getComponentList: function (state): Array<string> {
     // Buscamos en cada servicio todos los componentes que poseen
@@ -602,5 +604,20 @@ export default {
   },
   getTemporaryState: function (state) {
     return state.temporaryState;
+  },
+
+  getChartData: function (state, getters): Function {
+    return function (deploymentId: string, rolId?: string, instanceId?: string): Object {
+      if (rolId !== undefined) {
+        if (instanceId !== undefined) { // Chart de una instancia
+          return getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId);
+        }
+        else { // Chart de un rol
+          return getters.getDeploymentRolChartData(deploymentId, rolId);
+        }
+      } else { // Chart de un deployment
+        return getters.getDeploymentChartData(deploymentId);
+      }
+    };
   }
 };
