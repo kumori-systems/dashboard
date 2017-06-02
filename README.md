@@ -9,6 +9,19 @@ DECISIONES IMPORTANTES
 - He cambiado los valores de los identificadores en el archivo de métricas para que coincidan con los deployment locales.
 - He añadido un parámetro en el archivo de métricas. Este parámetro es para saber a qué instáncia corresponde cada métrica.
 
+
+PROBLEMAS RENDERIZACION CHARTS
+---------------------------------------------------------
+Actualmente tengo problemas con la renderización de los charts. Los problemas no vienen dados por los eventos que llaman
+a la store, sino por algo que parece interno de chart.js.
+PORQUÉ:
+    -> Si los datos no son dinámicos, sino estáticos, seguimos con el mismo problema
+    -> El problema parece que es para determinar el intervalo en el que enseñar las fechas
+    -> Con una fecha todo funciona bien
+    -> Cuando aparece más de una fecha las cosas empiezan a fallar
+    -> Anteriormente conseguía cargar 36 puntos en 2 segundos. No sé qué ha pasado que ahora tarda 20 segundos en cargar 2 puntos.
+
+
 PREGUNTAS
 ---------------------------------------------------------
 // Cuándo listas vacías
