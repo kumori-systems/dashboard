@@ -85,6 +85,7 @@
     "vue-bulma-chartjs": "^1.0.4",
     "vue-bulma-collapse": "^1.0.3",
     "vue-bulma-expanding": "0.0.1",
+    "vue-bulma-modal": "^1.0.1",
     "vue-bulma-tooltip": "^1.0.3",
     "vue-class-component": "^5.0.0",
     "vue-loader": "^11.1.4",

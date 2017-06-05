@@ -17,9 +17,10 @@
         <collapse>
             <collapse-item title="Components">
                 <p v-for="componentId in componentList" v-bind:key="componentId">
-                    {{componentId}} {{getComponentVersion(componentId)}} {{getComponentOwner(componentId)}}
-                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)"> in use </span>
-                    <button class="button">
+                    {{componentId}} {{getComponentVersion(componentId)}}
+                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
+                    {{getComponentOwner(componentId)}}
+                    <button class="button" v-on:click="openModal(componentId)">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
                     <button class="button" v-on:click="deleteElement(componentId)">
@@ -32,9 +33,9 @@
                 <p v-for="serviceId in serviceList" v-bind:key="serviceId">
                     <span>{{getServiceName(serviceId)}}</span>
                     <span>{{getServiceVersion(serviceId)}}</span>
-                    <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)"> in use </span>
+                    <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
                     <span>{{getServiceOwner(serviceId)}}</span>
-                    <button class="button">
+                    <button class="button" v-on:click="openModal(serviceId)">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
                     <button class="button" v-on:click="deleteElement(serviceId)">
@@ -45,7 +46,8 @@
                         <button class="button" v-on:click="selectedService(serviceId)">
                             <i class="fa fa-play" aria-hidden="true"></i>
                         </button>
-                    </router-link><router-link v-else v-bind:to="'newWebServiceAdvanced'">
+                    </router-link>
+                    <router-link v-else v-bind:to="'newWebServiceAdvanced'">
                         <button class="button" v-on:click="selectedService(serviceId)">
                             <i class="fa fa-play" aria-hidden="true"></i>
                         </button>
@@ -57,9 +59,9 @@
             <collapse-item title="Runtimes">
                 <p v-for="runtimeId in runtimeList" v-bind:key="runtimeId">
                     {{runtimeId}} {{getRuntimeVersion(runtimeId)}}
-                    <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)"> in use </span>
+                    <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
                     {{getRuntimeOwner(runtimeId)}}
-                    <button class="button">
+                    <button class="button" v-on:click="openModal(runtimeId)">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
                     <button class="button" v-on:click="deleteElement(runtimeId)">
@@ -69,6 +71,7 @@
                 </p>
             </collapse-item>
         </collapse>
+        <modal v-bind:visible="showModal" v-bind:title="elementURN" v-on:close="closeModal"></modal>
     </div>
 </template>
 
@@ -78,15 +81,19 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
+import Modal from '../innerComponents/Modal.vue';
 
 @Component({
     name: 'Elements',
     components: {
         'collapse': Collapse,
-        'collapse-item': CollapseItem
+        'collapse-item': CollapseItem,
+        'modal': Modal
     }
 })
 export default class Elements extends Vue {
+    showModal: boolean = false;
+    elementURN: string = '';
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
@@ -165,8 +172,15 @@ export default class Elements extends Vue {
     }
 
     selectedService(serviceId) {
-        console.log('El servicio que seleccionamos es: ' + serviceId);
         this.$store.dispatch('selectedService', serviceId);
+    }
+
+    openModal(elementId: string) {
+        this.elementURN = elementId;
+        this.showModal = true;
+    }
+    closeModal() {
+        this.showModal = false;
     }
 
 }
