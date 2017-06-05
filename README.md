@@ -63,3 +63,8 @@ POSIBLE SOLUCIÓN:
         1- CPU, MEM, NET
         2- RPM (Request Per Minute)
         3- RES (Response Time)
+
+// Vista elements, nombres cortos (en storyboard vista storage)
+Actualmente tengo entendido que únicamente los servicios y los deployments poseen nombres cortos.
+En la imágen da a entender que posiblemente queráis añadir nombres cortos también a los componentes y a los runtimes.
+¿Es así?

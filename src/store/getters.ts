@@ -389,12 +389,9 @@ export default {
 
 
   getComponentList: function (state): Array<string> {
-    // Buscamos en cada servicio todos los componentes que poseen
     let res = [];
-    for (let servicetIndex in state.serviceList) {
-      for (let componentId in (<Service>state.serviceList[servicetIndex]).components) {
-        res.push(componentId);
-      }
+    for (let componentIndex in state.componentList) {
+      res.push(componentIndex);
     }
     return res;
   },

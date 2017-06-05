@@ -69,7 +69,9 @@ export default class Elements extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get componentList() {
-        return this.$store.getters.getComponentList;
+        let res = this.$store.getters.getComponentList;
+        console.log('En la vista elements, la lista de componentes contiene: ' + res);
+        return res;
     }
 
     get serviceList() {
