@@ -20,18 +20,21 @@
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">delete</button>
-                    <button class="button">create new deployment</button>
+                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
             <collapse-item title="Services">
-                <p v-for="service in serviceList" v-bind:key="service">{{service}}
+                <p v-for="serviceId in serviceList" v-bind:key="serviceId">
+                    <span>{{getServiceName(serviceId)}}</span>
+                    <span>{{getServiceVersion(serviceId)}}</span>
+                    <span v-if="getIsServiceInUse(serviceId)"> in use </span>
+                    <span>{{getServiceOwner(serviceId)}}</span>
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">delete</button>
-                    <button class="button">create new deployment</button>
+                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    <button class="button"><i class="fa fa-play" aria-hidden="true"></i></button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
@@ -40,8 +43,7 @@
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">delete</button>
-                    <button class="button">create new deployment</button>
+                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
@@ -69,13 +71,31 @@ export default class Elements extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get componentList() {
-        let res = this.$store.getters.getComponentList;
-        console.log('En la vista elements, la lista de componentes contiene: ' + res);
-        return res;
+        return this.$store.getters.getComponentList;
     }
 
     get serviceList() {
         return this.$store.getters.getWebServiceList;
+    }
+    get getServiceName() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceName(serviceId);
+        };
+    }
+    get getServiceVersion() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceVersion(serviceId);
+        };
+    }
+    get getIsServiceInUse() {
+        return (serviceId) => {
+            return this.$store.getters.getIsServiceInUse(serviceId);
+        };
+    }
+    get getServiceOwner() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceOwner(serviceId);
+        };
     }
 
     get runtimeList() {

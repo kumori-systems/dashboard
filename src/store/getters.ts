@@ -386,8 +386,6 @@ export default {
     };
   },
 
-
-
   getComponentList: function (state): Array<string> {
     let res = [];
     for (let componentIndex in state.componentList) {
@@ -479,6 +477,37 @@ export default {
   },
   getCertificateList: function (state) {
     return ['cert1', 'cert2', 'cert3'];
+  },
+  getServiceName: function (state) {
+    return (serviceId) => {
+      return (<Service>state.serviceList[serviceId]).name;
+    };
+  },
+  getServiceVersion: function (state) {
+    return (serviceId: string) => {
+
+      // En el id debería de estar la versión del servicio
+      let splitted = serviceId.split('/');
+      return splitted[splitted.length - 1];
+
+    };
+  },
+
+  getIsServiceInUse: function (state) {
+    return (serviceId): boolean => {
+      // Miramos en la lista de deployments
+      for (let deploymentIndex in state.deploymentList) {
+        // Si alguno utiliza este servicio devolvemos true
+        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === serviceId)
+          return true;
+      }
+      return false;
+    };
+  },
+  getServiceOwner: function (state) {
+    return (serviceId) => {
+      return serviceId.split('/')[2];
+    };
   },
   getServiceRoles: function (state) {
     return function (serviceName: string) {
