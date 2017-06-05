@@ -28,6 +28,3 @@ export default class WebDomains extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

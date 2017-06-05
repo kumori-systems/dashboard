@@ -12,6 +12,3 @@ import Component from 'vue-class-component';
 })
 export default class Deployments extends Vue {}
 </script>
-<style lang="scss">
-
-</style>

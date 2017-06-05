@@ -62,6 +62,9 @@ export default {
         }
       }
     }
+  },
+  selectedService(state, serviceId) {
+    state.selectedService = serviceId;
   }
 
 };

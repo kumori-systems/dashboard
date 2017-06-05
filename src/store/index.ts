@@ -22,7 +22,8 @@ export default new Vuex.Store({
         'runtimesList': {},
         'hideEntrypoints': false,
         'temporaryState': {},
-        'fabElements': {}
+        'fabElements': {},
+        'selectedService': null
     },
     'getters': getters,
     'mutations': mutations,

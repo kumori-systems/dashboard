@@ -20,6 +20,3 @@ export default class AlarmsAndLogs extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

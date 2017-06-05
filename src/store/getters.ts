@@ -64,7 +64,12 @@ export default {
   },
   getIsEntryPoint: function (state, getters) {
     return function (deploymentId: string): boolean {
-      if (getters.getDeploymentService(deploymentId) === 'eslap://eslap.cloud/services/http/inbound/1_0_0')
+      return getters.getServiceIsEntryPoint(getters.getDeploymentService(deploymentId));
+    };
+  },
+  getServiceIsEntryPoint: function (state) {
+    return function (serviceId: string): boolean {
+      if (serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0')
         return true;
       return false;
     };
@@ -471,7 +476,6 @@ export default {
     return (runtimeId) => {
       // Recorremos la lista de componentes.
       // Si encontramos el runtime en alguno de los componentes devolvemos true
-      console.log('El runtimeId es: ' + runtimeId);
       for (let componentId in state.componentList) {
         if ((<Component>state.componentList[componentId]).runtime === runtimeId)
           return true;
@@ -693,5 +697,9 @@ export default {
         return getters.getDeploymentChartData(deploymentId);
       }
     };
+  },
+  getSelectedService: function (state): string {
+    console.log('Pregunta por el servicio seleccionado');
+    return state.selectedService;
   }
 };

@@ -1,10 +1,10 @@
 <template>
-    <collapse class="tile" id="fab"  v-if="fabElements.length > 0">
+    <collapse class="tile" id="fab" v-if="fabElements.length > 0">
         <collapse-item title="+">
             <div v-for="element in fabElements">
                 <router-link v-bind:to="element.to">
-                {{ element.name }}
-              </router-link>
+                    {{ element.name }}
+                </router-link>
             </div>
         </collapse-item>
     </collapse>
@@ -31,7 +31,6 @@ export default class FAB extends Vue {
 }
 </script>
 <style lang="scss">
-
 #fab {
     margin-left: 950px;
     margin-top: 50px;

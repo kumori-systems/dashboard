@@ -73,5 +73,11 @@ export default {
     },
     createNewHTTPENtrypoint({ }, params) {
         connection.createNewHTTPENtrypoint(params);
+    },
+    deleteElement({ }, elementId) {
+        connection.deleteElement(elementId);
+    },
+    selectedService({ commit }, serviceId) {
+        commit('selectedService', serviceId);
     }
 };

@@ -104,6 +104,10 @@ export default class NewWebServiceAdvanced extends Vue {
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+        let serviceId = this.$store.getters.getSelectedService;
+        if (serviceId != null)
+            this.selectedService = this.$store.getters.getServiceName(serviceId);
+        console.log('El servicio selecconado es: ' + serviceId);
     }
 
     get serviceList() {

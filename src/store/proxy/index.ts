@@ -511,3 +511,6 @@ export function getMetrics() {
 export function aplyChangesToDeployment(changes) {
     console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
 }
+export function deleteElement(elementId) {
+    console.log('Enviamos mensaje para eliminar: ' + elementId);
+}

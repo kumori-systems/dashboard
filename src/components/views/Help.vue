@@ -20,6 +20,3 @@ export default class Help extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

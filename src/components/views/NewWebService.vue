@@ -20,6 +20,3 @@ export default class NewWebService extends Vue {
     }
 }
 </script>
-<style lang="scss">
-
-</style>

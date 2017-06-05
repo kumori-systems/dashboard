@@ -22,7 +22,7 @@
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">
+                    <button class="button" v-on:click="deleteElement(componentId)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                     <input type="checkbox" id="selected">
@@ -37,12 +37,20 @@
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">
+                    <button class="button" v-on:click="deleteElement(serviceId)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
-                    <button class="button">
-                        <i class="fa fa-play" aria-hidden="true"></i>
-                    </button>
+    
+                    <router-link v-if="selectedServiceIsInbound(serviceId)" v-bind:to="'newHTTPEntrypoint'">
+                        <button class="button" v-on:click="selectedService(serviceId)">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    </router-link><router-link v-else v-bind:to="'newWebServiceAdvanced'">
+                        <button class="button" v-on:click="selectedService(serviceId)">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    </router-link>
+    
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
@@ -54,7 +62,7 @@
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button">
+                    <button class="button" v-on:click="deleteElement(runtimeId)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                     <input type="checkbox" id="selected">
@@ -90,6 +98,11 @@ export default class Elements extends Vue {
     get getComponentVersion() {
         return (componentId) => {
             return this.$store.getters.getComponentVersion(componentId);
+        }
+    }
+    get selectedServiceIsInbound() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceIsEntryPoint(serviceId);
         }
     }
 
@@ -145,6 +158,15 @@ export default class Elements extends Vue {
         return (runtimeId) => {
             return this.$store.getters.getRuntimeOwner(runtimeId);
         };
+    }
+
+    deleteElement(elementId) {
+        this.$store.dispatch('deleteElement', elementId);
+    }
+
+    selectedService(serviceId) {
+        console.log('El servicio que seleccionamos es: ' + serviceId);
+        this.$store.dispatch('selectedService', serviceId);
     }
 
 }
