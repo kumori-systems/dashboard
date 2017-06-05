@@ -394,6 +394,31 @@ export default {
     return res;
   },
 
+  getComponentVersion: function (state) {
+    return (componentId) => {
+      let splitted = componentId.split('/');
+      return splitted[splitted.length - 1];
+    };
+  },
+
+  getComponentOwner: function (state) {
+    return (componentId) => {
+      return componentId.split('/')[2];
+    };
+  },
+  getIsComponentInUse: function (state) {
+    return (componentId) => {
+      // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
+      for (let serviceIndex in state.serviceList) {
+        for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
+          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
+            return true;
+        }
+      }
+      return false;
+    };
+  },
+
   /**
    * Devolvemos una lista de servicios web disponibles para el usuario
    */
@@ -435,6 +460,29 @@ export default {
       }
     }
     return res;
+  },
+  getRuntimeVersion: function (state) {
+    return (runtimeId) => {
+      let splitted = runtimeId.split('/');
+      return splitted[splitted.length - 1];
+    };
+  },
+  getIsRuntimeInUse: function (state) {
+    return (runtimeId) => {
+      // Recorremos la lista de componentes.
+      // Si encontramos el runtime en alguno de los componentes devolvemos true
+      console.log('El runtimeId es: ' + runtimeId);
+      for (let componentId in state.componentList) {
+        if ((<Component>state.componentList[componentId]).runtime === runtimeId)
+          return true;
+      }
+      return false;
+    };
+  },
+  getRuntimeOwner: function (state) {
+    return (runtimeId) => {
+      return runtimeId.split('/')[2];
+    };
   },
 
   getWebDomainList: function (state): Array<string> {

@@ -16,11 +16,15 @@
         </p>
         <collapse>
             <collapse-item title="Components">
-                <p v-for="component in componentList" v-bind:key="component">{{component}}
+                <p v-for="componentId in componentList" v-bind:key="componentId">
+                    {{componentId}} {{getComponentVersion(componentId)}} {{getComponentOwner(componentId)}}
+                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)"> in use </span>
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    <button class="button">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
@@ -28,22 +32,31 @@
                 <p v-for="serviceId in serviceList" v-bind:key="serviceId">
                     <span>{{getServiceName(serviceId)}}</span>
                     <span>{{getServiceVersion(serviceId)}}</span>
-                    <span v-if="getIsServiceInUse(serviceId)"> in use </span>
+                    <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)"> in use </span>
                     <span>{{getServiceOwner(serviceId)}}</span>
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
-                    <button class="button"><i class="fa fa-play" aria-hidden="true"></i></button>
+                    <button class="button">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                    <button class="button">
+                        <i class="fa fa-play" aria-hidden="true"></i>
+                    </button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
             <collapse-item title="Runtimes">
-                <p v-for="runtime in runtimeList" v-bind:key="runtime">{{runtime}}
+                <p v-for="runtimeId in runtimeList" v-bind:key="runtimeId">
+                    {{runtimeId}} {{getRuntimeVersion(runtimeId)}}
+                    <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)"> in use </span>
+                    {{getRuntimeOwner(runtimeId)}}
                     <button class="button">
                         <i class="fa fa-info" aria-hidden="true" />
                     </button>
-                    <button class="button"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    <button class="button">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                     <input type="checkbox" id="selected">
                 </p>
             </collapse-item>
@@ -74,6 +87,23 @@ export default class Elements extends Vue {
         return this.$store.getters.getComponentList;
     }
 
+    get getComponentVersion() {
+        return (componentId) => {
+            return this.$store.getters.getComponentVersion(componentId);
+        }
+    }
+
+    get getIsComponentInUse() {
+        return (componentId) => {
+            return this.$store.getters.getIsComponentInUse(componentId);
+        }
+    }
+    get getComponentOwner() {
+        return (componentId) => {
+            return this.$store.getters.getComponentOwner(componentId);
+        }
+    }
+
     get serviceList() {
         return this.$store.getters.getWebServiceList;
     }
@@ -101,8 +131,21 @@ export default class Elements extends Vue {
     get runtimeList() {
         return this.$store.getters.getRuntimeList;
     }
+    get getRuntimeVersion() {
+        return (runtimeId) => {
+            return this.$store.getters.getRuntimeVersion(runtimeId);
+        }
+    }
+    get getIsRuntimeInUse() {
+        return (runtimeId) => {
+            return this.$store.getters.getIsRuntimeInUse(runtimeId);
+        }
+    }
+    get getRuntimeOwner() {
+        return (runtimeId) => {
+            return this.$store.getters.getRuntimeOwner(runtimeId);
+        };
+    }
+
 }
 </script>
-<style lang="scss">
-
-</style>
