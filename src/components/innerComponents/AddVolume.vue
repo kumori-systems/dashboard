@@ -5,10 +5,10 @@
             <input>
         </p>
         <p>Number of Chunks
-            <input v-model.number="chunkNum" type="number">
+            <input v-model.number="chunkNum" type="number" min=1>
         </p>
         <p v-for="n in chunkNum">Chunk {{n}}
-            <input v-model.number="size[n]" type="number"> GB </p>
+            <input v-model.number="size[n]" type="number" min=1> GB </p>
     
         <p>Size: {{getTotalGB}}GB</p>
         <button class="button">ADD</button>

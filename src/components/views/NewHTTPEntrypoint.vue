@@ -25,13 +25,13 @@
         </div>
         <div>
             Instances {{instances}}
-            <button class="fa fa-angle-up fa-lg" v-on:click="instances += 1"></button>
-            <button class="fa fa-angle-down fa-lg" v-on:click="instances>0? instances--:0"></button>
+            <button class="button fa fa-angle-up" v-on:click="instances += 1"></button>
+            <button class="button fa fa-angle-down" v-on:click="instances>0? instances--:0"></button>
         </div>
         <div>
             Resilence {{resilence}}
-            <button class="fa fa-angle-up fa-lg" v-on:click="resilence += 1"></button>
-            <button class="fa fa-angle-down fa-lg" v-on:click="resilence>0? resilence--:0"></button>
+            <button class="button fa fa-angle-up" v-on:click="resilence += 1"></button>
+            <button class="button fa fa-angle-down" v-on:click="resilence>0? resilence--:0"></button>
         </div>
     
     </div>

@@ -18,14 +18,14 @@
                 {{rol}}
                 <div class="inner-content">
                     MEM
-                    <input v-model.number="rolMem[index]" type="number"> CPU
-                    <input v-model.number="rolCPU[index]" type="number"> NET
-                    <input v-model.number="rolNet[index]" type="number">
+                    <input v-model.number="rolMem[index]" type="number" min=1> CPU
+                    <input v-model.number="rolCPU[index]" type="number" min=1> NET
+                    <input v-model.number="rolNet[index]" type="number" min=1>
     
                     <p>
                         Instances
-                        <input v-model.number="rolInstances[index]" type="number"> Resilence
-                        <input v-model.number="rolResilence[index]" type="number">
+                        <input v-model.number="rolInstances[index]" type="number" min=1> Resilence
+                        <input v-model.number="rolResilence[index]" type="number" min=1>
                     </p>
                 </div>
             </div>
