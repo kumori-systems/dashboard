@@ -514,3 +514,6 @@ export function aplyChangesToDeployment(changes) {
 export function deleteElement(elementId) {
     console.log('Enviamos mensaje para eliminar: ' + elementId);
 }
+export function downloadManifest(elementId) {
+    console.log('Descargando el manifiesto de: ' + elementId);
+}

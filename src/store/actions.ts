@@ -79,5 +79,8 @@ export default {
     },
     selectedService({ commit }, serviceId) {
         commit('selectedService', serviceId);
+    },
+    downloadManifest({ }, elementId) {
+        connection.downloadManifest(elementId);
     }
 };
