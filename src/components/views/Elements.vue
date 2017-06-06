@@ -2,21 +2,23 @@
     <div>
         <div class="tile">
             <span class="control has-icon">
-                <input class="input" placeholder="Search">
+                <input class="input" placeholder="Search" v-model="search">
                 <span class="icon is-small">
                     <i class="fa fa-search"></i>
                 </span>
             </span>
-            <button class="button">Download manifest</button>
-            <button class="button">Delete</button>
+            <span v-if="someoneSelected">
+                <button class="button" v-on:click="downloadManifest">Download manifest</button>
+                <button class="button" v-on:click="deleteSelected">Delete</button>
+            </span>
         </div>
         <p>
-            <input type="checkbox" id="showpublic3rdpartyelements">
+            <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
             <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         </p>
         <collapse>
-            <collapse-item title="Components">
-                <p v-for="componentId in componentList" v-bind:key="componentId">
+            <collapse-item title="Components" v-if="componentList.length>0">
+                <p v-for="componentId, index in componentList" v-bind:key="componentId">
                     {{componentId}} {{getComponentVersion(componentId)}}
                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
                     {{getComponentOwner(componentId)}}
@@ -26,11 +28,11 @@
                     <button class="button" v-on:click="deleteElement(componentId)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
-                    <input type="checkbox" id="selected">
+                    <input type="checkbox" id="selected" v-model="selectedComponents[index]">
                 </p>
             </collapse-item>
-            <collapse-item title="Services">
-                <p v-for="serviceId in serviceList" v-bind:key="serviceId">
+            <collapse-item title="Services" v-if="serviceList.length>0">
+                <p v-for="serviceId, index in serviceList" v-bind:key="serviceId">
                     <span>{{getServiceName(serviceId)}}</span>
                     <span>{{getServiceVersion(serviceId)}}</span>
                     <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
@@ -53,11 +55,11 @@
                         </button>
                     </router-link>
     
-                    <input type="checkbox" id="selected">
+                    <input type="checkbox" id="selected" v-model="selectedServices[index]">
                 </p>
             </collapse-item>
-            <collapse-item title="Runtimes">
-                <p v-for="runtimeId in runtimeList" v-bind:key="runtimeId">
+            <collapse-item title="Runtimes" v-if="runtimeList.length>0">
+                <p v-for="runtimeId, index in runtimeList" v-bind:key="runtimeId">
                     {{runtimeId}} {{getRuntimeVersion(runtimeId)}}
                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
                     {{getRuntimeOwner(runtimeId)}}
@@ -67,7 +69,7 @@
                     <button class="button" v-on:click="deleteElement(runtimeId)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
-                    <input type="checkbox" id="selected">
+                    <input type="checkbox" id="selected" v-model="selectedRuntimes[index]">
                 </p>
             </collapse-item>
         </collapse>
@@ -94,12 +96,34 @@ import Modal from '../innerComponents/Modal.vue';
 export default class Elements extends Vue {
     showModal: boolean = false;
     elementURN: string = '';
+    selectedComponents: Array<boolean> = [];
+    selectedServices: Array<boolean> = [];
+    selectedRuntimes: Array<boolean> = [];
+    search: string = null;
+    showPublicElements: boolean = true;
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
+
+    get someoneSelected() {
+        for (let index in this.selectedComponents) {
+            if (this.selectedComponents[index] === true) return true;
+        }
+        for (let index in this.selectedServices) {
+            if (this.selectedServices[index] === true) return true;
+        }
+        for (let index in this.selectedRuntimes) {
+            if (this.selectedRuntimes[index] === true) return true;
+        }
+        return false;
+    }
+
     get componentList() {
-        return this.$store.getters.getComponentList;
+        let components = this.$store.getters.getComponentList(this.search, this.showPublicElements);
+        this.selectedComponents = new Array<boolean>(components.length);
+        return components;
     }
 
     get getComponentVersion() {
@@ -125,7 +149,9 @@ export default class Elements extends Vue {
     }
 
     get serviceList() {
-        return this.$store.getters.getWebServiceList;
+        let services = this.$store.getters.getWebServiceList(this.search, this.showPublicElements);
+        this.selectedServices = new Array<boolean>(services.length);
+        return services
     }
     get getServiceName() {
         return (serviceId) => {
@@ -149,7 +175,9 @@ export default class Elements extends Vue {
     }
 
     get runtimeList() {
-        return this.$store.getters.getRuntimeList;
+        let runtimes = this.$store.getters.getRuntimeList(this.search, this.showPublicElements);
+        this.selectedRuntimes = new Array<boolean>(runtimes.length);
+        return runtimes;
     }
     get getRuntimeVersion() {
         return (runtimeId) => {
@@ -181,6 +209,53 @@ export default class Elements extends Vue {
     }
     closeModal() {
         this.showModal = false;
+    }
+
+    downloadManifest() {
+        let res = [];
+        // Descargamos el manifest de todos los elementos seleccionados
+        // Recorremos la lsita de componentes seleccionados
+        for (let index in this.selectedComponents) {
+            if (this.selectedComponents[index] === true) {
+                res.push(this.componentList[index]);
+            }
+        }
+
+        for (let index in this.selectedServices) {
+            if (this.selectedServices[index] === true) {
+                res.push(this.serviceList[index]);
+            }
+        }
+
+        for (let index in this.selectedRuntimes) {
+            if (this.selectedRuntimes[index] === true) {
+                res.push(this.runtimeList[index]);
+            }
+        }
+        this.$store.dispatch('downloadManifest', res);
+    }
+    deleteSelected() {
+        // Eliminamos todos los elementos seleccionados
+        let res = [];
+        for (let index in this.selectedComponents) {
+            if (this.selectedComponents[index] === true) {
+                res.push(this.componentList[index]);
+            }
+        }
+
+        for (let index in this.selectedServices) {
+            if (this.selectedServices[index] === true) {
+                res.push(this.serviceList[index]);
+            }
+        }
+
+        for (let index in this.selectedRuntimes) {
+            if (this.selectedRuntimes[index] === true) {
+                res.push(this.runtimeList[index]);
+            }
+        }
+        this.$store.dispatch('deleteElement', res);
+
     }
 
 }

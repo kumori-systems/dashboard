@@ -68,3 +68,8 @@ POSIBLE SOLUCIÓN:
 Actualmente tengo entendido que únicamente los servicios y los deployments poseen nombres cortos.
 En la imágen da a entender que posiblemente queráis añadir nombres cortos también a los componentes y a los runtimes.
 ¿Es así?
+
+// Vista elements, pop-up información
+"Cuando pinchas al icono 'i' de cada elemento debería de aparecer un pop-up que permita descargar el manifiesto."
+Entiendo que si no se descarga diréctamente el manifiesto al pulsar sobre la 'i' es porque contamos enseñar más información
+en el pop-up. ¿La vista que hay actualmente os gusta?

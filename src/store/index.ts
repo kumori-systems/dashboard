@@ -20,10 +20,20 @@ export default new Vuex.Store({
         'componentList': {},
         'resourcesList': {},
         'runtimesList': {},
+        'webDomainList': [
+            'monitor-ticket740.slap53.iti.es',
+            'admission-ticket740.slap53.iti.es',
+            'acs-ticket740.slap53.iti.es',
+            'another-webdomain.slap53.iti.es',
+            'another2-webdomain.slap53.iti.es',
+            'another3-webdomain.slap53.iti.es'
+        ],
+        'certList': ['cert1', 'cert2', 'cert3'],
         'hideEntrypoints': false,
         'temporaryState': {},
         'fabElements': {},
-        'selectedService': null
+        'selectedService': null,
+        'username': 'eslap.cloud'
     },
     'getters': getters,
     'mutations': mutations,

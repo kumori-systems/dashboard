@@ -82,5 +82,6 @@ export default {
     },
     downloadManifest({ }, elementId) {
         connection.downloadManifest(elementId);
-    }
+    },
+    
 };

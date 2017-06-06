@@ -13,7 +13,7 @@
             <div class="nav-right">
                 <i class="fa fa-bell"
                    aria-hidden="true" />
-                <p>{{user.name}}</p>
+                <p>{{username}}</p>
             </div>
         </nav>
     </section>
@@ -34,7 +34,10 @@ import Tooltip from 'vue-bulma-tooltip'
     }
 })
 export default class NavBar extends Vue{
-    user:any = { name: "Username" };
+    
+    get username(){
+        return this.$store.getters.getUsername;
+    }
 }
 </script>
 

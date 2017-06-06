@@ -511,9 +511,13 @@ export function getMetrics() {
 export function aplyChangesToDeployment(changes) {
     console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
 }
+
+// ElementId puede ser un URN o una lista de URNs
 export function deleteElement(elementId) {
-    console.log('Enviamos mensaje para eliminar: ' + elementId);
+    console.log('Enviamos mensaje para eliminar: ' + JSON.stringify(elementId));
 }
+
+// ElementId puede ser un URN o una lista de URNs
 export function downloadManifest(elementId) {
-    console.log('Descargando el manifiesto de: ' + elementId);
+    console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
 }

@@ -1,6 +1,9 @@
 import { Deployment, DeploymentRol, Component, Service, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
   /* GENERAL */
+  getUsername: function (state): string {
+    return state.username;
+  },
   sidebar: function (state) {
     return state.sidebar;
   },
@@ -391,12 +394,21 @@ export default {
     };
   },
 
-  getComponentList: function (state): Array<string> {
-    let res = [];
-    for (let componentIndex in state.componentList) {
-      res.push(componentIndex);
-    }
-    return res;
+  getComponentList: function (state, getters): Function {
+    return (filter, showPublicElems): Array<string> => {
+      let res: Array<string> = [];
+      for (let componentIndex in state.componentList) {
+        res.push(componentIndex);
+      }
+      if (!showPublicElems) {
+        let username = getters.getUsername;
+        res = res.filter(elem => { return elem.split('/')[2] === username; });
+      }
+
+      if (filter != null && filter.length > 0)
+        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
+      return res;
+    };
   },
 
   getComponentVersion: function (state) {
@@ -427,11 +439,25 @@ export default {
   /**
    * Devolvemos una lista de servicios web disponibles para el usuario
    */
-  getWebServiceList: function (state): Array<string> {
-    let res = [];
-    for (let serviceId in state.serviceList)
-      res.push(serviceId);
-    return res;
+  getWebServiceList: function (state, getters): Function {
+    return (filter, showPublicElems): Array<string> => {
+      let res = [];
+      for (let serviceId in state.serviceList) {
+        res.push(serviceId);
+      }
+
+      if (!showPublicElems) {
+        let username = getters.getUsername;
+        res = res.filter(elem => { return elem.split('/')[2] === username; });
+      }
+
+      if (filter != null && filter.length > 0)
+        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
+      return res;
+    };
+
+
+
   },
   getServiceNameList: function (state): Array<string> {
     let res = [];
@@ -453,18 +479,30 @@ export default {
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
-  getRuntimeList: function (state): Array<string> {
+  getRuntimeList: function (state, getters): Function {
     // Buscamos todos los runtime en los roles de los deployments
-    let res = [];
-    let aux: string;
-    for (let serviceId in state.serviceList) {
-      for (let componentId in (<Component>state.componentList)) {
-        aux = (<Component>state.componentList[componentId]).runtime;
-        if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
-          res.push(aux);
+    return (filter, showPublicElems): Array<string> => {
+
+      let res = [];
+      let aux: string;
+      for (let serviceId in state.serviceList) {
+        for (let componentId in (<Component>state.componentList)) {
+          aux = (<Component>state.componentList[componentId]).runtime;
+          if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
+            res.push(aux);
+        }
       }
-    }
-    return res;
+
+      if (!showPublicElems) {
+        let username = getters.getUsername;
+        res = res.filter(elem => { return elem.split('/')[2] === username; });
+      }
+
+
+      if (filter != null && filter.length > 0)
+        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
+      return res;
+    };
   },
   getRuntimeVersion: function (state) {
     return (runtimeId) => {
@@ -490,29 +528,32 @@ export default {
   },
 
   getWebDomainList: function (state): Array<string> {
-    return [
-      'monitor-ticket740.slap53.iti.es',
-      'admission-ticket740.slap53.iti.es',
-      'acs-ticket740.slap53.iti.es',
-      'another-webdomain.slap53.iti.es',
-      'another2-webdomain.slap53.iti.es',
-      'another3-webdomain.slap53.iti.es'
-    ];
+    return state.webDomainList;
+  },
+
+  getUsedWebDomainList: function (state, getters) {
+    let usedWebdomain: Array<string> = [];
+    let website: string = null;
+    for (let deploymentId in state.deploymentList) {
+      website = (<Deployment>state.deploymentList[deploymentId]).website;
+      if (website != null)
+        usedWebdomain.push(website);
+    }
+    return usedWebdomain;
   },
 
   getFreeWebDomainList: function (state, getters) {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
-    let usedWebdomain: string;
+    let usedWebdomains: Array<string> = getters.getUsedWebDomainList;
     let index: number;
-    for (let deploymentId in state.deploymentList) {
-      usedWebdomain = (<Deployment>state.deploymentList[deploymentId]).website;
-      index = allWebDomains.indexOf(usedWebdomain);
+    for (let uwd in usedWebdomains) {
+      index = allWebDomains.indexOf(usedWebdomains[uwd]);
       if (index > -1) {
         allWebDomains.splice(index, 1);
       }
     }
-
+    // En este punto, en allWebDomains, únicamente quedan aquellos que no están en la lista usedWebdomains
     return allWebDomains;
   },
   getDataVolumesList: function (state, getters) {
@@ -528,7 +569,7 @@ export default {
     return res;
   },
   getCertificateList: function (state) {
-    return ['cert1', 'cert2', 'cert3'];
+    return state.certList;
   },
   getServiceName: function (state) {
     return (serviceId) => {
