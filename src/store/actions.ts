@@ -83,5 +83,7 @@ export default {
     downloadManifest({ }, elementId) {
         connection.downloadManifest(elementId);
     },
-    
+    deleteWebdomain({ }, webdomain) {
+        connection.deleteWebdomain(webdomain);
+    }
 };

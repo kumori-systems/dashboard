@@ -1,4 +1,4 @@
-import { Deployment, DeploymentRol, Component, Service, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
+import { Deployment, DeploymentRol, Component, Service, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
   /* GENERAL */
   getUsername: function (state): string {
@@ -528,7 +528,11 @@ export default {
   },
 
   getWebDomainList: function (state): Array<string> {
-    return state.webDomainList;
+    let res: Array<string> = [];
+    for (let index in state.webDomainList) {
+      res.push((<Webdomain>state.webDomainList[index]).url);
+    }
+    return res;
   },
 
   getUsedWebDomainList: function (state, getters) {
@@ -541,7 +545,13 @@ export default {
     }
     return usedWebdomain;
   },
-
+  getWebdomainState: function (state) {
+    return (webdomain) => {
+      return state.webDomainList.find(elem => {
+        return elem.url === webdomain;
+      }).state;
+    };
+  },
   getFreeWebDomainList: function (state, getters) {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
@@ -565,7 +575,6 @@ export default {
           res.push(volumeId);
       }
     }
-
     return res;
   },
   getCertificateList: function (state) {

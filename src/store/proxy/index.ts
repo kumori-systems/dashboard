@@ -521,3 +521,7 @@ export function deleteElement(elementId) {
 export function downloadManifest(elementId) {
     console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
 }
+
+export function deleteWebdomain(webdomain) {
+    console.log('Enviamos un mensaje para eliminar el dominio: ' + JSON.stringify(webdomain));
+}

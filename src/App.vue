@@ -91,6 +91,9 @@ $state_icon_size: 50px;
 	}
 }
 
+.CONNECTED_FONT_COLOR{
+	color:$color_green;
+}
 
 .CONNECTED {
 	background: $color_green;
@@ -101,6 +104,9 @@ $state_icon_size: 50px;
 	font-size: $state_icon_size;
 }
 
+.DISCONNECTED_FONT_COLOR {
+	color: $color_red;
+}
 .DISCONNECTED {
 	background: $color_red;
 }
@@ -108,6 +114,10 @@ $state_icon_size: 50px;
 .DISCONNECTED_COLOR {
 	color: $color_red;
 	font-size: $state_icon_size;
+}
+
+.ON_PROGRESS_FONT_COLOR{
+	color: $color_yellow;
 }
 
 .ON_PROGRESS {

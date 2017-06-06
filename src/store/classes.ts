@@ -164,6 +164,15 @@ export class Service {
     }
 }
 
+export class Webdomain {
+    url: string;
+    state: State;
+    constructor(url: string, state: State) {
+        this.url = url;
+        this.state = state;
+    }
+}
+
 /* CLASES INDEPENDIENTES */
 export class FabElement {
     name: string;

@@ -21,12 +21,12 @@ export default new Vuex.Store({
         'resourcesList': {},
         'runtimesList': {},
         'webDomainList': [
-            'monitor-ticket740.slap53.iti.es',
-            'admission-ticket740.slap53.iti.es',
-            'acs-ticket740.slap53.iti.es',
-            'another-webdomain.slap53.iti.es',
-            'another2-webdomain.slap53.iti.es',
-            'another3-webdomain.slap53.iti.es'
+            { 'url': 'monitor-ticket740.slap53.iti.es', 'state': 0 },
+            { 'url': 'admission-ticket740.slap53.iti.es', 'state': 0 },
+            { 'url': 'acs-ticket740.slap53.iti.es', 'state': 0 },
+            { 'url': 'another-webdomain.slap53.iti.es', 'state': 0 },
+            { 'url': 'another2-webdomain.slap53.iti.es', 'state': 1 },
+            { 'url': 'another3-webdomain.slap53.iti.es', 'state': 2 }
         ],
         'certList': ['cert1', 'cert2', 'cert3'],
         'hideEntrypoints': false,
