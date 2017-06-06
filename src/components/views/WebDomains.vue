@@ -2,7 +2,7 @@
     <div>
         <p>
             <input v-model="newWebDomain" placeholder=" New web domain">
-            <button class="button">add</button>
+            <button class="button" v-on:click="addWebDomain">add</button>
         </p>
         <div v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
             {{usedWebdomain}}
@@ -64,8 +64,12 @@ export default class WebDomains extends Vue {
         }
     }
 
-    deleteWebDomain(webdomain){
+    deleteWebDomain(webdomain) {
         this.$store.dispatch('deleteWebdomain', webdomain);
+    }
+    addWebDomain() {
+        if (this.newWebDomain != null && this.newWebDomain.length > 0)
+            this.$store.dispatch('addWebDomain', this.newWebDomain);
     }
 }
 </script>

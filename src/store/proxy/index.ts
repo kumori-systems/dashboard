@@ -522,6 +522,10 @@ export function downloadManifest(elementId) {
     console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
 }
 
+
+export function addWebdomain(webdomain) {
+    console.log('Enviamos un mensaje para AÑADIR el dominio: ' + JSON.stringify(webdomain));
+}
 export function deleteWebdomain(webdomain) {
-    console.log('Enviamos un mensaje para eliminar el dominio: ' + JSON.stringify(webdomain));
+    console.log('Enviamos un mensaje para ELIMINAR el dominio: ' + JSON.stringify(webdomain));
 }
