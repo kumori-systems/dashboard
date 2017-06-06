@@ -3,8 +3,8 @@
         <div class="card-header title">
             <span class="card-header-left">{{rolId}}</span>
             <span class="card-header-right">{{numInstances}}</span>
-            <button class="fa fa-angle-up fa-lg button" v-on:click="numInstances = 1"></button>
-            <button class="fa fa-angle-down fa-lg button" v-on:click="numInstances = -1"></button>
+            <button class="fa fa-angle-up button" v-on:click="numInstances = 1"></button>
+            <button class="fa fa-angle-down button" v-on:click="numInstances = -1"></button>
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
         </div>
         <div class="card-body tile inner-content">

@@ -24,6 +24,7 @@ import DeploymentCard from './innerComponents/DeploymentCard.vue';
 import DeploymentItem from './innerComponents/DeploymentItem.vue';
 import Chart from './innerComponents/Chart.vue';
 import Modal from './innerComponents/Modal.vue';
+import AddVolume from './innerComponents/AddVolume.vue';
 
 
 // Export layouts
@@ -33,4 +34,4 @@ export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced };
 
 // Export inner components
-export { DeploymentCard, Chart, Modal };
+export { DeploymentCard, Chart, Modal, AddVolume };

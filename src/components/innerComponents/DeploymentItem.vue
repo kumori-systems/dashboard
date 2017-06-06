@@ -1,14 +1,14 @@
 <template>
     <div>
         <span class="title">{{deploymentName}}</span>
-        <button v-on:click="applyChanges">APPLY CHANGES</button>
-        <button v-on:click="cancelChanges">CANCEL</button>
+        <button class="button" v-on:click="applyChanges">APPLY CHANGES</button>
+        <button class="button" v-on:click="cancelChanges">CANCEL</button>
         <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
         <div class="tile">
             <div>
                 <p>
                     Service: {{deploymentService}}
-                    <button v-on:click="undeploy">UNDEPLOY</button>
+                    <button class="button" v-on:click="undeploy">UNDEPLOY</button>
                 </p>
                 <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
                     Connected to:

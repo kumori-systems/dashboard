@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced } from '../components';
+import { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced, AddVolume } from '../components';
 import r from '../menu';
 
 Vue.use(Router);

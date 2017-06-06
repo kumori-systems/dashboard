@@ -566,15 +566,14 @@ export default {
     // En este punto, en allWebDomains, únicamente quedan aquellos que no están en la lista usedWebdomains
     return allWebDomains;
   },
-  getDataVolumesList: function (state, getters) {
-    // Los volumenes los tengo almacenados por instáncia!!
-    let res = [];
-    for (let deploymentId in state.deploymentList) {
-      for (let volumeId in getters.getDeploymentVolumes(deploymentId)) {
-        if (!res.find(vol => { return vol === volumeId; }))
-          res.push(volumeId);
+  getDataVolumesList: function (state, getters): Array<string> {
+    let res: Array<string> = [];
+    for (let resourceIndex in state.resourcesList) {
+      if ((<Resource>state.resourcesList[resourceIndex]).realName && (<Resource>state.resourcesList[resourceIndex]).realName.split('/')[4] === 'volume') {
+        res.push(resourceIndex);
       }
     }
+    console.log('los datavolumes que tenemos almacenados son: ' + JSON.stringify(res));
     return res;
   },
   getCertificateList: function (state) {
@@ -749,7 +748,37 @@ export default {
     };
   },
   getSelectedService: function (state): string {
-    console.log('Pregunta por el servicio seleccionado');
     return state.selectedService;
+  },
+  getIsDataVolumeUsed: function (state): Function {
+    // Tenemos que mirar en los recursos de los servicios
+    return (dataVolumeId): boolean => {
+      for (let serviceId in state.serviceList) {
+        if ((<Service>state.serviceList[serviceId]).resources.indexOf(dataVolumeId) !== -1)
+          return true;
+      }
+      return false;
+    };
+  },
+  getServiceUsingDataVolume: function (state) {
+    return (dataVolumeId) => {
+      for (let serviceId in state.serviceList) {
+        if ((<Service>state.serviceList[serviceId]).resources.indexOf(dataVolumeId) !== -1) {
+          return serviceId;
+        }
+      }
+    };
+  },
+  getRolUsingDataVolume: function (state, getters) {
+    return (dataVolumeId) => {
+      let serviceId = getters.getServiceUsingDataVolume(dataVolumeId);
+      for (let rolId in (<Service>state.serviceList[serviceId]).roles) {
+        if ((<Service>state.serviceList[serviceId]).roles[rolId].resources[dataVolumeId] !== undefined)
+          return rolId;
+      }
+    };
+  },
+  getNumberOfChunksDataVolume: function (state) {
+    return (dataVolumeId) => { return 0; };
   }
 };

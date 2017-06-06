@@ -73,3 +73,10 @@ En la imágen da a entender que posiblemente queráis añadir nombres cortos tam
 "Cuando pinchas al icono 'i' de cada elemento debería de aparecer un pop-up que permita descargar el manifiesto."
 Entiendo que si no se descarga diréctamente el manifiesto al pulsar sobre la 'i' es porque contamos enseñar más información
 en el pop-up. ¿La vista que hay actualmente os gusta?
+
+// Vista dataVolumes Chunks
+No sé cómo sacar el número de chunks utilizados.
+De hecho, agradecería una definición de 'chunk', ya que la que he visto es 'fragmento de información'.
+
+// Vista dataVolumes Información
+Cada volumen tiene un botón de información. Entiendo, como en la vista de cada deployment, que tendremos el porcentaje de uso. Algo más?
