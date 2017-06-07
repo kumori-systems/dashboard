@@ -26,12 +26,12 @@
         <div>
             Instances {{instances}}
             <button class="button fa fa-angle-up" v-on:click="instances += 1"></button>
-            <button class="button fa fa-angle-down" v-on:click="instances>0? instances--:0"></button>
+            <button class="button fa fa-angle-down" v-on:click="instances>1? instances--:1"></button>
         </div>
         <div>
             Resilence {{resilence}}
             <button class="button fa fa-angle-up" v-on:click="resilence += 1"></button>
-            <button class="button fa fa-angle-down" v-on:click="resilence>0? resilence--:0"></button>
+            <button class="button fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
         </div>
     
     </div>
@@ -55,8 +55,8 @@ export default class NewHTTPEntrypoint extends Vue {
     selectedCertificate: string = "";
     acceptTLSSSL: boolean = false;
     requireClientCertificates: boolean = false;
-    instances: number = 0;
-    resilence: number = 0;
+    instances: number = 1;
+    resilence: number = 1;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
