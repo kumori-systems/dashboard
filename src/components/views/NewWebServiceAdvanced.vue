@@ -57,7 +57,7 @@
                 <div v-for="resource, index in serviceResourcesList" v-bind:key="resource">
                     {{resource}}
     
-                    <select v-model="selectedResourceConfig[index]">
+                    <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index].length >0">
                         <option disabled value="">Please select one</option>
                         <option v-for="resourceConfig in totalResourceConfig(resource)">{{resourceConfig}}</option>
                     </select>

@@ -439,6 +439,10 @@ export function createNewHTTPENtrypoint(params: {
     });
 }
 
+export function addDeployment(params) {
+    console.log('Creando un nuevo deployment con los parámetros: ' + JSON.stringify(params));
+}
+
 let ejemploMetricas = require('./metrics_example.json');
 export function getMetrics() {
     return auxFunction().then(function ({ response, body }) {

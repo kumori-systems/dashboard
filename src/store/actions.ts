@@ -74,6 +74,9 @@ export default {
     createNewHTTPENtrypoint({ }, params) {
         connection.createNewHTTPENtrypoint(params);
     },
+    createNewDeployment({}, params){
+        connection.addDeployment(params);
+    },
     deleteElement({ }, elementId) {
         connection.deleteElement(elementId);
     },
