@@ -11,7 +11,7 @@
             <input v-model.number="size[n]" type="number" min=1> GB </p>
     
         <p>Size: {{getTotalGB}}GB</p>
-        <button class="button">ADD</button>
+        <button class="button" v-on:click="addDataVolume">ADD</button>
     </div>
 </template>
 <script lang="ts">
@@ -29,7 +29,6 @@ export default class AddVolume extends Vue {
     mounted() {
         this.$watch('chunkNum', function (value) {
             this.size = new Array<number>(value + 1);
-            console.log('El valor es; ' + value);
             this.size[0] = 0;
             for (let index = 1; index <= value; index++) {
                 this.size[index] = 1;
@@ -43,6 +42,11 @@ export default class AddVolume extends Vue {
             res += this.size[index];
         }
         return res;
+    }
+
+    addDataVolume(){
+
+        //this.$store.dispatch('addDataVolume');
     }
 }
 </script>

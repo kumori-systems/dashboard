@@ -18,14 +18,14 @@
                 {{rol}}
                 <div class="inner-content">
                     MEM
-                    <input v-model.number="rolMem[index]" type="number" min=1> CPU
-                    <input v-model.number="rolCPU[index]" type="number" min=1> NET
-                    <input v-model.number="rolNet[index]" type="number" min=1>
+                    <inputnumber v-bind:value="rolMem[index]"/> CPU
+                    <inputnumber v-bind:value="rolCPU[index]" /> NET
+                    <inputnumber v-bind:value="rolNet[index]" />
     
                     <p>
                         Instances
-                        <input v-model.number="rolInstances[index]" type="number" min=1> Resilence
-                        <input v-model.number="rolResilence[index]" type="number" min=1>
+                        <inputnumber v-bind:value="rolInstances[index]" /> Resilence
+                        <inputnumber v-bind:value="rolResilence[index]" />
                     </p>
                 </div>
             </div>
@@ -83,9 +83,13 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Deployment, DeploymentRol, Resource } from '../../store/classes';
+import InputNumber from '../innerComponents/InputNumber.vue';
 
 @Component({
-    name: 'new-webservice-advanced'
+    name: 'new-webservice-advanced',
+    components: {
+        'inputnumber': InputNumber
+    }
 })
 export default class NewWebServiceAdvanced extends Vue {
     selectedService: string = null;
@@ -107,7 +111,6 @@ export default class NewWebServiceAdvanced extends Vue {
         let serviceId = this.$store.getters.getSelectedService;
         if (serviceId != null)
             this.selectedService = this.$store.getters.getServiceName(serviceId);
-        console.log('El servicio selecconado es: ' + serviceId);
     }
 
     get serviceList() {
@@ -121,6 +124,13 @@ export default class NewWebServiceAdvanced extends Vue {
         this.rolNet = new Array<number>(rolList.length);
         this.rolInstances = new Array<number>(rolList.length);
         this.rolResilence = new Array<number>(rolList.length);
+        for (let i = 0; i < rolList.length; i++) {
+            this.rolMem[i] = 1;
+            this.rolCPU[i] = 1;
+            this.rolNet[i] = 1;
+            this.rolInstances[i] = 1;
+            this.rolResilence[i] = 1;
+        }
         return rolList;
     }
 
@@ -134,7 +144,7 @@ export default class NewWebServiceAdvanced extends Vue {
 
     get serviceResourcesList(): Array<string> {
         let resourceList = this.$store.getters.getServiceResources(this.selectedService);
-        this.resourceConfig = new Array<string>()
+        this.resourceConfig = new Array<string>(resourceList.length);
         return resourceList;
     }
 
@@ -151,7 +161,6 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 
     get allSelected() {
-
         if (this.selectedService === undefined) return false;
         if (this.deploymentName == null || this.deploymentName.length < 1) return false;
         for (let index in this.rolMem) {

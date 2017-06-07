@@ -573,7 +573,6 @@ export default {
         res.push(resourceIndex);
       }
     }
-    console.log('los datavolumes que tenemos almacenados son: ' + JSON.stringify(res));
     return res;
   },
   getCertificateList: function (state) {
