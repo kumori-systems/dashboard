@@ -63,7 +63,6 @@ export default class AddVolume extends Vue {
     }
 
     updateInputValue(value) {
-        console.log('Recivimos valor: ' + JSON.stringify(value));
         let index, propertyType, newValue;
         [index, propertyType, newValue] = value;
 
