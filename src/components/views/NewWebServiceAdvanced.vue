@@ -18,7 +18,7 @@
                 {{rol}}
                 <div class="inner-content">
                     MEM
-                    <inputnumber v-bind:value="rolMem[index]"/> CPU
+                    <inputnumber v-bind:value="rolMem[index]" /> CPU
                     <inputnumber v-bind:value="rolCPU[index]" /> NET
                     <inputnumber v-bind:value="rolNet[index]" />
     
@@ -145,6 +145,9 @@ export default class NewWebServiceAdvanced extends Vue {
     get serviceResourcesList(): Array<string> {
         let resourceList = this.$store.getters.getServiceResources(this.selectedService);
         this.resourceConfig = new Array<string>(resourceList.length);
+        for (let i = 0; i < resourceList.length; i++) {
+            this.resourceConfig[i] = '';
+        }
         return resourceList;
     }
 
