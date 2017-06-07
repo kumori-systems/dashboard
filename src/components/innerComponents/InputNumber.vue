@@ -1,6 +1,6 @@
 <template>
     <span>
-        <input ref="input" v-model.number="this.value" type="number" min=1 v-bind:value="value" v-on:input="updateValue($event.target.value)">
+        <input ref="input" v-bind:value="value" type="number" min=1 v-on:input="updateValue($event.target.value)" v-on:focus="selectAll" v-on:blur="formatValue">
     </span>
 </template>
 <script lang="ts">
@@ -9,35 +9,36 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Deployment, DeploymentRol, Resource } from '../../store/classes';
 @Component({
-    name: 'number-input',
+    name: 'numberinput',
     props: {
-        value: { required: true, type: Number }
+        value: { required: false, type: Number, default: 0 }, // El valor del campo
+        numElement: { required: false, type: Number }, // El número de elemento, para hagamos emit, saber qué elemento emite
+        property: { required: false, type: String } // Esto se utiliza pra la pagina newWebServiceAdvanced. Para diferenciar en cada rol, cual es el input que emite
     }
 })
 export default class NumberInput extends Vue {
     value: number = this.value;
+    numElement: number = this.numElement;
+    property: string = this.property;
 
-    updateValue(value) {
-        var formattedValue = value
-            // Remove whitespace on either side
-            .trim()
-            // Shorten to no decimal places
-            .slice(
-            0,
-            value.indexOf('.') === -1 ? value.length : value.indexOf('.') + 0
-            );
-        formattedValue = formattedValue.slice(0,
-            value.indexOf('-') === -1 ? value.length : value.indexOf('.') + 0
-        );
-        if (formattedValue < 0) formattedValue = -formattedValue;
-        if (formattedValue.length <= 0) formattedValue = 1;
-        // If the value was not already normalized,
-        // manually override it to conform
-        if (formattedValue !== value) {
-            (<any>this.$refs.input).value = formattedValue;
-        }
+
+
+    updateValue(value: string) {
+        let formattedValue: number = isNaN(Number.parseInt(value.trim()))?1: Number.parseInt(value.trim());
+        if (formattedValue < 1) formattedValue = 1;
+        formattedValue = Math.fround(formattedValue);
+        (<HTMLInputElement>this.$refs.input).value = formattedValue.toString();
         // Emit the number value through the input event
-        this.$emit('input', Number(formattedValue));
+        this.$emit('input', [this.numElement, this.property, formattedValue]);
+    }
+
+    formatValue() {
+    }
+
+    selectAll(event) {
+        setTimeout(function () {
+            event.target.select()
+        }, 0)
     }
 }
 </script>

@@ -5,7 +5,7 @@
             <input>
         </p>
         <p>Number of Chunks
-            <input v-model.number="chunkNum" type="number" min=1>
+            <inputnumber v-bind:value="chunkNum" />
         </p>
         <p v-for="n in chunkNum">Chunk {{n}}
             <input v-model.number="size[n]" type="number" min=1> GB </p>
@@ -18,9 +18,13 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import InputNumber from './InputNumber.vue';
 
 @Component({
-    name: 'addvolume'
+    name: 'addvolume',
+    components: {
+        'inputnumber': InputNumber
+    }
 })
 export default class AddVolume extends Vue {
     chunkNum: number = 1;
@@ -37,14 +41,14 @@ export default class AddVolume extends Vue {
     }
 
     get getTotalGB() {
-        let res:number = 0;
+        let res: number = 0;
         for (let index in this.size) {
             res += this.size[index];
         }
         return res;
     }
 
-    addDataVolume(){
+    addDataVolume() {
 
         //this.$store.dispatch('addDataVolume');
     }

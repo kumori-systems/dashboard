@@ -18,14 +18,14 @@
                 {{rol}}
                 <div class="inner-content">
                     MEM
-                    <inputnumber v-bind:value="rolMem[index]" /> CPU
-                    <inputnumber v-bind:value="rolCPU[index]" /> NET
-                    <inputnumber v-bind:value="rolNet[index]" />
+                    <inputnumber v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue" /> CPU
+                    <inputnumber v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue" /> NET
+                    <inputnumber v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue" />
     
                     <p>
                         Instances
-                        <inputnumber v-bind:value="rolInstances[index]" /> Resilence
-                        <inputnumber v-bind:value="rolResilence[index]" />
+                        <inputnumber v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue" /> Resilence
+                        <inputnumber v-bind:value="rolResilence[index]" v-bind:numElement="index" v-bind:property="'RES'" v-on:input="updateInputValue" />
                     </p>
                 </div>
             </div>
@@ -228,6 +228,31 @@ export default class NewWebServiceAdvanced extends Vue {
                 website
             )
         });
+    }
+
+
+    updateInputValue(emitedArguments) {
+        let numRol: number, propertyType: string, newValue: number;
+        [numRol, propertyType, newValue] = emitedArguments;
+        console.log('RECIBIMOS: ' + numRol + ' ' + propertyType + ' ' + newValue);
+        console.log('El tipo de newValue es: '+typeof newValue);
+        switch (propertyType) {
+            case 'CPU':
+                this.rolCPU[numRol] = newValue
+                break;
+            case 'MEM':
+                this.rolMem[numRol] = newValue
+                break;
+            case 'NET':
+                this.rolNet[numRol] = newValue
+                break;
+            case 'INS':
+                this.rolInstances[numRol] = newValue
+                break;
+            case 'RES':
+                this.rolResilence[numRol] = newValue
+                break;
+        }
     }
 }
 </script>
