@@ -677,7 +677,7 @@ export default {
       return res;
     };
   },
-  getTotalProvidedDeploymentChannels: function (state) {
+  getTotalProvidedDeploymentChannels: function (state, getters) {
     // Recorremos los deployments y añadimos todos los identificadores de los canales provided
     let res = [];
 
@@ -685,11 +685,11 @@ export default {
       // Obtenemos el servicio del deployment
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       for (let providedChannelId in (<Service>state.serviceList[serviceId]).proChannels)
-        res.push(deploymentId + ' + ' + providedChannelId);
+        res.push(getters.getDeploymentName(deploymentId) + ' + ' + providedChannelId);
     }
     return res;
   },
-  getTotalRequiredDeploymentChannels: function (state) {
+  getTotalRequiredDeploymentChannels: function (state, getters) {
     // Recorremos los deployments y añadimos todos los identificadores de los canales provided
     let res = [];
 
@@ -697,7 +697,7 @@ export default {
       // Obtenemos el servicio del deployment
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       for (let requiredChannelId in (<Service>state.serviceList[serviceId]).reqChannels)
-        res.push(deploymentId + ' + ' + requiredChannelId);
+        res.push(getters.getDeploymentName(deploymentId) + ' + ' + requiredChannelId);
     }
     return res;
   },
