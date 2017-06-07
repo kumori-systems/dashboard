@@ -91,5 +91,8 @@ export default {
     },
     deleteWebdomain({ }, webdomain) {
         connection.deleteWebdomain(webdomain);
+    },
+    addDataVolume({ }, params) {
+        connection.addDataVolume(params);
     }
 };

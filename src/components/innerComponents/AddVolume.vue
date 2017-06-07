@@ -2,7 +2,7 @@
     <div>
         <p>NEW VOLUME RESERVARION</p>
         <p>Prefix:
-            <input>
+            <input v-model="prefix">
         </p>
         <p>Number of Chunks
             <inputnumber v-bind:value="chunkNum" v-on:input="updateInputValue" />
@@ -11,7 +11,7 @@
             <inputnumber v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue" /> GB </p>
     
         <p>Size: {{totalGB}}GB</p>
-        <button class="button" v-on:click="addDataVolume">ADD</button>
+        <button class="button" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
     </div>
 </template>
 <script lang="ts">
@@ -27,8 +27,9 @@ import InputNumber from './InputNumber.vue';
     }
 })
 export default class AddVolume extends Vue {
+    prefix: string = '';
     chunkNum: number = 1;
-    size: Array<number> = [null, 1];
+    size: Array<number> = [0, 1];
     totalGB: number = 1;
 
     mounted() {
@@ -52,8 +53,13 @@ export default class AddVolume extends Vue {
     }
 
     addDataVolume() {
-
-        //this.$store.dispatch('addDataVolume');
+        this.size.shift(); // Eliminamos el 0 inicial
+        let params = {
+            'prefix': this.prefix,
+            'chunks': this.size
+        };
+        this.size = [0].concat(this.size); // Restauramos el 0 inicial
+        this.$store.dispatch('addDataVolume', params);
     }
 
     updateInputValue(value) {
