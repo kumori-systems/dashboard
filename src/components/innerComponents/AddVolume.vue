@@ -5,12 +5,12 @@
             <input>
         </p>
         <p>Number of Chunks
-            <inputnumber v-bind:value="chunkNum" />
+            <inputnumber v-bind:value="chunkNum" v-on:input="updateInputValue" />
         </p>
         <p v-for="n in chunkNum">Chunk {{n}}
-            <input v-model.number="size[n]" type="number" min=1> GB </p>
+            <inputnumber v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue" /> GB </p>
     
-        <p>Size: {{getTotalGB}}GB</p>
+        <p>Size: {{totalGB}}GB</p>
         <button class="button" v-on:click="addDataVolume">ADD</button>
     </div>
 </template>
@@ -29,6 +29,7 @@ import InputNumber from './InputNumber.vue';
 export default class AddVolume extends Vue {
     chunkNum: number = 1;
     size: Array<number> = [null, 1];
+    totalGB: number = 1;
 
     mounted() {
         this.$watch('chunkNum', function (value) {
@@ -39,18 +40,41 @@ export default class AddVolume extends Vue {
             }
         });
     }
-
-    get getTotalGB() {
-        let res: number = 0;
-        for (let index in this.size) {
-            res += this.size[index];
+    get chunkSize() {
+        return (chunkIndex) => {
+            return this.size[chunkIndex];
         }
-        return res;
+    }
+    set chunkSize(chunkIndex) {
+        (value) => {
+            this.size[chunkIndex(1)] = value;
+        }
     }
 
     addDataVolume() {
 
         //this.$store.dispatch('addDataVolume');
+    }
+
+    updateInputValue(value) {
+        console.log('Recivimos valor: ' + JSON.stringify(value));
+        let index, propertyType, newValue;
+        [index, propertyType, newValue] = value;
+
+        if (index == null) {
+            this.chunkNum = newValue;
+            this.totalGB = newValue;
+        }
+        else {
+            this.size[index] = newValue;
+            let res = 0;
+            for (let i = 1; i < this.size.length; i++) {
+                res += this.size[i];
+            }
+            this.totalGB = res;
+        }
+
+
     }
 }
 </script>
