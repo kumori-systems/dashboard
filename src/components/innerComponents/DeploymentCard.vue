@@ -19,7 +19,7 @@
                         </div>
                     </p>
                     <p v-if="website!=null">
-                        <u>Website:</u> {{website}}
+                        <u>Websites:</u> <p class="inner-content" v-for="web in website">{{web}}</p>
                     </p>
                     <p v-if="links.length > 0">
                         <u>Links:</u>

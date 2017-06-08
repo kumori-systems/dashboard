@@ -217,7 +217,7 @@ export default class NewWebServiceAdvanced extends Vue {
         }
 
 
-        let website = "";
+        let website: Array<string> = [];
         this.$store.dispatch('createNewDeployment', {
             deployment: new Deployment(
                 this.deploymentName,
@@ -235,7 +235,7 @@ export default class NewWebServiceAdvanced extends Vue {
         let numRol: number, propertyType: string, newValue: number;
         [numRol, propertyType, newValue] = emitedArguments;
         console.log('RECIBIMOS: ' + numRol + ' ' + propertyType + ' ' + newValue);
-        console.log('El tipo de newValue es: '+typeof newValue);
+        console.log('El tipo de newValue es: ' + typeof newValue);
         switch (propertyType) {
             case 'CPU':
                 this.rolCPU[numRol] = newValue

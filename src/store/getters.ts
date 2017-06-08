@@ -78,22 +78,25 @@ export default {
     };
   },
   getDeploymentWebsite: function (state): Function {
-    return function (deploymentId: string): string {
-      let website = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (website != null) return website;
+    return function (deploymentId: string): Array<string> {
+      let website: Array<string> = (<Deployment>state.deploymentList[deploymentId]).website;
+      if (website.length > 0) return website;
       // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
       // lincado y sea un entrypoint (tenga un website != null)
 
       for (let linkIndex in state.linkList) {
         if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
-          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website != null)
-            return (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website;
+          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website.length > 0) {
+            website = website.concat((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website);
+          }
         }
         if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
-          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website != null)
-            return (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website;
+          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website.length > 0)
+            website = website.concat((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website);
         }
       }
+
+      return website;
     };
   },
   getDeploymentState: function (state, getters): Function {
@@ -537,11 +540,11 @@ export default {
 
   getUsedWebDomainList: function (state, getters) {
     let usedWebdomain: Array<string> = [];
-    let website: string = null;
+    let website: Array<string> = null;
     for (let deploymentId in state.deploymentList) {
       website = (<Deployment>state.deploymentList[deploymentId]).website;
       if (website != null)
-        usedWebdomain.push(website);
+        usedWebdomain.concat(website);
     }
     return usedWebdomain;
   },

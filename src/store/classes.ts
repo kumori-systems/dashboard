@@ -83,8 +83,8 @@ export class Deployment {
     resourcesConfig: { [resource: string]: any }; // encaja cómo llama el servicio a las resources con la definición real de las resources
     parameters: any;
     roles: { [rolName: string]: DeploymentRol };
-    website: string;
-    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: DeploymentRol }, website: string) {
+    website: Array<string>;
+    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: DeploymentRol }, website: Array<string>) {
         this.name = name;
         this.serviceId = serviceId;
         this.resourcesConfig = resourcesConfig;
