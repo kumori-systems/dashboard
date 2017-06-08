@@ -24,6 +24,9 @@ PORQUÉ:
 
 PREGUNTAS
 ---------------------------------------------------------
+// DeploymentId
+    Hace falta un campo webdomain en la vista detallada del deployment?
+
 // Cuándo listas vacías
 ¿Qué debería aparecer cuando las listas están vacías? 
 -Cuando no hay deployments (servicios)

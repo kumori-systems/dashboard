@@ -11,7 +11,8 @@
                         <u>Service:</u> {{service}}
                     </p>
                     <p class="roles" v-if="roles">
-                        <div><u>Roles:</u>
+                        <div>
+                            <u>Roles:</u>
                             <div v-for="rol in roles" class="inner-content">
                                 <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
                                 <div>{{rolComponentURN(rol)}}</div>
@@ -19,7 +20,14 @@
                         </div>
                     </p>
                     <p v-if="website!=null">
-                        <u>Websites:</u> <p class="inner-content" v-for="web in website">{{web}}</p>
+                        <u>Websites:</u>
+    
+                        <p class="inner-content" v-for="web in website">
+                            <a v-bind:href="'http://'+web">
+                                {{web}}
+                            </a>
+                        </p>
+    
                     </p>
                     <p v-if="links.length > 0">
                         <u>Links:</u>
@@ -28,7 +36,7 @@
                             <p>
                                 Connnected to -> {{link.toDeployment}}
                             </p>
-                            </div>
+                        </div>
                     </p>
                     <p v-if="volumes.length>0">
                         <u>Volumes:</u>
