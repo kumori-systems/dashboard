@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced, AddVolume } from '../components';
+import { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced, AddVolume, NewBundle } from '../components';
 import r from '../menu';
 
 Vue.use(Router);
@@ -26,21 +26,28 @@ routes.push({
   name: 'New HTTP Entrypoint',
   path: '/newHTTPEntrypoint',
   meta: { expanded: false },
-  component: NewHTTPEntrypoint,
+  component: NewHTTPEntrypoint
 });
 
 routes.push({
   name: 'New Web Service',
   path: '/newWebService',
   meta: { expanded: false },
-  component: NewWebService,
+  component: NewWebService
 });
 
 routes.push({
   name: 'New Web Service (Advanced)',
   path: '/newWebServiceAdvanced',
   meta: { expanded: false },
-  component: NewWebServiceAdvanced,
+  component: NewWebServiceAdvanced
+});
+
+routes.push({
+  name: 'New Element',
+  path: '/newBundle',
+  meta: { expanded: false },
+  component: NewBundle
 });
 
 export default new Router({

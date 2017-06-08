@@ -94,5 +94,8 @@ export default {
     },
     addDataVolume({ }, params) {
         connection.addDataVolume(params);
+    },
+    addNewElement({ }, params) {
+        connection.addNewElement(params);
     }
 };

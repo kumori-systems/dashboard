@@ -104,6 +104,7 @@ export default class Elements extends Vue {
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
+        fabElementsList.push(new FabElement('create new element', 'newBundle'));
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 

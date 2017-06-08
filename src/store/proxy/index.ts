@@ -536,3 +536,6 @@ export function deleteWebdomain(webdomain) {
 export function addDataVolume(params) {
     console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
 }
+export function addNewElement(params) {
+    console.log('Enviamos un mensaje para añadir un nuevo elemento. El mensaje contiene: ' + JSON.stringify(params));
+}

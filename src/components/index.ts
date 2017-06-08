@@ -14,6 +14,7 @@ import WebDomains from './views/WebDomains.vue';
 import DataVolumes from './views/DataVolumes.vue';
 import AlarmsAndLogs from './views/AlarmsAndLogs.vue';
 import Help from './views/Help.vue';
+import NewBundle from './views/NewBundle.vue';
 
 import NewHTTPEntrypoint from './views/NewHTTPEntrypoint.vue';
 import NewWebService from './views/NewWebService.vue';
@@ -31,7 +32,7 @@ import AddVolume from './innerComponents/AddVolume.vue';
 export { AppMain, FAB, FooterBar, LevelBar, NavBar, SideBar };
 
 // Export views
-export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced };
+export { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced, NewBundle };
 
 // Export inner components
 export { DeploymentCard, Chart, Modal, AddVolume };
