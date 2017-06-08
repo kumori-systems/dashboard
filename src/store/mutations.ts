@@ -35,9 +35,6 @@ export default {
   toggleMenuItemExpanded(state, menuItem) {
     menuItem.meta.expanded = !menuItem.meta.expanded;
   },
-  hideEntrypoints(state, { }) {
-    state.hideEntrypoints = !state.hideEntrypoints;
-  },
   setTemporaryState(state, temporaryState) {
     state.temporaryState = { ...temporaryState };
   },

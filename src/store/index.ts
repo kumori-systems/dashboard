@@ -29,7 +29,6 @@ export default new Vuex.Store({
             { 'url': 'another3-webdomain.slap53.iti.es', 'state': 2 }
         ],
         'certList': ['cert1', 'cert2', 'cert3'],
-        'hideEntrypoints': false,
         'temporaryState': {},
         'fabElements': {},
         'selectedService': null,

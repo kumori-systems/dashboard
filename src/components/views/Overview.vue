@@ -29,6 +29,7 @@ import { Deployment, FabElement } from '../../store/classes';
     }
 })
 export default class Overview extends Vue {
+    hideEntrypoints: boolean = false;
     // computed
     get route(): boolean {
         if (this.$route.name === 'OVERVIEW') {
@@ -51,14 +52,6 @@ export default class Overview extends Vue {
             if (!this.hideEntrypoints) return false;
             return this.$store.getters.getIsEntryPoint(deploymentId);
         }
-    }
-
-    get hideEntrypoints(): boolean {
-        return this.$store.getters.getHideEntrypoints;
-    }
-
-    set hideEntrypoints({ }) {
-        this.$store.dispatch('hideEntrypoints', {});
     }
 }
 </script>
