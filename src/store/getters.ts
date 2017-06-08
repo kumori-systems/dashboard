@@ -544,7 +544,7 @@ export default {
     for (let deploymentId in state.deploymentList) {
       website = (<Deployment>state.deploymentList[deploymentId]).website;
       if (website != null)
-        usedWebdomain.concat(website);
+        usedWebdomain = usedWebdomain.concat(website);
     }
     return usedWebdomain;
   },

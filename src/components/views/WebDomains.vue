@@ -9,7 +9,7 @@
             <span class="ON_PROGRESS">in use</span>
             <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
     
-            <a v-bind:href="usedWebdomain">
+            <a v-bind:location.href="usedWebdomain">
                 <button class="button">
                     <i class="fa fa-eye" aria-hidden="true"></i>
                 </button>
