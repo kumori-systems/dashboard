@@ -6,7 +6,7 @@
         <p v-for="dataVolume in dataVolumeList">
             {{dataVolume}}
             <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
-            by {{serviceUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}} {{numberOfChunks(dataVolume)}} chunks
+            by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}} {{numberOfChunks(dataVolume)}} chunks
             <button class="button fa fa-info" />
             <button class="button fa fa-trash" v-on:click="deleteVolume(dataVolume)" />
         </p>
@@ -41,9 +41,9 @@ export default class DataVolumes extends Vue {
         }
     }
 
-    get serviceUsingDataVolume() {
+    get deploymentUsingDataVolume() {
         return (dataVolume) => {
-            return this.$store.getters.getServiceName(this.$store.getters.getServiceUsingDataVolume(dataVolume));
+            return this.$store.getters.getDeploymentName(this.$store.getters.getDeploymentUsingDataVolume(dataVolume));
         }
     }
 

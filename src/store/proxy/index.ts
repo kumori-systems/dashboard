@@ -19,6 +19,7 @@ let stampStateExample = require('./tc_state_example.json');
 export function getStampState() {
 
     return auxFunction().then(function ({ response, body }) {
+        let cont = 0; // Contador de depliegues de un servicio (para el nombre del deployment)
         let parsedBody = stampStateExample;
         let deploymentList: { [deploymentId: string]: Deployment } = {};
         let linkList: Array<Link> = [];
@@ -32,11 +33,13 @@ export function getStampState() {
             // Primero resolvemos todo lo referente al servicio de un deployment
 
             // Comprobamos que no existe ya el servicio en la lista de servicios
-            let serviceId = parsedBody.tcState.deployedServices[deploymentId].manifest.service.name;
+            let serviceId: string = parsedBody.tcState.deployedServices[deploymentId].manifest.service.name;
 
             let version = parsedBody.tcState.deployedServices[deploymentId].manifest.versions['http://eslap.cloud/manifest/deployment/1_0_0'];
             if (!serviceList[serviceId]) { // Si no está definido lo añadimos
-                let serviceName: string = 'ServiceName[' + serviceId + ']';
+
+                let serviceName: string = serviceId.split('/')[4];
+
                 let serviceResources: Array<string> = []; // Las resources las encontramos dentro de la versión 1
                 for (let resourceIndex in version.resources) {
                     serviceResources.push(resourceIndex);
@@ -235,10 +238,11 @@ export function getStampState() {
                     + '\nreqChannels: ' + serviceList[serviceId].reqChannels
                     + '\ncomponents: ' + JSON.stringify(serviceList[serviceId].components)
                 );
+                cont = 0;
             }// En este punto el servicio ya está en la lista de servicios
-
+            cont++;
             // Ahora resolvemos todo lo referente al deployment
-            let deploymentName: string = 'DeploymentNAME';
+            let deploymentName: string = serviceList[serviceId].name + '_' + cont;
             let deploymentServiceId: string = serviceId;
 
             let deploymentResourcesConfig: { [resource: string]: any } = {};

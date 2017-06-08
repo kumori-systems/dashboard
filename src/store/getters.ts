@@ -759,18 +759,20 @@ export default {
       return false;
     };
   },
-  getServiceUsingDataVolume: function (state) {
+  getDeploymentUsingDataVolume: function (state) {
     return (dataVolumeId) => {
-      for (let serviceId in state.serviceList) {
-        if ((<Service>state.serviceList[serviceId]).resources.indexOf(dataVolumeId) !== -1) {
-          return serviceId;
+      // Tenemos que entrar en resourcesConfig de cada deployment y mirar si está el volumen
+      for (let deploymentId in state.deploymentList) {
+        if ((<Deployment>state.deploymentList[deploymentId]).resourcesConfig[dataVolumeId] !== undefined) {
+          return deploymentId;
         }
       }
     };
   },
   getRolUsingDataVolume: function (state, getters) {
     return (dataVolumeId) => {
-      let serviceId = getters.getServiceUsingDataVolume(dataVolumeId);
+      let deploymentId = getters.getDeploymentUsingDataVolume(dataVolumeId);
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       for (let rolId in (<Service>state.serviceList[serviceId]).roles) {
         if ((<Service>state.serviceList[serviceId]).roles[rolId].resources[dataVolumeId] !== undefined)
           return rolId;

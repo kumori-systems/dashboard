@@ -19,7 +19,7 @@
         <collapse>
             <collapse-item title="Components" v-if="componentList.length>0">
                 <p v-for="componentId, index in componentList" v-bind:key="componentId">
-                    {{componentId}} {{getComponentVersion(componentId)}}
+                    {{componentId.split('/')[4]}} {{getComponentVersion(componentId)}}
                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
                     {{getComponentOwner(componentId)}}
                     <button class="button" v-on:click="openModal(componentId)">
@@ -60,7 +60,7 @@
             </collapse-item>
             <collapse-item title="Runtimes" v-if="runtimeList.length>0">
                 <p v-for="runtimeId, index in runtimeList" v-bind:key="runtimeId">
-                    {{runtimeId}} {{getRuntimeVersion(runtimeId)}}
+                    {{runtimeId.split('/')[4]}} {{getRuntimeVersion(runtimeId)}}
                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
                     {{getRuntimeOwner(runtimeId)}}
                     <button class="button" v-on:click="openModal(runtimeId)">
