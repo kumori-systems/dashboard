@@ -397,20 +397,52 @@ export default {
     };
   },
 
-  getComponentList: function (state, getters): Function {
-    return (filter, showPublicElems): Array<string> => {
-      let res: Array<string> = [];
-      for (let componentIndex in state.componentList) {
-        res.push(componentIndex);
+  getComponentOwnerList: function (state, getters): Array<string> {
+    let res: Array<string> = [];
+    let owner: string = null;
+    for (let componentIndex in state.componentList) {
+      owner = getters.getComponentOwner(componentIndex);
+      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+        res.push(owner);
       }
-      if (!showPublicElems) {
-        let username = getters.getUsername;
-        res = res.filter(elem => { return elem.split('/')[2] === username; });
+    }
+    return res;
+  },
+
+  getOwnerComponentList: function (state, getters) {
+    return (owner) => {
+      // Buscamos todos los componentes del owner
+      let res: Array<string> = []; let compName;
+      for (let componentId in state.componentList) {
+        if (getters.getComponentOwner(componentId) === owner) {
+          // Si el componente ya esta no lo añadimos
+          compName = getters.getComponentName(componentId);
+          if (res.findIndex(comp => { return comp === compName; }) === -1) {
+            res.push(compName);
+          }
+        }
+      }
+      return res;
+    };
+  },
+
+  getComponentVersionList: function (state, getters) {
+    return (owner, component) => {
+      let res: Array<string> = [];
+      // Buscamos en la lista de componentes, todos aquellos que encajen con el owner y el componente
+      for (let key in state.componentList) {
+        if (getters.getComponentOwner(key) === owner && getters.getComponentName(key) === component) {
+          res.push(getters.getComponentVersion(key));
+        }
       }
 
-      if (filter != null && filter.length > 0)
-        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
       return res;
+    };
+  },
+
+  getComponentName: function (state) {
+    return (componentId: string) => {
+      return componentId.split('/')[4];
     };
   },
 
@@ -426,12 +458,24 @@ export default {
       return componentId.split('/')[2];
     };
   },
-  getIsComponentInUse: function (state) {
-    return (componentId) => {
+
+  getIsComponentInUse: function (state, getters) {
+    return (owner, component, version) => {
+      // Tenemos que volver a encontrar la id del componente
+      let myComponentId;
+      for (let componentId in state.componentList) {
+        if (getters.getComponentOwner(componentId) === owner
+          && getters.getComponentName(componentId) === component
+          && getters.getComponentVersion(componentId) === version)
+          myComponentId = componentId;
+      }
+
+
+
       // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
       for (let serviceIndex in state.serviceList) {
         for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
-          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
+          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === myComponentId)
             return true;
         }
       }
@@ -458,16 +502,15 @@ export default {
         return res.filter(elem => { return elem.indexOf(filter) !== -1; });
       return res;
     };
-
-
-
   },
+
   getServiceNameList: function (state): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList)
       res.push((<Service>state.serviceList[serviceId]).name);
     return res;
   },
+
   /**
    * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
    */
@@ -479,6 +522,7 @@ export default {
     }
     return res;
   },
+
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
@@ -507,12 +551,14 @@ export default {
       return res;
     };
   },
+
   getRuntimeVersion: function (state) {
     return (runtimeId) => {
       let splitted = runtimeId.split('/');
       return splitted[splitted.length - 1];
     };
   },
+
   getIsRuntimeInUse: function (state) {
     return (runtimeId) => {
       // Recorremos la lista de componentes.
@@ -548,6 +594,7 @@ export default {
     }
     return usedWebdomain;
   },
+
   getWebdomainState: function (state) {
     return (webdomain) => {
       return state.webDomainList.find(elem => {
@@ -555,6 +602,7 @@ export default {
       }).state;
     };
   },
+
   getFreeWebDomainList: function (state, getters) {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
@@ -569,6 +617,7 @@ export default {
     // En este punto, en allWebDomains, únicamente quedan aquellos que no están en la lista usedWebdomains
     return allWebDomains;
   },
+
   getDataVolumesList: function (state, getters): Array<string> {
     let res: Array<string> = [];
     for (let resourceIndex in state.resourcesList) {
@@ -578,14 +627,17 @@ export default {
     }
     return res;
   },
+
   getCertificateList: function (state) {
     return state.certList;
   },
+
   getServiceName: function (state) {
     return (serviceId) => {
       return (<Service>state.serviceList[serviceId]).name;
     };
   },
+
   getServiceVersion: function (state) {
     return (serviceId: string) => {
 
@@ -607,11 +659,13 @@ export default {
       return false;
     };
   },
+
   getServiceOwner: function (state) {
     return (serviceId) => {
       return serviceId.split('/')[2];
     };
   },
+
   getServiceRoles: function (state) {
     return function (serviceName: string) {
       if (serviceName == null) return [];
@@ -629,6 +683,7 @@ export default {
       return res;
     };
   },
+
   getServiceResources: function (state) {
     return (serviceName: string) => {
       if (serviceName == null) return [];
@@ -646,6 +701,7 @@ export default {
       return res;
     };
   },
+
   getServiceProChannels: function (state) {
     return (serviceName: string) => {
       if (serviceName == null) return [];
@@ -663,6 +719,7 @@ export default {
       return res;
     };
   },
+
   getServiceReqChannels: function (state) {
     return (serviceName: string) => {
       if (serviceName == null) return [];
@@ -680,6 +737,7 @@ export default {
       return res;
     };
   },
+
   getTotalProvidedDeploymentChannels: function (state, getters) {
     // Recorremos los deployments y añadimos todos los identificadores de los canales provided
     let res = [];
@@ -692,6 +750,7 @@ export default {
     }
     return res;
   },
+
   getTotalRequiredDeploymentChannels: function (state, getters) {
     // Recorremos los deployments y añadimos todos los identificadores de los canales provided
     let res = [];
@@ -704,6 +763,7 @@ export default {
     }
     return res;
   },
+
   getFreeResource: function (state) {
     return (configId) => {
       let res: Array<string> = [];
@@ -731,6 +791,7 @@ export default {
       return res;
     };
   },
+
   getTemporaryState: function (state) {
     return state.temporaryState;
   },
@@ -749,9 +810,11 @@ export default {
       }
     };
   },
+
   getSelectedService: function (state): string {
     return state.selectedService;
   },
+
   getIsDataVolumeUsed: function (state): Function {
     // Tenemos que mirar en los recursos de los servicios
     return (dataVolumeId): boolean => {
@@ -762,6 +825,7 @@ export default {
       return false;
     };
   },
+
   getDeploymentUsingDataVolume: function (state) {
     return (dataVolumeId) => {
       // Tenemos que entrar en resourcesConfig de cada deployment y mirar si está el volumen

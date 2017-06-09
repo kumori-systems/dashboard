@@ -16,29 +16,36 @@
             <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
             <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         </p>
-    
-        <collapse>
-            <collapse-item title="Components" v-if="componentList.length>0">
-                <table class="table">
-                    <tr v-for="componentId, index in componentList" v-bind:key="componentId">
-                        <th>{{getComponentOwner(componentId)}}</th>
-                        <th>{{componentId.split('/')[4]}}</th>
-                        <th>{{getComponentVersion(componentId)}}</th>
-                        <th>
-                            <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
-                        </th>
-    
-                        <th>
-                            <button class="button" v-on:click="openModal(componentId)">
-                                <i class="fa fa-info" aria-hidden="true" />
-                            </button>
-                            <button class="button" v-on:click="deleteElement(componentId)">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                            <input type="checkbox" id="selected" v-model="selectedComponents[index]">
-                        </th>
-                    </tr>
-                </table>
+        <collapse accordion is-fullwidth>
+            <collapse-item title="Components" v-if="componentOwnerList.length>0">
+                <div v-for="owner in componentOwnerList">
+                    <collapse accordion is-fullwidth>
+                        <collapse-item v-bind:title="owner">
+                            <div v-for="component in ownerComponentList(owner)">
+                                <collapse accordion is-fullwidth>
+                                    <collapse-item v-bind:title="component">
+                                        <table>
+                                            <tr v-for="version in componentVersionList(owner, component)">
+                                                <th>{{version}}</th>
+                                                <th>
+                                                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
+                                                </th>
+                                                <th>
+                                                    <button class="button" v-on:click="openModal('componentId')">
+                                                        <i class="fa fa-info" aria-hidden="true" />
+                                                    </button>
+                                                    <button class="button" v-on:click="deleteElement('componentId')">
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    </collapse-item>
+                                </collapse>
+                            </div>
+                        </collapse-item>
+                    </collapse>
+                </div>
             </collapse-item>
             <collapse-item title="Services" v-if="serviceList.length>0">
                 <table class="table">
@@ -49,7 +56,6 @@
                         <th>
                             <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
                         </th>
-    
                         <th>
                             <button class="button" v-on:click="openModal(serviceId)">
                                 <i class="fa fa-info" aria-hidden="true" />
@@ -57,7 +63,6 @@
                             <button class="button" v-on:click="deleteElement(serviceId)">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </button>
-    
                             <router-link v-if="selectedServiceIsInbound(serviceId)" v-bind:to="'newHTTPEntrypoint'">
                                 <button class="button" v-on:click="selectedService(serviceId)">
                                     <i class="fa fa-play" aria-hidden="true"></i>
@@ -68,7 +73,6 @@
                                     <i class="fa fa-play" aria-hidden="true"></i>
                                 </button>
                             </router-link>
-    
                             <input type="checkbox" id="selected" v-model="selectedServices[index]">
                         </th>
                     </tr>
@@ -83,7 +87,6 @@
                         <th>
                             <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
                         </th>
-    
                         <th>
                             <button class="button" v-on:click="openModal(runtimeId)">
                                 <i class="fa fa-info" aria-hidden="true" />
@@ -134,21 +137,34 @@ export default class Elements extends Vue {
 
     get someoneSelected() {
         for (let index in this.selectedComponents) {
-            if (this.selectedComponents[index] === true) return true;
+            if (this.selectedComponents[index] === true)
+                return true;
         }
         for (let index in this.selectedServices) {
-            if (this.selectedServices[index] === true) return true;
+            if (this.selectedServices[index] === true)
+                return true;
         }
         for (let index in this.selectedRuntimes) {
-            if (this.selectedRuntimes[index] === true) return true;
+            if (this.selectedRuntimes[index] === true)
+                return true;
         }
         return false;
     }
 
-    get componentList() {
-        let components = this.$store.getters.getComponentList(this.search, this.showPublicElements);
-        this.selectedComponents = new Array<boolean>(components.length);
-        return components;
+    get componentOwnerList() {
+        return this.$store.getters.getComponentOwnerList;
+    }
+
+    get ownerComponentList() {
+        return (owner) => {
+            return this.$store.getters.getOwnerComponentList(owner);
+        }
+    }
+
+    get componentVersionList() {
+        return (owner, component) => {
+            return this.$store.getters.getComponentVersionList(owner, component);
+        }
     }
 
     get getComponentVersion() {
@@ -156,6 +172,7 @@ export default class Elements extends Vue {
             return this.$store.getters.getComponentVersion(componentId);
         }
     }
+
     get selectedServiceIsInbound() {
         return (serviceId) => {
             return this.$store.getters.getServiceIsEntryPoint(serviceId);
@@ -163,10 +180,11 @@ export default class Elements extends Vue {
     }
 
     get getIsComponentInUse() {
-        return (componentId) => {
-            return this.$store.getters.getIsComponentInUse(componentId);
+        return (owner, component, version) => {
+            return this.$store.getters.getIsComponentInUse(owner, component, version);
         }
     }
+
     get getComponentOwner() {
         return (componentId) => {
             return this.$store.getters.getComponentOwner(componentId);
@@ -242,7 +260,7 @@ export default class Elements extends Vue {
         // Recorremos la lsita de componentes seleccionados
         for (let index in this.selectedComponents) {
             if (this.selectedComponents[index] === true) {
-                res.push(this.componentList[index]);
+                //res.push(this.componentList[index]);
             }
         }
 
@@ -257,6 +275,7 @@ export default class Elements extends Vue {
                 res.push(this.runtimeList[index]);
             }
         }
+
         this.$store.dispatch('downloadManifest', res);
     }
     deleteSelected() {
@@ -264,7 +283,7 @@ export default class Elements extends Vue {
         let res = [];
         for (let index in this.selectedComponents) {
             if (this.selectedComponents[index] === true) {
-                res.push(this.componentList[index]);
+                // res.push(this.componentList[index]);
             }
         }
 
@@ -279,9 +298,40 @@ export default class Elements extends Vue {
                 res.push(this.runtimeList[index]);
             }
         }
+
         this.$store.dispatch('deleteElement', res);
 
     }
 
 }
 </script>
+<style lang="scss">
+.card {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+.collapse-item {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+.card-content {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+.card-header-title {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+.card-content-box{
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+</style>

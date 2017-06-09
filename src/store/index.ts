@@ -17,7 +17,76 @@ export default new Vuex.Store({
         'deploymentList': {},
         'linkList': [],
         'serviceList': {},
-        'componentList': {},
+        'componentList': {
+            'eslap://eslap.cloud/components/monitor/0_0_1': {
+                'proChannels': {
+                    'sedpest': {
+                        'connectedTo': [
+                            {
+                                'channelName': 'http-monitor',
+                                'rolName': undefined
+                            }
+                        ],
+                        'protocol': 'eslap://eslap.cloud/protocol/message/http/1_0_0',
+                        'type': 'eslap://eslap.cloud/channel/reply/1_0_0'
+                    }
+                },
+                'reqChannels': {},
+                'resourcesConfig': {},
+                'runtime': 'eslap://eslap.cloud/runtime/native/1_0_1'
+            },
+            'eslap://eslap.cloud/components/monitor/0_0_2': {
+                'proChannels': {
+                    'sedpest': {
+                        'connectedTo': [
+                            {
+                                'channelName': 'http-monitor',
+                                'rolName': undefined
+                            }
+                        ],
+                        'protocol': 'eslap://eslap.cloud/protocol/message/http/1_0_0',
+                        'type': 'eslap://eslap.cloud/channel/reply/1_0_0'
+                    }
+                },
+                'reqChannels': {},
+                'resourcesConfig': {},
+                'runtime': 'eslap://eslap.cloud/runtime/native/1_0_1'
+            },
+            'eslap://eslap.cloud/components/monitor/0_1_0': {
+                'proChannels': {
+                    'sedpest': {
+                        'connectedTo': [
+                            {
+                                'channelName': 'http-monitor',
+                                'rolName': undefined
+                            }
+                        ],
+                        'protocol': 'eslap://eslap.cloud/protocol/message/http/1_0_0',
+                        'type': 'eslap://eslap.cloud/channel/reply/1_0_0'
+                    }
+                },
+                'reqChannels': {},
+                'resourcesConfig': {},
+                'runtime': 'eslap://eslap.cloud/runtime/native/1_0_1'
+            },
+            'eslap://eslap.cloud/components/monitor/0_1_1': {
+                'proChannels': {
+                    'sedpest': {
+                        'connectedTo': [
+                            {
+                                'channelName': 'http-monitor',
+                                'rolName': undefined
+                            }
+                        ],
+                        'protocol': 'eslap://eslap.cloud/protocol/message/http/1_0_0',
+                        'type': 'eslap://eslap.cloud/channel/reply/1_0_0'
+                    }
+                },
+                'reqChannels': {},
+                'resourcesConfig': {},
+                'runtime': 'eslap://eslap.cloud/runtime/native/1_0_1'
+            }
+        },
         'resourcesList': {},
         'runtimesList': {},
         'webDomainList': [

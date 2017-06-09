@@ -2,12 +2,12 @@ import { Deployment } from './classes';
 export default {
   setStampState(state, stampState) {
     // actualizamos el estado del stamp
-    state.deploymentList = stampState.deploymentList;
-    state.serviceList = stampState.serviceList;
-    state.linkList = stampState.linkList;
-    state.componentList = stampState.componentList;
-    state.resourcesList = stampState.resourcesList;
-    state.runtimesList = stampState.runtimesList;
+    state.deploymentList = { ...state.deploymentList, ...stampState.deploymentList };
+    state.serviceList = { ...state.serviceList, ...stampState.serviceList };
+    state.linkList.push(stampState.linkList);
+    state.componentList = { ...state.componentList, ...stampState.componentList };
+    state.resourcesList = { ...state.resourcesList, ...stampState.resourcesList };
+    state.runtimesList = { ...state.runtimesList, ...stampState.runtimesList };
   },
   setRegisteredElements(state, { registeredElements }) {
     // actualizamos la lista de elementos registrados
