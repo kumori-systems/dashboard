@@ -7,9 +7,9 @@
                     <i class="fa fa-search"></i>
                 </span>
             </span>
-            <span v-if="someoneSelected">
-                <button class="button" v-on:click="downloadManifest">Download manifest</button>
-                <button class="button" v-on:click="deleteSelected">Delete</button>
+            <span>
+                <button class="button" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
+                <button class="button" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
             </span>
         </div>
         <p>

@@ -11,4 +11,4 @@ import Component from 'vue-class-component';
     name: 'Deployments'
 })
 export default class Deployments extends Vue {}
-</script>
+</script>git 
