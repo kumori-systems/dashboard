@@ -21,12 +21,13 @@
             <collapse-item title="Components" v-if="componentList.length>0">
                 <table class="table">
                     <tr v-for="componentId, index in componentList" v-bind:key="componentId">
+                        <th>{{getComponentOwner(componentId)}}</th>
                         <th>{{componentId.split('/')[4]}}</th>
                         <th>{{getComponentVersion(componentId)}}</th>
                         <th>
                             <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
                         </th>
-                        <th>{{getComponentOwner(componentId)}}</th>
+    
                         <th>
                             <button class="button" v-on:click="openModal(componentId)">
                                 <i class="fa fa-info" aria-hidden="true" />
@@ -42,12 +43,13 @@
             <collapse-item title="Services" v-if="serviceList.length>0">
                 <table class="table">
                     <tr v-for="serviceId, index in serviceList" v-bind:key="serviceId">
+                        <th>{{getServiceOwner(serviceId)}}</th>
                         <th>{{getServiceName(serviceId)}}</th>
                         <th>{{getServiceVersion(serviceId)}}</th>
                         <th>
                             <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
                         </th>
-                        <th>{{getServiceOwner(serviceId)}}</th>
+    
                         <th>
                             <button class="button" v-on:click="openModal(serviceId)">
                                 <i class="fa fa-info" aria-hidden="true" />
@@ -75,11 +77,13 @@
             <collapse-item title="Runtimes" v-if="runtimeList.length>0">
                 <table class="table">
                     <tr v-for="runtimeId, index in runtimeList" v-bind:key="runtimeId">
-                        <th>{{runtimeId.split('/')[4]}} {{getRuntimeVersion(runtimeId)}}</th>
+                        <th>{{getRuntimeOwner(runtimeId)}}</th>
+                        <th>{{runtimeId.split('/')[4]}}</th>
+                        <th> {{getRuntimeVersion(runtimeId)}}</th>
                         <th>
                             <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
                         </th>
-                        <th>{{getRuntimeOwner(runtimeId)}}</th>
+    
                         <th>
                             <button class="button" v-on:click="openModal(runtimeId)">
                                 <i class="fa fa-info" aria-hidden="true" />
