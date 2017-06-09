@@ -16,61 +16,81 @@
             <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
             <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         </p>
+    
         <collapse>
             <collapse-item title="Components" v-if="componentList.length>0">
-                <p v-for="componentId, index in componentList" v-bind:key="componentId">
-                    {{componentId.split('/')[4]}} {{getComponentVersion(componentId)}}
-                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
-                    {{getComponentOwner(componentId)}}
-                    <button class="button" v-on:click="openModal(componentId)">
-                        <i class="fa fa-info" aria-hidden="true" />
-                    </button>
-                    <button class="button" v-on:click="deleteElement(componentId)">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                    <input type="checkbox" id="selected" v-model="selectedComponents[index]">
-                </p>
+                <table class="table">
+                    <tr v-for="componentId, index in componentList" v-bind:key="componentId">
+                        <th>{{componentId.split('/')[4]}}</th>
+                        <th>{{getComponentVersion(componentId)}}</th>
+                        <th>
+                            <span class="ON_PROGRESS" v-if="getIsComponentInUse(componentId)">in use</span>
+                        </th>
+                        <th>{{getComponentOwner(componentId)}}</th>
+                        <th>
+                            <button class="button" v-on:click="openModal(componentId)">
+                                <i class="fa fa-info" aria-hidden="true" />
+                            </button>
+                            <button class="button" v-on:click="deleteElement(componentId)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            <input type="checkbox" id="selected" v-model="selectedComponents[index]">
+                        </th>
+                    </tr>
+                </table>
             </collapse-item>
             <collapse-item title="Services" v-if="serviceList.length>0">
-                <p v-for="serviceId, index in serviceList" v-bind:key="serviceId">
-                    <span>{{getServiceName(serviceId)}}</span>
-                    <span>{{getServiceVersion(serviceId)}}</span>
-                    <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
-                    <span>{{getServiceOwner(serviceId)}}</span>
-                    <button class="button" v-on:click="openModal(serviceId)">
-                        <i class="fa fa-info" aria-hidden="true" />
-                    </button>
-                    <button class="button" v-on:click="deleteElement(serviceId)">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
+                <table class="table">
+                    <tr v-for="serviceId, index in serviceList" v-bind:key="serviceId">
+                        <th>{{getServiceName(serviceId)}}</th>
+                        <th>{{getServiceVersion(serviceId)}}</th>
+                        <th>
+                            <span class="ON_PROGRESS" v-if="getIsServiceInUse(serviceId)">in use</span>
+                        </th>
+                        <th>{{getServiceOwner(serviceId)}}</th>
+                        <th>
+                            <button class="button" v-on:click="openModal(serviceId)">
+                                <i class="fa fa-info" aria-hidden="true" />
+                            </button>
+                            <button class="button" v-on:click="deleteElement(serviceId)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
     
-                    <router-link v-if="selectedServiceIsInbound(serviceId)" v-bind:to="'newHTTPEntrypoint'">
-                        <button class="button" v-on:click="selectedService(serviceId)">
-                            <i class="fa fa-play" aria-hidden="true"></i>
-                        </button>
-                    </router-link>
-                    <router-link v-else v-bind:to="'newWebServiceAdvanced'">
-                        <button class="button" v-on:click="selectedService(serviceId)">
-                            <i class="fa fa-play" aria-hidden="true"></i>
-                        </button>
-                    </router-link>
+                            <router-link v-if="selectedServiceIsInbound(serviceId)" v-bind:to="'newHTTPEntrypoint'">
+                                <button class="button" v-on:click="selectedService(serviceId)">
+                                    <i class="fa fa-play" aria-hidden="true"></i>
+                                </button>
+                            </router-link>
+                            <router-link v-else v-bind:to="'newWebServiceAdvanced'">
+                                <button class="button" v-on:click="selectedService(serviceId)">
+                                    <i class="fa fa-play" aria-hidden="true"></i>
+                                </button>
+                            </router-link>
     
-                    <input type="checkbox" id="selected" v-model="selectedServices[index]">
-                </p>
+                            <input type="checkbox" id="selected" v-model="selectedServices[index]">
+                        </th>
+                    </tr>
+                </table>
             </collapse-item>
             <collapse-item title="Runtimes" v-if="runtimeList.length>0">
-                <p v-for="runtimeId, index in runtimeList" v-bind:key="runtimeId">
-                    {{runtimeId.split('/')[4]}} {{getRuntimeVersion(runtimeId)}}
-                    <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
-                    {{getRuntimeOwner(runtimeId)}}
-                    <button class="button" v-on:click="openModal(runtimeId)">
-                        <i class="fa fa-info" aria-hidden="true" />
-                    </button>
-                    <button class="button" v-on:click="deleteElement(runtimeId)">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                    <input type="checkbox" id="selected" v-model="selectedRuntimes[index]">
-                </p>
+                <table class="table">
+                    <tr v-for="runtimeId, index in runtimeList" v-bind:key="runtimeId">
+                        <th>{{runtimeId.split('/')[4]}} {{getRuntimeVersion(runtimeId)}}</th>
+                        <th>
+                            <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(runtimeId)">in use</span>
+                        </th>
+                        <th>{{getRuntimeOwner(runtimeId)}}</th>
+                        <th>
+                            <button class="button" v-on:click="openModal(runtimeId)">
+                                <i class="fa fa-info" aria-hidden="true" />
+                            </button>
+                            <button class="button" v-on:click="deleteElement(runtimeId)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            <input type="checkbox" id="selected" v-model="selectedRuntimes[index]">
+                        </th>
+                    </tr>
+                </table>
             </collapse-item>
         </collapse>
         <modal v-bind:visible="showModal" v-bind:title="elementURN" v-on:close="closeModal"></modal>
