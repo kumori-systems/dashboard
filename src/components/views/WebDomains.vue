@@ -7,7 +7,11 @@
         <table class="table">
     
             <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
-                <th>{{usedWebdomain}}</th>
+                <th>
+                    <a v-bind:href="'http://'+usedWebdomain">
+                        {{usedWebdomain}}
+                    </a>
+                </th>
                 <th>
                     <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
                 </th>
@@ -15,11 +19,6 @@
                     <span class="ON_PROGRESS">in use</span>
                 </th>
                 <th>
-                    <a v-bind:href="'http://'+usedWebdomain">
-                        <button class="button">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                        </button>
-                    </a>
                     <button class="button">
                         <i class="fa fa-trash" aria-hidden="true" v-on:click="deleteWebDomain(usedWebdomain)"></i>
                     </button>
@@ -33,10 +32,6 @@
                 </th>
                 <th></th>
                 <th>
-                    <button class="button" v-bind:disabled="true">
-                        <i class="fa fa-eye" aria-hidden="true"></i>
-                    </button>
-    
                     <button class="button" v-on:click="deleteWebDomain(freeWebdomain)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
