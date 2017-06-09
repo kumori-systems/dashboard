@@ -4,27 +4,45 @@
             <input v-model="newWebDomain" placeholder=" New web domain">
             <button class="button" v-on:click="addWebDomain">add</button>
         </p>
-        <div v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
-            {{usedWebdomain}}
-            <span class="ON_PROGRESS">in use</span>
-            <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
+        <table class="table">
     
-            <a v-bind:href="'http://'+usedWebdomain">
-                <button class="button">
-                    <i class="fa fa-eye" aria-hidden="true"></i>
-                </button>
-            </a>
-            <button class="button">
-                <i class="fa fa-trash" aria-hidden="true" v-on:click="deleteWebDomain(usedWebdomain)"></i>
-            </button>
-        </div>
-        <div v-for="freeWebdomain in freeWebDomainList" v-bind:key="freeWebdomain">
-            {{freeWebdomain}}
-            <i class="fa fa-circle" v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true" />
-            <button class="button" v-on:click="deleteWebDomain(freeWebdomain)">
-                <i class="fa fa-trash" aria-hidden="true"></i>
-            </button>
-        </div>
+            <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
+                <th>{{usedWebdomain}}</th>
+                <th>
+                    <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
+                </th>
+                <th>
+                    <span class="ON_PROGRESS">in use</span>
+                </th>
+                <th>
+                    <a v-bind:href="'http://'+usedWebdomain">
+                        <button class="button">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </a>
+                    <button class="button">
+                        <i class="fa fa-trash" aria-hidden="true" v-on:click="deleteWebDomain(usedWebdomain)"></i>
+                    </button>
+                </th>
+            </tr>
+            <tr v-for="freeWebdomain in freeWebDomainList" v-bind:key="freeWebdomain">
+                <th>{{freeWebdomain}}
+                </th>
+                <th>
+                    <i class="fa fa-circle" v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true" />
+                </th>
+                <th></th>
+                <th>
+                    <button class="button" v-bind:disabled="true">
+                        <i class="fa fa-eye" aria-hidden="true"></i>
+                    </button>
+    
+                    <button class="button" v-on:click="deleteWebDomain(freeWebdomain)">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </th>
+            </tr>
+        </table>
     </div>
 </template>
 
