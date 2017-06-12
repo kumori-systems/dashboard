@@ -171,7 +171,7 @@ export default class Elements extends Vue {
     }
 
     get componentOwnerList() {
-        return this.$store.getters.getComponentOwnerList;
+        return this.$store.getters.getComponentOwnerList(this.showPublicElements);
     }
 
     get ownerComponentList() {
@@ -187,7 +187,7 @@ export default class Elements extends Vue {
     }
 
     get serviceOwnerList() {
-        return this.$store.getters.getServiceOwnerList;
+        return this.$store.getters.getServiceOwnerList(this.showPublicElements);
     }
 
     get ownerServiceList() {
@@ -247,7 +247,7 @@ export default class Elements extends Vue {
     }
 
     get runtimeOwnerList() {
-        return this.$store.getters.getRuntimeOwnerList;
+        return this.$store.getters.getRuntimeOwnerList(this.showPublicElements);
     }
 
     get ownerRuntimeList() {

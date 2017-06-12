@@ -396,16 +396,25 @@ export default {
     };
   },
 
-  getComponentOwnerList: function (state, getters): Array<string> {
-    let res: Array<string> = [];
-    let owner: string = null;
-    for (let componentIndex in state.componentList) {
-      owner = getters.getComponentOwner(componentIndex);
-      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-        res.push(owner);
+  getComponentOwnerList: function (state, getters) {
+    return (showPublicElements: boolean): Array<string> => {
+      // ShowPublicElements marca si enseñamos elementos que no son nuestros
+      let user;
+      if (!showPublicElements) {
+        user = state.username;
       }
-    }
-    return res;
+
+      let res: Array<string> = [];
+      let owner: string = null;
+      for (let componentIndex in state.componentList) {
+        owner = getters.getComponentOwner(componentIndex);
+        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+          if (user === undefined || user === owner)
+            res.push(owner);
+        }
+      }
+      return res;
+    };
   },
 
   getOwnerComponentList: function (state, getters) {
@@ -474,16 +483,25 @@ export default {
   /**
    * Devolvemos una lista de servicios web disponibles para el usuario
    */
-  getServiceOwnerList: function (state, getters): Array<string> {
-    let res: Array<string> = [];
-    let owner: string = null;
-    for (let serviceIndex in state.serviceList) {
-      owner = getters.getServiceOwner(serviceIndex);
-      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-        res.push(owner);
+  getServiceOwnerList: function (state, getters) {
+    return (showPublicElements: boolean): Array<string> => {
+      // ShowPublicElements marca si enseñamos elementos que no son nuestros
+      let user;
+      if (!showPublicElements) {
+        user = state.username;
       }
-    }
-    return res;
+
+      let res: Array<string> = [];
+      let owner: string = null;
+      for (let serviceIndex in state.serviceList) {
+        owner = getters.getServiceOwner(serviceIndex);
+        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+          if (user === undefined || user === owner)
+            res.push(owner);
+        }
+      }
+      return res;
+    };
   },
 
   getOwnerServiceList: function (state, getters) {
@@ -554,17 +572,26 @@ export default {
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
-  getRuntimeOwnerList: function (state, getters): Array<string> {
-    let res: Array<string> = [];
-    let owner: string = null;
-    for (let runtimeIndex in state.runtimeList) {
-      owner = getters.getRuntimeOwner(runtimeIndex);
-
-      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-        res.push(owner);
+  getRuntimeOwnerList: function (state, getters) {
+    return (showPublicElements: boolean): Array<string> => {
+      // ShowPublicElements marca si enseñamos elementos que no son nuestros
+      let user;
+      if (!showPublicElements) {
+        user = state.username;
       }
-    }
-    return res;
+
+      let res: Array<string> = [];
+      let owner: string = null;
+      for (let runtimeIndex in state.runtimeList) {
+        owner = getters.getRuntimeOwner(runtimeIndex);
+
+        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+          if (user === undefined || user === owner)
+            res.push(owner);
+        }
+      }
+      return res;
+    };
   },
   getOwnerRuntimeList: function (state, getters) {
     return (owner) => {

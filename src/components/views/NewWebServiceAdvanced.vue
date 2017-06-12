@@ -230,7 +230,6 @@ export default class NewWebServiceAdvanced extends Vue {
         });
     }
 
-
     updateInputValue(emitedArguments) {
         let numRol: number, propertyType: string, newValue: number;
         [numRol, propertyType, newValue] = emitedArguments;
