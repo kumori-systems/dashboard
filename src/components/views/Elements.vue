@@ -31,13 +31,13 @@
                                                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal('componentId')">
+                                                    <button class="button" v-on:click="openModal(getComponentId(owner, component, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button" v-on:click="deleteElement('componentId')">
+                                                    <button class="button" v-on:click="deleteElement(getComponentId(owner, component, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
-                                                    <input type="checkbox" id="selected">
+                                                    <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)">
                                                 </th>
                                             </tr>
                                         </table>
@@ -62,25 +62,25 @@
                                                     <span class="ON_PROGRESS" v-if="getIsServiceInUse(owner, service, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal('serviceId')">
+                                                    <button class="button" v-on:click="openModal(getServiceId(owner, service, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <!-- Dependiendo de si el servicio es entrypoint o no, el botón nos redirigirá a un sitio u a otro -->
-                                                    <router-link v-if="selectedServiceIsInbound(service)" v-bind:to="'newHTTPEntrypoint'">
-                                                        <button class="button" v-on:click="selectedService(service)">
+                                                    <router-link v-if="selectedServiceIsInbound(getServiceId(owner, service, version))" v-bind:to="'newHTTPEntrypoint'">
+                                                        <button class="button" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
                                                     <router-link v-else v-bind:to="'newWebServiceAdvanced'">
-                                                        <button class="button" v-on:click="selectedService(service)">
+                                                        <button class="button" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
                                                     <!-- fin redirección -->
-                                                    <button class="button" v-on:click="deleteElement('serviceId')">
+                                                    <button class="button" v-on:click="deleteElement(getServiceId(owner, service, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
-                                                    <input type="checkbox" id="selected">
+                                                    <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)">
                                                 </th>
                                             </tr>
                                         </table>
@@ -106,13 +106,13 @@
                                                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(owner, runtime, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal('runtimeId')">
+                                                    <button class="button" v-on:click="openModal(getRuntimeId(owner, runtime, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button" v-on:click="deleteElement('runtimeId')">
+                                                    <button class="button" v-on:click="deleteElement(getRuntimeId(owner, runtime, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
-                                                    <input type="checkbox" id="selected">
+                                                    <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">
                                                 </th>
                                             </tr>
                                         </table>
@@ -147,9 +147,9 @@ import Modal from '../innerComponents/Modal.vue';
 export default class Elements extends Vue {
     showModal: boolean = false;
     elementURN: string = '';
-    selectedComponents: Array<boolean> = [];
-    selectedServices: Array<boolean> = [];
-    selectedRuntimes: Array<boolean> = [];
+    selectedComponents = [];
+    selectedServices = [];
+    selectedRuntimes = [];
     search: string = null;
     showPublicElements: boolean = true;
 
@@ -160,19 +160,14 @@ export default class Elements extends Vue {
     }
 
     get someoneSelected() {
-        for (let index in this.selectedComponents) {
-            if (this.selectedComponents[index] === true)
-                return true;
-        }
-        for (let index in this.selectedServices) {
-            if (this.selectedServices[index] === true)
-                return true;
-        }
-        for (let index in this.selectedRuntimes) {
-            if (this.selectedRuntimes[index] === true)
-                return true;
-        }
+        if (this.selectedComponents.length > 0 || this.selectedServices.length > 0 || this.selectedRuntimes.length > 0)
+            return true;
         return false;
+    }
+    get getComponentId() {
+        return (owner, component, version) => {
+            return this.$store.getters.getComponentId(owner, component, version);
+        }
     }
 
     get componentOwnerList() {
@@ -214,7 +209,7 @@ export default class Elements extends Vue {
     }
     get getIsComponentInUse() {
         return (owner, component, version) => {
-            return this.$store.getters.getIsComponentInUse(owner, component, version);
+            return this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
         }
     }
 
@@ -230,15 +225,19 @@ export default class Elements extends Vue {
         };
     }
 
-
     get getServiceVersion() {
         return (serviceId) => {
             return this.$store.getters.getServiceVersion(serviceId);
         };
     }
+    get getServiceId() {
+        return (owner, service, version) => {
+            return this.$store.getters.getServiceId(owner, service, version);
+        }
+    }
     get getIsServiceInUse() {
         return (owner, service, version) => {
-            return this.$store.getters.getIsServiceInUse(owner, service, version);
+            return this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
         };
     }
     get getServiceOwner() {
@@ -248,9 +247,7 @@ export default class Elements extends Vue {
     }
 
     get runtimeOwnerList() {
-        let res = this.$store.getters.getRuntimeOwnerList;
-        console.log('La lista de owners de runtimes contiene: ' + JSON.stringify(res));
-        return res;
+        return this.$store.getters.getRuntimeOwnerList;
     }
 
     get ownerRuntimeList() {
@@ -263,9 +260,16 @@ export default class Elements extends Vue {
             return this.$store.getters.getRuntimeVersion(runtimeId);
         }
     }
+
+    get getRuntimeId() {
+        return (owner, runtime, version) => {
+            return this.$store.getters.getRuntimeId(owner, runtime, version);
+        }
+    }
+
     get getIsRuntimeInUse() {
-        return (runtimeId) => {
-            return this.$store.getters.getIsRuntimeInUse(runtimeId);
+        return (owner, runtime, version) => {
+            return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
         }
     }
     get getRuntimeOwner() {
@@ -296,55 +300,10 @@ export default class Elements extends Vue {
     }
 
     downloadManifest() {
-        let res = [];
-        // Descargamos el manifest de todos los elementos seleccionados
-        // Recorremos la lsita de componentes seleccionados
-
-        /*
-        for (let index in this.selectedComponents) {
-            if (this.selectedComponents[index] === true) {
-                //res.push(this.componentList[index]);
-            }
-        }
-        
-                for (let index in this.selectedServices) {
-                    if (this.selectedServices[index] === true) {
-                        res.push(this.serviceList[index]);
-                    }
-                }
-        
-                for (let index in this.selectedRuntimes) {
-                    if (this.selectedRuntimes[index] === true) {
-                        res.push(this.runtimeList[index]);
-                    }
-                }
-        */
-        this.$store.dispatch('downloadManifest', res);
+        this.$store.dispatch('downloadManifest', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
     deleteSelected() {
-        // Eliminamos todos los elementos seleccionados
-        let res = [];
-        /*
-        for (let index in this.selectedComponents) {
-            if (this.selectedComponents[index] === true) {
-                // res.push(this.componentList[index]);
-            }
-        }
-
-        for (let index in this.selectedServices) {
-            if (this.selectedServices[index] === true) {
-                res.push(this.serviceList[index]);
-            }
-        }
-
-        for (let index in this.selectedRuntimes) {
-            if (this.selectedRuntimes[index] === true) {
-                res.push(this.runtimeList[index]);
-            }
-        }
-*/
-        this.$store.dispatch('deleteElement', res);
-
+        this.$store.dispatch('deleteElement', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
 
 }

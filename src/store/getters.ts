@@ -459,22 +459,11 @@ export default {
   },
 
   getIsComponentInUse: function (state, getters) {
-    return (owner, component, version) => {
-      // Tenemos que volver a encontrar la id del componente
-      let myComponentId;
-      for (let componentId in state.componentList) {
-        if (getters.getComponentOwner(componentId) === owner
-          && getters.getComponentName(componentId) === component
-          && getters.getComponentVersion(componentId) === version)
-          myComponentId = componentId;
-      }
-
-
-
+    return (componentId) => {
       // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
       for (let serviceIndex in state.serviceList) {
         for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
-          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === myComponentId)
+          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
             return true;
         }
       }
@@ -527,6 +516,8 @@ export default {
       return res;
     };
   },
+
+
   getRuntimeVersionList: function (state, getters) {
     return (owner, runtime) => {
       let res: Array<string> = [];
@@ -566,12 +557,8 @@ export default {
   getRuntimeOwnerList: function (state, getters): Array<string> {
     let res: Array<string> = [];
     let owner: string = null;
-
-    console.log('Entramos a buscar la lsita de owners de runtimes');
     for (let runtimeIndex in state.runtimeList) {
       owner = getters.getRuntimeOwner(runtimeIndex);
-
-      console.log('El owner de este runtime es: ' + owner);
 
       if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
         res.push(owner);
@@ -600,6 +587,17 @@ export default {
     return (runtimeId) => {
       let splitted = runtimeId.split('/');
       return splitted[splitted.length - 1];
+    };
+  },
+
+  getRuntimeId: function (state, getters) {
+    return (owner, runtime, version) => {
+      for (let runtimeId in state.runtimeList) {
+        if (getters.getRuntimeOwner(runtimeId) === owner
+          && getters.getRuntimeName(runtimeId) === runtime
+          && getters.getRuntimeVersion(runtimeId) === version)
+          return runtimeId;
+      }
     };
   },
 
@@ -676,6 +674,17 @@ export default {
     return state.certList;
   },
 
+  getComponentId: function (state, getters) {
+    return (owner, component, version) => {
+      for (let componentId in state.componentList) {
+        if (getters.getComponentOwner(componentId) === owner
+          && getters.getComponentName(componentId) === component
+          && getters.getComponentVersion(componentId) === version)
+          return componentId;
+      }
+    };
+  },
+
   getServiceName: function (state) {
     return (serviceId) => {
       return (<Service>state.serviceList[serviceId]).name;
@@ -701,21 +710,23 @@ export default {
     };
   },
 
-  getIsServiceInUse: function (state, getters) {
-    return (owner, service, version): boolean => {
-
-      // Recuperamos la id del servicio
+  getServiceId: function (state, getters) {
+    return (owner, service, version) => {
       let myServiceId;
       for (let serviceId in state.serviceList) {
         if (getters.getServiceOwner(serviceId) === owner
           && getters.getServiceName(serviceId) === service
           && getters.getServiceVersion(serviceId) === version)
-          myServiceId = serviceId;
+          return serviceId;
       }
+    };
+  },
 
+  getIsServiceInUse: function (state, getters) {
+    return (serviceId): boolean => {
       // Tenemos que comprobar si el servicio está siendo utilizado por algún deployment
       for (let deploymentIndex in state.deploymentList) {
-        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === myServiceId)
+        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === serviceId)
           return true;
       }
       return false;
