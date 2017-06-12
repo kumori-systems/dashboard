@@ -3,13 +3,20 @@
         <div v-if="addVolume">
             <add-volume></add-volume>
         </div>
-        <p v-for="dataVolume in dataVolumeList">
-            {{dataVolume}}
-            <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
-            by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}} {{numberOfChunks(dataVolume)}} chunks
-            <button class="button fa fa-info" />
-            <button class="button fa fa-trash" v-on:click="deleteVolume(dataVolume)" />
-        </p>
+        <table class="table">
+            <tr v-for="dataVolume in dataVolumeList">
+                <th>{{dataVolume}}</th>
+                <th>
+                    <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
+                </th>
+                <th>by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</th>
+                <th>{{numberOfChunks(dataVolume)}} chunks</th>
+                <th>
+                    <button class="button fa fa-info" />
+                    <button class="button fa fa-trash" v-on:click="deleteVolume(dataVolume)" />
+                </th>
+            </tr>
+        </table>
     </div>
 </template>
 
