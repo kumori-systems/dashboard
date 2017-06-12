@@ -25,7 +25,7 @@ export function getStampState() {
         let linkList: Array<Link> = [];
         let serviceList: { [serviceId: string]: Service } = {};
         let componentList: { [componentid: string]: Component } = {};
-        let resourcesList: { [resourceId: string]: Resource } = {};
+        let resourceList: { [resourceId: string]: Resource } = {};
         let runtimeList: { [runtimeId: string]: Runtime } = {};
 
         // Por la forma en la que obtenemos el estado, lo recorreremos por deployments
@@ -43,13 +43,13 @@ export function getStampState() {
                 let serviceResources: Array<string> = []; // Las resources las encontramos dentro de la versión 1
                 for (let resourceIndex in version.resources) {
                     serviceResources.push(resourceIndex);
-                    resourcesList[resourceIndex] = new Resource(
+                    resourceList[resourceIndex] = new Resource(
                         version.resources[resourceIndex].resource.name,
                         version.resources[resourceIndex].resource.parameters
                     );
                     console.info('NEW resource(' + resourceIndex
-                        + '):\nname: ' + resourcesList[resourceIndex].realName
-                        + '\nparameters: ' + JSON.stringify(resourcesList[resourceIndex].parameters));
+                        + '):\nname: ' + resourceList[resourceIndex].realName
+                        + '\nparameters: ' + JSON.stringify(resourceList[resourceIndex].parameters));
                 }
                 let serviceParameters: Array<string> = version.configuration.parameters;
                 let serviceRoles: { [rolId: string]: ServiceRol } = {};
@@ -213,9 +213,18 @@ export function getStampState() {
                             + '):\nconnectedTo: ' + JSON.stringify(reqChannels[channelId].connectedTo)
                         );
                     }
+
+                    // Añadimos el runtime a la lista de runtimes
+                    let runtime = components[componentIndex].runtime;
+
+                    if (runtimeList[runtime] === undefined) {
+                        runtimeList[runtime] = new Runtime();
+                        console.info('New runtime created(' + runtime + ')');
+                    }
+
                     serviceComponents.push(componentIndex);
                     componentList[componentIndex] = new Component(
-                        components[componentIndex].runtime,
+                        runtime,
                         componentResources,
                         components[componentIndex].configuration.parameters,
                         proChannels,
@@ -330,7 +339,7 @@ export function getStampState() {
             'deploymentList': deploymentList,
             'serviceList': serviceList,
             'componentList': componentList,
-            'resourcesList': resourcesList,
+            'resourceList': resourceList,
             'linkList': linkList,
             'runtimeList': runtimeList
         };

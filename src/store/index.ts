@@ -87,8 +87,8 @@ export default new Vuex.Store({
                 'runtime': 'eslap://eslap.cloud/runtime/native/1_0_1'
             }
         },
-        'resourcesList': {},
-        'runtimesList': {},
+        'resourceList': {},
+        'runtimeList': {},
         'webDomainList': [
             { 'url': 'monitor-ticket740.slap53.iti.es', 'state': 0 },
             { 'url': 'admission-ticket740.slap53.iti.es', 'state': 0 },
@@ -98,7 +98,6 @@ export default new Vuex.Store({
             { 'url': 'another3-webdomain.slap53.iti.es', 'state': 2 }
         ],
         'certList': ['cert1', 'cert2', 'cert3'],
-        'temporaryState': {},
         'fabElements': {},
         'selectedService': null,
         'username': 'eslap.cloud'

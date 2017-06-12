@@ -80,7 +80,6 @@ export default {
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let website: Array<string> = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (website.length > 0) return website;
       // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
       // lincado y sea un entrypoint (tenga un website != null)
 
@@ -227,7 +226,7 @@ export default {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let serviceResources = (<Service>state.serviceList[serviceId]).resources;
       for (let resourceIndex in serviceResources) {
-        if ((<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName && (<Resource>state.resourcesList[serviceResources[resourceIndex]]).realName.split('/')[4] === 'volume')
+        if ((<Resource>state.resourceList[serviceResources[resourceIndex]]).realName && (<Resource>state.resourceList[serviceResources[resourceIndex]]).realName.split('/')[4] === 'volume')
           res.push(serviceResources[resourceIndex]);
       }
       return res;
@@ -322,7 +321,7 @@ export default {
 
       for (let resourceId in resources) {
         // Buscamos las resources que sean volumenes
-        if ((<Resource>state.resourcesList[resources[resourceId]]).realName.split('/')[4] === 'volume') {
+        if ((<Resource>state.resourceList[resources[resourceId]]).realName.split('/')[4] === 'volume') {
           res.push(resources[resourceId]);
         }
       }
@@ -486,20 +485,58 @@ export default {
   /**
    * Devolvemos una lista de servicios web disponibles para el usuario
    */
-  getWebServiceList: function (state, getters): Function {
-    return (filter, showPublicElems): Array<string> => {
-      let res = [];
+  getServiceOwnerList: function (state, getters): Array<string> {
+    let res: Array<string> = [];
+    let owner: string = null;
+    for (let serviceIndex in state.serviceList) {
+      owner = getters.getServiceOwner(serviceIndex);
+      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+        res.push(owner);
+      }
+    }
+    return res;
+  },
+
+  getOwnerServiceList: function (state, getters) {
+    return (owner) => {
+      // Buscamos todos los servicios del owner
+      let res: Array<string> = []; let serviceName;
       for (let serviceId in state.serviceList) {
-        res.push(serviceId);
+        if (getters.getServiceOwner(serviceId) === owner) {
+          // Si el servicio ya esta no lo añadimos
+          serviceName = getters.getServiceName(serviceId);
+          if (res.findIndex(serv => { return serv === serviceName; }) === -1) {
+            res.push(serviceName);
+          }
+        }
+      }
+      return res;
+    };
+  },
+
+  getServiceVersionList: function (state, getters) {
+    return (owner, service) => {
+      let res: Array<string> = [];
+      // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
+      for (let key in state.serviceList) {
+        if (getters.getServiceOwner(key) === owner && getters.getServiceName(key) === service) {
+          res.push(getters.getServiceVersion(key));
+        }
       }
 
-      if (!showPublicElems) {
-        let username = getters.getUsername;
-        res = res.filter(elem => { return elem.split('/')[2] === username; });
+      return res;
+    };
+  },
+  getRuntimeVersionList: function (state, getters) {
+    return (owner, runtime) => {
+      let res: Array<string> = [];
+      // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
+      for (let key in state.runtimeList) {
+        if (getters.getRuntimeOwner(key) === owner && getters.getRuntimeName(key) === runtime) {
+          res.push(getters.getRuntimeVersion(key));
+        }
       }
 
-      if (filter != null && filter.length > 0)
-        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
       return res;
     };
   },
@@ -526,28 +563,35 @@ export default {
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
-  getRuntimeList: function (state, getters): Function {
-    // Buscamos todos los runtime en los roles de los deployments
-    return (filter, showPublicElems): Array<string> => {
+  getRuntimeOwnerList: function (state, getters): Array<string> {
+    let res: Array<string> = [];
+    let owner: string = null;
 
-      let res = [];
-      let aux: string;
-      for (let serviceId in state.serviceList) {
-        for (let componentId in (<Component>state.componentList)) {
-          aux = (<Component>state.componentList[componentId]).runtime;
-          if (!res.find(runtim => { return runtim === aux; }))// Comprobamos que no esta ya añadido
-            res.push(aux);
+    console.log('Entramos a buscar la lsita de owners de runtimes');
+    for (let runtimeIndex in state.runtimeList) {
+      owner = getters.getRuntimeOwner(runtimeIndex);
+
+      console.log('El owner de este runtime es: ' + owner);
+
+      if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
+        res.push(owner);
+      }
+    }
+    return res;
+  },
+  getOwnerRuntimeList: function (state, getters) {
+    return (owner) => {
+      // Buscamos todos los servicios del owner
+      let res: Array<string> = []; let runtimeName;
+      for (let runtimeId in state.runtimeList) {
+        if (getters.getRuntimeOwner(runtimeId) === owner) {
+          // Si el servicio ya esta no lo añadimos
+          runtimeName = getters.getRuntimeName(runtimeId);
+          if (res.findIndex(serv => { return serv === runtimeName; }) === -1) {
+            res.push(runtimeName);
+          }
         }
       }
-
-      if (!showPublicElems) {
-        let username = getters.getUsername;
-        res = res.filter(elem => { return elem.split('/')[2] === username; });
-      }
-
-
-      if (filter != null && filter.length > 0)
-        return res.filter(elem => { return elem.indexOf(filter) !== -1; });
       return res;
     };
   },
@@ -620,8 +664,8 @@ export default {
 
   getDataVolumesList: function (state, getters): Array<string> {
     let res: Array<string> = [];
-    for (let resourceIndex in state.resourcesList) {
-      if ((<Resource>state.resourcesList[resourceIndex]).realName && (<Resource>state.resourcesList[resourceIndex]).realName.split('/')[4] === 'volume') {
+    for (let resourceIndex in state.resourceList) {
+      if ((<Resource>state.resourceList[resourceIndex]).realName && (<Resource>state.resourceList[resourceIndex]).realName.split('/')[4] === 'volume') {
         res.push(resourceIndex);
       }
     }
@@ -637,6 +681,15 @@ export default {
       return (<Service>state.serviceList[serviceId]).name;
     };
   },
+  getRuntimeName: function (state, getters) {
+    return (runtimeId) => {
+      let splitted = runtimeId.split('/');
+      if (splitted[5] === getters.getRuntimeVersion(runtimeId))
+        return splitted[4];
+      else
+        return splitted[4] + '.' + splitted[5];
+    };
+  },
 
   getServiceVersion: function (state) {
     return (serviceId: string) => {
@@ -648,12 +701,21 @@ export default {
     };
   },
 
-  getIsServiceInUse: function (state) {
-    return (serviceId): boolean => {
-      // Miramos en la lista de deployments
+  getIsServiceInUse: function (state, getters) {
+    return (owner, service, version): boolean => {
+
+      // Recuperamos la id del servicio
+      let myServiceId;
+      for (let serviceId in state.serviceList) {
+        if (getters.getServiceOwner(serviceId) === owner
+          && getters.getServiceName(serviceId) === service
+          && getters.getServiceVersion(serviceId) === version)
+          myServiceId = serviceId;
+      }
+
+      // Tenemos que comprobar si el servicio está siendo utilizado por algún deployment
       for (let deploymentIndex in state.deploymentList) {
-        // Si alguno utiliza este servicio devolvemos true
-        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === serviceId)
+        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === myServiceId)
           return true;
       }
       return false;
@@ -769,11 +831,11 @@ export default {
       let res: Array<string> = [];
 
       // Miramos el tipo de configId
-      if ((<Resource>state.resourcesList[configId]).realName) {
-        let type = (<Resource>state.resourcesList[configId]).realName.split('/')[4];
+      if ((<Resource>state.resourceList[configId]).realName) {
+        let type = (<Resource>state.resourceList[configId]).realName.split('/')[4];
 
-        for (let resourceId in (<Array<Resource>>state.resourcesList)) {
-          if ((<Resource>state.resourcesList[resourceId]).realName && (<Resource>state.resourcesList[resourceId]).realName.split('/')[4] === type) {
+        for (let resourceId in (<Array<Resource>>state.resourceList)) {
+          if ((<Resource>state.resourceList[resourceId]).realName && (<Resource>state.resourceList[resourceId]).realName.split('/')[4] === type) {
             res.push(resourceId);
           }
         }

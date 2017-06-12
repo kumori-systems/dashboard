@@ -4,10 +4,10 @@ export default {
     // actualizamos el estado del stamp
     state.deploymentList = { ...state.deploymentList, ...stampState.deploymentList };
     state.serviceList = { ...state.serviceList, ...stampState.serviceList };
-    state.linkList.push(stampState.linkList);
+    state.linkList = state.linkList.concat(stampState.linkList);
     state.componentList = { ...state.componentList, ...stampState.componentList };
-    state.resourcesList = { ...state.resourcesList, ...stampState.resourcesList };
-    state.runtimesList = { ...state.runtimesList, ...stampState.runtimesList };
+    state.resourceList = { ...state.resourceList, ...stampState.resourceList };
+    state.runtimeList = { ...state.runtimeList, ...stampState.runtimeList };
   },
   setRegisteredElements(state, { registeredElements }) {
     // actualizamos la lista de elementos registrados

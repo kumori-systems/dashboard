@@ -10,6 +10,15 @@
                     Service: {{deploymentService}}
                     <button class="button" v-on:click="undeploy">UNDEPLOY</button>
                 </p>
+                <p v-if="website!=null">
+                    Websites:
+                    <p class="inner-content" v-for="web in website">
+                        <a v-bind:href="'http://'+web">
+                            {{web}}
+                        </a>
+                    </p>
+    
+                </p>
                 <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
                     Connected to:
                     <div v-for="proChannel in serviceProvideChannels" class="inner-content">
@@ -73,6 +82,9 @@ export default class DeploymentItem extends Vue {
         // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
 
+    }
+    get website(): string {
+        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
 
     get deploymentName(): string {
