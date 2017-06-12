@@ -522,15 +522,21 @@ export default {
   },
 
   getServiceVersionList: function (state, getters) {
-    return (owner, service) => {
+    return (owner, service, filtro) => {
       let res: Array<string> = [];
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
       for (let key in state.serviceList) {
         if (getters.getServiceOwner(key) === owner && getters.getServiceName(key) === service) {
-          res.push(getters.getServiceVersion(key));
+          if (filtro !== null && filtro.length > 0) {
+            if (key.indexOf(filtro) !== -1) {
+              res.push(getters.getServiceVersion(key));
+            }
+          } else {
+            res.push(getters.getServiceVersion(key));
+          }
+
         }
       }
-
       return res;
     };
   },
@@ -661,6 +667,7 @@ export default {
       if (website != null)
         usedWebdomain = usedWebdomain.concat(website);
     }
+
     return usedWebdomain;
   },
 

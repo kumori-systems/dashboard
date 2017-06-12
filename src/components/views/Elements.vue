@@ -51,11 +51,11 @@
             <collapse-item title="Services" v-if="serviceOwnerList.length>0">
                 <div v-for="owner in serviceOwnerList">
                     <collapse accordion is-fullwidth>
-                        <collapse-item v-bind:title="owner">
+                        <collapse-item v-bind:title="owner" v-if="ownerServiceList(owner).length>0">
                             <div v-for="service in ownerServiceList(owner)">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="service">
-                                        <table>
+                                    <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0">
+                                        <table >
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
                                                 <th>
@@ -204,7 +204,7 @@ export default class Elements extends Vue {
 
     get serviceVersionList() {
         return (owner, service) => {
-            return this.$store.getters.getServiceVersionList(owner, service);
+            return this.$store.getters.getServiceVersionList(owner, service, this.search);
         }
     }
     get getIsComponentInUse() {
