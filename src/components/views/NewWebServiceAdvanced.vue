@@ -57,7 +57,7 @@
                 <div v-for="resource, index in serviceResourcesList" v-bind:key="resource">
                     {{resource}}
     
-                    <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index].length >0">
+                    <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index]!==undefined && resourceConfig[index].length >0">
                         <option disabled value="">Please select one</option>
                         <option v-for="resourceConfig in totalResourceConfig(resource)">{{resourceConfig}}</option>
                     </select>
@@ -145,9 +145,7 @@ export default class NewWebServiceAdvanced extends Vue {
     get serviceResourcesList(): Array<string> {
         let resourceList = this.$store.getters.getServiceResources(this.selectedService);
         this.resourceConfig = new Array<string>(resourceList.length);
-        for (let i = 0; i < resourceList.length; i++) {
-            this.resourceConfig[i] = '';
-        }
+        
         return resourceList;
     }
 
@@ -194,8 +192,6 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 
     createNewDeployment() {
-        // Tenemos que reorganizar los roles
-        // Organizamos la configuracion
         let config = {};
         for (let resourceIndex in this.serviceResourcesList) {
             config[this.serviceResourcesList[resourceIndex]] = this.resourceConfig[resourceIndex];
