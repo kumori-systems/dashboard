@@ -55,7 +55,7 @@
                             <div v-for="service in ownerServiceList(owner)">
                                 <collapse accordion is-fullwidth>
                                     <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0">
-                                        <table >
+                                        <table>
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
                                                 <th>
