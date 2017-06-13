@@ -17,32 +17,31 @@ import { FabElement } from '../../store/classes';
     name: 'NewBundle'
 })
 export default class NewBundle extends Vue {
-    image: string = '';
+    bundle: string = '';
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     addElement() {
-        if (this.image !== null && this.image.length > 0) {
-            this.$store.dispatch('addNewElement', this.image);
+        if (this.bundle !== null && this.bundle.length > 0) {
+            this.$store.dispatch('addNewElement', this.bundle);
         }
-        console.log('image vale: ' + JSON.stringify(this.image));
     }
     onFileChange(e) {
         var files = e.target.files || e.dataTransfer.files;
-      if (!files.length)
-        return;
-      this.createImage(files[0]);
+        if (!files.length)
+            return;
+        this.loadFile(files[0]);
     }
 
 
-    createImage(file) {
+    loadFile(file) {
         var reader = new FileReader();
         var vm = this;
 
         reader.onload = (e) => {
-            vm.image = (<any>e.target).result;
+            vm.bundle = (<any>e.target).result;
         };
         reader.readAsDataURL(file);
     }
