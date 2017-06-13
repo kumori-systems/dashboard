@@ -23,7 +23,7 @@
                         <collapse-item v-bind:title="owner">
                             <div v-for="component in ownerComponentList(owner)">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="component">
+                                    <collapse-item v-bind:title="component" v-if="componentVersionList(owner,component).length>0">
                                         <table>
                                             <tr v-for="version in componentVersionList(owner, component)">
                                                 <th>{{version}}</th>
@@ -98,7 +98,7 @@
                         <collapse-item v-bind:title="owner">
                             <div v-for="runtime in ownerRuntimeList(owner)">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="runtime">
+                                    <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0">
                                         <table>
                                             <tr v-for="version in runtimeVersionList(owner, runtime)">
                                                 <th>{{version}}</th>
@@ -182,7 +182,7 @@ export default class Elements extends Vue {
 
     get componentVersionList() {
         return (owner, component) => {
-            return this.$store.getters.getComponentVersionList(owner, component);
+            return this.$store.getters.getComponentVersionList(owner, component, this.search);
         }
     }
 
@@ -279,7 +279,7 @@ export default class Elements extends Vue {
     }
     get runtimeVersionList() {
         return (owner, runtime) => {
-            return this.$store.getters.getRuntimeVersionList(owner, runtime);
+            return this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
         }
     }
 

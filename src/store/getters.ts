@@ -435,12 +435,18 @@ export default {
   },
 
   getComponentVersionList: function (state, getters) {
-    return (owner, component) => {
+    return (owner, component, filtro) => {
       let res: Array<string> = [];
       // Buscamos en la lista de componentes, todos aquellos que encajen con el owner y el componente
       for (let key in state.componentList) {
         if (getters.getComponentOwner(key) === owner && getters.getComponentName(key) === component) {
-          res.push(getters.getComponentVersion(key));
+          if (filtro !== null && filtro.length > 0) {
+            if (key.indexOf(filtro) !== -1) {
+              res.push(getters.getServiceVersion(key));
+            }
+          } else {
+            res.push(getters.getServiceVersion(key));
+          }
         }
       }
 
@@ -543,12 +549,18 @@ export default {
 
 
   getRuntimeVersionList: function (state, getters) {
-    return (owner, runtime) => {
+    return (owner, runtime, filtro) => {
       let res: Array<string> = [];
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
       for (let key in state.runtimeList) {
         if (getters.getRuntimeOwner(key) === owner && getters.getRuntimeName(key) === runtime) {
-          res.push(getters.getRuntimeVersion(key));
+          if (filtro !== null && filtro.length > 0) {
+            if (key.indexOf(filtro) !== -1) {
+              res.push(getters.getServiceVersion(key));
+            }
+          } else {
+            res.push(getters.getServiceVersion(key));
+          }
         }
       }
 
