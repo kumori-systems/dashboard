@@ -106,10 +106,10 @@
                                                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(owner, runtime, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal(getRuntimeId(owner, runtime, version))">
+                                                    <button class="button is-info" v-on:click="openModal(getRuntimeId(owner, runtime, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button" v-on:click="deleteElement(getRuntimeId(owner, runtime, version))">
+                                                    <button class="button is-danger" v-on:click="deleteElement(getRuntimeId(owner, runtime, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">

@@ -1,6 +1,6 @@
 <template>
     <div class="tile">
-        <div class="content" id="instancecontent">
+        <div class="content tile" id="instancecontent">
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
             <span class="title">{{instanceId}}</span>
             <span>{{instanceMem}} MEM</span>
@@ -12,7 +12,7 @@
                 <label for="killInstance">kill instance</label>
             </span>
         </div>
-        <div class="tile is-child is-4">
+        <div class="is-child is-pulled-right box">
             <chart v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instanceId"></chart>
         </div>
     </div>

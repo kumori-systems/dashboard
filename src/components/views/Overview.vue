@@ -5,8 +5,8 @@
             <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
             <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     
-            <div class="tile" v-for="deployment in deploymentList">
-                <deployment-card v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
+            <div class="tile is-vertical is-5" >
+                <deployment-card  v-for="deployment in deploymentList" v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
             </div>
         </div>
     </div>

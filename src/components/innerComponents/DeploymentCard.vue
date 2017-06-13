@@ -1,54 +1,50 @@
 <template>
     <div class="card">
         <div class="card-header title" v-bind:class="state">
-            <span class="card-header-left">{{name}}</span>
-            <span class="card-header-right">{{shotDeploymentId}}</span>
+            <div class="card-header-left">{{name}}</div>
+            <div class="card-header-right">{{shotDeploymentId}}</div>
         </div>
         <div class="card-body">
-            <div class="tile">
-                <div>
-                    <p>
-                        <u>Service:</u> {{service}}
-                    </p>
-                    <p class="roles" v-if="roles">
-                        <div>
-                            <u>Roles:</u>
-                            <div v-for="rol in roles" class="inner-content">
-                                <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
-                                <div>{{rolComponentURN(rol)}}</div>
-                            </div>
+            <i class="is-pulled-right" v-bind:class="stateIcon" aria-hidden="true" />
+            <div>
+                <p>
+                    <u>Service:</u> {{service}}
+                </p>
+                <p class="roles" v-if="roles">
+                    <div>
+                        <u>Roles:</u>
+                        <div v-for="rol in roles" class="inner-content">
+                            <strong>{{rol}}</strong> {{rolNumInstances(rol)}}
+                            <div>{{rolComponentURN(rol)}}</div>
                         </div>
+                    </div>
+                </p>
+                <p v-if="website!=null">
+                    <u>Websites:</u>
+                    <p class="inner-content" v-for="web in website">
+                        <a v-bind:href="'http://'+web">
+                            {{web}}
+                        </a>
                     </p>
-                    <p v-if="website!=null">
-                        <u>Websites:</u>
-    
-                        <p class="inner-content" v-for="web in website">
-                            <a v-bind:href="'http://'+web">
-                                {{web}}
-                            </a>
+                </p>
+                <p v-if="links.length > 0">
+                    <u>Links:</u>
+                    <div v-for="link in links" class="inner-content">
+                        {{link.myChannel}}
+                        <p>
+                            Connnected to -> {{link.toDeployment}}
                         </p>
-    
-                    </p>
-                    <p v-if="links.length > 0">
-                        <u>Links:</u>
-                        <div v-for="link in links" class="inner-content">
-                            {{link.myChannel}}
-                            <p>
-                                Connnected to -> {{link.toDeployment}}
-                            </p>
-                        </div>
-                    </p>
-                    <p v-if="volumes.length>0">
-                        <u>Volumes:</u>
-                        <div v-for="volume in volumes" class="inner-content">
-                            <div>{{volume}}</div>
-                        </div>
-                    </p>
-                    <router-link :to="deploymentPath">
-                        <i class="fa fa-caret-square-o-down" aria-hidden="true"></i>
-                    </router-link>
-                </div>
-                <i v-bind:class="stateIcon" aria-hidden="true"></i>
+                    </div>
+                </p>
+                <p v-if="volumes.length>0">
+                    <u>Volumes:</u>
+                    <div v-for="volume in volumes" class="inner-content">
+                        <div>{{volume}}</div>
+                    </div>
+                </p>
+                <router-link v-bind:to="deploymentPath" class="is-pulled-right">
+                    <i class="fa fa-caret-square-o-down" aria-hidden="true" />
+                </router-link>
             </div>
         </div>
         <div class="card-footer" v-if="false" />

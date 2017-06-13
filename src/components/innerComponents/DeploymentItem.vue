@@ -1,15 +1,14 @@
 <template>
     <div>
         <span class="title">{{deploymentName}}</span>
-        <button class="button" v-on:click="applyChanges">APPLY CHANGES</button>
-        <button class="button" v-on:click="cancelChanges">CANCEL</button>
         <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
-        <div class="tile">
-            <div>
-                <p>
-                    Service: {{deploymentService}}
-                    <button class="button" v-on:click="undeploy">UNDEPLOY</button>
-                </p>
+        <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
+        <button class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
+        <button class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        <div class="is-parent tile">
+            <div class="tile">
+                <div>
+                <p>Service: {{deploymentService}}</p>
                 <p v-if="website!=null">
                     Websites:
                     <p class="inner-content" v-for="web in website">
@@ -17,7 +16,6 @@
                             {{web}}
                         </a>
                     </p>
-    
                 </p>
                 <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
                     Connected to:
@@ -29,10 +27,12 @@
                         <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                 </p>
                 </div>
-                <div class="tile is-child">
+                </div>
+                <div class="is-child is-pulled-right box">
                     <chart v-bind:deploymentId="deploymentId"></chart>
                 </div>
             </div>
+    
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
         </div>
 </template>

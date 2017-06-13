@@ -3,39 +3,42 @@
         <div class="card-header title">
             <span class="card-header-left">{{rolId}}</span>
             <span class="card-header-right">{{numInstances}}</span>
-            <button class="fa fa-angle-up button" v-on:click="numInstances = 1"></button>
-            <button class="fa fa-angle-down button" v-on:click="numInstances = -1"></button>
+            <div>
+                <button class="fa fa-angle-up button is-small is-primary is-outlined" v-on:click="numInstances = 1" />
+                <button class="fa fa-angle-down button is-small is-primary is-outlined" v-on:click="numInstances = -1" />
+            </div>
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
         </div>
         <div class="card-body tile inner-content">
-            <div class="inner-content">
-                <p>Component: {{componentURN}}</p>
-                <p>Runtime: {{rolRuntime}}</p>
-                <p>
-                    {{memNumber}} MEM {{cpuNumber}} CPU {{netNumber}} NET
-                </p>
-                <p v-if="dataVolumesList.length>0">
-                    Data Volumes:
-                    <div class="inner-content" v-for="dataVolume in dataVolumesList">
-                        <i class="fa fa-hdd-o" aria-hidden="true"></i> {{dataVolume}}
-                    </div>
-                </p>
-                <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
+            <div class="tile">
+                <div class="inner-content">
+                    <p>Component: {{componentURN}}</p>
+                    <p>Runtime: {{rolRuntime}}</p>
                     <p>
-                        Connected to:
-                        <div class="left-padding">
-                            <div v-for="connection in rolProConnectedTo">
-                                <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
-                            </div>
-                            <div v-for="connection in rolReqConnectedTo">
-                                <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
-                            </div>
+                        {{memNumber}} MEM {{cpuNumber}} CPU {{netNumber}} NET
+                    </p>
+                    <p v-if="dataVolumesList.length>0">
+                        Data Volumes:
+                        <div class="inner-content" v-for="dataVolume in dataVolumesList">
+                            <i class="fa fa-hdd-o" aria-hidden="true"></i> {{dataVolume}}
                         </div>
                     </p>
+                    <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
+                        <p>
+                            Connected to:
+                            <div class="left-padding">
+                                <div v-for="connection in rolProConnectedTo">
+                                    <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                                </div>
+                                <div v-for="connection in rolReqConnectedTo">
+                                    <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
                 </div>
-    
             </div>
-            <div class="tile is-child is-4">
+            <div class="is-child is-pulled-right box">
                 <chart v-bind:deploymentId="deploymentId" v-bind:rolId="rolId"></chart>
             </div>
     

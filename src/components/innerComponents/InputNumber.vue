@@ -1,6 +1,6 @@
 <template>
     <span>
-        <input ref="input" v-bind:value="value" type="number" min=1 v-on:input="updateValue($event.target.value)" v-on:focus="selectAll" v-on:blur="formatValue">
+        <input class="input" ref="input" v-bind:value="value" type="number" min=1 v-on:input="updateValue($event.target.value)" v-on:focus="selectAll" v-on:blur="formatValue">
     </span>
 </template>
 <script lang="ts">

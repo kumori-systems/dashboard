@@ -51,6 +51,12 @@ export default class App extends Vue {
 }
 </script>
 <style lang="scss">
+/*
+$primary: #E91E63;
+$primary-invert: #fff;
+$danger: #536DFE;
+$family-primary: "Merriweather", "Georgia", serif;
+*/
 @import '~animate.css';
 .animated {
 	animation-duration: .4s;
