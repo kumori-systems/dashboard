@@ -14,6 +14,7 @@
     "lint": "tslint src/**/*.ts"
   },
   "dependencies": {
+    "babel-runtime": "^6.23.0",
     "vue": "^2.2.2",
     "vue-router": "^2.2.0"
   },
@@ -82,11 +83,11 @@
     "url-loader": "^0.5.7",
     "vue-bulma-breadcrumb": "^1.0.1",
     "vue-bulma-card": "^1.0.2",
-    "vue-bulma-chartjs": "^1.0.4",
     "vue-bulma-collapse": "^1.0.3",
     "vue-bulma-expanding": "0.0.1",
     "vue-bulma-modal": "^1.0.1",
     "vue-bulma-tooltip": "^1.0.3",
+    "vue-chartjs": "^2.6.5",
     "vue-class-component": "^5.0.0",
     "vue-loader": "^11.1.4",
     "vue-nprogress": "^0.1.5",

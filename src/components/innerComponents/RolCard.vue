@@ -57,7 +57,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
-import Chart from './Chart.vue';
+import Chart from './Chart.js';
 import { Channel, State } from '../../store/classes';
 
 @Component({

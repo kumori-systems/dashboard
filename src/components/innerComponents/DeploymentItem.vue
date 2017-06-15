@@ -8,28 +8,28 @@
         <div class="is-parent tile">
             <div class="tile">
                 <div>
-                <p>Service: {{deploymentService}}</p>
-                <p v-if="website!=null">
-                    Websites:
-                    <p class="inner-content" v-for="web in website">
-                        <a v-bind:href="'http://'+web">
-                            {{web}}
-                        </a>
+                    <p>Service: {{deploymentService}}</p>
+                    <p v-if="website!=null">
+                        Websites:
+                        <p class="inner-content" v-for="web in website">
+                            <a v-bind:href="'http://'+web">
+                                {{web}}
+                            </a>
+                        </p>
                     </p>
-                </p>
-                <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
-                    Connected to:
-                    <div v-for="proChannel in serviceProvideChannels" class="inner-content">
-                        {{proChannel.myChannel}} -> {{proChannel.toDeployment}} ({{proChannel.toChannel}})
+                    <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
+                        Connected to:
+                        <div v-for="proChannel in serviceProvideChannels" class="inner-content">
+                            {{proChannel.myChannel}} -> {{proChannel.toDeployment}} ({{proChannel.toChannel}})
+                        </div>
+                        <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
+                            {{reqChannel.myChannel}}
+                            <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
+                    </p>
                     </div>
-                    <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
-                        {{reqChannel.myChannel}}
-                        <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
-                </p>
-                </div>
                 </div>
                 <div class="is-child is-pulled-right box">
-                    <chart v-bind:deploymentId="deploymentId"></chart>
+                    <chart v-bind:data="deploymentData" :width="600" :height="300"></chart>
                 </div>
             </div>
     
@@ -41,7 +41,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import RolCard from './../innerComponents/RolCard.vue';
 
-import Chart from './Chart.vue';
+import Chart from './Chart.js';
+import Moment from 'moment';
 
 import { Channel, FabElement, State } from '../../store/classes';
 
@@ -60,6 +61,53 @@ export default class DeploymentItem extends Vue {
     rolNumInstances: { [rolId: string]: number } = {};
     instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
     clear: boolean = false;
+    deploymentData = {
+        labels: [
+            Moment().toDate(),
+            Moment().add(1, 'd').toDate(),
+            Moment().add(2, 'd').toDate(),
+            Moment().add(3, 'd').toDate(),
+            Moment().add(4, 'd').toDate(),
+            Moment().add(5, 'd').toDate()
+        ],
+        datasets: [
+            {
+                label: 'CPU',
+                backgroundColor: '#1fc8db',
+                borderColor: '#1fc8db',
+                fill: false,
+                data: [10, 20, 30, 40, 50, 60]
+            },
+            {
+                label: 'MEM',
+                backgroundColor: '#fce473',
+                borderColor: '#fce473',
+                fill: false,
+                data: [20, 20, 20, 20, 20, 20]
+            },
+            {
+                label: 'NET',
+                backgroundColor: '#42afe3',
+                borderColor: '#42afe3',
+                fill: false,
+                data: [5, 30, 5, 30, 5, 30]
+            },
+            {
+                label: 'RPM',
+                backgroundColor: '#ed6c63',
+                borderColor: '#ed6c63',
+                fill: false,
+                data: [10, 40, 10, 40, 10, 40]
+            },
+            {
+                label: 'RES',
+                backgroundColor: '#97cd76',
+                borderColor: '#97cd76',
+                fill: false,
+                data: [40, 20, 40, 20, 40, 20]
+            }
+        ]
+    };
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];

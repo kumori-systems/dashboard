@@ -23,7 +23,7 @@ import NewWebServiceAdvanced from './views/NewWebServiceAdvanced.vue';
 // Inner components
 import DeploymentCard from './innerComponents/DeploymentCard.vue';
 import DeploymentItem from './innerComponents/DeploymentItem.vue';
-import Chart from './innerComponents/Chart.vue';
+import Chart from './innerComponents/Chart.js';
 import Modal from './innerComponents/Modal.vue';
 import AddVolume from './innerComponents/AddVolume.vue';
 
