@@ -28,7 +28,7 @@
                     </p>
                     </div>
                 </div>
-                <div class="is-child is-pulled-right box">
+                <div class="is-child is-pulled-right box deploymentChart">
                     <chart v-bind:data="deploymentData" :width="600" :height="300"></chart>
                 </div>
             </div>
@@ -194,3 +194,8 @@ export default class DeploymentItem extends Vue {
     }
 }
 </script>
+<style lang="scss">
+.deploymentChart{
+    margin-right: 15px;
+}
+</style>
