@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="is-child is-pulled-right box deploymentChart">
-                    <chart v-bind:data="deploymentData" :width="600" :height="300"></chart>
+                    <chart v-bind:data="deploymentChartData" :width="600" :height="300"></chart>
                 </div>
             </div>
     
@@ -43,8 +43,7 @@ import RolCard from './../innerComponents/RolCard.vue';
 
 import Chart from './Chart.js';
 import Moment from 'moment';
-
-import { Channel, FabElement, State } from '../../store/classes';
+import { Channel, FabElement, State, Metrics } from '../../store/classes';
 
 @Component({
     name: 'DeploymentItem',
@@ -61,53 +60,6 @@ export default class DeploymentItem extends Vue {
     rolNumInstances: { [rolId: string]: number } = {};
     instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
     clear: boolean = false;
-    deploymentData = {
-        labels: [
-            Moment().toDate(),
-            Moment().add(1, 'd').toDate(),
-            Moment().add(2, 'd').toDate(),
-            Moment().add(3, 'd').toDate(),
-            Moment().add(4, 'd').toDate(),
-            Moment().add(5, 'd').toDate()
-        ],
-        datasets: [
-            {
-                label: 'CPU',
-                backgroundColor: '#1fc8db',
-                borderColor: '#1fc8db',
-                fill: false,
-                data: [10, 20, 30, 40, 50, 60]
-            },
-            {
-                label: 'MEM',
-                backgroundColor: '#fce473',
-                borderColor: '#fce473',
-                fill: false,
-                data: [20, 20, 20, 20, 20, 20]
-            },
-            {
-                label: 'NET',
-                backgroundColor: '#42afe3',
-                borderColor: '#42afe3',
-                fill: false,
-                data: [5, 30, 5, 30, 5, 30]
-            },
-            {
-                label: 'RPM',
-                backgroundColor: '#ed6c63',
-                borderColor: '#ed6c63',
-                fill: false,
-                data: [10, 40, 10, 40, 10, 40]
-            },
-            {
-                label: 'RES',
-                backgroundColor: '#97cd76',
-                borderColor: '#97cd76',
-                fill: false,
-                data: [40, 20, 40, 20, 40, 20]
-            }
-        ]
-    };
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -139,8 +91,48 @@ export default class DeploymentItem extends Vue {
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
-    get deploymentChartData(): Array<any> {
-        return this.$store.getters.getDeploymentChartData(this.deploymentId);
+    get deploymentChartData(): any {
+        let metrics: Metrics = this.$store.getters.getDeploymentChartData(this.deploymentId);
+        return {
+            labels: metrics.time,
+            datasets: [
+                {
+                    label: 'CPU',
+                    backgroundColor: '#1fc8db',
+                    borderColor: '#1fc8db',
+                    fill: false,
+                    data: metrics.cpu
+                },
+                {
+                    label: 'MEM',
+                    backgroundColor: '#fce473',
+                    borderColor: '#fce473',
+                    fill: false,
+                    data: metrics.mem
+                },
+                {
+                    label: 'NET',
+                    backgroundColor: '#42afe3',
+                    borderColor: '#42afe3',
+                    fill: false,
+                    data: metrics.net_in
+                },
+                {
+                    label: 'RPM',
+                    backgroundColor: '#ed6c63',
+                    borderColor: '#ed6c63',
+                    fill: false,
+                    data: metrics.rpm
+                },
+                {
+                    label: 'RES',
+                    backgroundColor: '#97cd76',
+                    borderColor: '#97cd76',
+                    fill: false,
+                    data: metrics.res
+                }
+            ]
+        };
     }
 
     get deploymentRoles(): Array<string> {
@@ -195,7 +187,7 @@ export default class DeploymentItem extends Vue {
 }
 </script>
 <style lang="scss">
-.deploymentChart{
+.deploymentChart {
     margin-right: 15px;
 }
 </style>

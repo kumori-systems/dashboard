@@ -3,17 +3,58 @@ export enum State { CONNECTED, DISCONNECTED, ON_PROGRESS };
 export class Runtime {
 }
 
+export class Metrics {
+    time: Array<Date>;
+    cpu: Array<number>;
+    mem: Array<number>;
+    net_in: Array<number>;
+    net_out: Array<number>;
+    rpm: Array<number>;
+    res: Array<number>;
+
+    constructor() {
+        this.time = [];
+        this.cpu = [];
+        this.mem = [];
+        this.net_in = [];
+        this.net_out = [];
+        this.rpm = [];
+        this.res = [];
+    }
+
+    addValues(time: Date, cpu: number, mem: number, netIn: number, netOut: number, rpm: number, res: number) {
+        this.time.push(time);
+        this.cpu.push(cpu);
+        this.mem.push(mem);
+        this.net_in.push(netIn);
+        this.net_out.push(netOut);
+        this.rpm.push(rpm);
+        this.res.push(res);
+    }
+
+    groupValues(m: Metrics) {
+        if (this.time.length > 0) {
+            let res: Metrics = new Metrics();
+            res.time = this.time;
+            let i;
+            for (i = 0; i < res.time.length; i++) {
+                res.cpu.push((this.cpu[i] + m.cpu[i]) / 2);
+                res.mem.push((this.mem[i] + m.mem[i]) / 2);
+                res.net_in.push((this.net_in[i] + m.net_in[i]) / 2);
+                res.net_out.push((this.net_out[i] + m.net_out[i]) / 2);
+                res.rpm.push((this.rpm[i] + m.rpm[i]) / 2);
+                res.res.push((this.res[i] + m.res[i]) / 2);
+            }
+            return res;
+        } else { // Caso en que concatenemos con métricas vacías
+            return m;
+        }
+    }
+}
+
 export class Instance {
     state: State;
-    metrics: Array<{
-        'time': Date,
-        'cpu': number,
-        'mem': number,
-        'net_in': number,
-        'net_out': number,
-        'rpm': number,
-        'res': number
-    }>;
+    metrics: Metrics = new Metrics();
     constructor(state: boolean) {
         switch (state) {
             case true:
@@ -25,18 +66,9 @@ export class Instance {
             default:
                 this.state = State.ON_PROGRESS;
         }
-        this.metrics = [];
     }
     addMetrics(time: Date, cpu: number, mem: number, netIn: number, netOut: number, rpm: number, res: number) {
-        this.metrics.push({
-            'time': time,
-            'cpu': cpu,
-            'mem': mem,
-            'net_in': netIn,
-            'net_out': netOut,
-            'rpm': rpm,
-            'res': res
-        });
+        this.metrics.addValues(time, cpu, mem, netIn, netOut, rpm, res);
     }
 }
 
