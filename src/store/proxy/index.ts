@@ -1,4 +1,4 @@
-import { State, Deployment, Link, DeploymentRol, Runtime, Channel, Instance, Resource, Component, Service, ServiceRol } from './../classes';
+import { State, Deployment, Link, DeploymentRol, Runtime, Channel, NormalMetrics, EntryPointMetrics, Instance, Resource, Component, Service, ServiceRol } from './../classes';
 import moment from 'moment';
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -462,18 +462,17 @@ export function getMetrics() {
 
         let parsedBody = ejemploMetricas;
 
-        let res: {
+        let normalMetrics: {
             [deploymentId: string]: {
                 [rolId: string]: {
-                    [instanceId: string]: Array<{
-                        'time': Date,
-                        'cpu': number,
-                        'mem': number,
-                        'net_in': number,
-                        'net_out': number,
-                        'rpm': number,
-                        'res': number
-                    }>
+                    [instanceId: string]: NormalMetrics
+                }
+            }
+        } = {};
+        let entryPointMetrics: {
+            [deploymentId: string]: {
+                [rolId: string]: {
+                    [instanceId: string]: EntryPointMetrics
                 }
             }
         } = {};
@@ -484,35 +483,76 @@ export function getMetrics() {
                     for (let componentId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId]) { // Por cada componente del deployment
                         for (let rolId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId]) { // Por cada rol del componente
                             for (let instanceId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId]) { // Por cada instáncia del rol
-                                // Si no habíamos instanciado el deployment en el resultado lo hacemos
-                                if (!res[deploymentId]) res[deploymentId] = {};
-                                // Si no habíamos instanciado el rol en el resultado lo hacemos
-                                if (!res[deploymentId][rolId]) res[deploymentId][rolId] = {};
-                                // Inicializamos el array de la instancia en el resultado
-                                if (!res[deploymentId][rolId][instanceId]) res[deploymentId][rolId][instanceId] = [];
-
                                 if (serviceId.split('/')[5] === 'inbound') { // Si es un inbound
+                                    // Si no habíamos instanciado el deployment en el resultado lo hacemos
+                                    if (!entryPointMetrics[deploymentId]) entryPointMetrics[deploymentId] = {};
+                                    // Si no habíamos instanciado el rol en el resultado lo hacemos
+                                    if (!entryPointMetrics[deploymentId][rolId]) entryPointMetrics[deploymentId][rolId] = {};
+                                    // Inicializamos el array de la instancia en el resultado
+                                    if (!entryPointMetrics[deploymentId][rolId][instanceId]) entryPointMetrics[deploymentId][rolId][instanceId] = new EntryPointMetrics();
+
+                                    entryPointMetrics[deploymentId][rolId][instanceId].addValues(
+                                        moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7,
+                                        8,
+                                        9,
+                                        10,
+                                        11,
+                                        12,
+                                        13,
+                                        14
+                                    );
+
+                                    console.info(
+                                        'NEW Inbound metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
+                                        + '):\ntime: ' + entryPointMetrics[deploymentId][rolId][instanceId].time
+                                        + '\ntimestamp_init: ' + entryPointMetrics[deploymentId][rolId][instanceId].timestamp_init
+                                        + '\ntimestamp_end: ' + entryPointMetrics[deploymentId][rolId][instanceId].timestamp_end
+                                        + '\nelapsed_msec: ' + entryPointMetrics[deploymentId][rolId][instanceId].elapsed_msec
+                                        + '\nhttp_request_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_request_per_second
+                                        + '\nhttp_errors_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_errors_per_second
+                                        + '\nhttp_size_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_size_in_per_second
+                                        + '\nhttp_size_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_size_out_per_second
+                                        + '\nhttp_chunk_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_chunk_in_per_second
+                                        + '\nhttp_chunk_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_chunk_out_per_second
+                                        + '\nhttp_response_time: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_response_time
+                                        + '\nws_size_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_size_in_per_second
+                                        + '\nws_size_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_size_out_per_second
+                                        + '\nws_chunk_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_chunk_in_per_second
+                                        + '\nws_chunk_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_chunk_out_per_second
+                                    );
                                 } else { // Si no es un inbound (servicio normal)
-                                    res[deploymentId][rolId][instanceId].push(
-                                        {
-                                            'time': moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
-                                            'cpu': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.mean * 100),
-                                            'mem': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.mean),
-                                            'net_in': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.mean * 100),
-                                            'net_out': Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.mean * 100),
-                                            'rpm': 0,
-                                            'res': 0
-                                        }
+                                    // Si no habíamos instanciado el deployment en el resultado lo hacemos
+                                    if (!normalMetrics[deploymentId]) normalMetrics[deploymentId] = {};
+                                    // Si no habíamos instanciado el rol en el resultado lo hacemos
+                                    if (!normalMetrics[deploymentId][rolId]) normalMetrics[deploymentId][rolId] = {};
+                                    // Inicializamos el array de la instancia en el resultado
+                                    if (!normalMetrics[deploymentId][rolId][instanceId]) normalMetrics[deploymentId][rolId][instanceId] = new NormalMetrics();
+
+                                    normalMetrics[deploymentId][rolId][instanceId].addValues(
+                                        moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(), // Time
+                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.mean * 100), // CPU
+                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.mean), // MEM
+                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.mean * 100), // NET_IN
+                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.mean * 100), // NET_OUT
+                                        0, // RPM
+                                        0 // RES
                                     );
                                     console.info(
-                                        'NEW metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
-                                        + '):\ntime: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].time
-                                        + '\ncpu: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].cpu
-                                        + '\nmem: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].mem
-                                        + '\nnet_in: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].net_in
-                                        + '\nnet_out: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].net_out
-                                        + '\nrpm: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].rpm
-                                        + '\nres: ' + res[deploymentId][rolId][instanceId][res[deploymentId][rolId][instanceId].length - 1].res
+                                        'NEW Normal metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
+                                        + '):\ntime: ' + normalMetrics[deploymentId][rolId][instanceId].time
+                                        + '\ncpu: ' + normalMetrics[deploymentId][rolId][instanceId].cpu
+                                        + '\nmem: ' + normalMetrics[deploymentId][rolId][instanceId].mem
+                                        + '\nnet_in: ' + normalMetrics[deploymentId][rolId][instanceId].net_in
+                                        + '\nnet_out: ' + normalMetrics[deploymentId][rolId][instanceId].net_out
+                                        + '\nrpm: ' + normalMetrics[deploymentId][rolId][instanceId].rpm
+                                        + '\nres: ' + normalMetrics[deploymentId][rolId][instanceId].res
                                     );
                                 }
                             }
@@ -521,7 +561,8 @@ export function getMetrics() {
                 }
             }
         }
-        return res;
+        
+        return { 'entryPointMetrics': entryPointMetrics, 'normalMetrics': normalMetrics };
     });
 }
 

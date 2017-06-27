@@ -1,4 +1,4 @@
-import { Deployment } from './classes';
+import { Deployment, NormalMetrics, EntryPointMetrics } from './classes';
 export default {
   setStampState(state, stampState) {
     // actualizamos el estado del stamp
@@ -41,24 +41,25 @@ export default {
   clearTemporaryState(state) {
     state.temporaryState = {};
   },
-  addMetrics(state, metrics) {
-
-    for (let deploymentId in metrics) {
-      for (let rolId in metrics[deploymentId]) {
-        for (let instanceId in metrics[deploymentId][rolId]) {
-          for (let metrica in metrics[deploymentId][rolId][instanceId])
-            (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
-              metrics[deploymentId][rolId][instanceId][metrica].time,
-              metrics[deploymentId][rolId][instanceId][metrica].cpu,
-              metrics[deploymentId][rolId][instanceId][metrica].mem,
-              metrics[deploymentId][rolId][instanceId][metrica].net_in,
-              metrics[deploymentId][rolId][instanceId][metrica].net_out,
-              metrics[deploymentId][rolId][instanceId][metrica].rpm,
-              metrics[deploymentId][rolId][instanceId][metrica].res
-            );
+  addMetrics(state, { entryPointMetrics, normalMetrics }) {
+    console.log('EntryPointMetrics: ' + JSON.stringify(entryPointMetrics));
+    console.log('NormalMetrics: ' + JSON.stringify(normalMetrics));
+    for (let deploymentId in entryPointMetrics) {
+      for (let rolId in entryPointMetrics[deploymentId]) {
+        for (let instanceId in entryPointMetrics[deploymentId][rolId]) {
+          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].concatEntryPointMetrics(entryPointMetrics[deploymentId][rolId][instanceId]);
         }
       }
     }
+
+    for (let deploymentId in normalMetrics) {
+      for (let rolId in normalMetrics[deploymentId]) {
+        for (let instanceId in normalMetrics[deploymentId][rolId]) {
+          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].concatNormalMetrics(normalMetrics[deploymentId][rolId][instanceId]);
+        }
+      }
+    }
+
   },
   selectedService(state, serviceId) {
     state.selectedService = serviceId;

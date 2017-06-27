@@ -51,7 +51,7 @@ export default {
         connection.getMetrics().then(function (metrics) {
             commit('addMetrics', metrics);
         }).catch(function (error) {
-            console.log('Error obteniendo las métricas: ' + error);
+            console.error('Error obteniendo las métricas: ' + error);
         });
     },
     setFabElements({ commit }, { fabElementsList }) {

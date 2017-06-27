@@ -1,4 +1,4 @@
-import { Deployment, DeploymentRol, Component, Service, Metrics, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
+import { Deployment, DeploymentRol, Component, Service, Metrics, NormalMetrics, EntryPointMetrics, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
   /* GENERAL */
   getUsername: function (state): string {
@@ -234,12 +234,22 @@ export default {
   },
   getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
-      // Buscamos todas las instancias del rol
-      let res: Metrics = new Metrics();
-      for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
-        res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
+
+      if (getters.getIsEntryPoint(deploymentId)) {
+        let res: EntryPointMetrics = new EntryPointMetrics();
+        for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
+          res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
+        }
+        return res;
+      } else {
+        let res: NormalMetrics = new NormalMetrics();
+        for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
+          res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
+        }
+        return res;
       }
-      return res;
+
+
     };
   },
 
@@ -292,12 +302,21 @@ export default {
   getDeploymentRolChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): Object {
       // Buscamos todas las instancias del rol
-      let res: Metrics = new Metrics();
-      for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
-        res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
+      if (getters.getIsEntryPoint(deploymentId)) {
+        let res: EntryPointMetrics = new EntryPointMetrics();
+        for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
+          res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
+        }
+        console.log('Este res cpmtoeme: ' + JSON.stringify(res));
+        return res;
+      } else {
+        let res: NormalMetrics = new NormalMetrics();
+        for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
+          res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
+        }
+        console.log('Res contiene: ' + JSON.stringify(res));
+        return res;
       }
-      console.log('Los datos agrupados contienen: ' + JSON.stringify(res));
-      return res;
     };
   },
   getDeploymentRolMemNumber: function (state): Function {
@@ -396,11 +415,6 @@ export default {
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
     };
   },
-
-
-
-
-
 
   getComponentOwnerList: function (state, getters) {
     return (showPublicElements: boolean): Array<string> => {
@@ -914,25 +928,6 @@ export default {
       }
 
       return res;
-    };
-  },
-
-  getTemporaryState: function (state) {
-    return state.temporaryState;
-  },
-
-  getChartData: function (state, getters): Function {
-    return function (deploymentId: string, rolId?: string, instanceId?: string): Object {
-      if (rolId !== undefined) {
-        if (instanceId !== undefined) { // Chart de una instancia
-          return getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId);
-        }
-        else { // Chart de un rol
-          return getters.getDeploymentRolChartData(deploymentId, rolId);
-        }
-      } else { // Chart de un deployment
-        return getters.getDeploymentChartData(deploymentId);
-      }
     };
   },
 

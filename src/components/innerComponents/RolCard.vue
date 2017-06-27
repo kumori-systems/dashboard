@@ -58,7 +58,7 @@ import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from './Chart.js';
-import { Channel, State, Metrics } from '../../store/classes';
+import { Channel, State, Metrics, NormalMetrics, EntryPointMetrics } from '../../store/classes';
 import Moment from 'moment';
 
 @Component({
@@ -127,49 +127,153 @@ export default class Card extends Vue {
     }
 
     get rolChartData() {
-        let metrics: Metrics = this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
-        return {
+        // Los datos a representar son distintos si los servicios son entrypoints
+        if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
+            let metrics: EntryPointMetrics = this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId );
+            return {
+                labels: metrics.time,
+                datasets: [
+                    {
+                        label: 'timestamp_init',
+                        backgroundColor: '#1fc8db',
+                        borderColor: '#1fc8db',
+                        fill: false,
+                        data: metrics.timestamp_init
+                    },
+                    {
+                        label: 'timestamp_end',
+                        backgroundColor: '#fce473',
+                        borderColor: '#fce473',
+                        fill: false,
+                        data: metrics.timestamp_end
+                    },
+                    {
+                        label: 'elapsed_msec',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: metrics.elapsed_msec
+                    },
+                    {
+                        label: 'http_request_per_second',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: metrics.http_request_per_second
+                    },
+                    {
+                        label: 'http_errors_per_second',
+                        backgroundColor: '#ed6c63',
+                        borderColor: '#ed6c63',
+                        fill: false,
+                        data: metrics.http_errors_per_second
+                    },
+                    {
+                        label: 'http_size_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.http_size_in_per_second
+                    },
+                    {
+                        label: 'http_size_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.http_size_out_per_second
+                    },
+                    {
+                        label: 'http_response_time',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.http_response_time
+                    },
+                    {
+                        label: 'ws_size_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.ws_size_in_per_second
+                    },
+                    {
+                        label: 'ws_size_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.ws_size_out_per_second
+                    },
+                    {
+                        label: 'ws_chunk_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.ws_chunk_in_per_second
+                    },
+                    {
+                        label: 'ws_chunk_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.ws_chunk_out_per_second
+                    }
+                ]
 
-            labels: metrics.time,
-            datasets: [
-                {
-                    label: 'CPU',
-                    backgroundColor: '#1fc8db',
-                    borderColor: '#1fc8db',
-                    fill: false,
-                    data: metrics.cpu
-                },
-                {
-                    label: 'MEM',
-                    backgroundColor: '#fce473',
-                    borderColor: '#fce473',
-                    fill: false,
-                    data: metrics.mem
-                },
-                {
-                    label: 'NET',
-                    backgroundColor: '#42afe3',
-                    borderColor: '#42afe3',
-                    fill: false,
-                    data: metrics.net_in
-                },
-                {
-                    label: 'RPM',
-                    backgroundColor: '#ed6c63',
-                    borderColor: '#ed6c63',
-                    fill: false,
-                    data: metrics.rpm
-                },
-                {
-                    label: 'RES',
-                    backgroundColor: '#97cd76',
-                    borderColor: '#97cd76',
-                    fill: false,
-                    data: metrics.res
-                }
-            ]
+            };
+        }
+        else {
+            let metrics: NormalMetrics = this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
+            return {
 
-        };
+                labels: metrics.time,
+                datasets: [
+                    {
+                        label: 'CPU',
+                        backgroundColor: '#1fc8db',
+                        borderColor: '#1fc8db',
+                        fill: false,
+                        data: metrics.cpu
+                    },
+                    {
+                        label: 'MEM',
+                        backgroundColor: '#fce473',
+                        borderColor: '#fce473',
+                        fill: false,
+                        data: metrics.mem
+                    },
+                    {
+                        label: 'NET_IN',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: metrics.net_in
+                    },
+                    {
+                        label: 'NET_OUT',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: metrics.net_out
+                    },
+                    {
+                        label: 'RPM',
+                        backgroundColor: '#ed6c63',
+                        borderColor: '#ed6c63',
+                        fill: false,
+                        data: metrics.rpm
+                    },
+                    {
+                        label: 'RES',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: metrics.res
+                    }
+                ]
+
+            };
+        }
+
     }
 
     get rolInstances() {
