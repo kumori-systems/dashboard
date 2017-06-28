@@ -6,10 +6,10 @@
           {{ menuItem.name }}
           <span class="icon is-small is-angle fa" v-if="menuItem.children">
             <i v-if="menuItem.meta.expanded" class="fa-angle-down"></i>
-            <i v-else class="fa-angle-right"></i> 
+            <i v-else class="fa-angle-right"></i>
           </span>
         </router-link>
-        <expanding  v-show="menuItem.meta.expanded">
+        <expanding v-show="menuItem.meta.expanded">
           <ul>
             <li v-for="subItem in menuItem.children">
               <router-link v-bind:to="subItem.path">
@@ -58,7 +58,7 @@ export default class Sidebar extends Vue {
   min-width: 45px;
   max-height: 100vh;
   height: calc(100% - 50px);
-  z-index: 1024 - 1;
+  z-index: 1;
   background: #FFF;
   box-shadow: 0 2px 3px rgba(17, 17, 17, 0.1), 0 0 0 1px rgba(17, 17, 17, 0.1);
   overflow-y: auto;

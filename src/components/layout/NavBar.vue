@@ -42,7 +42,7 @@ export default class NavBar extends Vue {
 .app-navbar {
     position: fixed;
     min-width: 100%;
-    z-index: 1024;
+    z-index: 2;
     box-shadow: 0 2px 3px rgba(17, 17, 17, 0.1), 0 0 0 1px rgba(17, 17, 17, 0.1);
     .container {
         margin: auto 10px;
