@@ -1,11 +1,10 @@
-
 <template>
     <div>
         <span class="title">{{deploymentName}}</span>
         <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
         <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
-        <button class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
-        <button class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
+        <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
         <div class="is-parent tile">
             <div class="tile">
                 <div>
@@ -34,18 +33,19 @@
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
-            <modal v-bind:visible="showModal" v-bind:title="modalTitle" v-on:close="closeModal"></modal>
+            <modal v-bind:visible="showModal" v-bind:title="modalTitle" v-bind:okButtonCallback="modalOkCallback" v-bind:bodyText="modalBodyText" v-on:close="showModal=false">
+            </modal>
         </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import RolCard from './innerComponents/card/RolCard.vue';
 import Moment from 'moment';
 
 import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
+import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
-import Modal from './innerComponents/modal/CardModal.vue';
+import Modal from './innerComponents/modal/Modal.vue';
 
 @Component({
     name: 'DeploymentItem',
@@ -62,8 +62,12 @@ export default class DeploymentItem extends Vue {
     deploymentRoute: string = this.deploymentRoute;
     rolNumInstances: { [rolId: string]: number } = {};
     instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+    haveChanges: boolean = false;
     clear: boolean = false;
     showModal: boolean = false;
+    modalTitle: string = '¿Quieres hacer undeploy?';
+    modalOkCallback: Function = function () { console.log('El callback parece que funciona'); };
+    modalBodyText: String = "El texto que se enseña en el cuerpo del modal";
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -259,6 +263,7 @@ export default class DeploymentItem extends Vue {
     }
 
     applyChanges(): void {
+        this.haveChanges = false;
         // Enviamos los valores que han cambiado
         //  rolNumInstances
         //  killInstances
@@ -272,14 +277,17 @@ export default class DeploymentItem extends Vue {
         this.rolNumInstances = {};
         this.instanceKill = {};
         this.clear = true;
+        this.haveChanges = false;
         // Tenemos que avisar de alguna forma a los hijos de que se han cancelado los cambios
     }
     undeploy(): void {
         // TODO: Mensaje de confirmación del usuario
+        this.showModal = true;
         this.$store.dispatch('undeployDeployment', { deploymentId: this.deploymentId });
     }
 
     handleKillInstanceChange(payload) {
+        this.haveChanges = true;
         let tempRol, tempInst, value;
         [tempRol, tempInst, value] = payload;
         if (this.instanceKill[tempRol] === undefined)
@@ -287,6 +295,7 @@ export default class DeploymentItem extends Vue {
         this.instanceKill[tempRol][tempInst] = value;
     }
     handleNumInstancesChange(payload) {
+        this.haveChanges = true;
         let tempRol, value;
         [tempRol, value] = payload;
         this.rolNumInstances[tempRol] = value;
