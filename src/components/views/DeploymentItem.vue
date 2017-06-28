@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="is-child is-pulled-right box deploymentChart">
-                    <chart v-bind:data="deploymentChartData" :width="600" :height="300"></chart>
+                    <chart v-bind:data="deploymentChartData" v-bind:width="600" v-bind:height="300"></chart>
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
@@ -100,9 +100,12 @@ export default class DeploymentItem extends Vue {
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
+    get isEntrypoint(){
+        return this.$store.getters.getIsEntryPoint(this.deploymentId);
+    }
     get deploymentChartData(): any {
         // Los datos a representar son distintos si los servicios son entrypoints
-        if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
+        if (this.isEntrypoint) {
             let metrics: EntryPointMetrics = this.$store.getters.getDeploymentChartData(this.deploymentId);
             return {
                 labels: metrics.time,
