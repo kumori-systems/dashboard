@@ -54,7 +54,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { DeploymentRol, State, Deployment } from './../../store/classes';
+import { DeploymentRol, State, Deployment } from './../../../../store/classes';
 
 @Component({
     name: 'deployment-card',
@@ -133,23 +133,3 @@ export default class Card extends Vue {
     }
 }
 </script>
-
-<style lang="scss">
-$padding:10px;
-$icon_size:8em;
-
-
-.card {
-    padding: $padding;
-    margin: $padding;
-}
-
-.title {
-    padding: $padding;
-}
-
-.card-header-right {
-    color: grey;
-    padding-left: padding;
-}
-</style>

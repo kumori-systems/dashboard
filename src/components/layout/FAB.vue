@@ -1,20 +1,20 @@
 <template>
-    <collapse class="tile" id="fab" v-if="fabElements.length > 0">
-        <collapse-item title="+">
-            <div v-for="element in fabElements">
-                <router-link v-bind:to="element.to">
-                    {{ element.name }}
-                </router-link>
-            </div>
-        </collapse-item>
-    </collapse>
+    <div>
+        <collapse class="tile" id="fab" v-if="fabElements.length > 0">
+            <collapse-item title="+" class="fab">
+                <div class="fab-element" v-for="element in fabElements" v-bind:key="element">
+                    <router-link v-bind:to="element.to">
+                        {{ element.name }}
+                    </router-link>
+                </div>
+            </collapse-item>
+        </collapse>
+    </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../store/classes';
-
-// Components
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 
 @Component({
@@ -30,10 +30,17 @@ export default class FAB extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 #fab {
-    margin-left: 950px;
-    margin-top: 50px;
+    z-index: 2;
+    margin-left: 90vw;
+    margin-top: 90vh;
     position: fixed;
+}
+.fab{
+    background: #93c47d;;
+}
+.fab-element{
+    background: white;
 }
 </style>

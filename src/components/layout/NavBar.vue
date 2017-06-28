@@ -38,7 +38,7 @@ export default class NavBar extends Vue {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .app-navbar {
     position: fixed;
     min-width: 100%;

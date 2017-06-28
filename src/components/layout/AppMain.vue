@@ -19,7 +19,7 @@ import LevelBar from './LevelBar.vue'
 })
 export default class AppMain extends Vue{}
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 
 $default_padding:10px;
 $default_margin_left:180px;

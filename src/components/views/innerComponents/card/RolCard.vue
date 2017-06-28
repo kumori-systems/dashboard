@@ -57,8 +57,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
-import Chart from './Chart.js';
-import { Channel, State, Metrics, NormalMetrics, EntryPointMetrics } from '../../store/classes';
+import Chart from '../chart/Chart.js';
+import { Channel, State, Metrics, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
 import Moment from 'moment';
 
 @Component({
@@ -312,20 +312,3 @@ export default class Card extends Vue {
     }
 }
 </script>
-
-<style lang="scss">
-$padding: 10px;
-.card {
-    padding: $padding;
-    margin: $padding;
-}
-
-.title {
-    padding: $padding;
-}
-
-.card-header-right {
-    color: grey;
-    padding-left: 10px;
-}
-</style>

@@ -51,13 +51,6 @@ export default class App extends Vue {
 }
 </script>
 <style lang="scss">
-/*
-$primary: #E91E63;
-$primary-invert: #fff;
-$danger: #536DFE;
-$family-primary: "Merriweather", "Georgia", serif;
-*/
-
 @import '~animate.css';
 .animated {
 	animation-duration: .4s;
@@ -81,21 +74,7 @@ $state_icon_size: 50px;
 	position: fixed !important;
 	width: 100%;
 	height: 50px;
-	z-index: 2048;
 	pointer-events: none;
-	#nprogress {
-		$color: #48e79a;
-		.bar {
-			background: $color;
-		}
-		.peg {
-			box-shadow: 0 0 10px $color, 0 0 5px $color;
-		}
-		.spinner-icon {
-			border-top-color: $color;
-			border-left-color: $color;
-		}
-	}
 }
 
 .CONNECTED_FONT_COLOR {
@@ -158,13 +137,5 @@ $state_icon_size: 50px;
 .fa-exclamation-circle {
 	color: $color_red;
 	font-size: $icon_size;
-}
-
-.inner-content {
-	padding: $padding;
-}
-
-.left-padding {
-	padding-left: $padding;
 }
 </style>

@@ -5,11 +5,10 @@
             <input v-model="prefix">
         </p>
         <p>Number of Chunks
-            <inputnumber v-bind:value="chunkNum" v-on:input="updateInputValue" />
+            <inputnumber v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
         </p>
-        <p v-for="n in chunkNum">Chunk {{n}}
-            <inputnumber v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue" /> GB </p>
-    
+        <p v-for="n in chunkNum" v-bind:key="n">Chunk {{n}}
+            <inputnumber v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber> GB </p>
         <p>Size: {{totalGB}}GB</p>
         <button class="button" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
     </div>
@@ -18,7 +17,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import InputNumber from './InputNumber.vue';
+import InputNumber from '../input/InputNumber.vue';
 
 @Component({
     name: 'addvolume',
@@ -78,8 +77,6 @@ export default class AddVolume extends Vue {
             }
             this.totalGB = res;
         }
-
-
     }
 }
 </script>

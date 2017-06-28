@@ -45,7 +45,7 @@ export default class Sidebar extends Vue {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 @import '~bulma/sass/utilities/variables';
 @import '~bulma/sass/utilities/mixins';
 .app-sidebar {

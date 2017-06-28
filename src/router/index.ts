@@ -1,6 +1,13 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, Deployments, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help, NewHTTPEntrypoint, NewWebService, NewWebServiceAdvanced, AddVolume, NewBundle } from '../components';
+import { Overview, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
+
+import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
+import NewWebService from '../components/views/innerComponents/form/NewWebService.vue';
+import NewWebServiceAdvanced from '../components/views/innerComponents/form/NewWebServiceAdvanced.vue';
+import AddVolume from '../components/views/innerComponents/form/AddVolume.vue';
+import NewBundle from '../components/views/innerComponents/form/NewBundle.vue';
+
 import r from '../menu';
 
 Vue.use(Router);

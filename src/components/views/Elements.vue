@@ -92,7 +92,6 @@
                 </div>
             </collapse-item>
             <collapse-item title="Runtimes" v-if="runtimeOwnerList.length>0">
-    
                 <div v-for="owner in runtimeOwnerList">
                     <collapse accordion is-fullwidth>
                         <collapse-item v-bind:title="owner">
@@ -129,12 +128,11 @@
 </template>
 
 <script lang="ts">
-
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import Modal from './innerComponents/modal/CardModal.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
-import Modal from '../innerComponents/Modal.vue';
 
 @Component({
     name: 'Elements',
@@ -308,34 +306,3 @@ export default class Elements extends Vue {
 
 }
 </script>
-<style lang="scss">
-.card {
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-}
-
-.collapse-item {
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-}
-
-.card-content {
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-}
-
-.card-header-title {
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-}
-
-.card-content-box {
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-}
-</style>

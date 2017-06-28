@@ -1,72 +1,63 @@
 <template>
-    <div>
-        <span class="title">{{deploymentName}}</span>
-        <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
-        <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
-        <button class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
-        <button class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
-        <div class="is-parent tile">
-            <div class="tile">
-                <div>
-                    <p>Service: {{deploymentService}}</p>
-                    <p v-if="website!=null">
-                        Websites:
-                        <p class="inner-content" v-for="web in website">
-                            <a v-bind:href="'http://'+web">
-                                {{web}}
-                            </a>
-                        </p>
-                    </p>
-                    <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
-                        Connected to:
-                        <div v-for="proChannel in serviceProvideChannels" class="inner-content">
-                            {{proChannel.myChannel}} -> {{proChannel.toDeployment}} ({{proChannel.toChannel}})
-                        </div>
-                        <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
-                            {{reqChannel.myChannel}}
-                            <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
-                    </p>
-                    </div>
-                </div>
-                <div class="is-child is-pulled-right box deploymentChart">
-                    <chart v-bind:data="deploymentChartData" :width="600" :height="300"></chart>
-                </div>
-            </div>
+    <div class="tile is-horizontal">
+        <div class="tile is-vertical">
+            <div class="content" id="instancecontent">
+                <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
+                <span class="title">{{instanceId}}</span>
+                <span>{{instanceMem}} MEM</span>
+                <span>{{instanceCPU}} CPU</span>
+                <span>{{instanceNet}} NET</span>
+                <span>
+                    <span>&#160;</span>
+                    <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
+                    <label for="killInstance">kill instance</label>
+                </span>
     
-            <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
+            </div>
         </div>
+        <div class="is-child is-pulled-right box instanceChart">
+            <chart v-bind:data="instanceChartData" v-bind:width="600" v-bind:height="300"></chart>
+        </div>
+    </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import RolCard from './../innerComponents/RolCard.vue';
-
-import Chart from './Chart.js';
 import Moment from 'moment';
-import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
+import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
+import Chart from '../chart/Chart';
+import { State, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
 
 @Component({
-    name: 'DeploymentItem',
-    components: {
-        'rol-card': RolCard,
-        'chart': Chart
-    },
+    name: 'instance-card',
     props: {
-        deploymentRoute: { type: String }
+        deploymentId: { required: true, type: String },
+        rolId: { required: true, type: String },
+        instanceId: { required: true, type: String },
+        clear: { required: true, type: Boolean } // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
+    },
+    components: {
+        'collapse': Collapse,
+        'collapse-item': CollapseItem,
+        'chart': Chart
     }
 })
-export default class DeploymentItem extends Vue {
-    deploymentRoute: string = this.deploymentRoute;
-    rolNumInstances: { [rolId: string]: number } = {};
-    instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
-    clear: boolean = false;
+export default class Card extends Vue {
+    deploymentId: string = this.deploymentId;
+    rolId: string = this.rolId;
+    instanceId: string = this.instanceId;
+    killInstance: boolean = false;
 
     mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+        this.$watch('clear', function (value) {
+            if (value == true) {
+                this.killInstance = false;
+            }
+        })
     }
+
     get state(): string {
-        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+        switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
             case State.CONNECTED:
                 return 'CONNECTED_COLOR';
             case State.DISCONNECTED:
@@ -78,23 +69,22 @@ export default class DeploymentItem extends Vue {
         }
     }
 
-    get deploymentId() {
-        // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
-        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
-
-    }
-    get website(): string {
-        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
+    get instanceMem(): number {
+        return this.$store.getters.getDeploymentRolInstanceMem(this.deploymentId, this.rolId, this.instanceId);
     }
 
-    get deploymentName(): string {
-        return this.$store.getters.getDeploymentName(this.deploymentId);
+    get instanceCPU(): number {
+        return this.$store.getters.getDeploymentRolInstanceCPU(this.deploymentId, this.rolId, this.instanceId);
     }
 
-    get deploymentChartData(): any {
+    get instanceNet(): number {
+        return this.$store.getters.getDeploymentRolInstanceNet(this.deploymentId, this.rolId, this.instanceId);
+    }
+
+    get instanceChartData(): any {
         // Los datos a representar son distintos si los servicios son entrypoints
         if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
-            let metrics: EntryPointMetrics = this.$store.getters.getDeploymentChartData(this.deploymentId);
+            let metrics: EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
                 labels: metrics.time,
                 datasets: [
@@ -187,9 +177,8 @@ export default class DeploymentItem extends Vue {
             };
         }
         else {
-            let metrics: NormalMetrics = this.$store.getters.getDeploymentChartData(this.deploymentId);
+            let metrics: NormalMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
-
                 labels: metrics.time,
                 datasets: [
                     {
@@ -241,59 +230,12 @@ export default class DeploymentItem extends Vue {
 
     }
 
-    get deploymentRoles(): Array<string> {
-        return this.$store.getters.getDeploymentRoles(this.deploymentId);
-    }
-
-    /* Rol atributes */
-    get deploymentService(): string {
-        return this.$store.getters.getDeploymentService(this.deploymentId);
-    }
-    get serviceProvideChannels(): Array<Channel> {
-        return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
-    }
-
-    get serviceRequireChannels(): Array<Channel> {
-        return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
-    }
-
-    applyChanges(): void {
-        // Enviamos los valores que han cambiado
-        //  rolNumInstances
-        //  killInstances
-        this.$store.dispatch('aplyingChangesToDeployment', {
-            'deploymentId': this.deploymentId,
-            'rolNumInstances': this.rolNumInstances,
-            'killInstances': this.instanceKill
-        });
-    }
-    cancelChanges(): void {
-        this.rolNumInstances = {};
-        this.instanceKill = {};
-        this.clear = true;
-        // Tenemos que avisar de alguna forma a los hijos de que se han cancelado los cambios
-    }
-    undeploy(): void {
-        // TODO: Mensaje de confirmación del usuario
-        this.$store.dispatch('undeployDeployment', { deploymentId: this.deploymentId });
-    }
-
-    handleKillInstanceChange(payload) {
-        let tempRol, tempInst, value;
-        [tempRol, tempInst, value] = payload;
-        if (this.instanceKill[tempRol] === undefined)
-            this.instanceKill[tempRol] = {};
-        this.instanceKill[tempRol][tempInst] = value;
-    }
-    handleNumInstancesChange(payload) {
-        let tempRol, value;
-        [tempRol, value] = payload;
-        this.rolNumInstances[tempRol] = value;
+    /**
+     * Éste método se utiliza para enviar una notificación al componente superior para que lea que
+     * se ha cambiado el valor de 'kill instance'
+     */
+    killInstanceChange() {
+        this.$emit('killInstanceChange', [this.instanceId, this.killInstance]);
     }
 }
 </script>
-<style lang="scss">
-.deploymentChart {
-    margin-right: 15px;
-}
-</style>

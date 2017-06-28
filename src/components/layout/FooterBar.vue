@@ -15,7 +15,7 @@ export default class FooterBar extends Vue{
 
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 $default_padding:10px;
 $default_margin_left:180px;
 #footerbar{

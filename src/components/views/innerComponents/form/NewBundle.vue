@@ -11,7 +11,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement } from '../../store/classes';
+import { FabElement } from '../../../../store/classes';
 
 @Component({
     name: 'NewBundle'

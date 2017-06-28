@@ -100,8 +100,8 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, DeploymentRol, Resource } from '../../store/classes';
-import InputNumber from '../innerComponents/InputNumber.vue';
+import { FabElement, Deployment, DeploymentRol, Resource } from '../../../../store/classes';
+import InputNumber from '../input/InputNumber.vue';
 
 @Component({
     name: 'new-webservice-advanced',

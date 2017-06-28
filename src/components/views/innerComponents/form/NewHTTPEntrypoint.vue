@@ -4,26 +4,26 @@
             <span class="select">
                 <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
                     <option disabled value="">Please select one</option>
-                    <option v-for="domain in domainList">{{domain}}</option>
+                    <option v-for="domain in domainList" v-bind:key="domain">{{domain}}</option>
                 </select>
             </span>
-            <input class="checkbox" type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain" />
+            <input class="checkbox" type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain"></input>
             <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
             <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
         </div>
         <div class="inner-content">
             <div>
-                <input class="checkbox" type="checkbox" id="acceptTLSSSL" v-model="acceptTLSSSL" />
+                <input class="checkbox" type="checkbox" id="acceptTLSSSL" v-model="acceptTLSSSL"></input>
                 <label for="acceptTLSSSL"> Accept TLS/SSL</label>
                 <span class="select">
                     <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
                         <option disabled value="">Please select one</option>
-                        <option v-for="certificate in certificateList">{{certificate}}</option>
+                        <option v-for="certificate in certificateList" v-bind:key="certificate">{{certificate}}</option>
                     </select>
                 </span>
             </div>
             <div>
-                <input class="checkbox is-large" type="checkbox" id="requireClientCertificates" v-model="requireClientCertificates" />
+                <input class="checkbox is-large" type="checkbox" id="requireClientCertificates" v-model="requireClientCertificates"></input>
                 <label for="requireClientCertificates"> Require Client Certificates</label>
             </div>
         </div>
@@ -37,18 +37,15 @@
             <button class="button is-small fa fa-angle-up" v-on:click="resilence += 1"></button>
             <button class="button is-small fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
         </div>
-    
     </div>
 </template>
-
 <script lang="ts">
-
 // TODO: No se pueden listar dominios que ya estén en uso
 // TODO: Los certificados los tenemos que obtener de otro documento distinto al stamp state
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement } from '../../store/classes';
+import { FabElement } from '../../../../store/classes';
 
 @Component({
     name: 'new-httpentrypoint'
@@ -86,4 +83,3 @@ export default class NewHTTPEntrypoint extends Vue {
     }
 }
 </script>
-

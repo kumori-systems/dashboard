@@ -25,7 +25,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../store/classes';
-import AddVolume from '../innerComponents/AddVolume.vue';
+import AddVolume from './innerComponents/form/AddVolume.vue';
 
 @Component({
     name: 'DataVolumes',
@@ -68,6 +68,5 @@ export default class DataVolumes extends Vue {
     deleteVolume(dataVolumeId) {
         return this.$store.dispatch('deleteElement', dataVolumeId);
     }
-
 }
 </script>

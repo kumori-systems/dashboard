@@ -1,12 +1,12 @@
 <template>
     <div>
-        <router-view v-if="route" />
+        <router-view v-if="route"></router-view>
         <div v-else>
-            <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints" />
+            <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints"></input>
             <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     
-            <div class="tile is-vertical is-5" >
-                <deployment-card  v-for="deployment in deploymentList" v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)" />
+            <div class="tile is-vertical is-5">
+                <deployment-card v-for="deployment in deploymentList" v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
             </div>
         </div>
     </div>
@@ -16,7 +16,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 // Componentes
-import DeploymentCard from './../innerComponents/DeploymentCard.vue';
+import DeploymentCard from './innerComponents/card/DeploymentCard.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { Deployment, FabElement } from '../../store/classes';
 
