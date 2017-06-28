@@ -1,6 +1,5 @@
 <template>
     <div>
-    
         <nav class="level app-levelbar">
             <div class="level-left">
                 <div class="level-item">
@@ -12,7 +11,6 @@
                 </div>
             </div>
         </nav>
-    
     </div>
 </template>
 
