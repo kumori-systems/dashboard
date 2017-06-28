@@ -1,18 +1,15 @@
 <template>
-    <section class="app-navbar animated"
-             :class="{ slideInDown: show, slideOutDown: !show }">
+    <section class="app-navbar animated" :class="{ slideInDown: show, slideOutDown: !show }">
         <nav class="nav">
             <div class="nav-left">
-                <a class="nav-item hero-brand"
-                   href="/">
+                <a class="nav-item hero-brand" href="/">
                     <img src="../../assets/logo_m_text.png" />
                 </a>
             </div>
             <div class="nav-center">
             </div>
             <div class="nav-right">
-                <i class="fa fa-bell"
-                   aria-hidden="true" />
+                <i class="fa fa-bell" aria-hidden="true" />
                 <p>{{username}}</p>
             </div>
         </nav>
@@ -27,15 +24,15 @@ import Tooltip from 'vue-bulma-tooltip'
 @Component({
     name: 'navbar',
     components: {
-        'tooltip':Tooltip
+        'tooltip': Tooltip
     },
     props: {
         show: Boolean
     }
 })
-export default class NavBar extends Vue{
-    
-    get username(){
+export default class NavBar extends Vue {
+
+    get username() {
         return this.$store.getters.getUsername;
     }
 }
