@@ -116,26 +116,7 @@ $state_icon_size: 50px;
 	font-size: $state_icon_size;
 }
 
-.fa-caret-square-o-down {
-	font-size: $icon_size;
-}
-
-.fa-check-circle {
-	color: $color_green;
-	font-size: $icon_size;
-}
-
 .fa-hdd-o {
 	font-size: 30px;
-}
-
-.fa-exclamation-triangle {
-	color: $color_yellow;
-	font-size: $icon_size;
-}
-
-.fa-exclamation-circle {
-	color: $color_red;
-	font-size: $icon_size;
 }
 </style>

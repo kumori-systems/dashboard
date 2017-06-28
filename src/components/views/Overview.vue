@@ -5,8 +5,8 @@
             <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints"></input>
             <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
     
-            <div class="tile is-vertical is-5">
-                <deployment-card v-for="deployment in deploymentList" v-bind:key="deployment" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
+            <div class="tile is-4 is-vertical" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-bind:class="isEven(index)">
+                <deployment-card v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
             </div>
         </div>
     </div>
@@ -51,6 +51,14 @@ export default class Overview extends Vue {
         return function (deploymentId): boolean {
             if (!this.hideEntrypoints) return false;
             return this.$store.getters.getIsEntryPoint(deploymentId);
+        }
+    }
+
+
+    get isEven() {
+        return function (index: number) {
+            if (index % 2 === 0) return 'is-vertical';
+            return '';
         }
     }
 }

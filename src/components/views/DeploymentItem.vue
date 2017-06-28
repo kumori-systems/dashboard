@@ -33,7 +33,7 @@
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
-            <modal v-bind:visible="showModal" v-bind:title="modalTitle" v-bind:okButtonCallback="modalOkCallback" v-bind:bodyText="modalBodyText" v-on:close="showModal=false">
+            <modal v-bind:visible="showModal" v-bind:primaryButtonClass="modalPrimaryButtonClass" v-bind:title="modalTitle" v-bind:bodyText="modalBodyText" v-bind:leftButtonCallback="modalOkCallback" v-on:close="showModal=false">
             </modal>
         </div>
 </template>
@@ -65,9 +65,10 @@ export default class DeploymentItem extends Vue {
     haveChanges: boolean = false;
     clear: boolean = false;
     showModal: boolean = false;
-    modalTitle: string = '¿Quieres hacer undeploy?';
-    modalOkCallback: Function = function () { console.log('El callback parece que funciona'); };
-    modalBodyText: String = "El texto que se enseña en el cuerpo del modal";
+    modalTitle: string = '';
+    modalBodyText: string = '';
+    modalOkCallback: Function = function () { };
+    modalPrimaryButtonClass: String = null;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -278,12 +279,14 @@ export default class DeploymentItem extends Vue {
         this.instanceKill = {};
         this.clear = true;
         this.haveChanges = false;
-        // Tenemos que avisar de alguna forma a los hijos de que se han cancelado los cambios
     }
     undeploy(): void {
-        // TODO: Mensaje de confirmación del usuario
+        this.modalPrimaryButtonClass = 'is-danger';
+        this.modalTitle = 'Undeploy'
+        this.modalBodyText = 'Sure about to undeploy ' + this.deploymentId + '?';
+        const deploymentId = this.deploymentId;
+        this.modalOkCallback = function () { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
         this.showModal = true;
-        this.$store.dispatch('undeployDeployment', { deploymentId: this.deploymentId });
     }
 
     handleKillInstanceChange(payload) {

@@ -33,14 +33,8 @@ export default class FAB extends Vue {
 <style lang="scss" scoped>
 #fab {
     z-index: 2;
-    margin-left: 90vw;
-    margin-top: 90vh;
+    margin-left: 70vw;
+    margin-top: 10vh;
     position: fixed;
-}
-.fab{
-    background: #93c47d;;
-}
-.fab-element{
-    background: white;
 }
 </style>
