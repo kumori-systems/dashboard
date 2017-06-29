@@ -16,7 +16,6 @@
                     <span> {{deploymentName}} and</span>
                     <strong>ALL DATA WILL BE LOST</strong>.
                 </p>
-    
             </section>
             <a class="button is-primary is-danger" v-on:click="undeploy">Undeploy</a>
     

@@ -353,7 +353,6 @@ export default class Elements extends Vue {
                 this.$store.getters.getComponentVersion(this.selectedComponents[index])
             ]);
         }
-
         for (let index in this.selectedServices) {
             this.modalElementList.push([
                 this.selectedServices[index],
