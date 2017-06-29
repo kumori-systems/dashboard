@@ -33,11 +33,11 @@
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
-            <modal v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
+            <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
                 This action will
                 <strong>UNDEPLOY</strong> {{deploymentName}} and you will
                 <strong>loose all data</strong>
-            </modal>
+            </undeploy>
         </div>
 </template>
 <script lang="ts">
@@ -48,14 +48,14 @@ import Moment from 'moment';
 import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
-import Modal from './innerComponents/modal/Undeploy.vue';
+import Undeploy from './innerComponents/modal/Undeploy.vue';
 
 @Component({
     name: 'DeploymentItem',
     components: {
         'rol-card': RolCard,
         'chart': Chart,
-        'modal': Modal
+        'undeploy': Undeploy
     },
     props: {
         deploymentRoute: { type: String }
