@@ -653,6 +653,19 @@ export default {
       return false;
     };
   },
+  getComponentUsedBy: function (state, getters) {
+    return (componentId) => {
+      let res: Array<string> = [];
+      // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
+      for (let serviceIndex in state.serviceList) {
+        for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
+          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
+            res.push((<Service>state.serviceList[serviceIndex]).name + getters.getServiceVersion(serviceIndex));
+        }
+      }
+      return res;
+    };
+  },
 
   /**
    * Devolvemos una lista de servicios web disponibles para el usuario
@@ -825,6 +838,16 @@ export default {
       return false;
     };
   },
+  getRuntimeUsedBy: function (state, getters) {
+    return (runtimeId) => {
+      let res = [];
+      for (let componentId in state.componentList) {
+        if ((<Component>state.componentList[componentId]).runtime === runtimeId)
+          res.push(getters.getComponentName(componentId) + getters.getComponentVersion(componentId));
+      }
+      return res;
+    };
+  },
   getRuntimeOwner: function (state) {
     return (runtimeId) => {
       return runtimeId.split('/')[2];
@@ -946,7 +969,17 @@ export default {
       return false;
     };
   },
-
+  getServiceUsedBy: function (state, getters) {
+    return (serviceId) => {
+      let res = [];
+      // Tenemos que comprobar si el servicio está siendo utilizado por algún deployment
+      for (let deploymentIndex in state.deploymentList) {
+        if ((<Deployment>state.deploymentList[deploymentIndex]).serviceId === serviceId)
+          res.push((<Deployment>state.deploymentList[deploymentIndex]).name);
+      }
+      return res;
+    };
+  },
   getServiceOwner: function (state) {
     return (serviceId) => {
       return serviceId.split('/')[2];

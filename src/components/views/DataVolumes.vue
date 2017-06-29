@@ -8,8 +8,7 @@
                 <th>{{dataVolume}}</th>
                 <th>
                     <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
-                </th>
-                <th>by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</th>
+                    by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</th>
                 <th>{{numberOfChunks(dataVolume)}} chunks</th>
                 <th>
                     <button class="button fa fa-info" />

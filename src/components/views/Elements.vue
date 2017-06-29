@@ -28,7 +28,10 @@
                                             <tr v-for="version in componentVersionList(owner, component)">
                                                 <th>{{version}}</th>
                                                 <th>
-                                                    <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
+                                                    <div v-if="getIsComponentInUse(owner, component, version)">
+                                                        <span class="ON_PROGRESS">in use by</span> service/s:
+                                                        <span v-for="usedBy in getComponentUsedBy(owner, component, version)">{{usedBy}} </span>
+                                                    </div>
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showComponentInfo(owner, component, version)">
@@ -58,8 +61,9 @@
                                         <table>
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
-                                                <th>
-                                                    <span class="ON_PROGRESS" v-if="getIsServiceInUse(owner, service, version)">in use</span>
+                                                <th v-if="getIsServiceInUse(owner, service, version)">
+                                                    <span class="ON_PROGRESS">in use by</span> deployment/s:
+                                                    <span v-for="usedBy in getServiceUsedBy(owner, service, version)">{{usedBy}} </span>
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
@@ -101,8 +105,9 @@
                                         <table>
                                             <tr v-for="version in runtimeVersionList(owner, runtime)">
                                                 <th>{{version}}</th>
-                                                <th>
-                                                    <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(owner, runtime, version)">in use</span>
+                                                <th v-if="getIsRuntimeInUse(owner, runtime, version)">
+                                                    <span class="ON_PROGRESS">in use by</span> component/s:
+                                                    <span v-for="usedBy in getRuntimeUsedBy(owner, runtime, version)">{{usedBy}} </span>
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
@@ -230,6 +235,12 @@ export default class Elements extends Vue {
         }
     }
 
+    get getComponentUsedBy() {
+        return (owner, component, version) => {
+            return this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
+        }
+    }
+
     get getComponentOwner() {
         return (componentId) => {
             return this.$store.getters.getComponentOwner(componentId);
@@ -255,6 +266,11 @@ export default class Elements extends Vue {
     get getIsServiceInUse() {
         return (owner, service, version) => {
             return this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
+        };
+    }
+    get getServiceUsedBy() {
+        return (owner, service, version) => {
+            return this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
         };
     }
     get getServiceOwner() {
@@ -289,6 +305,11 @@ export default class Elements extends Vue {
             return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
         }
     }
+    get getRuntimeUsedBy() {
+        return (owner, runtime, version) => {
+            return this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
+        }
+    }
     get getRuntimeOwner() {
         return (runtimeId) => {
             return this.$store.getters.getRuntimeOwner(runtimeId);
@@ -316,7 +337,6 @@ export default class Elements extends Vue {
     deleteComponent(owner, component, version) {
         this.deleteElement('component', this.getComponentId(owner, component, version), component, version);
     }
-
 
     showElementInfo(elementId, elementName, version) {
         this.infoIsVisible = true;
