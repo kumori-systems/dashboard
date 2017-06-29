@@ -1,11 +1,13 @@
 <template>
     <div class="card">
-        <div class="card-header title">
-            <span class="card-header-left">{{rolId}}</span>
-            <span class="card-header-right">{{numInstances}}</span>
+        <div class="card-header">
+            <span class="title">{{rolId}}</span>
+            <span class="box">{{numInstances}}</span>
             <div>
-                <button class="fa fa-angle-up button is-small is-primary is-outlined" v-on:click="numInstances = 1" />
-                <button class="fa fa-angle-down button is-small is-primary is-outlined" v-on:click="numInstances = -1" />
+                <div class="tile is-vertical">
+                    <button class="fa fa-angle-up button is-small is-primary is-outlined" v-on:click="numInstances = 1" />
+                    <button class="fa fa-angle-down button is-small is-primary is-outlined" v-on:click="numInstances = -1" />
+                </div>
             </div>
             <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
         </div>
@@ -38,10 +40,9 @@
                     </div>
                 </div>
             </div>
-            <div class="is-child is-pulled-right box">
+            <div class="is-child is-pulled-right box rol-chart">
                 <chart v-bind:data="rolChartData" :width="600" :height="300"></chart>
             </div>
-    
         </div>
         <collapse>
             <collapse-item title="View instances">
@@ -116,7 +117,6 @@ export default class Card extends Vue {
             this.localNumInstances += x;
             this.$emit('numInstancesChange', [this.rolId, this.localNumInstances]);
         }
-
     }
 
     get componentURN() {
@@ -127,153 +127,7 @@ export default class Card extends Vue {
     }
 
     get rolChartData() {
-        // Los datos a representar son distintos si los servicios son entrypoints
-        if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
-            let metrics: EntryPointMetrics = this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId );
-            return {
-                labels: metrics.time,
-                datasets: [
-                    {
-                        label: 'timestamp_init',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: metrics.timestamp_init
-                    },
-                    {
-                        label: 'timestamp_end',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: metrics.timestamp_end
-                    },
-                    {
-                        label: 'elapsed_msec',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.elapsed_msec
-                    },
-                    {
-                        label: 'http_request_per_second',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.http_request_per_second
-                    },
-                    {
-                        label: 'http_errors_per_second',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: metrics.http_errors_per_second
-                    },
-                    {
-                        label: 'http_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_size_in_per_second
-                    },
-                    {
-                        label: 'http_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_size_out_per_second
-                    },
-                    {
-                        label: 'http_response_time',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_response_time
-                    },
-                    {
-                        label: 'ws_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_size_in_per_second
-                    },
-                    {
-                        label: 'ws_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_size_out_per_second
-                    },
-                    {
-                        label: 'ws_chunk_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_chunk_in_per_second
-                    },
-                    {
-                        label: 'ws_chunk_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_chunk_out_per_second
-                    }
-                ]
-
-            };
-        }
-        else {
-            let metrics: NormalMetrics = this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
-            return {
-
-                labels: metrics.time,
-                datasets: [
-                    {
-                        label: 'CPU',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: metrics.cpu
-                    },
-                    {
-                        label: 'MEM',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: metrics.mem
-                    },
-                    {
-                        label: 'NET_IN',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.net_in
-                    },
-                    {
-                        label: 'NET_OUT',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.net_out
-                    },
-                    {
-                        label: 'RPM',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: metrics.rpm
-                    },
-                    {
-                        label: 'RES',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.res
-                    }
-                ]
-
-            };
-        }
-
+        return this.$store.getters.getDeploymentRolChartDataFormatted(this.deploymentId, this.rolId);
     }
 
     get rolInstances() {
@@ -308,7 +162,44 @@ export default class Card extends Vue {
      */
     handleKillInstanceChange(payload) {
         this.$emit('killInstanceChange', [this.rolId, ...payload]);
-
     }
 }
 </script>
+<style lang="scss">
+$color_green:#93c47d;
+$color_yellow:#f5d164;
+$color_red:#ff6666;
+$icon_size: 90px;
+$radius: 5px;
+.rol-chart {
+    width: 800px;
+    height: 400px;
+    margin-right: 10px;
+}
+
+.fa-circle {
+    padding: 10px;
+}
+
+.card {
+    margin: 10px;
+    padding: 2px;
+    border-radius: $radius;
+}
+
+.card-header {
+    border-radius: $radius;
+}
+
+.box {
+    background: whitesmoke;
+}
+
+.card-body {
+    padding: 10px;
+}
+
+a {
+    padding-left: 10px;
+}
+</style>

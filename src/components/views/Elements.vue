@@ -8,8 +8,8 @@
                 </span>
             </span>
             <span>
-                <button class="button" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
-                <button class="button" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
+                <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
+                <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
             </span>
         </div>
         <p>
@@ -31,10 +31,10 @@
                                                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal(getComponentId(owner, component, version))">
+                                                    <button class="button is-info" v-on:click="openModal(getComponentId(owner, component, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button" v-on:click="deleteElement(getComponentId(owner, component, version))">
+                                                    <button class="button is-danger" v-on:click="deleteElement(getComponentId(owner, component, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)">
@@ -62,22 +62,22 @@
                                                     <span class="ON_PROGRESS" v-if="getIsServiceInUse(owner, service, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button" v-on:click="openModal(getServiceId(owner, service, version))">
+                                                    <button class="button is-info" v-on:click="openModal(getServiceId(owner, service, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <!-- Dependiendo de si el servicio es entrypoint o no, el botón nos redirigirá a un sitio u a otro -->
                                                     <router-link v-if="selectedServiceIsInbound(getServiceId(owner, service, version))" v-bind:to="'newHTTPEntrypoint'">
-                                                        <button class="button" v-on:click="selectedService(getServiceId(owner, service, version))">
+                                                        <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
                                                     <router-link v-else v-bind:to="'newWebServiceAdvanced'">
-                                                        <button class="button" v-on:click="selectedService(getServiceId(owner, service, version))">
+                                                        <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
                                                     <!-- fin redirección -->
-                                                    <button class="button" v-on:click="deleteElement(getServiceId(owner, service, version))">
+                                                    <button class="button is-danger" v-on:click="deleteElement(getServiceId(owner, service, version))">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)">
@@ -306,3 +306,13 @@ export default class Elements extends Vue {
 
 }
 </script>
+<style lang="scss" scoped>
+/*
+input[type=checkbox] {
+    -ms-transform: scale(2); // IE
+    -moz-transform: scale(2); // Firefox
+    -webkit-transform: scale(2); // Safari and Chrome
+    -o-transform: scale(2); // Opera
+}
+*/
+</style>

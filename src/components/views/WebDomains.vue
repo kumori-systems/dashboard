@@ -8,15 +8,15 @@
     
             <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
                 <th>
-                    <a v-bind:href="'http://'+usedWebdomain">
-                        {{usedWebdomain}}
+                    <a v-bind:href="'http://'+usedWebdomain[1]">
+                        {{usedWebdomain[1]}}
                     </a>
                 </th>
                 <th>
                     <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
                 </th>
                 <th>
-                    <span class="ON_PROGRESS">in use</span>
+                    <span class="ON_PROGRESS">in use</span> by {{usedWebdomain[0]}}
                 </th>
                 <th>
                     <button class="button">

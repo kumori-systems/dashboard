@@ -1,7 +1,5 @@
-
 import { Line } from 'vue-chartjs';
 import Moment from 'moment';
-
 
 const options = {
   legend: {
@@ -43,10 +41,14 @@ const options = {
   }
 };
 
-
 export default Line.extend({
   props: ['data'],
   mounted() {
-    this.renderChart(this.data, options)
+    this.renderChart(this.data, options);
+  },
+  watch: {
+    data: function (val, oldVal) {
+      this.renderChart(val, options);
+    }
   }
 });

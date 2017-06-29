@@ -15,7 +15,7 @@
     
             </div>
         </div>
-        <div class="is-child is-pulled-right box instanceChart">
+        <div class="is-child is-pulled-right box instance-chart">
             <chart v-bind:data="instanceChartData" v-bind:width="600" v-bind:height="300"></chart>
         </div>
     </div>
@@ -239,3 +239,10 @@ export default class Card extends Vue {
     }
 }
 </script>
+<style lang="scss" scoped>
+.instance-chart {
+    width: 800px;
+    height: 400px;
+    margin-right: 10px;
+}
+</style>

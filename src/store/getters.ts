@@ -240,15 +240,159 @@ export default {
         for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
           res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
         }
-        return res;
+        return getters.formatChartData(true, res);
       } else {
         let res: NormalMetrics = new NormalMetrics();
         for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
           res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
         }
-        return res;
+        return getters.formatChartData(false, res);
       }
+    };
+  },
 
+  formatChartData: function (state, getters): Function {
+    return function (isEntryPoint: boolean, chartData: Metrics) {
+      if (isEntryPoint) {
+        return {
+          labels: chartData.time,
+          datasets: [
+            {
+              label: 'timestamp_init',
+              backgroundColor: '#1fc8db',
+              borderColor: '#1fc8db',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).timestamp_init
+            },
+            {
+              label: 'timestamp_end',
+              backgroundColor: '#fce473',
+              borderColor: '#fce473',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).timestamp_end
+            },
+            {
+              label: 'elapsed_msec',
+              backgroundColor: '#42afe3',
+              borderColor: '#42afe3',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).elapsed_msec
+            },
+            {
+              label: 'http_request_per_second',
+              backgroundColor: '#42afe3',
+              borderColor: '#42afe3',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).http_request_per_second
+            },
+            {
+              label: 'http_errors_per_second',
+              backgroundColor: '#ed6c63',
+              borderColor: '#ed6c63',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).http_errors_per_second
+            },
+            {
+              label: 'http_size_in_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).http_size_in_per_second
+            },
+            {
+              label: 'http_size_out_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).http_size_out_per_second
+            },
+            {
+              label: 'http_response_time',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).http_response_time
+            },
+            {
+              label: 'ws_size_in_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).ws_size_in_per_second
+            },
+            {
+              label: 'ws_size_out_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).ws_size_out_per_second
+            },
+            {
+              label: 'ws_chunk_in_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).ws_chunk_in_per_second
+            },
+            {
+              label: 'ws_chunk_out_per_second',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<EntryPointMetrics>chartData).ws_chunk_out_per_second
+            }
+          ]
+        };
+      }
+      else {
+        return {
+          labels: chartData.time,
+          datasets: [
+            {
+              label: 'CPU',
+              backgroundColor: '#1fc8db',
+              borderColor: '#1fc8db',
+              fill: false,
+              data: (<NormalMetrics>chartData).cpu
+            },
+            {
+              label: 'MEM',
+              backgroundColor: '#fce473',
+              borderColor: '#fce473',
+              fill: false,
+              data: (<NormalMetrics>chartData).mem
+            },
+            {
+              label: 'NET_IN',
+              backgroundColor: '#42afe3',
+              borderColor: '#42afe3',
+              fill: false,
+              data: (<NormalMetrics>chartData).net_in
+            },
+            {
+              label: 'NET_OUT',
+              backgroundColor: '#42afe3',
+              borderColor: '#42afe3',
+              fill: false,
+              data: (<NormalMetrics>chartData).net_out
+            },
+            {
+              label: 'RPM',
+              backgroundColor: '#ed6c63',
+              borderColor: '#ed6c63',
+              fill: false,
+              data: (<NormalMetrics>chartData).rpm
+            },
+            {
+              label: 'RES',
+              backgroundColor: '#97cd76',
+              borderColor: '#97cd76',
+              fill: false,
+              data: (<NormalMetrics>chartData).res
+            }
+          ]
+        };
+      }
 
     };
   },
@@ -307,17 +451,21 @@ export default {
         for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
           res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
         }
-        console.log('Este res cpmtoeme: ' + JSON.stringify(res));
         return res;
       } else {
         let res: NormalMetrics = new NormalMetrics();
         for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
           res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
         }
-        console.log('Res contiene: ' + JSON.stringify(res));
         return res;
       }
     };
+  },
+  getDeploymentRolChartDataFormatted: function (state, getters): Function {
+    return function (deploymentId: string, rolId: string): any {
+      return getters.formatChartData(getters.getIsEntryPoint(deploymentId), getters.getDeploymentRolChartData(deploymentId, rolId));
+    };
+
   },
   getDeploymentRolMemNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
@@ -692,12 +840,15 @@ export default {
   },
 
   getUsedWebDomainList: function (state, getters) {
-    let usedWebdomain: Array<string> = [];
-    let website: Array<string> = null;
+    let usedWebdomain: Array<[string, string]> = [];
+    let websiteList: Array<string> = null;
     for (let deploymentId in state.deploymentList) {
-      website = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (website != null)
-        usedWebdomain = usedWebdomain.concat(website);
+      websiteList = (<Deployment>state.deploymentList[deploymentId]).website;
+      if (websiteList != null) {
+        for (let index in websiteList) {
+          usedWebdomain.push([getters.getDeploymentName(deploymentId), websiteList[index]]);
+        }
+      }
     }
 
     return usedWebdomain;
