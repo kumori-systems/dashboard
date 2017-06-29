@@ -3,13 +3,13 @@
         <div class="modal-card">
             <header class="modal-card-head">
                 <p class="modal-card-title">{{ title }}</p>
+                 <button class="delete" @click="close"></button>
             </header>
             <section class="modal-card-body">
-                {{bodyText}}
+                <slot></slot>
             </section>
-            <footer class="modal-card-foot">
-                <a class="button is-primary" v-bind:class="primaryButtonClass" v-on:click="leftButtonClick">Ok</a>
-                <a class="button" v-on:click="close">Cancel</a>
+            <footer class="modal-card-foot" v-if="leftButtonText">
+                <a  class="button is-primary" v-bind:class="leftButtonClass" v-on:click="leftButtonClick">{{leftButtonText}}</a>
             </footer>
         </div>
     </vue-modal>
@@ -27,17 +27,16 @@ import vueModal from 'vue-bulma-modal/src/Modal.vue';
     props: {
         title: { required: true, type: String },
         visible: { required: true, type: Boolean },
-        bodyText: { required: true, type: String },
-        leftButtonCallback: { required: true, type: Function },
-        primaryButtonClass: { required: false, type: String }
+        leftButtonCallback: { required: false, type: Function },
+        leftButtonText: { required: false, type: String },
+        leftButtonClass: { required: false, type: String }
     }
 })
 export default class Modal extends Vue {
     title = this.title;
     visible = this.visible;
-    primaryButtonClass = this.primaryButtonClass;
+    leftButtonClass = this.leftButtonClass;
     leftButtonCallback = this.leftButtonCallback;
-    bodyText = this.bodyText;
 
     close() {
         this.$emit('close');
@@ -49,6 +48,7 @@ export default class Modal extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+/*
 .button {
     position: absolute;
     right: 10px;
@@ -57,4 +57,5 @@ export default class Modal extends Vue {
 .button.is-primary {
     right: 80px;
 }
+*/
 </style>

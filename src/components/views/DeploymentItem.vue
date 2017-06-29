@@ -33,7 +33,10 @@
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
-            <modal v-bind:visible="showModal" v-bind:primaryButtonClass="modalPrimaryButtonClass" v-bind:title="modalTitle" v-bind:bodyText="modalBodyText" v-bind:leftButtonCallback="modalOkCallback" v-on:close="showModal=false">
+            <modal v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
+                This action will
+                <strong>UNDEPLOY</strong> {{deploymentName}} and you will
+                <strong>loose all data</strong>
             </modal>
         </div>
 </template>
@@ -45,7 +48,7 @@ import Moment from 'moment';
 import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
-import Modal from './innerComponents/modal/Modal.vue';
+import Modal from './innerComponents/modal/Undeploy.vue';
 
 @Component({
     name: 'DeploymentItem',
@@ -65,10 +68,7 @@ export default class DeploymentItem extends Vue {
     haveChanges: boolean = false;
     clear: boolean = false;
     showModal: boolean = false;
-    modalTitle: string = '';
-    modalBodyText: string = '';
     modalOkCallback: Function = function () { };
-    modalPrimaryButtonClass: String = null;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -142,9 +142,6 @@ export default class DeploymentItem extends Vue {
         this.haveChanges = false;
     }
     undeploy(): void {
-        this.modalPrimaryButtonClass = 'is-danger';
-        this.modalTitle = 'Undeploy'
-        this.modalBodyText = 'Sure about to undeploy ' + this.deploymentId + '?';
         const deploymentId = this.deploymentId;
         this.modalOkCallback = function () { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
         this.showModal = true;

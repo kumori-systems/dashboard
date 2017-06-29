@@ -31,7 +31,7 @@
                                                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="openModal(getComponentId(owner, component, version))">
+                                                    <button class="button is-info" v-on:click="showComponentInfo(getComponentId(owner, component, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <button class="button is-danger" v-on:click="deleteElement(getComponentId(owner, component, version))">
@@ -62,7 +62,7 @@
                                                     <span class="ON_PROGRESS" v-if="getIsServiceInUse(owner, service, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="openModal(getServiceId(owner, service, version))">
+                                                    <button class="button is-info" v-on:click="showModal(getServiceId(owner, service, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <!-- Dependiendo de si el servicio es entrypoint o no, el botón nos redirigirá a un sitio u a otro -->
@@ -105,7 +105,7 @@
                                                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(owner, runtime, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="openModal(getRuntimeId(owner, runtime, version))">
+                                                    <button class="button is-info" v-on:click="showModal(getRuntimeId(owner, runtime, version))">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <button class="button is-danger" v-on:click="deleteElement(getRuntimeId(owner, runtime, version))">
@@ -123,14 +123,16 @@
                 </div>
             </collapse-item>
         </collapse>
-        <modal v-bind:visible="showModal" v-bind:title="elementURN" v-on:close="closeModal"></modal>
+        <modal v-bind:visible="modalIsVisible" v-bind:title="modalTitle" v-bind:leftButtonText="modalLeftButtonText" , v-bind:leftButtonCallback="modalLeftButtonCallback" , v-bind:leftButtonClass="modalLeftButtonClass" , v-on:close="closeModal">
+            {{modalBody}}
+        </modal>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Modal from './innerComponents/modal/CardModal.vue';
+import Modal from './innerComponents/modal/Undeploy.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
 
@@ -143,13 +145,19 @@ import { FabElement } from '../../store/classes';
     }
 })
 export default class Elements extends Vue {
-    showModal: boolean = false;
-    elementURN: string = '';
     selectedComponents = [];
     selectedServices = [];
     selectedRuntimes = [];
     search: string = null;
+    // Modal Arguments
     showPublicElements: boolean = true;
+    modalIsVisible: boolean = false;
+    modalTitle: string = '';
+    modalBody: string = '';
+    modalLeftButtonText: string = '';
+    modalLeftButtonCallback: Function = function () { };
+    modalLeftButtonClass: string = "is-primary";
+
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -289,18 +297,26 @@ export default class Elements extends Vue {
         this.$store.dispatch('selectedService', serviceId);
     }
 
-    openModal(elementId: string) {
-        this.elementURN = elementId;
-        this.showModal = true;
+    showModal(title: string, body: string, leftButtonClass?: string, leftButtonText?: string, leftButtonCallback?: Function) {
+        this.modalIsVisible = true;
+        this.modalTitle = title;
+        this.modalBody = body;
+        if (leftButtonClass) this.modalLeftButtonClass = leftButtonClass;
+        if (leftButtonText) this.modalLeftButtonText = leftButtonText;
+        if (leftButtonCallback) this.modalLeftButtonCallback = leftButtonCallback;
     }
     closeModal() {
-        this.showModal = false;
+        this.modalIsVisible = false;
     }
 
+    showComponentInfo(componentURN: string) {
+        this.showModal(componentURN, "Cuerpo del <u>modal</u>");
+    }
     downloadManifest() {
         this.$store.dispatch('downloadManifest', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
     deleteSelected() {
+        //this.showModal('');
         this.$store.dispatch('deleteElement', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
 
