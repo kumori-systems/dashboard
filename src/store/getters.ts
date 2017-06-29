@@ -919,14 +919,11 @@ export default {
 
   getServiceVersion: function (state) {
     return (serviceId: string) => {
-
       // En el id debería de estar la versión del servicio
       let splitted = serviceId.split('/');
       return splitted[splitted.length - 1];
-
     };
   },
-
   getServiceId: function (state, getters) {
     return (owner, service, version) => {
       let myServiceId;

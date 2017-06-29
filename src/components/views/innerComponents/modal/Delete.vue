@@ -12,14 +12,11 @@
             <section class="modal-card-body">
                 <p>
                     <span>This action <strong>CAN'T BE UNDONE</strong> and will </span>
-                    <strong>DESTROY</strong>
-                    <span> {{deploymentName}} and</span>
-                    <strong>ALL DATA WILL BE LOST</strong>.
+                    <strong>ERASE</strong>
+                    <span> the version {{elementVersion}} of the {{elementType}} {{elementName}}</span>.
                 </p>
-    
             </section>
-            <a class="button is-primary is-danger" v-on:click="undeploy">Undeploy</a>
-    
+            <a class="button is-primary is-danger" v-on:click="deleteElement">Delete</a>
         </div>
     </vue-modal>
 </template>
@@ -35,20 +32,23 @@ import vueModal from 'vue-bulma-modal/src/Modal.vue';
     },
     props: {
         visible: { required: true, type: Boolean },
-        deploymentId: { required: true, type: String },
-        deploymentName: { required: true, type: String }
+        elementId: { required: true, type: String },
+        elementName: { required: true, type: String },
+        elementVersion: { required: true, type: String },
+        elementType: { required: true, type: String }
     }
 })
 export default class Modal extends Vue {
     visible: boolean = this.visible;
-    deploymentId: string = this.deploymentId;
-    deploymentName: string = this.deploymentName;
+    elementId: string = this.elementId;
+    elementName: string = this.elementName;
+    elementVersion: string = this.elementVersion;
 
     close() {
         this.$emit('close');
     }
-    undeploy() {
-        this.$store.dispatch('undeployDeployment', { 'deploymentId': this.deploymentId });
+    deleteElement() {
+        this.$store.dispatch('deleteElement', this.elementId);
         this.close();
     }
 }

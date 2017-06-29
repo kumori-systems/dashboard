@@ -31,10 +31,10 @@
                                                     <span class="ON_PROGRESS" v-if="getIsComponentInUse(owner, component, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="showComponentInfo(getComponentId(owner, component, version))">
+                                                    <button class="button is-info" v-on:click="showComponentInfo(owner, component, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button is-danger" v-on:click="deleteElement(getComponentId(owner, component, version))">
+                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteComponent(owner, component, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)">
@@ -62,7 +62,7 @@
                                                     <span class="ON_PROGRESS" v-if="getIsServiceInUse(owner, service, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="showModal(getServiceId(owner, service, version))">
+                                                    <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
                                                     <!-- Dependiendo de si el servicio es entrypoint o no, el botón nos redirigirá a un sitio u a otro -->
@@ -77,7 +77,7 @@
                                                         </button>
                                                     </router-link>
                                                     <!-- fin redirección -->
-                                                    <button class="button is-danger" v-on:click="deleteElement(getServiceId(owner, service, version))">
+                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)">
@@ -105,10 +105,10 @@
                                                     <span class="ON_PROGRESS" v-if="getIsRuntimeInUse(owner, runtime, version)">in use</span>
                                                 </th>
                                                 <th>
-                                                    <button class="button is-info" v-on:click="showModal(getRuntimeId(owner, runtime, version))">
+                                                    <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button is-danger" v-on:click="deleteElement(getRuntimeId(owner, runtime, version))">
+                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteRuntime(owner, runtime, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                     <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">
@@ -123,16 +123,18 @@
                 </div>
             </collapse-item>
         </collapse>
-        <modal v-bind:visible="modalIsVisible" v-bind:title="modalTitle" v-bind:leftButtonText="modalLeftButtonText" , v-bind:leftButtonCallback="modalLeftButtonCallback" , v-bind:leftButtonClass="modalLeftButtonClass" , v-on:close="closeModal">
-            {{modalBody}}
-        </modal>
+        <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
+        <info v-bind:visible="infoIsVisible" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="infoIsVisible=false"></info>
+        <delete-group v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Modal from './innerComponents/modal/Undeploy.vue';
+import Delete from './innerComponents/modal/Delete.vue';
+import DeleteGroup from './innerComponents/modal/DeleteGroup.vue';
+import Info from './innerComponents/modal/Info.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
 
@@ -141,22 +143,28 @@ import { FabElement } from '../../store/classes';
     components: {
         'collapse': Collapse,
         'collapse-item': CollapseItem,
-        'modal': Modal
+        'delete': Delete,
+        'delete-group': DeleteGroup,
+        'info': Info
     }
 })
 export default class Elements extends Vue {
+    showPublicElements: boolean = true;
     selectedComponents = [];
     selectedServices = [];
     selectedRuntimes = [];
     search: string = null;
+
     // Modal Arguments
-    showPublicElements: boolean = true;
-    modalIsVisible: boolean = false;
-    modalTitle: string = '';
-    modalBody: string = '';
-    modalLeftButtonText: string = '';
-    modalLeftButtonCallback: Function = function () { };
-    modalLeftButtonClass: string = "is-primary";
+    deleteIsVisible: boolean = false;
+    deleteGroupIsVisible: boolean = false;
+    infoIsVisible: boolean = false;
+    modalElementType: string = '';
+    modalElementId: string = '';
+    modalElementName: string = '';
+    modalElementVersion: string = '';
+    // id, tipo, elemento, version
+    modalElementList: Array<[string, string, string, string]> = [];
 
 
     mounted() {
@@ -165,6 +173,9 @@ export default class Elements extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
+    get user() {
+        return this.$store.getters.getUsername;
+    }
     get someoneSelected() {
         if (this.selectedComponents.length > 0 || this.selectedServices.length > 0 || this.selectedRuntimes.length > 0)
             return true;
@@ -289,35 +300,79 @@ export default class Elements extends Vue {
         }
     }
 
-    deleteElement(elementId) {
-        this.$store.dispatch('deleteElement', elementId);
+    deleteElement(elementType, elementId, elementName, elementVersion) {
+        this.deleteIsVisible = true;
+        this.modalElementType = elementType;
+        this.modalElementId = elementId;
+        this.modalElementName = elementName;
+        this.modalElementVersion = elementVersion;
+    }
+    deleteRuntime(owner, runtime, version) {
+        this.deleteElement('runtime', this.getRuntimeId(owner, runtime, version), runtime, version);
+    }
+    deleteService(owner, service, version) {
+        this.deleteElement('service', this.getServiceId(owner, service, version), service, version);
+    }
+    deleteComponent(owner, component, version) {
+        this.deleteElement('component', this.getComponentId(owner, component, version), component, version);
+    }
+
+
+    showElementInfo(elementId, elementName, version) {
+        this.infoIsVisible = true;
+        this.modalElementId = elementId;
+        this.modalElementName = elementName;
+        this.modalElementVersion = version;
+    }
+    showRuntimeInfo(owner, runtime, version) {
+        this.showElementInfo(this.getRuntimeId(owner, runtime, version), runtime, version);
+    }
+    showServiceInfo(owner, service, version) {
+        this.showElementInfo(this.getServiceId(owner, service, version), service, version);
+    }
+    showComponentInfo(owner, component, version) {
+        this.showElementInfo(this.getComponentId(owner, component, version), component, version);
     }
 
     selectedService(serviceId) {
         this.$store.dispatch('selectedService', serviceId);
     }
 
-    showModal(title: string, body: string, leftButtonClass?: string, leftButtonText?: string, leftButtonCallback?: Function) {
-        this.modalIsVisible = true;
-        this.modalTitle = title;
-        this.modalBody = body;
-        if (leftButtonClass) this.modalLeftButtonClass = leftButtonClass;
-        if (leftButtonText) this.modalLeftButtonText = leftButtonText;
-        if (leftButtonCallback) this.modalLeftButtonCallback = leftButtonCallback;
-    }
-    closeModal() {
-        this.modalIsVisible = false;
-    }
-
-    showComponentInfo(componentURN: string) {
-        this.showModal(componentURN, "Cuerpo del <u>modal</u>");
-    }
     downloadManifest() {
         this.$store.dispatch('downloadManifest', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
+
     deleteSelected() {
-        //this.showModal('');
-        this.$store.dispatch('deleteElement', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
+        this.modalElementList = [];
+        // id, tipo, elemento, version
+        for (let index in this.selectedComponents) {
+            this.modalElementList.push([
+                this.selectedComponents[index],
+                'component',
+                this.$store.getters.getComponentName(this.selectedComponents[index]),
+                this.$store.getters.getComponentVersion(this.selectedComponents[index])
+            ]);
+        }
+
+        for (let index in this.selectedServices) {
+            this.modalElementList.push([
+                this.selectedServices[index],
+                'service',
+                this.$store.getters.getServiceName(this.selectedServices[index]),
+                this.$store.getters.getServiceVersion(this.selectedServices[index])
+            ]);
+        }
+
+        for (let index in this.selectedRuntimes) {
+            this.modalElementList.push([
+                this.selectedRuntimes[index],
+                'runtime',
+                this.$store.getters.getRuntimeName(this.selectedRuntimes[index]),
+                this.$store.getters.getRuntimeVersion(this.selectedRuntimes[index])
+            ]);
+        }
+
+        this.deleteGroupIsVisible = true;
     }
 
 }

@@ -12,14 +12,11 @@
             <section class="modal-card-body">
                 <p>
                     <span>This action <strong>CAN'T BE UNDONE</strong> and will </span>
-                    <strong>DESTROY</strong>
-                    <span> {{deploymentName}} and</span>
-                    <strong>ALL DATA WILL BE LOST</strong>.
+                    <strong>ERASE</strong>
+                    <p v-for="element in elementList" v-bind:key="element[0]"> the version {{element[3]}} of the {{element[1]}} {{element[2]}}</p>
                 </p>
-    
             </section>
-            <a class="button is-primary is-danger" v-on:click="undeploy">Undeploy</a>
-    
+            <a class="button is-primary is-danger" v-on:click="deleteGroup">Delete group</a>
         </div>
     </vue-modal>
 </template>
@@ -35,20 +32,24 @@ import vueModal from 'vue-bulma-modal/src/Modal.vue';
     },
     props: {
         visible: { required: true, type: Boolean },
-        deploymentId: { required: true, type: String },
-        deploymentName: { required: true, type: String }
+        elementList: { required: true }
     }
 })
 export default class Modal extends Vue {
     visible: boolean = this.visible;
-    deploymentId: string = this.deploymentId;
-    deploymentName: string = this.deploymentName;
+    // id, tipo, elemento, version
+    elementList: Array<[string, string, string, string]> = this.elementList;
 
     close() {
         this.$emit('close');
     }
-    undeploy() {
-        this.$store.dispatch('undeployDeployment', { 'deploymentId': this.deploymentId });
+    deleteGroup() {
+        // De la lista de elementos únicamente queremos el id
+        let res = [];
+        for (let element in this.elementList) {
+            res.push(this.elementList[element][0]);
+        }
+        this.$store.dispatch('deleteElement', res);
         this.close();
     }
 }
