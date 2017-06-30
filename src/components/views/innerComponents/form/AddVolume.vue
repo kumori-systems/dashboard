@@ -1,20 +1,24 @@
 <template>
     <div>
         <p>NEW VOLUME RESERVARION</p>
-        <p>Prefix:
-            <input v-model="prefix">
-        </p>
-        <p>Number of Chunks
-            <inputnumber v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
-        </p>
-        <p v-for="n in chunkNum" v-bind:key="n">Chunk {{n}}
-            <inputnumber v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber> GB </p>
-        <p>Size: {{totalGB}}GB</p>
-        <button class="button" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
+        <div class="tile is-4">
+            <span>Prefix:</span>
+            <input class="input" v-model="prefix">
+        </div>
+        <div class="tile is-4">
+            <span>Number of Chunks:</span>
+            <inputnumber class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
+        </div>
+        <div class="tile is-4" v-for="n in chunkNum" v-bind:key="n">
+            <span>Chunk {{n}}:</span>
+            <inputnumber class="tile is-2"v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
+            <span>GB</span>
+        </div>
+        <div>Size: {{totalGB}}GB</div>
+        <button class="button is-primary" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
     </div>
 </template>
 <script lang="ts">
-
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import InputNumber from '../input/InputNumber.vue';
@@ -40,11 +44,13 @@ export default class AddVolume extends Vue {
             }
         });
     }
+
     get chunkSize() {
         return (chunkIndex) => {
             return this.size[chunkIndex];
         }
     }
+
     set chunkSize(chunkIndex) {
         (value) => {
             this.size[chunkIndex(1)] = value;

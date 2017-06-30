@@ -1,7 +1,5 @@
 <template>
-    <span>
-        <input class="input" ref="input" v-bind:value="value" type="number" min=1 v-on:input="updateValue($event.target.value)" v-on:focus="selectAll" v-on:blur="formatValue">
-    </span>
+    <input class="input" ref="input" v-bind:value="value" type="number" min=1 v-on:input="updateValue($event.target.value)" v-on:focus="selectAll" v-on:blur="formatValue">
 </template>
 <script lang="ts">
 
@@ -24,7 +22,7 @@ export default class NumberInput extends Vue {
 
 
     updateValue(value: string) {
-        let formattedValue: number = isNaN(Number.parseInt(value.trim()))?1: Number.parseInt(value.trim());
+        let formattedValue: number = isNaN(Number.parseInt(value.trim())) ? 1 : Number.parseInt(value.trim());
         if (formattedValue < 1) formattedValue = 1;
         formattedValue = Math.fround(formattedValue);
         (<HTMLInputElement>this.$refs.input).value = formattedValue.toString();

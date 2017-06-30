@@ -728,7 +728,6 @@ export default {
     };
   },
 
-
   getRuntimeVersionList: function (state, getters) {
     return (owner, runtime, filtro) => {
       let res: Array<string> = [];
@@ -838,6 +837,7 @@ export default {
       return false;
     };
   },
+
   getRuntimeUsedBy: function (state, getters) {
     return (runtimeId) => {
       let res = [];
@@ -848,6 +848,7 @@ export default {
       return res;
     };
   },
+
   getRuntimeOwner: function (state) {
     return (runtimeId) => {
       return runtimeId.split('/')[2];
@@ -873,7 +874,6 @@ export default {
         }
       }
     }
-
     return usedWebdomain;
   },
 
@@ -1137,6 +1137,7 @@ export default {
       }
     };
   },
+  
   getRolUsingDataVolume: function (state, getters) {
     return (dataVolumeId) => {
       let deploymentId = getters.getDeploymentUsingDataVolume(dataVolumeId);
@@ -1147,6 +1148,7 @@ export default {
       }
     };
   },
+
   getNumberOfChunksDataVolume: function (state) {
     return (dataVolumeId) => { return 0; };
   }
