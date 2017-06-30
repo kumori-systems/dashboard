@@ -1,11 +1,10 @@
 <template>
     <div>
-        <p>
-            <input v-model="newWebDomain" placeholder=" New web domain">
-            <button class="button" v-on:click="addWebDomain">add</button>
-        </p>
+        <div class="tile is-4">
+            <input class="input" v-model="newWebDomain" placeholder="New web domain">
+            <button class="button is-primary" v-on:click="addWebDomain">add</button>
+        </div>
         <table class="table">
-    
             <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
                 <th>
                     <a v-bind:href="'http://'+usedWebdomain[1]">
@@ -19,7 +18,7 @@
                     <span class="ON_PROGRESS">in use</span> by {{usedWebdomain[0]}}
                 </th>
                 <th>
-                    <button class="button">
+                    <button class="button is-danger">
                         <i class="fa fa-trash" aria-hidden="true" v-on:click="deleteWebDomain(usedWebdomain)"></i>
                     </button>
                 </th>
@@ -32,7 +31,7 @@
                 </th>
                 <th></th>
                 <th>
-                    <button class="button" v-on:click="deleteWebDomain(freeWebdomain)">
+                    <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                 </th>
@@ -42,11 +41,9 @@
 </template>
 
 <script lang="ts">
-
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, State } from '../../store/classes';
-
 @Component({
     name: 'WebDomains'
 })

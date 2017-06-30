@@ -8,11 +8,12 @@
                 <th>{{dataVolume}}</th>
                 <th>
                     <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
-                    by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</th>
+                    <span>by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</span>
+                </th>
                 <th>{{numberOfChunks(dataVolume)}} chunks</th>
                 <th>
-                    <button class="button fa fa-info" />
-                    <button class="button fa fa-trash" v-on:click="deleteVolume(dataVolume)" />
+                    <button class="button fa fa-info is-info" />
+                    <button class="button fa fa-trash is-danger" v-on:click="deleteVolume(dataVolume)" />
                 </th>
             </tr>
         </table>
