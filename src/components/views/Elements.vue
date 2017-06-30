@@ -27,8 +27,8 @@
                                                 <th>{{version}}</th>
                                                 <th>
                                                     <div v-if="getIsComponentInUse(owner, component, version)">
-                                                        <span class="ON_PROGRESS">in use by</span> service/s:
-                                                        <span v-for="usedBy in getComponentUsedBy(owner, component, version)">{{usedBy}} </span>
+                                                        <div><span class="ON_PROGRESS">in use by service/s:</span></div>
+                                                        <div v-for="usedBy in getComponentUsedBy(owner, component, version)">{{usedBy}} </div>
                                                     </div>
                                                 </th>
                                                 <th>
@@ -60,8 +60,8 @@
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
-                                                    <span class="ON_PROGRESS">in use by</span> deployment/s:
-                                                    <span v-for="usedBy in getServiceUsedBy(owner, service, version)">{{usedBy}} </span>
+                                                    <div><span class="ON_PROGRESS">in use by deployment/s:</span></div>
+                                                    <div v-for="usedBy in getServiceUsedBy(owner, service, version)">{{usedBy}}</div>
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
@@ -104,8 +104,8 @@
                                             <tr v-for="version in runtimeVersionList(owner, runtime)">
                                                 <th>{{version}}</th>
                                                 <th v-if="getIsRuntimeInUse(owner, runtime, version)">
-                                                    <span class="ON_PROGRESS">in use by</span> component/s:
-                                                    <span v-for="usedBy in getRuntimeUsedBy(owner, runtime, version)">{{usedBy}} </span>
+                                                    <div><span class="ON_PROGRESS">in use by component/s:</span></div>
+                                                    <div v-for="usedBy in getRuntimeUsedBy(owner, runtime, version)">{{usedBy}} </div>
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
