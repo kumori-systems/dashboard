@@ -1,13 +1,11 @@
 <template>
     <div>
         <div class="tile">
-            <span class="control has-icon">
+            <span class="control has-icon tile is-4">
                 <input class="input" placeholder="Search" v-model="search">
                 <span class="icon is-small">
                     <i class="fa fa-search"></i>
                 </span>
-            </span>
-            <span>
                 <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
                 <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
             </span>
