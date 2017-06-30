@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="is-child is-pulled-right box deployment-chart">
-                    <chart v-bind:data="deploymentChartData" v-bind:width="600" v-bind:height="300"></chart>
+                    <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
                 </div>
             </div>
             <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
@@ -41,6 +41,7 @@
         </div>
 </template>
 <script lang="ts">
+
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import Moment from 'moment';
@@ -48,6 +49,7 @@ import Moment from 'moment';
 import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
+import ChartOptions from './innerComponents/chart/ChartOptions.js';
 import Undeploy from './innerComponents/modal/Undeploy.vue';
 
 @Component({
@@ -69,6 +71,7 @@ export default class DeploymentItem extends Vue {
     clear: boolean = false;
     showModal: boolean = false;
     modalOkCallback: Function = function () { };
+    chartOptions = ChartOptions;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];

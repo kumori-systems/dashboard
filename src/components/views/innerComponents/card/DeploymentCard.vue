@@ -6,7 +6,6 @@
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
-    
             <p>
                 <u>Service:</u> {{service}}
             </p>
@@ -64,7 +63,6 @@
         <div class="card-footer" v-if="false" />
     </div>
 </template>
-
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';

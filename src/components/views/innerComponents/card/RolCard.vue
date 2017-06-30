@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div class="is-child  box rol-chart">
-                <chart v-bind:data="rolChartData" :width="600" :height="300"></chart>
+                <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" :width="600" :height="300"></chart>
             </div>
         </div>
         <collapse>
@@ -59,6 +59,7 @@ import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from '../chart/Chart.js';
+import ChartOptions from '../chart/ChartOptions.js';
 import { Channel, State, Metrics, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
 import Moment from 'moment';
 
@@ -80,6 +81,7 @@ export default class Card extends Vue {
     deploymentId: string = this.deploymentId;
     rolId: string = this.rolId;
     localNumInstances: number = -1;
+    chartOptions = ChartOptions;
 
 
     mounted() {

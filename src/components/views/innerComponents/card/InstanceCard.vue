@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="is-child is-pulled-right box instance-chart">
-            <chart v-bind:data="instanceChartData" v-bind:width="600" v-bind:height="300"></chart>
+            <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
         </div>
     </div>
 </template>
@@ -26,6 +26,7 @@ import Component from 'vue-class-component';
 import Moment from 'moment';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import Chart from '../chart/Chart';
+import ChartOptions from '../chart/ChartOptions';
 import { State, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
 
 @Component({
@@ -47,6 +48,7 @@ export default class Card extends Vue {
     rolId: string = this.rolId;
     instanceId: string = this.instanceId;
     killInstance: boolean = false;
+    chartOptions = ChartOptions;
 
     mounted() {
         this.$watch('clear', function (value) {
