@@ -8,7 +8,7 @@
                     <button class="button is-primary" v-on:click="numInstances = 1">
                         <i class="fa fa-angle-up"></i>
                     </button>
-                    <button class="button is-primary  is-outlined" v-on:click="numInstances = -1">
+                    <button class="button is-primary is-outlined" v-on:click="numInstances = -1">
                             <i class="fa fa-angle-down"></i>
                     </button>
                 </div>

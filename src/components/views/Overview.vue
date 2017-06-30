@@ -3,9 +3,8 @@
         <router-view v-if="route"></router-view>
         <div v-else>
             <input type="checkbox" id="hideEntryPoints" v-model="hideEntrypoints"></input>
-            <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>
-    
-            <div class="tile is-4 is-vertical" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-bind:class="isEven(index)">
+            <label for="hideEntryPoints" v-on:click="hideEntrypoints(null)"> Hide HTTP entrypoints</label>                
+            <div class="tile is-4" v-for="(deployment, index) in deploymentList" v-bind:key="index">
                 <deployment-card v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
             </div>
         </div>
@@ -53,13 +52,8 @@ export default class Overview extends Vue {
             return this.$store.getters.getIsEntryPoint(deploymentId);
         }
     }
-
-
-    get isEven() {
-        return function (index: number) {
-            if (index % 2 === 0) return 'is-vertical';
-            return '';
-        }
+    isEven(index){
+        return index%2===0;
     }
 }
 </script>

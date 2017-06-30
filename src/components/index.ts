@@ -1,6 +1,6 @@
 // Layouts
 import AppMain from './layout/AppMain.vue';
-import FAB from './layout/FAB.vue';
+import FAB from './layout/fab/FAB.vue';
 import FooterBar from './layout/FooterBar.vue';
 import LevelBar from './layout/LevelBar.vue';
 import NavBar from './layout/NavBar.vue';
