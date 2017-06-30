@@ -2,7 +2,7 @@
     <div class="tile is-horizontal">
         <div class="tile is-vertical">
             <div class="content" id="instancecontent">
-                <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
+                <i class="state" v-bind:class="state" aria-hidden="true"></i>
                 <span class="title">{{instanceId}}</span>
                 <span>{{instanceMem}} MEM</span>
                 <span>{{instanceCPU}} CPU</span>
@@ -58,14 +58,12 @@ export default class Card extends Vue {
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
-            case State.CONNECTED:
-                return 'CONNECTED_COLOR';
+             case State.CONNECTED:
+                return 'fa fa-check-circle';
             case State.DISCONNECTED:
-                return 'DISCONNECTED_COLOR';
-            case State.ON_PROGRESS:
-                return 'ON_PROGRESS_COLOR';
+                return 'fa fa-exclamation-circle';
             default:
-                return '';
+                return 'fa fa-exclamation-triangle';
         }
     }
 
@@ -240,9 +238,47 @@ export default class Card extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+$color_green:#93c47d;
+$color_yellow:#f5d164;
+$color_red:#ff6666;
+$icon_size: 40px;
+$radius: 5px;
 .instance-chart {
     width: 800px;
     height: 400px;
-    margin-right: 10px;
+}
+
+.fa-check-circle {
+    color: $color_green;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+    color: $color_yellow;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+    color: $color_red;
+    font-size: $icon_size;
+}
+
+.card {
+    margin: 10px;
+    padding: 2px;
+    border-radius: $radius;
+}
+
+.card-header {
+    border-radius: $radius;
+}
+
+.card-body {
+    padding: 10px;
+}
+
+a {
+    padding-left: 10px;
 }
 </style>
+

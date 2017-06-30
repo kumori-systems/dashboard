@@ -12,7 +12,7 @@
                     </a>
                 </th>
                 <th>
-                    <i class="fa fa-circle CONNECTED_FONT_COLOR" aria-hidden="true" />
+                    <i class="fa fa-check-circle" aria-hidden="true" />
                 </th>
                 <th>
                     <span class="ON_PROGRESS">in use</span> by {{usedWebdomain[0]}}
@@ -27,7 +27,7 @@
                 <th>{{freeWebdomain}}
                 </th>
                 <th>
-                    <i class="fa fa-circle" v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true" />
+                    <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true" />
                 </th>
                 <th></th>
                 <th>
@@ -65,11 +65,11 @@ export default class WebDomains extends Vue {
         return (webdomain) => {
             switch (this.$store.getters.getWebdomainState(webdomain)) {
                 case State.CONNECTED:
-                    return 'CONNECTED_FONT_COLOR';
+                    return 'fa fa-check-circle';
                 case State.DISCONNECTED:
-                    return 'DISCONNECTED_FONT_COLOR';
+                    return 'fa fa-exclamation-circle';
                 default:
-                    return 'ON_PROGRESS_FONT_COLOR';
+                    return 'fa fa-exclamation-triangle';
             }
         }
     }
@@ -83,3 +83,24 @@ export default class WebDomains extends Vue {
     }
 }
 </script>
+<style lang="scss" scoped>
+$color_green:#93c47d;
+$color_yellow:#f5d164;
+$color_red:#ff6666;
+$icon_size: 20px;
+
+.fa-check-circle {
+    color: $color_green;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+    color: $color_yellow;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+    color: $color_red;
+    font-size: $icon_size;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
     <div>
         <span class="title">{{deploymentName}}</span>
-        <i class="fa fa-circle" v-bind:class="state" aria-hidden="true" />
+        <i v-bind:class="state" aria-hidden="true" />
         <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
         <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
         <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
@@ -77,7 +77,7 @@ export default class DeploymentItem extends Vue {
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case State.CONNECTED:
-                return 'CONNECTED_COLOR';
+                return 'fa fa-check-circle';
             case State.DISCONNECTED:
                 return 'DISCONNECTED_COLOR';
             case State.ON_PROGRESS:
@@ -163,10 +163,29 @@ export default class DeploymentItem extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
+$color_green:#93c47d;
+$color_yellow:#f5d164;
+$color_red:#ff6666;
+$icon_size: 40px;
 .deployment-chart {
     width: 800px;
     height: 400px;
-    margin-right: 10px;
+    margin-right: 40px;
+}
+
+.fa-check-circle {
+    color: $color_green;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+    color: $color_yellow;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+    color: $color_red;
+    font-size: $icon_size;
 }
 </style>

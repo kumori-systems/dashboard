@@ -9,7 +9,7 @@
                     <button class="fa fa-angle-down button is-small is-primary is-outlined" v-on:click="numInstances = -1" />
                 </div>
             </div>
-            <i class="fa fa-circle" v-bind:class="state" aria-hidden="true"></i>
+            <i class="state" v-bind:class="state" aria-hidden="true"></i>
         </div>
         <div class="card-body tile inner-content">
             <div class="tile">
@@ -40,7 +40,7 @@
                     </div>
                 </div>
             </div>
-            <div class="is-child is-pulled-right box rol-chart">
+            <div class="is-child  box rol-chart">
                 <chart v-bind:data="rolChartData" :width="600" :height="300"></chart>
             </div>
         </div>
@@ -95,13 +95,11 @@ export default class Card extends Vue {
     get state(): string {
         switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
             case State.CONNECTED:
-                return 'CONNECTED_COLOR';
+                return 'fa fa-check-circle';
             case State.DISCONNECTED:
-                return 'DISCONNECTED_COLOR';
-            case State.ON_PROGRESS:
-                return 'ON_PROGRESS_COLOR';
+                return 'fa fa-exclamation-circle';
             default:
-                return '';
+                return 'fa fa-exclamation-triangle';
         }
     }
     get numInstances(): number {
@@ -165,19 +163,35 @@ export default class Card extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
-$icon_size: 90px;
+$icon_size: 40px;
 $radius: 5px;
+
 .rol-chart {
     width: 800px;
     height: 400px;
-    margin-right: 10px;
+    margin-right: 30px;
 }
 
-.fa-circle {
+.fa-check-circle {
+    color: $color_green;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-triangle {
+    color: $color_yellow;
+    font-size: $icon_size;
+}
+
+.fa-exclamation-circle {
+    color: $color_red;
+    font-size: $icon_size;
+}
+
+.state {
     padding: 10px;
 }
 
@@ -189,10 +203,6 @@ $radius: 5px;
 
 .card-header {
     border-radius: $radius;
-}
-
-.box {
-    background: whitesmoke;
 }
 
 .card-body {
