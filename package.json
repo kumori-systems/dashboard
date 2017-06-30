@@ -19,6 +19,8 @@
     "vue-router": "^2.2.0"
   },
   "devDependencies": {
+    "acs-client": "git+ssh://git@gitlab.com:ECloud/acs-client.git#ticket782",
+    "admission-client": "git+ssh://git@gitlab.com:ECloud/admission-client.git#ticket782",
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.10",
