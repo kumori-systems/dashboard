@@ -1,11 +1,11 @@
 import { State, Deployment, Link, DeploymentRol, Runtime, Channel, NormalMetrics, EntryPointMetrics, Instance, Resource, Component, Service, ServiceRol } from './../classes';
 import moment from 'moment';
+
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
-    const promesa = new Promise(function (resolve, reject) {
+    return new Promise<{ response: string, body: string }>(function (resolve, reject) {
         resolve({ response: 'respuesta', body: 'cuerpo' });
     });
-    return promesa;
 }
 
 let stampStateExample = require('./tc_state_example.json');
@@ -561,7 +561,7 @@ export function getMetrics() {
                 }
             }
         }
-        
+
         return { 'entryPointMetrics': entryPointMetrics, 'normalMetrics': normalMetrics };
     });
 }
