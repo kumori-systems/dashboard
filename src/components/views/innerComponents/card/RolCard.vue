@@ -5,8 +5,12 @@
             <span class="box">{{numInstances}}</span>
             <div>
                 <div class="tile is-vertical">
-                    <button class="fa fa-angle-up button is-small is-primary is-outlined" v-on:click="numInstances = 1" />
-                    <button class="fa fa-angle-down button is-small is-primary is-outlined" v-on:click="numInstances = -1" />
+                    <button class="button is-primary" v-on:click="numInstances = 1">
+                        <i class="fa fa-angle-up"></i>
+                    </button>
+                    <button class="button is-primary  is-outlined" v-on:click="numInstances = -1">
+                            <i class="fa fa-angle-down"></i>
+                    </button>
                 </div>
             </div>
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
@@ -172,6 +176,14 @@ $color_red:#ff6666;
 $icon_size: 40px;
 $radius: 5px;
 
+button {
+    height: 30px;
+    width : 40px;
+}
+button i{
+    font-size:20px;
+}
+
 .rol-chart {
     width: 800px;
     height: 400px;
@@ -210,7 +222,6 @@ $radius: 5px;
 .card-body {
     padding: 10px;
 }
-
 a {
     padding-left: 10px;
 }
