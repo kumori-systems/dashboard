@@ -17,7 +17,7 @@
 import anime from 'animejs'
 export default {
   props: {
-    selected: Boolean
+    selected: { default: false, type: Boolean }
   },
 
   data() {
@@ -52,9 +52,7 @@ export default {
 
   methods: {
     toggle() {
-      if ((this.isActived = !this.isActived)) {
-        this.$emit('open', this.index)
-      }
+      this.isActived = !this.isActived;
     },
 
     getAnime(targets) {
