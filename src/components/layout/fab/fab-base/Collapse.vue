@@ -7,7 +7,7 @@
 <script>
 export default {
   computed: {
-    $collapseItems () {
+    $collapseItems() {
       return this.$children.filter(child => child._isCollapseItem)
     }
   }
@@ -15,10 +15,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .collapse {
-    margin-top: 10vh;
-    margin-left: 70vw;
-    position: fixed;
-    z-index: 1;
+  margin-top: 10vh;
+  margin-left: 70vw;
+  position: fixed;
+  z-index: 1;
+  border-radius: 25px;
 }
 
 .collapse.is-fullwidth {

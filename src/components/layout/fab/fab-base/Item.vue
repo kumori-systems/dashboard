@@ -1,59 +1,43 @@
 <template>
   <div class="card collapse-item" :class="{ 'is-fullwidth': $parent.isFullwidth, 'is-active': isActived }">
-        <header class="card-header touchable" role="tab" :aria-expanded="selected ? 'true' : 'fase'" @click="toggle">
-        <i class="card-header-icon fa fa-plus push-right"></i>
+    <header class="card-header touchable button is-primary" role="tab" :aria-expanded="selected ? 'true' : 'fase'" @click="toggle">
+      <i class="card-header-icon fa fa-plus"></i>
     </header>
-     <transition
-      name="collapsed-fade"
-      :css="false"
-      appear
-      @before-appear="before"
-      @appear="enter"
-      @appear-cancel="cancel"
-      @before-enter="before"
-      @enter="enter"
-      @enter-cancel="cancel"
-      @leave="leave"
-      @leave-cancel="cancel"
-    >
-    <div class="card-content" v-show="isActived">
-      <div class="card-content-box">
-        <slot></slot>
+    <transition name="collapsed-fade" :css="false" appear @before-appear="before" @appear="enter" @appear-cancel="cancel" @before-enter="before" @enter="enter" @enter-cancel="cancel" @leave="leave" @leave-cancel="cancel">
+      <div class="card-content" v-show="isActived">
+        <div class="card-content-box">
+          <slot></slot>
+        </div>
       </div>
-    </div>
-  </transition>   
-</div>
+    </transition>
+  </div>
 </template>
 
 <script>
 import anime from 'animejs'
 export default {
   props: {
-    selected: Boolean,
-    title: {
-      type: String,
-      required: true
-    }
+    selected: Boolean
   },
 
-  data () {
+  data() {
     return {
       isActived: this.selected
     }
   },
 
-  created () {
+  created() {
     this._isCollapseItem = true
   },
 
-  mounted () {
+  mounted() {
     this.$on('open', this.$parent.openByIndex)
     if (this.isActived) {
       this.$emit('open', this.index)
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     if (this.anime && this.targets) {
       anime.remove(this.targets)
     }
@@ -61,33 +45,33 @@ export default {
   },
 
   computed: {
-    index () {
+    index() {
       return this.$parent.$collapseItems.indexOf(this)
     }
   },
 
   methods: {
-    toggle () {
+    toggle() {
       if ((this.isActived = !this.isActived)) {
         this.$emit('open', this.index)
       }
     },
 
-    getAnime (targets) {
+    getAnime(targets) {
       if (this.anime) return this.anime
       return this.anime = anime({ targets })
     },
 
-    cancel () {
+    cancel() {
       this.anime.pause()
     },
 
-    before (targets) {
+    before(targets) {
       if (!this.targets) this.targets = targets
       targets.removeAttribute('style')
     },
 
-    enter (targets, done) {
+    enter(targets, done) {
       const height = targets.scrollHeight
       targets.style.height = 0
       targets.style.opacity = 0
@@ -97,14 +81,14 @@ export default {
         easing: 'easeOutExpo',
         opacity: [0, 1],
         height,
-        complete () {
+        complete() {
           targets.removeAttribute('style')
           done()
         }
       })
     },
 
-    leave (targets, complete) {
+    leave(targets, complete) {
       this.getAnime(targets).play({
         targets,
         duration: 377,
@@ -118,13 +102,19 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .collapse-item {
+  border-radius: 25px;
+
   .card-header {
     cursor: pointer;
+    border-radius: 20px;
+    font-size: 2ex;
+    padding: 0px;
   }
   .card-header-icon {
     transition: transform .377s ease;
+    border-radius: 25px;
   }
   .card-content {
     padding-top: 0;
@@ -137,8 +127,8 @@ export default {
   }
 
   &.is-active {
-    > .card-header {
-      > .card-header-icon {
+    >.card-header {
+      >.card-header-icon {
         transform: rotate(90deg);
       }
     }
