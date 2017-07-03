@@ -51,7 +51,7 @@ routes.push({
 });
 
 routes.push({
-  name: 'New Element',
+  name: 'Upload bundle',
   path: '/newBundle',
   meta: { expanded: false },
   component: NewBundle

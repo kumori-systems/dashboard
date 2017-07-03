@@ -1,5 +1,5 @@
 <template>
-    <div class="inner-content">
+    <form>
         <div>
             <span class="select">
                 <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
@@ -11,7 +11,7 @@
             <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
             <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
         </div>
-        <div class="inner-content">
+        <div>
             <div>
                 <input class="checkbox" type="checkbox" id="acceptTLSSSL" v-model="acceptTLSSSL"></input>
                 <label for="acceptTLSSSL"> Accept TLS/SSL</label>
@@ -27,17 +27,25 @@
                 <label for="requireClientCertificates"> Require Client Certificates</label>
             </div>
         </div>
-        <div>
-            Instances {{instances}}
-            <button class="button is-small fa fa-angle-up" v-on:click="instances += 1"></button>
-            <button class="button is-small fa fa-angle-down" v-on:click="instances>1? instances--:1"></button>
+        <div class="tile">
+            <span class="name">Instances {{instances}}</span>
+            <div>
+                <div class="tile is-vertical">
+                    <button class="button is-small fa fa-angle-up" v-on:click="instances += 1"></button>
+                    <button class="button is-small fa fa-angle-down" v-on:click="instances>1? instances--:1"></button>
+                </div>
+            </div>
         </div>
-        <div>
-            Resilence {{resilence}}
-            <button class="button is-small fa fa-angle-up" v-on:click="resilence += 1"></button>
-            <button class="button is-small fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
+        <div class="tile">
+            <span class="name">Resilence {{resilence}}</span>
+            <div>
+                <div class="tile is-vertical">
+                    <button class="button is-small fa fa-angle-up" v-on:click="resilence += 1"></button>
+                    <button class="button is-small fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
+                </div>
+            </div>
         </div>
-    </div>
+    </form>
 </template>
 <script lang="ts">
 // TODO: No se pueden listar dominios que ya estén en uso
@@ -83,3 +91,11 @@ export default class NewHTTPEntrypoint extends Vue {
     }
 }
 </script>
+<style lang="scss">
+#acceptTLSSSL {
+    margin-top: 1em;
+}
+.name{
+    padding-top: 1em;
+}
+</style>

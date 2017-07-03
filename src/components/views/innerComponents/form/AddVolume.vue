@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <form>
         <p>NEW VOLUME RESERVARION</p>
         <div class="tile is-4">
             <span>Prefix:</span>
@@ -16,7 +16,7 @@
         </div>
         <div>Size: {{totalGB}}GB</div>
         <button class="button is-primary" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
-    </div>
+    </form>
 </template>
 <script lang="ts">
 import Vue from 'vue';

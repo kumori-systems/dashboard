@@ -1,14 +1,10 @@
 <template>
-    <div>
-        <input type="file" v-on:change="onFileChange">
-        <!--<input type="file" name="bundle" id="file">-->
-        </input>
+    <form>
+        <input type="file" class="box" v-on:change="onFileChange">
         <div>
-            <button v-on:click="addElement">Add new Element</button>
-            <!--<input type="submit" class="button">-->
-            </input>
+            <button class="button is-primary" v-on:click="addElement">Upload bundle</button>
         </div>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
@@ -21,39 +17,21 @@ import { FabElement } from '../../../../store/classes';
     name: 'NewBundle'
 })
 export default class NewBundle extends Vue {
-    bundle: string = '';
+    fileList: FileList;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
-    // Escuchamos cambios en el fichero que se quiere cargar
     onFileChange(e) {
-        console.log('El tipo de e es: ' + typeof e);
-        let files = e.target.files || e.dataTransfer.files;
-        if (!files.length)
-            return;
-        this.loadFile(files[0]);
-    }
-
-    loadFile(file) {
-        let reader: FileReader = new FileReader();
-        let vm: NewBundle = this;
-
-        reader.onload = (e) => {
-            vm.bundle = (<any>e.target).result;
-        };
-        reader.readAsDataURL(file);
+        this.fileList = (<HTMLInputElement>e.target).files || (<DataTransfer>e.dataTransfer).files;
     }
 
     addElement() {
-        if (this.bundle !== null && this.bundle.length > 0) {
-            this.$store.dispatch('addNewElement', this.bundle);
+        if (this.fileList) {
+            this.$store.dispatch('addNewElement', this.fileList);
         }
     }
 }
 </script>
-<style lang="scss">
-
-</style>
