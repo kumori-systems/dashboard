@@ -1,6 +1,7 @@
 <template>
     <div class="card">
         <div class="card-header">
+            <i class="state" v-bind:class="state" aria-hidden="true"></i>
             <span class="title">{{rolId}}</span>
             <span class="box">{{numInstances}}</span>
             <div>
@@ -9,11 +10,10 @@
                         <i class="fa fa-angle-up"></i>
                     </button>
                     <button class="button is-primary is-outlined" v-on:click="numInstances = -1">
-                            <i class="fa fa-angle-down"></i>
+                        <i class="fa fa-angle-down"></i>
                     </button>
                 </div>
             </div>
-            <i class="state" v-bind:class="state" aria-hidden="true"></i>
         </div>
         <div class="card-body tile inner-content">
             <div class="tile">
@@ -178,10 +178,11 @@ $radius: 5px;
 
 button {
     height: 30px;
-    width : 40px;
+    width: 40px;
 }
-button i{
-    font-size:20px;
+
+button i {
+    font-size: 20px;
 }
 
 .rol-chart {
@@ -219,9 +220,18 @@ button i{
     border-radius: $radius;
 }
 
+.card-header .title {
+    padding-top: 10px;
+    padding-right:5px;
+}
+.card-header .box{
+    margin-bottom: 0px;
+}
+
 .card-body {
     padding: 10px;
 }
+
 a {
     padding-left: 10px;
 }
