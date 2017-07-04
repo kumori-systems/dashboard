@@ -1,5 +1,5 @@
 <template>
-    <form>
+    <div>
         <div>
             <span class="select">
                 <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
@@ -45,7 +45,7 @@
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </template>
 <script lang="ts">
 // TODO: No se pueden listar dominios que ya estén en uso

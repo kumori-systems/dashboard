@@ -1,10 +1,10 @@
 <template>
-    <form>
+    <div>
         <input type="file" class="box" v-on:change="onFileChange">
         <div>
             <button class="button is-primary" v-on:click="addElement">Upload bundle</button>
         </div>
-    </form>
+    </div>
 </template>
 
 <script lang="ts">
