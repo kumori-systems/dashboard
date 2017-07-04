@@ -1,8 +1,23 @@
 import * as connection from './proxy';
 import { DeploymentItem } from './../components';
 import { Deployment } from './classes';
-
 export default {
+    login({ commit }, { email, password }) {
+        connection.login(email, password).then(
+            function ({ state, user, token }) {
+                if (state === connection.CONNECTION_STATE.SUCCESS) {
+                    console.info('Sucessfully authenticated as ' + user);
+                    commit('login', { 'user': user, 'token': token });
+                }
+                else if (state === connection.CONNECTION_STATE.FAIL) {
+                    console.info('Authentication fail');
+                    commit('authError', true);
+                }
+            }
+        ).catch(function (error) {
+            console.error('Error in authenticatin process: ' + error);
+        });
+    },
     getStampState({ commit, dispatch }) {
         connection.getStampState().then(function (stampState) {
             // Guardamos los deployments en el estado

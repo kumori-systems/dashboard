@@ -1,8 +1,11 @@
 import { Deployment, DeploymentRol, Component, Service, Metrics, NormalMetrics, EntryPointMetrics, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
 export default {
   /* GENERAL */
-  getUsername: function (state): string {
-    return state.username;
+  getUser: function (state): string {
+    return state.user;
+  },
+  authError: function (state): boolean {
+    return state.authError;
   },
   sidebar: function (state) {
     return state.sidebar;
@@ -1137,7 +1140,7 @@ export default {
       }
     };
   },
-  
+
   getRolUsingDataVolume: function (state, getters) {
     return (dataVolumeId) => {
       let deploymentId = getters.getDeploymentUsingDataVolume(dataVolumeId);

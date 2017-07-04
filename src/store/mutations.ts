@@ -1,5 +1,12 @@
 import { Deployment, NormalMetrics, EntryPointMetrics } from './classes';
 export default {
+  login(state, { user, token }) {
+    state.user = user;
+    state.token = token;
+  },
+  authError(state, value) {
+    state.authError = value;
+  },
   setStampState(state, stampState) {
     // actualizamos el estado del stamp
     state.deploymentList = { ...state.deploymentList, ...stampState.deploymentList };

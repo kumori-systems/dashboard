@@ -42,17 +42,5 @@ export default class NavBar extends Vue {
 
         return res;
     }
-
-    // computed
-    get codelink() {
-        if (this.$route.meta && this.$route.meta.link) {
-            return 'https://github.com/vue-bulma/vue-admin/blob/master/client/views/' + this.$route.meta.link
-        } else {
-            return null
-        }
-    }
-    get name() {
-        return this.$route.name
-    }
 }
 </script>

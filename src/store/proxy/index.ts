@@ -1,11 +1,26 @@
 import { State, Deployment, Link, DeploymentRol, Runtime, Channel, NormalMetrics, EntryPointMetrics, Instance, Resource, Component, Service, ServiceRol } from './../classes';
 import moment from 'moment';
 
+export enum CONNECTION_STATE { SUCCESS, ON_PROGRESS, FAIL };
+
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
     return new Promise<{ response: string, body: string }>(function (resolve, reject) {
         resolve({ response: 'respuesta', body: 'cuerpo' });
     });
+}
+export function login(email: string, password: string) {
+    return auxFunction().then(
+        function ({ response, body }) {
+            let rightEmail = 'dashboard@iti.es';
+            let rightPassword = 'dashboard';
+            if (email === rightEmail && password === rightPassword) {
+                return { state: CONNECTION_STATE.SUCCESS, user: 'eslap.cloud', token: 'AAAAAAAAAA' };
+            }
+            console.log('email: ' + rightEmail + '\npassword: ' + rightPassword);
+            return { state: CONNECTION_STATE.FAIL, user: null, token: null };
+        }
+    );
 }
 
 let stampStateExample = require('./tc_state_example.json');

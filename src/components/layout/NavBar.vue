@@ -3,14 +3,14 @@
         <nav class="nav">
             <div class="nav-left">
                 <a class="nav-item hero-brand" href="/">
-                    <img src="../../assets/logo_m_text.png" />
+                    <img src="../../assets/logo_m_text.png" alt="logo"></img>
                 </a>
             </div>
             <div class="nav-center">
             </div>
             <div class="nav-right">
-                <i class="fa fa-bell" aria-hidden="true" />
-                <p>{{username}}</p>
+                <i class="fa fa-bell" aria-hidden="true"></i>
+                <p>{{user}}</p>
             </div>
         </nav>
     </section>
@@ -32,8 +32,8 @@ import Tooltip from 'vue-bulma-tooltip'
 })
 export default class NavBar extends Vue {
 
-    get username() {
-        return this.$store.getters.getUsername;
+    get user() {
+        return this.$store.getters.getUser;
     }
 }
 </script>

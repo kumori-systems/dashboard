@@ -1,11 +1,28 @@
 <template>
 	<div id="app">
-		<nprogress-container></nprogress-container>
-		<nav-bar v-bind:show="true"></nav-bar>
-		<fab></fab>
-		<side-bar></side-bar>
-		<app-main></app-main>
-		<footer-bar></footer-bar>
+		<div v-if="user !== null">
+			<nprogress-container></nprogress-container>
+			<nav-bar v-bind:show="true"></nav-bar>
+			<fab></fab>
+			<side-bar></side-bar>
+			<app-main></app-main>
+			<footer-bar></footer-bar>
+		</div>
+		<div v-else>
+			<div class="tile is-4 login">
+				<div class="box">
+					The access to this preview requires authentication
+					<form>
+						<div class="box tile is-vertical is-parent">
+							<input class="input is-small is-child" type="email" id="email" v-model="email" placeholder="Email">
+							<input class="input is-small is-child" type="password" id="password" v-model="password" placeholder="Password">
+							<input type="submit" class="button" value="Login" v-on:click="login">
+							<span v-if="authError" class="invalid">Invalid username or password</span>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 <script lang='ts'>
@@ -27,7 +44,8 @@ import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components'
 	}
 })
 export default class App extends Vue {
-	name: string = 'App';
+	email: string = null;
+	password: string = null;
 
 	beforeMount(): void {
 		const { body } = document
@@ -46,7 +64,20 @@ export default class App extends Vue {
 		window.addEventListener('resize', handler);
 
 		// Enviamos una petición para obtener los deployments
-		this.$store.dispatch('getStampState', { vueInstanceReference: this });
+
+	}
+
+	get user() {
+		let res = this.$store.getters.getUser;
+		if (res !== null) this.$store.dispatch('getStampState', { vueInstanceReference: this });
+		return res;
+	}
+	get authError() {
+		return this.$store.getters.authError;
+	}
+
+	login() {
+		this.$store.dispatch('login', { 'email': this.email, 'password': this.password });
 	}
 }
 </script>
@@ -94,6 +125,10 @@ $state_icon_size: 50px;
 	color: $color_red;
 }
 
+.invalid {
+	color: $color_red;
+}
+
 .DISCONNECTED {
 	background: $color_red;
 }
@@ -118,5 +153,11 @@ $state_icon_size: 50px;
 
 .fa-hdd-o {
 	font-size: 30px;
+}
+
+.login {
+	position: absolute;
+	top: 40%;
+	left: 40%;
 }
 </style>

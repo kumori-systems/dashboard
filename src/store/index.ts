@@ -100,7 +100,9 @@ export default new Vuex.Store({
         'certList': ['cert1', 'cert2', 'cert3'],
         'fabElements': {},
         'selectedService': null,
-        'username': 'eslap.cloud'
+        'user': null,
+        'token': null,
+        'authError': false
     },
     'getters': getters,
     'mutations': mutations,
