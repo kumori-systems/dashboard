@@ -49,8 +49,6 @@ export default {
     state.temporaryState = {};
   },
   addMetrics(state, { entryPointMetrics, normalMetrics }) {
-    console.log('EntryPointMetrics: ' + JSON.stringify(entryPointMetrics));
-    console.log('NormalMetrics: ' + JSON.stringify(normalMetrics));
     for (let deploymentId in entryPointMetrics) {
       for (let rolId in entryPointMetrics[deploymentId]) {
         for (let instanceId in entryPointMetrics[deploymentId][rolId]) {

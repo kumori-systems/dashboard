@@ -20,25 +20,24 @@
                     <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
                         Connected to:
                         <div v-for="proChannel in serviceProvideChannels" class="inner-content">
-                            {{proChannel.myChannel}} -> {{proChannel.toDeployment}} ({{proChannel.toChannel}})
+                            {{proChannel.myChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
                         </div>
                         <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
-                            {{reqChannel.myChannel}}
-                            <- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
+                            {{reqChannel.myChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                     </p>
-                    </div>
-                </div>
-                <div class="is-child is-pulled-right box deployment-chart">
-                    <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
                 </div>
             </div>
-            <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
-            <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
-                This action will
-                <strong>UNDEPLOY</strong> {{deploymentName}} and you will
-                <strong>loose all data</strong>
-            </undeploy>
+            <div class="is-child is-pulled-right box deployment-chart">
+                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+            </div>
         </div>
+        <rol-card v-for="deploymentRol in deploymentRoles" v-bind:key="deploymentRol" v-bind:deploymentId="deploymentId" v-bind:rolId="deploymentRol" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false" />
+        <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
+            This action will
+            <strong>UNDEPLOY</strong> {{deploymentName}} and you will
+            <strong>loose all data</strong>
+        </undeploy>
+    </div>
 </template>
 <script lang="ts">
 
@@ -58,13 +57,9 @@ import Undeploy from './innerComponents/modal/Undeploy.vue';
         'rol-card': RolCard,
         'chart': Chart,
         'undeploy': Undeploy
-    },
-    props: {
-        deploymentRoute: { type: String }
     }
 })
 export default class DeploymentItem extends Vue {
-    deploymentRoute: string = this.deploymentRoute;
     rolNumInstances: { [rolId: string]: number } = {};
     instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
     haveChanges: boolean = false;
@@ -78,52 +73,58 @@ export default class DeploymentItem extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get state(): string {
+        console.log('Vamos a obtener el estado');
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case State.CONNECTED:
                 return 'fa fa-check-circle';
             case State.DISCONNECTED:
                 return 'DISCONNECTED_COLOR';
-            case State.ON_PROGRESS:
-                return 'ON_PROGRESS_COLOR';
             default:
-                return '';
+                return 'ON_PROGRESS_COLOR';
         }
     }
 
     get deploymentId() {
-        // Gracias a la ruta podemos obtener el id del deployment con el que estamos tratando
-        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.deploymentRoute);
-
+        console.log('Vamos a obtener el id');
+        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
     }
     get website(): string {
+        console.log('Vamos a obtener el website');
         return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
 
     get deploymentName(): string {
+        console.log('Vamos a obtener el deployment Name');
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
     get isEntrypoint() {
+        console.log('Vamos a preguntar is entrypoint');
         return this.$store.getters.getIsEntryPoint(this.deploymentId);
     }
 
     get deploymentChartData(): any {
+        console.log('vamos a obtener el chartData');
         return this.$store.getters.getDeploymentChartData(this.deploymentId);
     }
 
     get deploymentRoles(): Array<string> {
+        console.log('Vamos a obtener los roles');
         return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
 
     /* Rol atributes */
     get deploymentService(): string {
+        console.log('Vamos a obtener el servicio');
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
     get serviceProvideChannels(): Array<Channel> {
+        console.log('Vamos a obtener los provideChannels');
         return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
 
     get serviceRequireChannels(): Array<Channel> {
+        console.log('vamos a obtener los requiredChannels');
         return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
     }
 

@@ -145,7 +145,6 @@ export class NormalMetrics extends Metrics {
     }
 
     concat(m: NormalMetrics) {
-        console.log('Cuando empieza el concat: ' + JSON.stringify(m));
         super.concat(m);
         this.cpu = this.cpu.concat(m.cpu);
         this.mem = this.mem.concat(m.mem);
@@ -153,7 +152,6 @@ export class NormalMetrics extends Metrics {
         this.net_out = this.net_out.concat(m.net_out);
         this.rpm = this.rpm.concat(m.rpm);
         this.res = this.res.concat(m.res);
-        console.log('Cuando finaliza el concat: ' + JSON.stringify(this));
     }
 
     groupValues(m: NormalMetrics) {

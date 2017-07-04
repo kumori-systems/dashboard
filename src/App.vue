@@ -12,14 +12,14 @@
 			<div class="tile is-4 login">
 				<div class="box">
 					The access to this preview requires authentication
-					<form>
+					<div>
 						<div class="box tile is-vertical is-parent">
-							<input class="input is-small is-child" type="email" id="email" v-model="email" placeholder="Email">
-							<input class="input is-small is-child" type="password" id="password" v-model="password" placeholder="Password">
-							<input type="submit" class="button" value="Login" v-on:click="login">
+							<input class="input is-small is-child" type="email" v-model="email" placeholder="Email">
+							<input class="input is-small is-child" type="password" v-model="password" placeholder="Password">
+							<input type="submit" class="button" v-on:click="onSubmit">
 							<span v-if="authError" class="invalid">Invalid username or password</span>
 						</div>
-					</form>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -46,6 +46,10 @@ import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components'
 export default class App extends Vue {
 	email: string = null;
 	password: string = null;
+
+	onSubmit() {
+		this.$store.dispatch('login', { 'email': this.email, 'password': this.password });
+	}
 
 	beforeMount(): void {
 		const { body } = document
@@ -74,10 +78,6 @@ export default class App extends Vue {
 	}
 	get authError() {
 		return this.$store.getters.authError;
-	}
-
-	login() {
-		this.$store.dispatch('login', { 'email': this.email, 'password': this.password });
 	}
 }
 </script>

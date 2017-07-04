@@ -1,17 +1,11 @@
 <template>
-    <div>
-        <nav class="level app-levelbar">
-            <div class="level-left">
-                <div class="level-item">
-                    <h3 class="subtitle is-5">
-                        <strong>
-                            <breadcrumb v-bind:list="list"></breadcrumb>
-                        </strong>
-                    </h3>
-                </div>
-            </div>
-        </nav>
-    </div>
+    <nav class="level app-levelbar">
+        <h3 class="title is-5">
+            <strong>
+                <breadcrumb v-bind:list="list"></breadcrumb>
+            </strong>
+        </h3>
+    </nav>
 </template>
 
 <script lang="ts">
@@ -23,23 +17,23 @@ import Breadcrumb from 'vue-bulma-breadcrumb/src/Breadcrumb.vue'
     name: 'navbar',
     components: {
         'breadcrumb': Breadcrumb
-    },
-    props: {
-        show: Boolean
     }
 })
 export default class NavBar extends Vue {
-    get list() {
-        let res: any = this.$route.matched.filter(item => item.name);
-        let parents = res[0].path.split('/');
-
-        // Ignoramos el primer y el último elemento
-        // primer elemento = ''
-        // último elemento es el elemento que tenemos
-        for (let i = parents.length - 2; i > 0; i--) {
-            res = [{ name: parents[i], path: '/' + parents[i] }].concat(res);
+    get deploymentId(): string {
+        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
+    }
+    get deploymentName(): string {
+        return this.$store.getters.getDeploymentName(this.deploymentId);
+    }
+    get list(): Array<{ name: string, path: string }> {
+        let res: Array<{ name: string, path: string }> = [];
+        if (this.$route.path.startsWith('/deployment/')) {
+            res.push(this.$store.getters.menuElement('/'));
+            res.push({ name: this.deploymentName, path: this.$route.path });
+        } else {
+            res.push(this.$store.getters.menuElement(this.$route.path))
         }
-
         return res;
     }
 }

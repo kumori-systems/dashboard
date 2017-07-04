@@ -1,6 +1,7 @@
 import * as connection from './proxy';
 import { DeploymentItem } from './../components';
 import { Deployment } from './classes';
+import urlencode from 'urlencode';
 export default {
     login({ commit }, { email, password }) {
         connection.login(email, password).then(
@@ -15,7 +16,7 @@ export default {
                 }
             }
         ).catch(function (error) {
-            console.error('Error in authenticatin process: ' + error);
+            console.error('Error in authentication process: ' + error);
         });
     },
     getStampState({ commit, dispatch }) {
@@ -26,24 +27,15 @@ export default {
             let res = [];
             let path: string;
             for (let key in stampState.deploymentList) {
-                path = key;
-                let index = path.indexOf('/');
-                while (index !== -1) {
-                    path = path.replace('/', '\\');
-                    index = path.indexOf('/');
-                }
                 res.push({
                     'name': stampState.deploymentList[key].name,
-                    'path': 'deployments\\' + path,
-                    'meta': {
-                        'id': key
-                    }
+                    'path': '/deployment/' + urlencode(key)
                 });
             }
             commit('addDeploymentMenuItem', { 'deploymentList': res });
             dispatch('getMetrics');
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error manejando los deployments: ' + error);
+            console.error('Error handling deployments: ' + error);
         });
     },
     getRegisteredElements({ commit }) {
@@ -51,7 +43,7 @@ export default {
             // Guardamos los elementos
             commit('setRegisteredElements', { registeredElements });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error Obteniendo elementos registrados: ' + error);
+            console.error('Error obtaining registered elements: ' + error);
         });
     },
     getManifest({ commit }, { uri }) {
@@ -59,14 +51,14 @@ export default {
             // Guardamos los elementos
             commit('setElementData', { element });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error Obteniendo elementos registrados: ' + error);
+            console.error('Error obtaining registered elements: ' + error);
         });
     },
     getMetrics({ commit }) {
         connection.getMetrics().then(function (metrics) {
             commit('addMetrics', metrics);
         }).catch(function (error) {
-            console.error('Error obteniendo las métricas: ' + error);
+            console.error('Error obtaining metrics: ' + error);
         });
     },
     setFabElements({ commit }, { fabElementsList }) {

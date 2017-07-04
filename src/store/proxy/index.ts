@@ -341,7 +341,7 @@ export function getStampState() {
                     parsedBody.tcState.linkedServices[linkIndex].channel2,
                 ));
         }
-        console.info('Links in the state: ' + JSON.stringify(linkList));
+        console.info('NEW linklist created: ' + JSON.stringify(linkList));
 
         // Gestión de errores de conexión
         // TODO: hay que comprobar los valores de cuando se lanza un error y de cuándo no se lanzan

@@ -1,4 +1,5 @@
 import { Deployment, DeploymentRol, Component, Service, Metrics, NormalMetrics, EntryPointMetrics, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
+import urlencode from 'urlencode';
 export default {
   /* GENERAL */
   getUser: function (state): string {
@@ -9,6 +10,12 @@ export default {
   },
   sidebar: function (state) {
     return state.sidebar;
+  },
+  menuElement: function (state) {
+    return function (path) {
+      let menuItem = (<Array<any>>state.menuItemList).find(elemen => elemen.path === path);
+      return { name: menuItem.name, path: menuItem.path };
+    };
   },
   getFabElements: function (state): Array<FabElement> {
     return state.fabElements;
@@ -33,38 +40,25 @@ export default {
   },
   getDeploymentIdFromDeploymentRoute: function (state): Function {
     return function (deploymentRoute: string): string {
-      // Tenemos que obtener el id a partir de la ruta, esto es
-      // Entrar en el menú, mirar qué elemento está utilizando esta ruta y pasar el nombre
-      let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
-
-      // Eliminamos el primer \ y cambiamos el resto por /
-      while (deploymentRoute.indexOf('\\') !== -1) {
-        deploymentRoute = deploymentRoute.replace('\\', '/');
-      }
-      deploymentRoute = deploymentRoute.substring(1, deploymentRoute.length);
-
-      // Tenemos que deshacer el cambio para poder reconocer el id
-      return overview.children.find(menuItem => {
-        return menuItem.meta.id === deploymentRoute;
-      }).meta.id;
+      return urlencode.decode(deploymentRoute.split('/')[2]);
     };
   },
   getDeploymentPath: function (state): Function {
     return function (deploymentId: String): string {
       // Obtenemos la vista que contiene los deployment == OVERVIEW
-      let overview = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
-      return overview.children.find(deploymentMenuItem => {
-        return deploymentMenuItem.meta.id === deploymentId;
-      }).path;
+      return '/deployment/' + urlencode(deploymentId);
     };
   },
   getDeploymentName: function (state): Function {
     return function (deploymentId: string): string {
-      return (<Deployment>state.deploymentList[deploymentId]).name;
+      if ((<Deployment>state.deploymentList[deploymentId]))
+        return (<Deployment>state.deploymentList[deploymentId]).name;
+      return '';
     };
   },
   getDeploymentService: function (state): Function {
     return function (deploymentId: string): string {
+      if (state.deploymentList[deploymentId] === undefined) return null;
       return (<Deployment>state.deploymentList[deploymentId]).serviceId;
     };
   },
@@ -82,6 +76,7 @@ export default {
   },
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): Array<string> {
+      if (state.deploymentList[deploymentId] === undefined) return [];
       let website: Array<string> = (<Deployment>state.deploymentList[deploymentId]).website;
       // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
       // lincado y sea un entrypoint (tenga un website != null)
@@ -104,11 +99,11 @@ export default {
   getDeploymentState: function (state, getters): Function {
     return function (deploymentId: string): StateType {
       let onProgress = false;
+      if (state.deploymentList[deploymentId] === undefined) return StateType.ON_PROGRESS;
       for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
         switch (getters.getDeploymentRolState(deploymentId, rolId)) {
           case StateType.DISCONNECTED: return StateType.DISCONNECTED;
-          case StateType.ON_PROGRESS: onProgress = true; break;
-          default:
+          case StateType.ON_PROGRESS: onProgress = true;
         }
       }
       if (onProgress === true) return StateType.ON_PROGRESS;
@@ -122,6 +117,7 @@ export default {
   */
   getDeploymentProvideChannels: function (state) {
     return (deploymentId: string) => {
+      if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let res = [];
       for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
@@ -162,6 +158,7 @@ export default {
   },
   getDeploymentRequireChannels: function (state) {
     return (deploymentId: string) => {
+      if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let res = [];
       for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
@@ -237,7 +234,7 @@ export default {
   },
   getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
-
+      if (state.deploymentList[deploymentId] === undefined) return null;
       if (getters.getIsEntryPoint(deploymentId)) {
         let res: EntryPointMetrics = new EntryPointMetrics();
         for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
@@ -405,6 +402,7 @@ export default {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
       let deployment: Deployment = state.deploymentList[deploymentId];
+      if (deployment === undefined) return [];
       for (let rolId in deployment.roles) {
         res.push(rolId);
       }
