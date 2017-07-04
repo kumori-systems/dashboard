@@ -31,6 +31,14 @@ export default class NavBar extends Vue {
         if (this.$route.path.startsWith('/deployment/')) {
             res.push(this.$store.getters.menuElement('/'));
             res.push({ name: this.deploymentName, path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newHTTPEntrypoint')) {
+            res.push({ name: 'New HTTP Entrypoint', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newWebServiceAdvanced')) {
+            res.push({ name: 'New Webservice (Advanced)', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newWebService')) {
+            res.push({ name: 'New Webservice', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newBundle')) {
+            res.push({ name: 'New Bundle', path: this.$route.path });
         } else {
             res.push(this.$store.getters.menuElement(this.$route.path))
         }
