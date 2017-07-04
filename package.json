@@ -19,11 +19,14 @@
     "vue-router": "^2.2.0"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.8",
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.10",
+    "@types/q": "^1.0.2",
+    "@types/request": "0.0.45",
     "@types/sinon": "^1.16.36",
-    "admission-client": "git+ssh://git@gitlab.com:ECloud/admission-client.git",
+    "admission-client": "git+ssh://git@gitlab.com:ECloud/admission-client.git#ticket820",
     "animate.css": "^3.5.2",
     "autoprefixer": "^6.7.2",
     "bulma": "^0.4.0",

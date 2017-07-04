@@ -38,3 +38,35 @@ No sé cómo sacar el número de chunks utilizados. De hecho, agradecería una d
 INFORMACIÓN VOLUMENES
 ---------------------------------------------------------
 Queda pendiente obtener la información de los volúmenes, para overview el porcentaje de uso y para la vista 'data volumes'
+
+
+
+
+
+
+
+
+-----------------------------------------------------------
+
+Por fin he encontrado el tipo de objeto que estoy utilizando(FileList) y al final se resuelve bastante sencillo.
+
+Mirando en la documentación de vue-resource, he encontrado el ejemplo perfecto para nuestro caso:
+
+var formData = new FormData();
+let fileInput = fileList[0]; //Contando que únicamente añadiremos 1 bundle
+
+formData.append('pic', fileInput, 'mypic.jpg'); // formData.append(name, value, filename);
+
+this.$http.post('/someUrl', formData).then(response => {
+  // success callback
+}, response => {
+  // error callback
+});
+
+Ejemplo(https://github.com/pagekit/vue-resource/blob/develop/docs/recipes.md#forms)
+FileList(https://developer.mozilla.org/en/docs/Web/API/FileList)
+FormData(https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+
+
+* Lo he comprobado todo para asegurarme que no te topas con dependencias de vue y que los tipos de los argumentos son acordes.
+** tipos de value: Blob | File | USVString
