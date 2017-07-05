@@ -16,7 +16,7 @@
 						<div class="box tile is-vertical is-parent">
 							<input class="input is-small is-child" type="email" v-model="email" placeholder="Email">
 							<input class="input is-small is-child" type="password" v-model="password" placeholder="Password">
-							<input type="submit" class="button" v-on:click="onSubmit">
+							<button class="button" v-on:click="onSubmit">Login</button>
 							<span v-if="authError" class="invalid">Invalid username or password</span>
 						</div>
 					</div>
