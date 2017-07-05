@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="help-view">
         Help
     </div>
 </template>
@@ -11,7 +11,7 @@ import Component from 'vue-class-component';
 import { FabElement } from '../../store/classes';
 
 @Component({
-    name: 'Help'
+    name: 'help'
 })
 export default class Help extends Vue {
     mounted() {

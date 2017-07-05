@@ -1,8 +1,8 @@
 {
   "name": "dashboard",
   "version": "1.0.0",
-  "description": "A Vue.js project",
-  "author": "paul van bladel <paul.vanbladel@gmail.com>",
+  "description": "Single web page para Ecloud",
+  "author": "Óscar Muñoz Garrigós <omunoz@iti.es>",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
@@ -13,12 +13,10 @@
     "unit-debug": "karma start test/unit/karma.conf.js --browsers=Chrome --auto-watch --no-colors",
     "lint": "tslint src/**/*.ts"
   },
-  "dependencies": {
+  "devDependencies": {
     "babel-runtime": "^6.23.0",
     "vue": "^2.2.2",
-    "vue-router": "^2.2.0"
-  },
-  "devDependencies": {
+    "vue-router": "^2.2.0",
     "@types/bluebird": "^3.5.8",
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.40",
