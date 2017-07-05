@@ -16,18 +16,20 @@
         </p>
         <collapse accordion is-fullwidth>
             <collapse-item title="Components" v-if="componentOwnerList.length>0">
-                <div v-for="owner in componentOwnerList">
+                <div v-for="owner in componentOwnerList" v-if="ownerComponentList(owner).length>0 && (showPublicElements || owner === user)">
                     <collapse accordion is-fullwidth>
                         <collapse-item v-bind:title="owner">
-                            <div v-for="component in ownerComponentList(owner)">
+                            <div v-for="component in ownerComponentList(owner)" v-if="componentVersionList(owner,component).length>0">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="component" v-if="componentVersionList(owner,component).length>0">
+                                    <collapse-item v-bind:title="component">
                                         <table>
                                             <tr v-for="version in componentVersionList(owner, component)">
                                                 <th>{{version}}</th>
                                                 <th>
                                                     <div v-if="getIsComponentInUse(owner, component, version)">
-                                                        <div><span class="ON_PROGRESS">in use by service/s:</span></div>
+                                                        <div>
+                                                            <span class="ON_PROGRESS">in use by service/s:</span>
+                                                        </div>
                                                         <div v-for="usedBy in getComponentUsedBy(owner, component, version)">{{usedBy}} </div>
                                                     </div>
                                                 </th>
@@ -60,7 +62,9 @@
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
-                                                    <div><span class="ON_PROGRESS">in use by deployment/s:</span></div>
+                                                    <div>
+                                                        <span class="ON_PROGRESS">in use by deployment/s:</span>
+                                                    </div>
                                                     <div v-for="usedBy in getServiceUsedBy(owner, service, version)">{{usedBy}}</div>
                                                 </th>
                                                 <th>
@@ -104,7 +108,9 @@
                                             <tr v-for="version in runtimeVersionList(owner, runtime)">
                                                 <th>{{version}}</th>
                                                 <th v-if="getIsRuntimeInUse(owner, runtime, version)">
-                                                    <div><span class="ON_PROGRESS">in use by component/s:</span></div>
+                                                    <div>
+                                                        <span class="ON_PROGRESS">in use by component/s:</span>
+                                                    </div>
                                                     <div v-for="usedBy in getRuntimeUsedBy(owner, runtime, version)">{{usedBy}} </div>
                                                 </th>
                                                 <th>
@@ -177,7 +183,7 @@ export default class Elements extends Vue {
     }
 
     get user() {
-        return this.$store.getters.getUsername;
+        return this.$store.getters.getUser;
     }
     get someoneSelected() {
         if (this.selectedComponents.length > 0 || this.selectedServices.length > 0 || this.selectedRuntimes.length > 0)
@@ -191,12 +197,12 @@ export default class Elements extends Vue {
     }
 
     get componentOwnerList() {
-        return this.$store.getters.getComponentOwnerList(this.showPublicElements);
+        return this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerComponentList() {
         return (owner) => {
-            return this.$store.getters.getOwnerComponentList(owner);
+            return this.$store.getters.getOwnerComponentList(owner, this.search);
         }
     }
 
@@ -207,12 +213,12 @@ export default class Elements extends Vue {
     }
 
     get serviceOwnerList() {
-        return this.$store.getters.getServiceOwnerList(this.showPublicElements);
+        return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerServiceList() {
         return (owner) => {
-            return this.$store.getters.getOwnerServiceList(owner);
+            return this.$store.getters.getOwnerServiceList(owner, this.search);
         }
     }
 
@@ -278,12 +284,12 @@ export default class Elements extends Vue {
     }
 
     get runtimeOwnerList() {
-        return this.$store.getters.getRuntimeOwnerList(this.showPublicElements);
+        return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerRuntimeList() {
         return (owner) => {
-            return this.$store.getters.getOwnerRuntimeList(owner);
+            return this.$store.getters.getOwnerRuntimeList(owner, this.search);
         }
     }
     get getRuntimeVersion() {

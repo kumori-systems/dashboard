@@ -566,28 +566,27 @@ export default {
   },
 
   getComponentOwnerList: function (state, getters) {
-    return (showPublicElements: boolean): Array<string> => {
-      // ShowPublicElements marca si enseñamos elementos que no son nuestros
-      let user;
-      if (!showPublicElements) {
-        user = state.username;
-      }
-
+    return (showPublicElements: boolean, filter): Array<string> => {
       let res: Array<string> = [];
-      let owner: string = null;
+      let owner: string;
       for (let componentIndex in state.componentList) {
         owner = getters.getComponentOwner(componentIndex);
-        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-          if (user === undefined || user === owner)
-            res.push(owner);
+
+        if (
+          (showPublicElements || getters.getUser === owner) // Cumple las condiciones
+          && ((filter && filter !== null && filter.length > 0 && componentIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
+        ) {
+          res.push(owner);
         }
       }
+
       return res;
     };
   },
 
   getOwnerComponentList: function (state, getters) {
-    return (owner) => {
+    return (owner, filter) => {
       // Buscamos todos los componentes del owner
       let res: Array<string> = []; let compName;
       for (let componentId in state.componentList) {
@@ -595,7 +594,11 @@ export default {
           // Si el componente ya esta no lo añadimos
           compName = getters.getComponentName(componentId);
           if (res.findIndex(comp => { return comp === compName; }) === -1) {
-            res.push(compName);
+            if (filter !== null && filter.length > 0) {
+              if (componentId.indexOf(filter) !== -1) {
+                res.push(compName);
+              }
+            } else { res.push(compName); }
           }
         }
       }
@@ -672,20 +675,16 @@ export default {
    * Devolvemos una lista de servicios web disponibles para el usuario
    */
   getServiceOwnerList: function (state, getters) {
-    return (showPublicElements: boolean): Array<string> => {
-      // ShowPublicElements marca si enseñamos elementos que no son nuestros
-      let user;
-      if (!showPublicElements) {
-        user = state.username;
-      }
-
+    return (showPublicElements: boolean, filter: string): Array<string> => {
       let res: Array<string> = [];
-      let owner: string = null;
+      let owner: string;
       for (let serviceIndex in state.serviceList) {
         owner = getters.getServiceOwner(serviceIndex);
-        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-          if (user === undefined || user === owner)
-            res.push(owner);
+        if ((showPublicElements || getters.getUser === owner) // Cumple las condiciones
+          && ((filter && filter !== null && filter.length > 0 && serviceIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
+        ) {
+          res.push(owner);
         }
       }
       return res;
@@ -693,16 +692,17 @@ export default {
   },
 
   getOwnerServiceList: function (state, getters) {
-    return (owner) => {
+    return (owner, filter) => {
       // Buscamos todos los servicios del owner
-      let res: Array<string> = []; let serviceName;
+      let res: Array<string> = [];
+      let serviceName;
       for (let serviceId in state.serviceList) {
-        if (getters.getServiceOwner(serviceId) === owner) {
-          // Si el servicio ya esta no lo añadimos
-          serviceName = getters.getServiceName(serviceId);
-          if (res.findIndex(serv => { return serv === serviceName; }) === -1) {
-            res.push(serviceName);
-          }
+        serviceName = getters.getServiceName(serviceId);
+
+        if (getters.getServiceOwner(serviceId) === owner
+          && ((filter && filter !== null && filter.length > 0 && serviceId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && res.findIndex(serv => { return serv === serviceName; }) === -1) {
+          res.push(serviceName);
         }
       }
       return res;
@@ -772,37 +772,34 @@ export default {
    * Devolvemos una lista de runtimes disponibles para el usuario
    */
   getRuntimeOwnerList: function (state, getters) {
-    return (showPublicElements: boolean): Array<string> => {
+    return (showPublicElements: boolean, filter: string): Array<string> => {
       // ShowPublicElements marca si enseñamos elementos que no son nuestros
-      let user;
-      if (!showPublicElements) {
-        user = state.username;
-      }
 
       let res: Array<string> = [];
       let owner: string = null;
       for (let runtimeIndex in state.runtimeList) {
         owner = getters.getRuntimeOwner(runtimeIndex);
 
-        if (res.findIndex(menuItem => { return menuItem === owner; }) === -1) {
-          if (user === undefined || user === owner)
-            res.push(owner);
+        if ((showPublicElements || getters.getUser === owner)
+          && ((filter && filter !== null && filter.length > 0 && runtimeIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(menuItem => { return menuItem === owner; }) === -1)) {
+          res.push(owner);
         }
       }
       return res;
     };
   },
   getOwnerRuntimeList: function (state, getters) {
-    return (owner) => {
+    return (owner, filter) => {
       // Buscamos todos los servicios del owner
-      let res: Array<string> = []; let runtimeName;
+      let res: Array<string> = [];
+      let runtimeName;
       for (let runtimeId in state.runtimeList) {
-        if (getters.getRuntimeOwner(runtimeId) === owner) {
-          // Si el servicio ya esta no lo añadimos
-          runtimeName = getters.getRuntimeName(runtimeId);
-          if (res.findIndex(serv => { return serv === runtimeName; }) === -1) {
-            res.push(runtimeName);
-          }
+        runtimeName = getters.getRuntimeName(runtimeId);
+        if ((getters.getRuntimeOwner(runtimeId) === owner)
+          && ((filter && filter !== null && filter.length > 0 && runtimeId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(serv => { return serv === runtimeName; }) === -1)) {
+          res.push(runtimeName);
         }
       }
       return res;

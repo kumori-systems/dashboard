@@ -85,46 +85,37 @@ export default class DeploymentItem extends Vue {
     }
 
     get deploymentId() {
-        console.log('Vamos a obtener el id');
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
     }
     get website(): string {
-        console.log('Vamos a obtener el website');
         return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
 
     get deploymentName(): string {
-        console.log('Vamos a obtener el deployment Name');
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
 
     get isEntrypoint() {
-        console.log('Vamos a preguntar is entrypoint');
         return this.$store.getters.getIsEntryPoint(this.deploymentId);
     }
 
     get deploymentChartData(): any {
-        console.log('vamos a obtener el chartData');
         return this.$store.getters.getDeploymentChartData(this.deploymentId);
     }
 
     get deploymentRoles(): Array<string> {
-        console.log('Vamos a obtener los roles');
         return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
 
     /* Rol atributes */
     get deploymentService(): string {
-        console.log('Vamos a obtener el servicio');
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
     get serviceProvideChannels(): Array<Channel> {
-        console.log('Vamos a obtener los provideChannels');
         return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
 
     get serviceRequireChannels(): Array<Channel> {
-        console.log('vamos a obtener los requiredChannels');
         return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
     }
 
