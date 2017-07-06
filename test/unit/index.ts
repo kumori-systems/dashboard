@@ -12,5 +12,6 @@ testsContext.keys().forEach(testsContext);
 // require all src files except main.js for coverage.
 // you can also change this to match only the subset of files that
 // you want coverage for.
-const  srcContext = (<any>require).context('../../src', true, /^\.\/(?!main(\.ts)?$)/);
-srcContext.keys().forEach(srcContext);
+
+// const  srcContext = (<any>require).context('../../src', true, /^\.\/(?!main(\.ts)?$)/);
+// srcContext.keys().forEach(srcContext);

@@ -1,6 +1,6 @@
 <template>
-    <div class="help-view">
-        Help
+    <div class="help">
+        <h1>Help</h1>
     </div>
 </template>
 
