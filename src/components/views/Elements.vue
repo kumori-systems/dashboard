@@ -400,13 +400,3 @@ export default class Elements extends Vue {
 
 }
 </script>
-<style lang="scss" scoped>
-/*
-input[type=checkbox] {
-    -ms-transform: scale(2); // IE
-    -moz-transform: scale(2); // Firefox
-    -webkit-transform: scale(2); // Safari and Chrome
-    -o-transform: scale(2); // Opera
-}
-*/
-</style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="datavolumes-view">
         <div v-if="addVolume">
             <add-volume></add-volume>
         </div>
@@ -19,9 +19,7 @@
         </table>
     </div>
 </template>
-
 <script lang="ts">
-
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../store/classes';
@@ -36,8 +34,8 @@ import AddVolume from './innerComponents/form/AddVolume.vue';
 export default class DataVolumes extends Vue {
     addVolume: boolean = true;
     mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+        // let fabElementsList: Array<FabElement> = [];
+        // this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get dataVolumeList() {
         return this.$store.getters.getDataVolumesList;

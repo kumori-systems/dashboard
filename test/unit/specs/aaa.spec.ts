@@ -3,8 +3,8 @@
  * If this file works, the config for running karma alone in this environment has been well done.
  */
 import { assert } from 'chai';
-describe('Trivial Test Cases', () => {
-    it('this should be ok', () => {
+describe('Testing karma\'s environment', () => {
+    it('environment', () => {
         const actualValue = true;
         const expectedValue = true;
         const failMessage = 'Message explaining the fail';

@@ -24,6 +24,7 @@
     "admission-client": "git+ssh://git@gitlab.com:ECloud/admission-client.git#ticket820",
     "animate.css": "^3.5.2",
     "autoprefixer": "^6.7.2",
+    "babel-polyfill": "^6.23.0",
     "babel-runtime": "^6.23.0",
     "bulma": "^0.4.0",
     "chai": "^3.5.0",
