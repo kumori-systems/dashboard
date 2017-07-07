@@ -2,13 +2,14 @@
 Dashboard single web page for Kumori Ecloud.
 
 ## Development Setup
-`code`
+
+``` bash
 git clone git@gitlab.com:ECloud/dashboard.git;
 cd dashboard;
 git checkout ticket741;
 npm install;
 npm run dev;
-`code`
+```
 
 The default browser should be automatically prompt.
 
