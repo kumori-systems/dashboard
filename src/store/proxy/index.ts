@@ -1,55 +1,7 @@
 import { State, Deployment, Link, DeploymentRol, Runtime, Channel, NormalMetrics, EntryPointMetrics, Instance, Resource, Component, Service, ServiceRol } from './../classes';
 import moment from 'moment';
-import { AcsClient as EcloudAcsClient } from 'acs-client';
-import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, Deployment as EcloudDployment, EcloudEventType } from 'admission-client/dist/src';
 
 export enum CONNECTION_STATE { SUCCESS, ON_PROGRESS, FAIL };
-
-let admission: EcloudAdmissionClient;
-let acs: EcloudAcsClient;
-const userid: string = 'josep';
-const username: string = userid + '@iti.es';
-const password: string = userid;
-let deployments: number = 0;
-let registries: number = 0;
-
-const ACS_URI: string = 'http://acs.argo.kumori.cloud/acs';
-const ADMISSION_URI: string = 'http://admission.argo.kumori.cloud/admission';
-const BUNDLE: string = '/workspaces/slap/git/examples/calculator_1_0_0/deploy_bundle.zip';
-const SERVICE: string = 'eslap://sampleservicecalculator/services/sampleservicecalculator/1_0_0';
-const COMPONENT: string = 'eslap://sampleservicecalculator/components/cfe/1_0_0';
-
-function init() {
-
-    console.log('Llamamos a la función init del proxy');
-    admission = new EcloudAdmissionClient(ADMISSION_URI);
-    console.log('Admission inicializado');
-    console.log('Empezamos a definir listeners de admission');
-    admission.onConnected(() => {
-        console.log('===========================CONNECT***************');
-    });
-    admission.onEcloudEvent((event: EcloudEvent) => {
-        console.log('=========================== Event ' + event.strType + '/' +
-            event.strName + ' ***************');
-        if (event.type === EcloudEventType.metrics) { return; }
-        console.log(JSON.stringify(event, null, 2));
-    });
-    admission.onError((reason: any) => {
-        console.log('===========================ERROR***************');
-        console.log(reason);
-    });
-    console.log('finalización de la definición de los listeners');
-    // console.log('Devolvemos admission.init() cuando admission vale: ' + JSON.stringify(admission));
-    
-    return admission.init().then(() => {
-        console.log('Finalización de la promesa de init de admission');
-        return admission.findDeployments();
-    }).then((arg) => {
-        console.log('AdmissionAAAAAAAAAAAAAAAAAAAAA nos devuelve: ' + JSON.stringify(arg));
-        return { response: 'respuesta', body: 'cuerpo' };
-    });
-}
-
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<{ response: string, body: string }> {
@@ -80,7 +32,8 @@ let stampStateExample = require('./tc_state_example.json');
  * Devolvemos un objeto que contenga las dos listas 
  */
 export function getStampState() {
-    return init().then(function ({ response, body }) {
+
+    return auxFunction().then(function ({ response, body }) {
         let cont = 0; // Contador de depliegues de un servicio (para el nombre del deployment)
         let parsedBody = stampStateExample;
         let deploymentList: { [deploymentId: string]: Deployment } = {};
