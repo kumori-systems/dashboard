@@ -174,11 +174,45 @@ export class NormalMetrics extends Metrics {
     }
 }
 
+export class Arrangement {
+    minInstances: number;
+    maxInstances: number;
+    cpu: number;
+    memory: number;
+    bandwith: number;
+    failureZones: number;
+    constructor(minInstances, maxInstances, cpu, memory, bandwith, failureZones) {
+        this.minInstances = minInstances;
+        this.maxInstances = maxInstances;
+        this.cpu = cpu;
+        this.memory = memory;
+        this.bandwith = bandwith;
+        this.failureZones = failureZones;
+    }
+}
+
+
 export class Instance {
+
+    cnid: string;
+    publicIp: string;
+    privateIp: string;
+    arrangement: Arrangement;
+    volumes: { [key: string]: string; };
+    ports: { [key: string]: string; };
     state: State;
     metrics: Metrics;
-    constructor(state: boolean) {
-        switch (state) {
+
+    constructor(cnid: string, publicIp: string, privateIp: string, arrangement: Arrangement, volumes?: { [key: string]: string; }, ports?: { [key: string]: string; }) {
+        this.cnid = cnid;
+        this.publicIp = publicIp;
+        this.privateIp = privateIp;
+        this.arrangement = arrangement;
+        this.volumes = volumes;
+        this.ports = ports;
+    }
+    setState(connected: boolean) {
+        switch (connected) {
             case true:
                 this.state = State.CONNECTED;
                 break;
@@ -227,7 +261,6 @@ export class Link {
 }
 
 export class DeploymentRol {
-    instances: number;
     cpu: number;
     memory: number;
     ioperf: number;
@@ -235,8 +268,7 @@ export class DeploymentRol {
     bandwidth: number;
     resilence: number;
     instanceList: { [instanceId: string]: Instance };
-    constructor(instances: number, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilence: number, instanceList: { [instanceId: string]: Instance }) {
-        this.instances = instances;
+    constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilence: number, instanceList: { [instanceId: string]: Instance }) {
         this.cpu = cpu;
         this.memory = memory;
         this.ioperf = ioperf;
@@ -244,6 +276,14 @@ export class DeploymentRol {
         this.bandwidth = bandwidth;
         this.resilence = resilence;
         this.instanceList = instanceList;
+    };
+
+    instances = () => {
+        let counter: number = 0;
+        for (let key in this.instanceList) {
+            counter++;
+        }
+        return counter;
     }
 }
 

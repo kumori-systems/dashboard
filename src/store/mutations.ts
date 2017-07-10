@@ -16,6 +16,9 @@ export default {
     state.resourceList = { ...state.resourceList, ...stampState.resourceList };
     state.runtimeList = { ...state.runtimeList, ...stampState.runtimeList };
   },
+  setDeploymentList(state, deploymentList) {
+    state.deploymentList = { ...state.deploymentList, ...deploymentList };
+  },
   setRegisteredElements(state, { registeredElements }) {
     // actualizamos la lista de elementos registrados
     state.registeredElements = registeredElements;
@@ -27,7 +30,7 @@ export default {
   setFabElements(state, { fabElementsList }) {
     state.fabElements = fabElementsList;
   },
-  addDeploymentMenuItem(state, { deploymentList }) {
+  addDeploymentMenuItem(state, deploymentList) {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
 

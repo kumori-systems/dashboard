@@ -4,7 +4,7 @@
       <li v-for="menuItem in menuItems" v-bind:key="menuItem">
         <router-link v-bind:to="menuItem.path" v-on:click.native="onClick(menuItem)">
           {{ menuItem.name }}
-          <span class="icon is-small is-angle fa" v-if="menuItem.children">
+          <span class="icon is-small is-angle fa" v-if="menuItem.children && menuItem.children.length > 0">
             <i v-if="menuItem.meta.expanded" class="fa-angle-down"></i>
             <i v-else class="fa-angle-right"></i>
           </span>

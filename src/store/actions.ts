@@ -3,39 +3,29 @@ import { DeploymentItem } from './../components';
 import { Deployment } from './classes';
 import urlencode from 'urlencode';
 export default {
-    login({ commit }, { email, password }) {
-        connection.login(email, password).then(
-            function ({ state, user, token }) {
-                if (state === connection.CONNECTION_STATE.SUCCESS) {
-                    console.info('Sucessfully authenticated as ' + user);
-                    commit('login', { 'user': user, 'token': token });
-                }
-                else if (state === connection.CONNECTION_STATE.FAIL) {
-                    console.info('Authentication fail');
-                    commit('authError', true);
-                }
-            }
-        ).catch(function (error) {
-            console.error('Error in authentication process: ' + error);
+    init({ commit, dispatch }, { username, password }) {
+        connection.login(username, password).then(() => {
+            commit('login', username);
+        }).catch((error) => {
+            commit('authError', true);
+            console.error('Error authenticating the user', error);
         });
     },
-    getStampState({ commit, dispatch }) {
-        connection.getStampState().then(function (stampState) {
-            // Guardamos los deployments en el estado
-            commit('setStampState', stampState);
+    getDeploymentList({ commit, dispatch }) {
+        connection.getDeploymentList().then((deploymentList) => {
+            commit('setDeploymentList', deploymentList);
             // añadimos cada deployment como un deploymentMenuItem
             let res = [];
-            let path: string;
-            for (let key in stampState.deploymentList) {
+            for (let key in deploymentList) {
                 res.push({
-                    'name': stampState.deploymentList[key].name,
+                    'name': deploymentList[key].name,
                     'path': '/deployment/' + urlencode(key)
                 });
             }
-            commit('addDeploymentMenuItem', { 'deploymentList': res });
+            commit('addDeploymentMenuItem', res);
             dispatch('getMetrics');
-        }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error handling deployments: ' + error);
+        }).catch(function (error) {
+            console.error('Error managing deployments: ' + error);
         });
     },
     getRegisteredElements({ commit }) {

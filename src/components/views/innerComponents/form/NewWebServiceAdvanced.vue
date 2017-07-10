@@ -100,7 +100,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, DeploymentRol, Resource } from '../../../../store/classes';
+import { FabElement, Deployment,Instance, DeploymentRol, Resource } from '../../../../store/classes';
 import InputNumber from '../input/InputNumber.vue';
 
 @Component({
@@ -220,20 +220,24 @@ export default class NewWebServiceAdvanced extends Vue {
         }
 
         let roles = {};
-
+        let instances;
         for (let rolIndex in this.serviceRolList) {
+            
+            instances = {};
+            for(let counter=0; counter< this.rolInstances[rolIndex];counter++){
+                instances[counter] = new Instance(null,null,null, null);
+            }
+
             roles[this.serviceRolList[rolIndex]] = new DeploymentRol(
-                this.rolInstances[rolIndex],
                 this.rolCPU[rolIndex],
                 this.rolMem[rolIndex],
                 0, //ioperf
                 false,//iopsensitive
                 this.rolNet[rolIndex],
                 this.rolResilence[rolIndex],
-                {}
+                instances
             );
         }
-
 
         let website: Array<string> = [];
         this.$store.dispatch('createNewDeployment', {
@@ -251,8 +255,6 @@ export default class NewWebServiceAdvanced extends Vue {
     updateInputValue(emitedArguments) {
         let numRol: number, propertyType: string, newValue: number;
         [numRol, propertyType, newValue] = emitedArguments;
-        console.log('RECIBIMOS: ' + numRol + ' ' + propertyType + ' ' + newValue);
-        console.log('El tipo de newValue es: ' + typeof newValue);
         switch (propertyType) {
             case 'CPU':
                 this.rolCPU[numRol] = newValue

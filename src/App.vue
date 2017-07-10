@@ -14,7 +14,7 @@
 					The access to this preview requires authentication
 					<div>
 						<div class="box tile is-vertical is-parent">
-							<input class="input is-small is-child" type="email" v-model="email" placeholder="Email">
+							<input class="input is-small is-child" type="text" v-model="username" placeholder="Username">
 							<input class="input is-small is-child" type="password" v-model="password" placeholder="Password">
 							<button class="button" v-on:click="onSubmit">Login</button>
 							<span v-if="authError" class="invalid">Invalid username or password</span>
@@ -44,11 +44,11 @@ import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components'
 	}
 })
 export default class App extends Vue {
-	email: string = null;
+	username: string = null;
 	password: string = null;
 
 	onSubmit() {
-		this.$store.dispatch('login', { 'email': this.email, 'password': this.password });
+		this.$store.dispatch('init', { 'username': this.username, 'password': this.password });
 	}
 
 	beforeMount(): void {
@@ -72,9 +72,7 @@ export default class App extends Vue {
 	}
 
 	get user() {
-		let res = this.$store.getters.getUser;
-		if (res !== null) this.$store.dispatch('getStampState', { vueInstanceReference: this });
-		return res;
+		return this.$store.getters.getUser;
 	}
 	get authError() {
 		return this.$store.getters.authError;
