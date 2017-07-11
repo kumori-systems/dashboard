@@ -1,8 +1,7 @@
 import { Deployment, NormalMetrics, EntryPointMetrics } from './classes';
 export default {
-  login(state, { user, token }) {
+  login(state, user) {
     state.user = user;
-    state.token = token;
   },
   authError(state, value) {
     state.authError = value;
@@ -19,9 +18,14 @@ export default {
   setDeploymentList(state, deploymentList) {
     state.deploymentList = { ...state.deploymentList, ...deploymentList };
   },
-  setRegisteredElements(state, { registeredElements }) {
-    // actualizamos la lista de elementos registrados
-    state.registeredElements = registeredElements;
+  addComponent(state, { id, component }) {
+    state.componentList[id] = component;
+  },
+  setRegisteredElements(state, { runtimes, components, services, resources }) {
+    state.runtimeList = { ...state.runtimesList, ...runtimes };
+    state.componentList = { ...state.componentList, ...components };
+    state.serviceList = { ...state.serviceList, ...services };
+    state.resourceList = { ...state.resourceList, ...resources };
   },
   setElementData(state, { element }) {
     let [elementId, elementData] = element;

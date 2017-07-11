@@ -14,6 +14,7 @@
             <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
             <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         </p>
+        
         <collapse accordion is-fullwidth>
             <collapse-item title="Components" v-if="componentOwnerList.length>0">
                 <div v-for="owner in componentOwnerList" v-if="ownerComponentList(owner).length>0 && (showPublicElements || owner === user)">
@@ -21,7 +22,7 @@
                         <collapse-item v-bind:title="owner">
                             <div v-for="component in ownerComponentList(owner)" v-if="componentVersionList(owner,component).length>0">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="component">
+                                    <collapse-item v-bind:title="component" v-on:open="loadInfo('component', owner, component)">
                                         <table>
                                             <tr v-for="version in componentVersionList(owner, component)">
                                                 <th>{{version}}</th>
@@ -57,7 +58,7 @@
                         <collapse-item v-bind:title="owner" v-if="ownerServiceList(owner).length>0">
                             <div v-for="service in ownerServiceList(owner)">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0">
+                                    <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0" v-on:open="loadInfo('service', owner, service)">
                                         <table>
                                             <tr v-for="version in serviceVersionList(owner, service)">
                                                 <th>{{version}}</th>
@@ -71,7 +72,7 @@
                                                     <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <!-- Dependiendo de si el servicio es entrypoint o no, el botón nos redirigirá a un sitio u a otro -->
+                                                    
                                                     <router-link v-if="selectedServiceIsInbound(getServiceId(owner, service, version))" v-bind:to="'newHTTPEntrypoint'">
                                                         <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
@@ -82,7 +83,7 @@
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
-                                                    <!-- fin redirección -->
+                                                    
                                                     <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
@@ -103,7 +104,7 @@
                         <collapse-item v-bind:title="owner">
                             <div v-for="runtime in ownerRuntimeList(owner)">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0">
+                                    <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0" v-on:open="loadInfo('runtime', owner, runtime)">
                                         <table>
                                             <tr v-for="version in runtimeVersionList(owner, runtime)">
                                                 <th>{{version}}</th>
@@ -132,6 +133,7 @@
                 </div>
             </collapse-item>
         </collapse>
+        
         <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
         <info v-bind:visible="infoIsVisible" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="infoIsVisible=false"></info>
         <delete-group v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group>
@@ -175,6 +177,9 @@ export default class Elements extends Vue {
     // id, tipo, elemento, version
     modalElementList: Array<[string, string, string, string]> = [];
 
+    created(){
+        this.$store.dispatch('getElementList');
+    }
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -190,138 +195,196 @@ export default class Elements extends Vue {
             return true;
         return false;
     }
+
     get getComponentId() {
         return (owner, component, version) => {
-            return this.$store.getters.getComponentId(owner, component, version);
+            let res = this.$store.getters.getComponentId(owner, component, version);
+            console.log('La id del componente es: ',res);
+            return res;
         }
     }
 
     get componentOwnerList() {
-        return this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
+        let res = this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
+        console.log('componentOwnerList: ', res);
+        return res;
     }
 
     get ownerComponentList() {
         return (owner) => {
-            return this.$store.getters.getOwnerComponentList(owner, this.search);
+            let res = this.$store.getters.getOwnerComponentList(owner, this.search);
+            console.log('ownerComponentList', res);
+            return res;
         }
     }
 
     get componentVersionList() {
         return (owner, component) => {
-            return this.$store.getters.getComponentVersionList(owner, component, this.search);
+            let res = this.$store.getters.getComponentVersionList(owner, component, this.search);
+            console.log('componentVersionList', res);
+            return res;
         }
     }
 
     get serviceOwnerList() {
-        return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
+        let res = this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
+        console.log('serviceOwnerList', res);
+        return res;
     }
 
     get ownerServiceList() {
         return (owner) => {
-            return this.$store.getters.getOwnerServiceList(owner, this.search);
+            let res = this.$store.getters.getOwnerServiceList(owner, this.search);
+            console.log('ownerServiceList', res);
+            return res;
         }
     }
 
     get selectedServiceIsInbound() {
         return (serviceId) => {
-            return this.$store.getters.getServiceIsEntryPoint(serviceId);
+            let res = this.$store.getters.getServiceIsEntryPoint(serviceId);
+            console.log('serlectedServiceIsInbound', res);
+            return res;
         }
     }
 
     get serviceVersionList() {
         return (owner, service) => {
-            return this.$store.getters.getServiceVersionList(owner, service, this.search);
+            let res = this.$store.getters.getServiceVersionList(owner, service, this.search);
+            console.log('serviceVersionList',res);
+            return res;
         }
     }
     get getIsComponentInUse() {
         return (owner, component, version) => {
-            return this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
+            let res = this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
+            console.log('getIsComponentInUse', res);
+            return res;
         }
     }
 
     get getComponentUsedBy() {
         return (owner, component, version) => {
-            return this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
+            let res =this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
+            console.log('getComponentUsedBy', res);
+            return res;
         }
     }
 
     get getComponentOwner() {
         return (componentId) => {
-            return this.$store.getters.getComponentOwner(componentId);
+            let res = this.$store.getters.getComponentOwner(componentId);
+            console.log('getComponentOwner', res);
+            return res;
         }
     }
 
     get getServiceName() {
         return (serviceId) => {
-            return this.$store.getters.getServiceName(serviceId);
+            let res = this.$store.getters.getServiceName(serviceId);
+            console.log('getServiceName', res);
+            return res;
         };
     }
 
     get getServiceVersion() {
         return (serviceId) => {
-            return this.$store.getters.getServiceVersion(serviceId);
+            let res = this.$store.getters.getServiceVersion(serviceId);
+            console.log('getServiceVersion', res);
+            return res;
         };
     }
     get getServiceId() {
         return (owner, service, version) => {
-            return this.$store.getters.getServiceId(owner, service, version);
+            let res = this.$store.getters.getServiceId(owner, service, version);
+            console.log('getServiceId', res);
+            return res;
         }
     }
     get getIsServiceInUse() {
         return (owner, service, version) => {
-            return this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
+            let res = this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
+            console.log('getIsServiceInUse', res);
+            return res;
         };
     }
     get getServiceUsedBy() {
         return (owner, service, version) => {
-            return this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
+            let res = this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
+            console.log('getServiceUsedBy', res);
+            return res;
         };
     }
     get getServiceOwner() {
         return (serviceId) => {
-            return this.$store.getters.getServiceOwner(serviceId);
+            let res = this.$store.getters.getServiceOwner(serviceId);
+            console.log('getServiceOwner', res);
+            return res;
         };
     }
 
     get runtimeOwnerList() {
-        return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
+        let res = this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
+        console.log('runimeOwnerList', res);
+        return res;
     }
 
     get ownerRuntimeList() {
         return (owner) => {
-            return this.$store.getters.getOwnerRuntimeList(owner, this.search);
+            let res = this.$store.getters.getOwnerRuntimeList(owner, this.search);
+            console.log('ownerRuntimeList', res);
+            return res;
         }
     }
     get getRuntimeVersion() {
         return (runtimeId) => {
-            return this.$store.getters.getRuntimeVersion(runtimeId);
+            let res = this.$store.getters.getRuntimeVersion(runtimeId);
+            console.log('getRuntimeVersion', res);
+            return res;
         }
     }
 
     get getRuntimeId() {
         return (owner, runtime, version) => {
-            return this.$store.getters.getRuntimeId(owner, runtime, version);
+            let res = this.$store.getters.getRuntimeId(owner, runtime, version);
+            console.log('getRuntimeId', res);
+            return res;
         }
     }
 
     get getIsRuntimeInUse() {
         return (owner, runtime, version) => {
-            return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
+            let res = this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
+            console.log('getIsRuntimeInUse', res);
+            return res;
         }
     }
     get getRuntimeUsedBy() {
         return (owner, runtime, version) => {
-            return this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
+            let res = this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
+            console.log('getRuntimeUsedBy', res);
+            return res;
         }
     }
     get getRuntimeOwner() {
         return (runtimeId) => {
-            return this.$store.getters.getRuntimeOwner(runtimeId);
+            let res = this.$store.getters.getRuntimeOwner(runtimeId);
+            console.log('getRuntimeOwner', res);
+            return res;
         };
     }
     get runtimeVersionList() {
         return (owner, runtime) => {
-            return this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
+            let res = this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
+            console.log('runtimeVersionList', res);
+            return res;
+        }
+    }
+
+    loadInfo(type, owner, element){
+        if(this.$store.getters.getNeedElementInfo(type, owner, element)){
+            console.log('Se necesita información del componente: ', type, owner, element);
+            this.$store.dispatch('loadElementInfo', {type, owner, element});
         }
     }
 

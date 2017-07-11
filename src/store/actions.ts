@@ -1,17 +1,18 @@
 import * as connection from './proxy';
 import { DeploymentItem } from './../components';
-import { Deployment } from './classes';
+import { Deployment, Component } from './classes';
 import urlencode from 'urlencode';
 export default {
     init({ commit, dispatch }, { username, password }) {
-        connection.login(username, password).then(() => {
-            commit('login', username);
+        connection.login(username, password).then((user) => {
+            commit('login', user);
         }).catch((error) => {
             commit('authError', true);
             console.error('Error authenticating the user', error);
         });
     },
     getDeploymentList({ commit, dispatch }) {
+        // TODO: realizar un timmer para que la función no pueda llamarse en x tiempo
         connection.getDeploymentList().then((deploymentList) => {
             commit('setDeploymentList', deploymentList);
             // añadimos cada deployment como un deploymentMenuItem
@@ -23,21 +24,60 @@ export default {
                 });
             }
             commit('addDeploymentMenuItem', res);
-            dispatch('getMetrics');
         }).catch(function (error) {
             console.error('Error managing deployments: ' + error);
         });
     },
-    getRegisteredElements({ commit }) {
-        connection.getRegisteredElements().then(function ({ registeredElements }) {
-            // Guardamos los elementos
-            commit('setRegisteredElements', { registeredElements });
-        }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error obtaining registered elements: ' + error);
+    getElementList({ commit }) {
+        connection.getRegisteredElements().then((registeredElements) => {
+            commit('setRegisteredElements', registeredElements);
         });
     },
+    /*
+    getElementInfo({ commit }, serviceId) {
+        connection.getElementInfo(serviceId);
+    },
+    */
+    loadElementInfo({ commit, getters }, { type, owner, element }) {
+        let elementList: Array<string> = getters.getElementBundle(type, owner, element);
+        console.log('La lista de elementos por la que preguntamos es: ', elementList);
+        for (let i = 0; i < elementList.length; i++)
+            connection.getElementInfo(elementList[i]).then((value) => {
+                let elem;
+                console.log('Cuando cargamos la info de un elemento, la conexion nos devuelve', value);
+                switch (type) {
+                    case 'service':
+                        console.log('Se trata de un servicio');
+                        break;
+                    case 'component':
+                        console.log('Se trata de un component');
+                        elem = new Component(
+                            value.runtime, // runtime
+                            value.configuration.resources, // resourcesConfig: { [resourceName: string]: string }
+                            value.configuration.parameters, // parameters: Object
+                            {}, // proChannels: { [channelId: string]: Channel }
+                            {}, // reqChannels: { [channelId: string]: Channel }
+                        );
+                        commit('addComponent', {id: elementList[i], elem});
+                        break;
+                    case 'runtime':
+                        console.log('Se trata de un runtime');
+                        break;
+                    default:
+                        console.error('¿De qué tipo hemos pedido el elemento?', type);
+                }
+            });
+    },
+    /*
+    getRegisteredElements({ commit }) {
+        connection.getRegisteredElements().then(function ( registeredElements ) {
+            commit('setRegisteredElements', { registeredElements });
+        }).catch(function (error) {
+            console.error('Error obtaining registered elements: ' + error);
+        });
+    },*/
     getManifest({ commit }, { uri }) {
-        connection.getManifest(uri).then(function (element) {
+        connection.getElementInfo(uri).then(function (element) {
             // Guardamos los elementos
             commit('setElementData', { element });
         }).catch(function (error) { // TODO: mensaje de advertencia al usuario

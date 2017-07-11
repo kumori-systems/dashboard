@@ -1,7 +1,6 @@
 export enum State { CONNECTED, DISCONNECTED, ON_PROGRESS };
 
-export class Runtime {
-}
+export class Runtime { }
 
 export abstract class Metrics {
     time: Array<Date>;
@@ -191,6 +190,10 @@ export class Arrangement {
     }
 }
 
+
+export function getOwner(uri: string): string {
+    return uri.split('/')[2];
+}
 
 export class Instance {
 

@@ -9,9 +9,9 @@
             <p>
                 <u>Service:</u> {{service}}
             </p>
-            <div class="roles" v-if="roles">
+            <div class="roles">
                 <u>Roles:</u>
-                <div>
+                <div v-if="roles.length > 0">
                     <div v-for="rol in roles" class="tile">
                         <i class="fa-circle fa"></i>
                         <div>
@@ -22,6 +22,9 @@
                             {{rolNumInstances(rol)}}
                         </div>
                     </div>
+                </div>
+                <div v-else>
+                <span>No roles found</span>
                 </div>
             </div>
             <div v-if="website!=null" class="tile is-horizontal">

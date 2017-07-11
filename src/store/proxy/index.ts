@@ -9,6 +9,8 @@ import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent
 
 import { ADMISSION_URI, ACS_URI } from './config';
 
+import Prueba from './prueba';
+
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -20,10 +22,22 @@ let admission: EcloudAdmissionClient;
 let acs: EcloudAcsClient;
 
 export function login(username: string, password: string) {
+    // Prueba;
+
     acs = new EcloudAcsClient(ACS_URI);
-    return acs.login(username, password).then(({ accessToken }) => {
-        // admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
+    /*
+        return acs.login(username, password).then(({ accessToken, user }) => {
+            admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
+            // admission = new EcloudAdmissionClient(ADMISSION_URI);
+    */
+
+    return auxFunction().then(() => {
+        let accessToken = 'AAAAAAAAA';
+        let user = { name: 'josep' };
+
         admission = new EcloudAdmissionClient(ADMISSION_URI);
+
+
         admission.onConnected(() => {
             console.info('SUCCESSFULLY connected to admission');
         });
@@ -58,13 +72,12 @@ export function login(username: string, password: string) {
             console.error('Error received from admission-client: ' + JSON.stringify(error));
         });
 
-        return admission.init();
+        return admission.init().then(() => { return user.name; });
     });
 }
 export function getDeploymentList() {
     return admission.findDeployments().then((deploymentList) => {
         let res: { [deploymentId: string]: Deployment } = {};
-        console.log('Admission.findDeployments nos devuelve: ', deploymentList);
         let roles: { [rolId: string]: DeploymentRol };
         let instances: { [instanceId: string]: Instance };
         for (let deploymentId in deploymentList) {
@@ -89,6 +102,7 @@ export function getDeploymentList() {
                     );
                 }
 
+                // TODO: Esto debería de resolverse en una actualización de la api
                 if (deploymentList[deploymentId].roles[rolId].configuration) {
                     roles[rolId] = new DeploymentRol(
                         deploymentList[deploymentId].roles[rolId].configuration.cpu,
@@ -126,99 +140,53 @@ export function getDeploymentList() {
     });
 };
 
+/**
+ * The purpose of this function is to fullfil the view elements
+ */
+export function getRegisteredElements() {
+    return admission.findStorage().then((registeredElements) => {
+
+        let runtimes: { [runtimeId: string]: Runtime } = {};
+        let components: { [componentId: string]: Component } = {};
+        let services: { [serviceId: string]: Service } = {};
+        let resources: { [resourceId: string]: Resource } = {};
+
+        // Separamos los distintos elementos dependiendo de qué tipo sean
+        for (let indice = 0; indice < registeredElements.length; indice++) {
+            switch (registeredElements[indice].split('/')[3]) {
+                case 'runtime':
+                case 'runtimes':
+                    runtimes[registeredElements[indice]] = null;
+                    break;
+                case 'service':
+                case 'services':
+                    services[registeredElements[indice]] = null;
+                    break;
+                case 'component':
+                case 'components':
+                    components[registeredElements[indice]] = null;
+                    break;
+                case 'resource':
+                case 'resources':
+                    resources[registeredElements[indice]] = null;
+                    break;
+                default:
+                    console.info('Case not covered', registeredElements[indice]);
+            }
+        }
+
+        return { runtimes, components, services, resources };
+    });
+}
+
 export function undeployDeployment(deploymentId: string): void {
     console.info('INFO: Realizamos undeploy de: ' + deploymentId);
 }
 
-let registeredElements = require('./registered_elements_example.json');
-export function getRegisteredElements() {
-    return auxFunction().then(function () {
-        let parsedBody = registeredElements.data;
-
-        // parsedbody nos devolverá una array de elementos.
-        // Lo pasamos a diccionario
-        let res: { [id: string]: Object } = {};
-        for (let element in parsedBody) {
-            res[parsedBody[element]] = null;
-        }
-        return { 'registeredElements': res };
-    });
-}
 
 let ejemploObtencionManifiesto = require('./get_manifest_example.json');
-export function getManifest(uri: string) {
-    return auxFunction().then(function () {
-        let parsedBody = ejemploObtencionManifiesto.data;
-        // Dependiendo del tipo de elemento, deberíamos de parsearlo como la clase que tenemos internamente
-        let element;
-        let elementIndex = parsedBody.data.name;
-        let splited: Array<string> = (<string>parsedBody.data.spec).split('/');
-        switch (splited[3]) {
-            case 'components': // Caso en que el elemento por el que hemos preguntado sea un componente
-                let resourcesConfig: { [resourceId: string]: string } = {};
-                for (let resourceIndex in parsedBody.data.configuration.resources) {
-                    resourcesConfig[parsedBody.data.configuration.resources[resourceIndex].name] = parsedBody.data.configuration.resources[resourceIndex].type;
-                }
-                // Provide channels
-                let proChannels: { [channelId: string]: Channel } = {};
-                for (let proChannelIndex in parsedBody.data.channels.provides) {
-                    let channelId = parsedBody.data.channels.provides[proChannelIndex].name;
-                    // Añadimos el canal
-                    proChannels[channelId] = new Channel(
-                        parsedBody.data.channels.provides[proChannelIndex].type, // tipo
-                        parsedBody.data.channels.provides[proChannelIndex].protocol, // protocolo
-                        null // conexiones -> Este dato no lo podemos calcular aquí
-                    );
-                }
-                // Require channels
-                let reqChannels: { [channelId: string]: Channel } = {};
-                for (let reqChannelIndex in parsedBody.data.channels.requires) {
-                    let channelId = parsedBody.data.channels.requires[reqChannelIndex].name;
-                    // Añadimos el canal
-                    reqChannels[channelId] = new Channel(
-                        parsedBody.data.channels.requires[reqChannelIndex].type, // tipo
-                        parsedBody.data.channels.requires[reqChannelIndex].protocol, // protocolo
-                        null // conexiones -> Este dato no lo podemos calcular aquí
-                    );
-                }
-
-                element = new Component(
-                    parsedBody.data.runtime, // runtime
-                    resourcesConfig, // resourcesConfig
-                    parsedBody.data.configuration.parameters, // parameters
-                    proChannels, // proChannels
-                    reqChannels // reqChannels
-                );
-                console.info('NEW component received (' + elementIndex
-                    + '):\nruntime: ' + element.runtime
-                    + '\nresources: ' + JSON.stringify(element.resourcesConfig)
-                    + '\nparameters: ' + element.parameters
-                    + '\nproChannels: ' + element.proChannels
-                    + '\nreqChannels: ' + element.reqChannels);
-                break;
-            case 'runtime': // Caso en que el elemento por el que hemos preguntado sea un runtime
-                element = null; // TODO: no he visto manifiestos de runtimes por ningún lado
-                throw new Error('Error obtaining a runtime..');
-            // break;
-            case 'resources':
-                element = new Resource(
-                    parsedBody.data.name,
-                    parsedBody.data.parameters
-                );
-                console.info('NEW resource received(' + elementIndex
-                    + '):\nname: ' + element.realName
-                    + '\nparameters: ' + element.parameters);
-                break;
-            case 'services':
-                element = null; // TODO: No estoy seguro que haga falta obtener todo el servicio
-                throw new Error('Error obtaining a service..');
-            // break;
-        }
-
-        // parsedbody nos devolverá una array de elementos.
-        // Lo pasamos a diccionario
-        return [elementIndex, element];
-    });
+export function getElementInfo(uri: string) {
+    return admission.getStorageManifest(uri);
 }
 export function createNewHTTPENtrypoint(params: {
     'usePlatformGeneratedDomain': boolean,

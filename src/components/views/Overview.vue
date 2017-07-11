@@ -3,12 +3,13 @@
         <router-view v-if="route"></router-view>
         <div v-else-if="deploymentList.length > 0">
             <input type="checkbox" v-model="hideEntrypoints"></input>
-            <label for="hideEntryPoints"> Hide HTTP entrypoints</label>                
+            <label for="hideEntryPoints"> Hide HTTP entrypoints</label>
+            
             <div class="tile is-4" v-for="(deployment, index) in deploymentList" v-bind:key="index">
                 <deployment-card v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
             </div>
         </div>
-        <div v-else>
+        <div v-else><!-- No deployment found -->
             Start making some deployments!
         </div>
     </div>
