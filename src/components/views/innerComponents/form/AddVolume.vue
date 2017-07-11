@@ -1,6 +1,6 @@
 <template>
     <div>
-        <p>NEW VOLUME RESERVARION</p>
+        <p>NEW VOLUME RESERVATION</p>
         <div class="tile is-4">
             <span>Prefix:</span>
             <input class="input" v-model="prefix">
