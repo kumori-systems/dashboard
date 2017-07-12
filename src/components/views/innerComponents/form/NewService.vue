@@ -11,9 +11,9 @@ import Component from 'vue-class-component';
 import { FabElement } from '../../../../store/classes';
 
 @Component({
-    name: 'new-webservice'
+    name: 'new-service'
 })
-export default class NewWebService extends Vue {
+export default class NewService extends Vue {
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });

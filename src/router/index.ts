@@ -2,8 +2,8 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import { Overview, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
 import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
-import NewWebService from '../components/views/innerComponents/form/NewWebService.vue';
-import NewWebServiceAdvanced from '../components/views/innerComponents/form/NewWebServiceAdvanced.vue';
+import NewService from '../components/views/innerComponents/form/NewService.vue';
+import NewServiceAdvanced from '../components/views/innerComponents/form/NewServiceAdvanced.vue';
 import AddVolume from '../components/views/innerComponents/form/AddVolume.vue';
 import NewBundle from '../components/views/innerComponents/form/NewBundle.vue';
 
@@ -54,25 +54,25 @@ export default new Router({
       component: Help
     },
     {
-      name: 'New HTTP Entrypoint',
+      name: 'NEW HTTP ENTRYPOINT',
       path: '/newHTTPEntrypoint',
       meta: { expanded: false },
       component: NewHTTPEntrypoint
     },
     {
-      name: 'New Web Service',
-      path: '/newWebService',
+      name: 'NEW SERVICE',
+      path: '/newService',
       meta: { expanded: false },
-      component: NewWebService
+      component: NewService
     },
     {
-      name: 'New Web Service (Advanced)',
-      path: '/newWebServiceAdvanced',
+      name: 'NEW SERVICE (ADVANCED)',
+      path: '/newServiceAdvanced',
       meta: { expanded: false },
-      component: NewWebServiceAdvanced
+      component: NewServiceAdvanced
     },
     {
-      name: 'Upload bundle',
+      name: 'UPLOAD BUNDLE',
       path: '/newBundle',
       meta: { expanded: false },
       component: NewBundle
