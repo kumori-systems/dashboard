@@ -5,7 +5,7 @@
             <span class="select">
                 <select v-model="selectedService">
                     <option disabled value="">Please select one</option>
-                    <option v-for="service in serviceList">{{service}}</option>
+                    <option v-for="(service, index) in serviceList" v-bind:key="index">{{service}}</option>
                 </select>
             </span>
             <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
@@ -16,7 +16,7 @@
         </p>
         <p v-if="serviceRolList.length > 0">
             ROLES
-            <div v-for="rol, index in serviceRolList" v-bind:key="rol">
+            <div v-for="(rol, index) in serviceRolList" v-bind:key="index">
                 {{rol}}
                 <div class="inner-content">
                     <p class="tile is-6">
@@ -44,24 +44,24 @@
         </p>
         <p v-if="serviceProChannelList.length>0">
             CHANNELS PROVIDES
-            <div class="inner-content" v-for="channel, index in serviceProChannelList" v-bind:key="channel">
+            <div class="inner-content" v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
                 {{channel}} ->
                 <span class="select">
                     <select v-model="selectedRequiredChannel[index]">
                         <option disabled value="">Please select one</option>
-                        <option v-for="requiredChannel in totalRequiredDeploymentChannels">{{requiredChannel}}</option>
+                        <option v-for="(requiredChannel, index) in totalRequiredDeploymentChannels" v-bind:key="index">{{requiredChannel}}</option>
                     </select>
                 </span>
             </div>
         </p>
         <p v-if="serviceReqChannelList.length>0">
             CHANNELS REQUIRES
-            <div class="inner-content" v-for="channel, index in serviceReqChannelList" v-bind:key="channel">
-                {{channel}}<-
-                 <span class="select">
+            <div class="inner-content" v-for="(channel, index) in serviceReqChannelList" v-bind:key="index">
+                {{channel}}
+                <- <span class="select">
                     <select v-model="selectedProvidedChannel[index]">
                         <option disabled value="">Please select one</option>
-                        <option v-for="providedChannel in totalProvidedDeploymentChannels">{{providedChannel}}</option>
+                        <option v-for="(providedChannel, index) in totalProvidedDeploymentChannels" v-bind:key="index">{{providedChannel}}</option>
                     </select>
                     </span>
             </div>
@@ -70,13 +70,13 @@
             <p>CONFIGURATION</p>
             <div v-if="serviceResourcesList.length>0">
     
-                <div v-for="resource, index in serviceResourcesList" v-bind:key="resource">
+                <div v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
                     {{resource}}
     
                     <span class="select">
                         <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index]!==undefined && resourceConfig[index].length >0">
                             <option disabled value="">Please select one</option>
-                            <option v-for="resourceConfig in totalResourceConfig(resource)">{{resourceConfig}}</option>
+                            <option v-for="(resourceConfig, index) in totalResourceConfig(resource)" v-bind:key="index">{{resourceConfig}}</option>
                         </select>
                     </span>
     
@@ -100,7 +100,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment,Instance, DeploymentRol, Resource } from '../../../../store/classes';
+import { FabElement, Deployment, Resource } from '../../../../store/classes';
 import InputNumber from '../input/InputNumber.vue';
 
 @Component({
@@ -222,13 +222,13 @@ export default class NewWebServiceAdvanced extends Vue {
         let roles = {};
         let instances;
         for (let rolIndex in this.serviceRolList) {
-            
+
             instances = {};
-            for(let counter=0; counter< this.rolInstances[rolIndex];counter++){
-                instances[counter] = new Instance(null,null,null, null);
+            for (let counter = 0; counter < this.rolInstances[rolIndex]; counter++) {
+                instances[counter] = new Deployment.Rol.Instance(null, null, null, null);
             }
 
-            roles[this.serviceRolList[rolIndex]] = new DeploymentRol(
+            roles[this.serviceRolList[rolIndex]] = new Deployment.Rol(
                 this.rolCPU[rolIndex],
                 this.rolMem[rolIndex],
                 0, //ioperf

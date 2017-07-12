@@ -1,6 +1,6 @@
 <template>
     <div>
-        <i v-bind:class="state" aria-hidden="true" />
+        <i v-bind:class="state" aria-hidden="true"></i>
         <span class="title">{{deploymentName}}</span>
         <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
         <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
@@ -11,18 +11,17 @@
                     <p>Service: {{deploymentService}}</p>
                     <p v-if="website!=null">
                         Websites:
-                        <p class="inner-content" v-for="web in website">
-                            <a v-bind:href="'http://'+web">
+                        <p class="inner-content" v-for="(web, index) in website" v-bind:key="index">
+                            <a v-bind:href=" 'http://'+web ">
                                 {{web}}
                             </a>
                         </p>
                     </p>
-                    <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0">
-                        Connected to:
-                        <div v-for="proChannel in serviceProvideChannels" class="inner-content">
+                    <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0"> Connected to:
+                        <div v-for="(proChannel, index) in serviceProvideChannels" v-bind:key="index" class="inner-content">
                             {{proChannel.myChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
                         </div>
-                        <div v-for="reqChannel in serviceRequireChannels" class="inner-content">
+                        <div v-for="(reqChannel, index) in serviceRequireChannels" v-bind:key="index" class="inner-content">
                             {{reqChannel.myChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
                     </p>
                 </div>
@@ -45,7 +44,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Moment from 'moment';
 
-import { Channel, FabElement, State, EntryPointMetrics, NormalMetrics } from '../../store/classes';
+import { FabElement, Deployment, Service } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
 import ChartOptions from './innerComponents/chart/ChartOptions.js';
@@ -73,14 +72,16 @@ export default class DeploymentItem extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     get state(): string {
-        console.log('Vamos a obtener el estado');
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case State.CONNECTED:
+            case Deployment.Rol.Instance.State.CONNECTED:
                 return 'fa fa-check-circle';
-            case State.DISCONNECTED:
-                return 'DISCONNECTED_COLOR';
+            case Deployment.Rol.Instance.State.DISCONNECTED:
+                return 'fa fa-exclamation-circle';
+            case Deployment.Rol.Instance.State.ON_PROGRESS:
+                return 'fa fa-exclamation-triangle';
             default:
-                return 'ON_PROGRESS_COLOR';
+                console.error('DeploymentItem received a non-covered instance state');
+                return '';
         }
     }
 
@@ -111,11 +112,11 @@ export default class DeploymentItem extends Vue {
     get deploymentService(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
-    get serviceProvideChannels(): Array<Channel> {
+    get serviceProvideChannels(): Array<Service.Rol.Channel> {
         return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
 
-    get serviceRequireChannels(): Array<Channel> {
+    get serviceRequireChannels(): Array<Service.Rol.Channel> {
         return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
     }
 

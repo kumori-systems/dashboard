@@ -43,7 +43,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, State } from '../../store/classes';
+import { FabElement, Webdomain } from '../../store/classes';
 @Component({
     name: 'WebDomains'
 })
@@ -64,12 +64,15 @@ export default class WebDomains extends Vue {
     get getWebdomainState() {
         return (webdomain) => {
             switch (this.$store.getters.getWebdomainState(webdomain)) {
-                case State.CONNECTED:
+                case Webdomain.State.VALIDATED:
                     return 'fa fa-check-circle';
-                case State.DISCONNECTED:
+                case Webdomain.State.ERRONEUS:
                     return 'fa fa-exclamation-circle';
-                default:
+                case Webdomain.State.ON_VALIDATION:
                     return 'fa fa-exclamation-triangle';
+                default:
+                    console.error('Webdomains view received a non-covered webdomain state');
+                    return '';
             }
         }
     }
@@ -77,6 +80,7 @@ export default class WebDomains extends Vue {
     deleteWebDomain(webdomain) {
         this.$store.dispatch('deleteWebdomain', webdomain);
     }
+    
     addWebDomain() {
         if (this.newWebDomain != null && this.newWebDomain.length > 0)
             this.$store.dispatch('addWebDomain', this.newWebDomain);

@@ -25,7 +25,7 @@
                     </p>
                     <p v-if="dataVolumesList.length>0">
                         Data Volumes:
-                        <div class="inner-content" v-for="dataVolume in dataVolumesList">
+                        <div class="inner-content" v-for="(dataVolume, index) in dataVolumesList" v-bind:key="index">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> {{dataVolume}}
                         </div>
                     </p>
@@ -33,11 +33,15 @@
                         <p>
                             Connected to:
                             <div class="left-padding">
-                                <div v-for="connection in rolProConnectedTo">
-                                    <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                                <div v-for="(connection, index) in rolProConnectedTo" v-bind:key="index">
+                                    <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
+                                        {{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
+                                    </div>
                                 </div>
-                                <div v-for="connection in rolReqConnectedTo">
-                                    <div v-for="connectedTo in connection[1].connectedTo">{{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})</div>
+                                <div v-for="(connection, index) in rolReqConnectedTo" v-bind:key="index">
+                                    <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
+                                        {{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
+                                    </div>
                                 </div>
                             </div>
                         </p>
@@ -64,7 +68,7 @@ import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from '../chart/Chart.js';
 import ChartOptions from '../chart/ChartOptions.js';
-import { Channel, State, Metrics, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
+import { Deployment, Service } from '../../../../store/classes';
 import Moment from 'moment';
 
 @Component({
@@ -100,12 +104,15 @@ export default class Card extends Vue {
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
-            case State.CONNECTED:
+            case Deployment.Rol.Instance.State.CONNECTED:
                 return 'fa fa-check-circle';
-            case State.DISCONNECTED:
+            case Deployment.Rol.Instance.State.DISCONNECTED:
                 return 'fa fa-exclamation-circle';
-            default:
+            case Deployment.Rol.Instance.State.ON_PROGRESS:
                 return 'fa fa-exclamation-triangle';
+            default:
+                console.error('RolCard received a non-covered instance state');
+                return '';
         }
     }
     get numInstances(): number {
@@ -153,11 +160,11 @@ export default class Card extends Vue {
         return this.$store.getters.getDeploymentRolVolumeList(this.deploymentId, this.rolId);
     }
 
-    get rolReqConnectedTo(): Array<Channel> {
+    get rolReqConnectedTo(): Array<Service.Rol.Channel> {
         return this.$store.getters.getDeploymentRolReqConnectedTo(this.deploymentId, this.rolId);
     }
 
-    get rolProConnectedTo(): Array<Channel> {
+    get rolProConnectedTo(): Array<Service.Rol.Channel> {
         return this.$store.getters.getDeploymentRolProConnectedTo(this.deploymentId, this.rolId);
     }
     /**
@@ -222,9 +229,10 @@ button i {
 
 .card-header .title {
     padding-top: 10px;
-    padding-right:5px;
+    padding-right: 5px;
 }
-.card-header .box{
+
+.card-header .box {
     margin-bottom: 0px;
 }
 

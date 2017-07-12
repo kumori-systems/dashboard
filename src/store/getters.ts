@@ -1,4 +1,4 @@
-import { getOwner, Deployment, Runtime, DeploymentRol, Component, Service, Metrics, NormalMetrics, EntryPointMetrics, Webdomain, Link, State as StateType, Channel, Resource, Instance, FabElement } from './classes';
+import { Deployment, Runtime, Component, Service, Webdomain, Link, Resource, FabElement } from './classes';
 import urlencode from 'urlencode';
 export default {
   /* GENERAL */
@@ -99,17 +99,19 @@ export default {
     };
   },
   getDeploymentState: function (state, getters): Function {
-    return function (deploymentId: string): StateType {
+    return function (deploymentId: string): Deployment.Rol.Instance.State {
       let onProgress = false;
-      if (state.deploymentList[deploymentId] === undefined) return StateType.ON_PROGRESS;
+      if (state.deploymentList[deploymentId] === undefined) return Deployment.Rol.Instance.State.ON_PROGRESS;
       for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
         switch (getters.getDeploymentRolState(deploymentId, rolId)) {
-          case StateType.DISCONNECTED: return StateType.DISCONNECTED;
-          case StateType.ON_PROGRESS: onProgress = true;
+          case Deployment.Rol.Instance.State.DISCONNECTED:
+            return Deployment.Rol.Instance.State.DISCONNECTED;
+          case Deployment.Rol.Instance.State.ON_PROGRESS:
+            onProgress = true;
         }
       }
-      if (onProgress === true) return StateType.ON_PROGRESS;
-      return StateType.CONNECTED;
+      if (onProgress === true) return Deployment.Rol.Instance.State.ON_PROGRESS;
+      return Deployment.Rol.Instance.State.CONNECTED;
     };
   },
 
@@ -241,13 +243,13 @@ export default {
     return function (deploymentId: string): Object {
       if (state.deploymentList[deploymentId] === undefined) return null;
       if (getters.getIsEntryPoint(deploymentId)) {
-        let res: EntryPointMetrics = new EntryPointMetrics();
+        let res: Deployment.Rol.Instance.EntryPointMetrics = new Deployment.Rol.Instance.EntryPointMetrics();
         for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
           res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
         }
         return getters.formatChartData(true, res);
       } else {
-        let res: NormalMetrics = new NormalMetrics();
+        let res: Deployment.Rol.Instance.CommonMetrics = new Deployment.Rol.Instance.CommonMetrics();
         for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
           res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
         }
@@ -257,7 +259,7 @@ export default {
   },
 
   formatChartData: function (state, getters): Function {
-    return function (isEntryPoint: boolean, chartData: Metrics) {
+    return function (isEntryPoint: boolean, chartData: Deployment.Rol.Instance.Metrics) {
       if (isEntryPoint) {
         return {
           labels: chartData.time,
@@ -267,84 +269,84 @@ export default {
               backgroundColor: '#1fc8db',
               borderColor: '#1fc8db',
               fill: false,
-              data: (<EntryPointMetrics>chartData).timestamp_init
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).timestamp_init
             },
             {
               label: 'timestamp_end',
               backgroundColor: '#fce473',
               borderColor: '#fce473',
               fill: false,
-              data: (<EntryPointMetrics>chartData).timestamp_end
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).timestamp_end
             },
             {
               label: 'elapsed_msec',
               backgroundColor: '#42afe3',
               borderColor: '#42afe3',
               fill: false,
-              data: (<EntryPointMetrics>chartData).elapsed_msec
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).elapsed_msec
             },
             {
               label: 'http_request_per_second',
               backgroundColor: '#42afe3',
               borderColor: '#42afe3',
               fill: false,
-              data: (<EntryPointMetrics>chartData).http_request_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).http_request_per_second
             },
             {
               label: 'http_errors_per_second',
               backgroundColor: '#ed6c63',
               borderColor: '#ed6c63',
               fill: false,
-              data: (<EntryPointMetrics>chartData).http_errors_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).http_errors_per_second
             },
             {
               label: 'http_size_in_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).http_size_in_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).http_size_in_per_second
             },
             {
               label: 'http_size_out_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).http_size_out_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).http_size_out_per_second
             },
             {
               label: 'http_response_time',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).http_response_time
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).http_response_time
             },
             {
               label: 'ws_size_in_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).ws_size_in_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).ws_size_in_per_second
             },
             {
               label: 'ws_size_out_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).ws_size_out_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).ws_size_out_per_second
             },
             {
               label: 'ws_chunk_in_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).ws_chunk_in_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).ws_chunk_in_per_second
             },
             {
               label: 'ws_chunk_out_per_second',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<EntryPointMetrics>chartData).ws_chunk_out_per_second
+              data: (<Deployment.Rol.Instance.EntryPointMetrics>chartData).ws_chunk_out_per_second
             }
           ]
         };
@@ -358,42 +360,42 @@ export default {
               backgroundColor: '#1fc8db',
               borderColor: '#1fc8db',
               fill: false,
-              data: (<NormalMetrics>chartData).cpu
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).cpu
             },
             {
               label: 'MEM',
               backgroundColor: '#fce473',
               borderColor: '#fce473',
               fill: false,
-              data: (<NormalMetrics>chartData).mem
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).mem
             },
             {
               label: 'NET_IN',
               backgroundColor: '#42afe3',
               borderColor: '#42afe3',
               fill: false,
-              data: (<NormalMetrics>chartData).net_in
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).net_in
             },
             {
               label: 'NET_OUT',
               backgroundColor: '#42afe3',
               borderColor: '#42afe3',
               fill: false,
-              data: (<NormalMetrics>chartData).net_out
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).net_out
             },
             {
               label: 'RPM',
               backgroundColor: '#ed6c63',
               borderColor: '#ed6c63',
               fill: false,
-              data: (<NormalMetrics>chartData).rpm
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).rpm
             },
             {
               label: 'RES',
               backgroundColor: '#97cd76',
               borderColor: '#97cd76',
               fill: false,
-              data: (<NormalMetrics>chartData).res
+              data: (<Deployment.Rol.Instance.CommonMetrics>chartData).res
             }
           ]
         };
@@ -431,17 +433,17 @@ export default {
   },
 
   getDeploymentRolState: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string): StateType {
+    return function (deploymentId: string, rolId: string): Deployment.Rol.Instance.State {
       let onProgress = false;
       for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
         switch (getters.getDeploymentRolInstanceState(deploymentId, rolId, instanceId)) {
-          case StateType.DISCONNECTED: return StateType.DISCONNECTED;
-          case StateType.ON_PROGRESS: onProgress = true; break;
+          case Deployment.Rol.Instance.State.DISCONNECTED: return Deployment.Rol.Instance.State.DISCONNECTED;
+          case Deployment.Rol.Instance.State.ON_PROGRESS: onProgress = true; break;
           default:
         }
       }
-      if (onProgress === true) return StateType.ON_PROGRESS;
-      return StateType.CONNECTED;
+      if (onProgress === true) return Deployment.Rol.Instance.State.ON_PROGRESS;
+      return Deployment.Rol.Instance.State.CONNECTED;
     };
   },
   getDeploymentRolRuntime: function (state): Function {
@@ -457,13 +459,13 @@ export default {
     return function (deploymentId: string, rolId: string): Object {
       // Buscamos todas las instancias del rol
       if (getters.getIsEntryPoint(deploymentId)) {
-        let res: EntryPointMetrics = new EntryPointMetrics();
+        let res: Deployment.Rol.Instance.EntryPointMetrics = new Deployment.Rol.Instance.EntryPointMetrics();
         for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
           res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
         }
         return res;
       } else {
-        let res: NormalMetrics = new NormalMetrics();
+        let res: Deployment.Rol.Instance.CommonMetrics = new Deployment.Rol.Instance.CommonMetrics();
         for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
           res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
         }
@@ -522,7 +524,7 @@ export default {
     };
   },
   getDeploymentRolReqConnectedTo: function (state): Function {
-    return function (deploymentId: string, rolId: string): Array<[string, Channel]> {
+    return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
       let res = [];
@@ -533,7 +535,7 @@ export default {
     };
   },
   getDeploymentRolProConnectedTo: function (state): Function {
-    return function (deploymentId: string, rolId: string): Array<[string, Channel]> {
+    return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
       let res = [];
@@ -575,7 +577,7 @@ export default {
     };
   },
   getDeploymentRolInstanceChartData: function (state): Function {
-    return function (deploymentId: string, rolId: string, instanceId: string): Metrics {
+    return function (deploymentId: string, rolId: string, instanceId: string): Deployment.Rol.Instance.Metrics {
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
     };
   },
@@ -935,11 +937,6 @@ export default {
           res.push(getters.getComponentName(componentId) + getters.getComponentVersion(componentId));
       }
       return res;
-    };
-  },
-  getElementOwner: function (state, getters) {
-    return (runtimeId) => {
-      return getOwner(runtimeId);
     };
   },
 

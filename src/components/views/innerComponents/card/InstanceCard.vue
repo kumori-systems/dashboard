@@ -27,7 +27,7 @@ import Moment from 'moment';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import Chart from '../chart/Chart';
 import ChartOptions from '../chart/ChartOptions';
-import { State, NormalMetrics, EntryPointMetrics } from '../../../../store/classes';
+import { Deployment } from '../../../../store/classes';
 
 @Component({
     name: 'instance-card',
@@ -60,12 +60,15 @@ export default class Card extends Vue {
 
     get state(): string {
         switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
-             case State.CONNECTED:
+            case Deployment.Rol.Instance.State.CONNECTED:
                 return 'fa fa-check-circle';
-            case State.DISCONNECTED:
+            case Deployment.Rol.Instance.State.DISCONNECTED:
                 return 'fa fa-exclamation-circle';
-            default:
+            case Deployment.Rol.Instance.State.ON_PROGRESS:
                 return 'fa fa-exclamation-triangle';
+            default:
+                console.error('InstanceCard received a non-covered instance state');
+                return '';
         }
     }
 
@@ -84,7 +87,7 @@ export default class Card extends Vue {
     get instanceChartData(): any {
         // Los datos a representar son distintos si los servicios son entrypoints
         if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
-            let metrics: EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+            let metrics: Deployment.Rol.Instance.EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
                 labels: metrics.time,
                 datasets: [
@@ -177,7 +180,7 @@ export default class Card extends Vue {
             };
         }
         else {
-            let metrics: NormalMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+            let metrics: Deployment.Rol.Instance.CommonMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
                 labels: metrics.time,
                 datasets: [

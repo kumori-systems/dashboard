@@ -6,13 +6,14 @@
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
-            <p>
-                <u>Service:</u> {{service}}
-            </p>
+            <div>
+                <u>Service:</u>
+                {{service}}
+            </div>
             <div class="roles">
                 <u>Roles:</u>
                 <div v-if="roles.length > 0">
-                    <div v-for="rol in roles" class="tile">
+                    <div v-for="(rol, index) in roles" v-bind:key="index" class="tile">
                         <i class="fa-circle fa"></i>
                         <div>
                             <strong>{{rol}}</strong>
@@ -24,40 +25,54 @@
                     </div>
                 </div>
                 <div v-else>
-                <span>No roles found</span>
+                    <span>No roles found</span>
                 </div>
             </div>
-            <div v-if="website!=null" class="tile is-horizontal">
-                <div>
-                    <u>Websites:</u>
-                </div>
-                <div>
-                    <div v-for="web in website">
+            <div class="tile is-horizontal">
+    
+                <u>Websites:</u>
+    
+                <div v-if="website !== null && website.length>0">
+                    <div v-for="(web, index) in website" v-bind:key="index">
                         <a v-bind:href="'http://'+web">
                             {{web}}
                         </a>
                     </div>
                 </div>
+                <span v-else>
+                    none
+                </span>
+    
             </div>
-            <p v-if="links.length > 0">
+            <div>
                 <u>Links:</u>
-                <div v-for="link in links" class="tile">
-                    <i class="fa fa-circle"></i>
-                    <div>
-                        <strong>{{link.myChannel}}</strong>
+                <div v-if="links !== null && links.length > 0">
+                    <div v-for="(link, index) in links" v-bind:key="index" class="tile">
+                        <i class="fa fa-circle"></i>
                         <div>
-                            Connnected to -> {{link.toDeployment}}
+                            <strong>{{link.myChannel}}</strong>
+                            <div>
+                                Connnected to -> {{link.toDeployment}}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </p>
-            <p v-if="volumes.length>0">
+                <span v-else>
+                    none
+                </span>
+            </div>
+            <div>
                 <u>Volumes:</u>
-                <div v-for="volume in volumes" class="tile">
-                    <i class="fa fa-circle"></i>
-                    <div>{{volume}}</div>
+                <div v-if="volumes !== null && volumes.length>0">
+                    <div v-for="(volume, index) in volumes" v-bind:key="index" class="tile">
+                        <i class="fa fa-circle"></i>
+                        <div>{{volume}}</div>
+                    </div>
                 </div>
-            </p>
+                <span v-else>
+                    none
+                </span>
+            </div>
             <router-link v-bind:to="deploymentPath">
                 <i class="fa fa-caret-square-o-down" aria-hidden="true" />
             </router-link>
@@ -69,12 +84,17 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { DeploymentRol, State, Deployment } from './../../../../store/classes';
+import { Deployment } from './../../../../store/classes';
 
 @Component({
     name: 'deployment-card',
     props: {
         deploymentId: { required: true, type: String }
+    },
+    filters: {
+        truncate: function (string, value) {
+            return string.substring(0, value) + '...';
+        }
     }
 })
 export default class Card extends Vue {
@@ -88,13 +108,14 @@ export default class Card extends Vue {
     }
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case State.CONNECTED:
+            case Deployment.Rol.Instance.State.CONNECTED:
                 return 'CONNECTED';
-            case State.DISCONNECTED:
+            case Deployment.Rol.Instance.State.DISCONNECTED:
                 return 'DISCONNECTED';
-            case State.ON_PROGRESS:
+            case Deployment.Rol.Instance.State.ON_PROGRESS:
                 return 'ON_PROGRESS';
             default:
+                console.error('DeploymentCard received a non-covered instance state');
                 return '';
         }
     }
@@ -107,6 +128,7 @@ export default class Card extends Vue {
             case 'DISCONNECTED':
                 return 'fa fa-exclamation-circle';
             default:
+                console.error('DeploymentCard received a non-covered instance state');
                 return '';
         }
     }

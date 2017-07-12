@@ -1,4 +1,4 @@
-import { Deployment, NormalMetrics, EntryPointMetrics } from './classes';
+import { Deployment } from './classes';
 export default {
   login(state, user) {
     state.user = user;

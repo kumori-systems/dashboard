@@ -5,6 +5,7 @@ import urlencode from 'urlencode';
 export default {
     init({ commit, dispatch }, { username, password }) {
         connection.login(username, password).then((user) => {
+            console.info('SUCCESSFULLY AUTHENTICATED AS', user);
             commit('login', user);
         }).catch((error) => {
             commit('authError', true);
@@ -52,13 +53,14 @@ export default {
                     case 'component':
                         console.log('Se trata de un component');
                         elem = new Component(
+                            elementList[i], // uri
                             value.runtime, // runtime
                             value.configuration.resources, // resourcesConfig: { [resourceName: string]: string }
                             value.configuration.parameters, // parameters: Object
                             {}, // proChannels: { [channelId: string]: Channel }
                             {}, // reqChannels: { [channelId: string]: Channel }
                         );
-                        commit('addComponent', {id: elementList[i], elem});
+                        commit('addComponent', { id: elementList[i], elem });
                         break;
                     case 'runtime':
                         console.log('Se trata de un runtime');
@@ -84,6 +86,8 @@ export default {
             console.error('Error obtaining registered elements: ' + error);
         });
     },
+    /*
+    // TODO: Las métricas no se deberían de obtener mediante una llamada, sino mediante eventos
     getMetrics({ commit }) {
         connection.getMetrics().then(function (metrics) {
             commit('addMetrics', metrics);
@@ -91,6 +95,7 @@ export default {
             console.error('Error obtaining metrics: ' + error);
         });
     },
+    */
     setFabElements({ commit }, { fabElementsList }) {
         commit('setFabElements', { fabElementsList });
     },
