@@ -1,15 +1,13 @@
-import { Arrangement, State, Deployment, Link, DeploymentRol, Runtime, Channel, NormalMetrics, EntryPointMetrics, Instance, Resource, Component, Service, ServiceRol } from './../classes';
-import moment from 'moment';
 
-export enum CONNECTION_STATE { SUCCESS, ON_PROGRESS, FAIL };
-
-
+import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
-import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, Deployment as EcloudDployment, EcloudEventType } from 'admission-client/dist/src';
 
+import Moment from 'moment';
+
+import { Deployment, Link, Runtime, Resource, Component, Service } from './../classes';
 import { ADMISSION_URI, ACS_URI } from './config';
 
-import Prueba from './prueba';
+import * as utils from './utils';
 
 // TODO: sustituir esta función por la llamada correspondiente
 function auxFunction(): Promise<void> {
@@ -22,19 +20,18 @@ let admission: EcloudAdmissionClient;
 let acs: EcloudAcsClient;
 
 export function login(username: string, password: string) {
-    // Prueba;
 
     acs = new EcloudAcsClient(ACS_URI);
     /*
-        return acs.login(username, password).then(({ accessToken, user }) => {
-            admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
-            // admission = new EcloudAdmissionClient(ADMISSION_URI);
+    return acs.login(username, password).then(({ accessToken, user }) => {
+        console.log('Realizado login con ACS', user, accessToken);
+        admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
+        // admission = new EcloudAdmissionClient(ADMISSION_URI);
     */
 
     return auxFunction().then(() => {
         let accessToken = 'AAAAAAAAA';
         let user = { name: 'josep' };
-
         admission = new EcloudAdmissionClient(ADMISSION_URI);
 
 
@@ -72,69 +69,15 @@ export function login(username: string, password: string) {
             console.error('Error received from admission-client: ' + JSON.stringify(error));
         });
 
+
         return admission.init().then(() => { return user.name; });
     });
 }
 export function getDeploymentList() {
     return admission.findDeployments().then((deploymentList) => {
         let res: { [deploymentId: string]: Deployment } = {};
-        let roles: { [rolId: string]: DeploymentRol };
-        let instances: { [instanceId: string]: Instance };
         for (let deploymentId in deploymentList) {
-            roles = {};
-            for (let rolId in deploymentList[deploymentId].roles) {
-                instances = {};
-                for (let instanceId in deploymentList[deploymentId].roles[rolId].instances) {
-                    instances[instanceId] = new Instance(
-                        deploymentList[deploymentId].roles[rolId].instances[instanceId].cnid,
-                        deploymentList[deploymentId].roles[rolId].instances[instanceId].publicIp,
-                        deploymentList[deploymentId].roles[rolId].instances[instanceId].privateIp,
-                        new Arrangement(
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.mininstances,
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.maxinstances,
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.cpu,
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.memory,
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.bandwith,
-                            deploymentList[deploymentId].roles[rolId].instances[instanceId].arrangement.failureZones
-                        ),
-                        deploymentList[deploymentId].roles[rolId].instances[instanceId].volumes,
-                        deploymentList[deploymentId].roles[rolId].instances[instanceId].ports
-                    );
-                }
-
-                // TODO: Esto debería de resolverse en una actualización de la api
-                if (deploymentList[deploymentId].roles[rolId].configuration) {
-                    roles[rolId] = new DeploymentRol(
-                        deploymentList[deploymentId].roles[rolId].configuration.cpu,
-                        deploymentList[deploymentId].roles[rolId].configuration.memory,
-                        deploymentList[deploymentId].roles[rolId].configuration.ioperf,
-                        deploymentList[deploymentId].roles[rolId].configuration.iopsintensive,
-                        deploymentList[deploymentId].roles[rolId].configuration.bandwidth,
-                        deploymentList[deploymentId].roles[rolId].configuration.resilence,
-                        instances
-                    );
-                } else {
-                    roles[rolId] = new DeploymentRol(
-                        1,
-                        1,
-                        1,
-                        false,
-                        1,
-                        1,
-                        instances
-                    );
-                }
-
-            }
-
-            res[deploymentId] = new Deployment(
-                deploymentList[deploymentId].urn, // name: string
-                deploymentList[deploymentId].service, // serviceId: string
-                {}, // resourcesConfig: { [resource: string]: any }
-                {}, // parameters: any
-                roles, // roles: { [rolName: string]: DeploymentRol }
-                null, // website: Array<string>) {
-            );
+            res[deploymentId] = utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
         }
         return res;
     });
@@ -183,8 +126,6 @@ export function undeployDeployment(deploymentId: string): void {
     console.info('INFO: Realizamos undeploy de: ' + deploymentId);
 }
 
-
-let ejemploObtencionManifiesto = require('./get_manifest_example.json');
 export function getElementInfo(uri: string) {
     return admission.getStorageManifest(uri);
 }
@@ -205,7 +146,7 @@ export function addDeployment(params) {
     console.log('Creando un nuevo deployment con los parámetros: ' + JSON.stringify(params));
 }
 
-let ejemploMetricas = require('./metrics_example.json');
+/*
 export function getMetrics() {
     return auxFunction().then(function () {
 
@@ -214,14 +155,14 @@ export function getMetrics() {
         let normalMetrics: {
             [deploymentId: string]: {
                 [rolId: string]: {
-                    [instanceId: string]: NormalMetrics
+                    [instanceId: string]: Deployment.Rol.Instance.CommonMetrics
                 }
             }
         } = {};
         let entryPointMetrics: {
             [deploymentId: string]: {
                 [rolId: string]: {
-                    [instanceId: string]: EntryPointMetrics
+                    [instanceId: string]: Deployment.Rol.Instance.EntryPointMetrics
                 }
             }
         } = {};
@@ -238,10 +179,10 @@ export function getMetrics() {
                                     // Si no habíamos instanciado el rol en el resultado lo hacemos
                                     if (!entryPointMetrics[deploymentId][rolId]) entryPointMetrics[deploymentId][rolId] = {};
                                     // Inicializamos el array de la instancia en el resultado
-                                    if (!entryPointMetrics[deploymentId][rolId][instanceId]) entryPointMetrics[deploymentId][rolId][instanceId] = new EntryPointMetrics();
+                                    if (!entryPointMetrics[deploymentId][rolId][instanceId]) entryPointMetrics[deploymentId][rolId][instanceId] = new Deployment.Rol.Instance.EntryPointMetrics();
 
                                     entryPointMetrics[deploymentId][rolId][instanceId].addValues(
-                                        moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
+                                        Moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
                                         1,
                                         2,
                                         3,
@@ -282,10 +223,10 @@ export function getMetrics() {
                                     // Si no habíamos instanciado el rol en el resultado lo hacemos
                                     if (!normalMetrics[deploymentId][rolId]) normalMetrics[deploymentId][rolId] = {};
                                     // Inicializamos el array de la instancia en el resultado
-                                    if (!normalMetrics[deploymentId][rolId][instanceId]) normalMetrics[deploymentId][rolId][instanceId] = new NormalMetrics();
+                                    if (!normalMetrics[deploymentId][rolId][instanceId]) normalMetrics[deploymentId][rolId][instanceId] = new Deployment.Rol.Instance.CommonMetrics();
 
                                     normalMetrics[deploymentId][rolId][instanceId].addValues(
-                                        moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(), // Time
+                                        Moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(), // Time
                                         Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.mean * 100), // CPU
                                         Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.mean), // MEM
                                         Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.mean * 100), // NET_IN
@@ -314,6 +255,7 @@ export function getMetrics() {
         return { 'entryPointMetrics': entryPointMetrics, 'normalMetrics': normalMetrics };
     });
 }
+*/
 
 export function aplyChangesToDeployment(changes) {
     console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
