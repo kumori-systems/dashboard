@@ -1,284 +1,178 @@
-
 import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
-
-import Moment from 'moment';
-
-import { Deployment, Link, Runtime, Resource, Component, Service } from './../classes';
 import { ADMISSION_URI, ACS_URI } from './config';
-
+import { EventEmitter, Listener } from 'typed-event-emitter';
 import * as utils from './utils';
 
-// TODO: sustituir esta función por la llamada correspondiente
-function auxFunction(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        resolve();
-    });
-}
-
-let admission: EcloudAdmissionClient;
-let acs: EcloudAcsClient;
-
-export function login(username: string, password: string) {
-
-    acs = new EcloudAcsClient(ACS_URI);
-    /*
-    return acs.login(username, password).then(({ accessToken, user }) => {
-        console.log('Realizado login con ACS', user, accessToken);
-        admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
-        // admission = new EcloudAdmissionClient(ADMISSION_URI);
-    */
-
-    return auxFunction().then(() => {
-        let accessToken = 'AAAAAAAAA';
-        let user = { name: 'josep' };
-        admission = new EcloudAdmissionClient(ADMISSION_URI);
-
-
-        admission.onConnected(() => {
-            console.info('SUCCESSFULLY connected to admission');
-        });
-
-        admission.onEcloudEvent((event: EcloudEvent) => {
-            switch (event.type) {
-                case EcloudEventType.service:
-                    console.info('Service event received: ' + event.strName);
-                    // Service event type handler function
-                    break;
-                case EcloudEventType.node:
-                    console.info('Node event received: ' + event.strName);
-                    // Node event type handler function
-                    break;
-                case EcloudEventType.instance:
-                    console.info('Instance event received: ' + event.strName);
-                    // Instance event type handler function
-                    break;
-                case EcloudEventType.metrics:
-                    console.info('Metrics event received: ' + event.strName);
-                    // Metrics event type handler function
-                    break;
-                default:
-                    console.error('Non espected ecloud event type: ' + event.strType + '/' + event.strName);
-            }
-
-            console.info('Event should had been processed at this point');
-            console.log(JSON.stringify(event, null, 2));
-        });
-
-        admission.onError((error: any) => {
-            console.error('Error received from admission-client: ' + JSON.stringify(error));
-        });
-
-
-        return admission.init().then(() => { return user.name; });
-    });
-}
-export function getDeploymentList() {
-    return admission.findDeployments().then((deploymentList) => {
-        let res: { [deploymentId: string]: Deployment } = {};
-        for (let deploymentId in deploymentList) {
-            res[deploymentId] = utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
-        }
-        return res;
-    });
-};
-
 /**
- * The purpose of this function is to fullfil the view elements
+ * Esta clase está preparada para lanzar eventos que la página leerá y podrá actuar acorde al evento que lea.
+ * Los eventos se lanzan a partir de llamar a los distintos métodos.
  */
-export function getRegisteredElements() {
-    return admission.findStorage().then((registeredElements) => {
+export class ProxyConnection extends EventEmitter {
+    // Atributos
+    private admission: EcloudAdmissionClient;
+    private acs: EcloudAcsClient;
 
-        let runtimes: { [runtimeId: string]: Runtime } = {};
-        let components: { [componentId: string]: Component } = {};
-        let services: { [serviceId: string]: Service } = {};
-        let resources: { [resourceId: string]: Resource } = {};
+    // Eventos
+    public onLogin: Function;
+    public onAddDeployment: Function;
+    public onRemoveDeploymemt: Function;
+    public onAddService: Function;
+    public onRemoveService: Function;
+    public onAddComponent: Function;
+    public onRemoveComponent: Function;
+    public onAddRuntime: Function;
+    public onRemoveRuntime: Function;
+    public onAddResource: Function;
+    public onRemoveResource: Function;
 
-        // Separamos los distintos elementos dependiendo de qué tipo sean
-        for (let indice = 0; indice < registeredElements.length; indice++) {
-            switch (registeredElements[indice].split('/')[3]) {
+    // Constructor
+    constructor() {
+        super();
+        this.onLogin = this.registerEvent<Function>();
+        this.onAddDeployment = this.registerEvent<(deploymentId, deployment) => any>();
+        this.onRemoveDeploymemt = this.registerEvent<Function>();
+        this.onAddService = this.registerEvent<(serviceId, service) => any>();
+        this.onRemoveService = this.registerEvent<Function>();
+        this.onAddComponent = this.registerEvent<(componentId, component) => any>();
+        this.onRemoveComponent = this.registerEvent<Function>();
+        this.onAddRuntime = this.registerEvent<(runtimeId, runtime) => any>();
+        this.onRemoveRuntime = this.registerEvent<Function>();
+        this.onAddResource = this.registerEvent<(resourceId, resource) => any>();
+        this.onRemoveResource = this.registerEvent<Function>();
+    }
+    login(username: string, password: string) {
+        this.acs = new EcloudAcsClient(ACS_URI);
+        this.acs.login(username, password).then(({ accessToken, user }) => {
+            this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
+            // this.admission = new EcloudAdmissionClient(ADMISSION_URI);
+            this.admission.onConnected(() => {
+                console.info('Successfully connected to admission');
+            });
+            this.admission.onEcloudEvent((event: EcloudEvent) => {
+                console.info('Evento: ', event);
+                switch (event.type) {
+                    case EcloudEventType.service:
+                        console.info('Service event received: ' + event.strName);
+                        // Service event type handler function
+                        break;
+                    case EcloudEventType.node:
+                        console.info('Node event received: ' + event.strName);
+                        // Node event type handler function
+                        break;
+                    case EcloudEventType.instance:
+                        console.info('Instance event received: ' + event.strName);
+                        // Instance event type handler function
+                        break;
+                    case EcloudEventType.metrics:
+                        console.info('Metrics event received: ' + event.strName);
+                        // Metrics event type handler function
+                        break;
+                    default:
+                        console.error('Non espected ecloud event type: ' + event.strType + '/' + event.strName);
+                }
+            });
+
+            this.admission.onError((error: any) => {
+                console.error('Error received from admission-client: ' + JSON.stringify(error));
+            });
+
+            this.admission.init().then(() => {
+                this.emit(this.onLogin, user.name);
+            });
+        });
+    }
+    getDeploymentList() {
+        this.admission.findDeployments().then((deploymentList) => {
+            for (let deploymentId in deploymentList) {
+                this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+            }
+        });
+    }
+    getRegisteredElements() {
+        this.admission.findStorage().then((registeredElements) => {
+            for (let i = 0; i < registeredElements.length; i++) {
+                this.getElementInfo(registeredElements[i]);
+            }
+        });
+    }
+
+    undeployDeployment(deploymentURN: string): void {
+        this.admission.undeploy(deploymentURN);
+    }
+
+    getElementInfo(uri: string) {
+        return this.admission.getStorageManifest(uri).then((element) => {
+            switch (uri.split('/')[3]) {
                 case 'runtime':
                 case 'runtimes':
-                    runtimes[registeredElements[indice]] = null;
+                    this.emit(
+                        this.onAddRuntime,
+                        uri,
+                        utils.transformManifestToRuntime(element));
                     break;
                 case 'service':
                 case 'services':
-                    services[registeredElements[indice]] = null;
+                    this.emit(
+                        this.onAddService,
+                        uri,
+                        utils.transformManifestToService(element));
                     break;
                 case 'component':
                 case 'components':
-                    components[registeredElements[indice]] = null;
+                    this.emit(this.onAddComponent,
+                        uri,
+                        utils.transformManifestToComponent(element));
                     break;
                 case 'resource':
                 case 'resources':
-                    resources[registeredElements[indice]] = null;
+                    this.emit(
+                        this.onAddResource,
+                        uri,
+                        utils.transformManifestToResource(element)
+                    );
                     break;
                 default:
-                    console.info('Case not covered', registeredElements[indice]);
+                    console.info('Case not covered', uri, element);
             }
-        }
+        });
+    }
 
-        return { runtimes, components, services, resources };
-    });
-}
-
-export function undeployDeployment(deploymentId: string): void {
-    console.info('INFO: Realizamos undeploy de: ' + deploymentId);
-}
-
-export function getElementInfo(uri: string) {
-    return admission.getStorageManifest(uri);
-}
-export function createNewHTTPENtrypoint(params: {
-    'usePlatformGeneratedDomain': boolean,
-    'domain': string,
-    'accept-tls': boolean,
-    'require-client-certificates': boolean,
-    'instances': number,
-    'resilence': number
-}) {
-    return auxFunction().then(function () {
+    createNewHTTPENtrypoint(params: any) {
         console.info('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
-    });
-}
+    }
 
-export function addDeployment(params) {
-    console.log('Creando un nuevo deployment con los parámetros: ' + JSON.stringify(params));
-}
+    addDeployment(params) {
+        console.log('Creando un nuevo deployment con los parámetros: ' + JSON.stringify(params));
+    }
 
-/*
-export function getMetrics() {
-    return auxFunction().then(function () {
+    aplyChangesToDeployment(changes) {
+        console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
+    }
 
-        let parsedBody = ejemploMetricas;
+    // @param elementId: Elemento o lista de elementos
+    deleteElement(elementId) {
+        console.log('Enviamos mensaje para eliminar: ' + JSON.stringify(elementId));
+    }
 
-        let normalMetrics: {
-            [deploymentId: string]: {
-                [rolId: string]: {
-                    [instanceId: string]: Deployment.Rol.Instance.CommonMetrics
-                }
-            }
-        } = {};
-        let entryPointMetrics: {
-            [deploymentId: string]: {
-                [rolId: string]: {
-                    [instanceId: string]: Deployment.Rol.Instance.EntryPointMetrics
-                }
-            }
-        } = {};
+    // @param elementId: Elemento o lista de elementos
+    downloadManifest(elementId) {
+        console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
+    }
 
-        for (let metricsIndex in parsedBody.metrics) { // Por cada métrica obtenida
-            for (let serviceId in parsedBody.metrics[metricsIndex].deployments) { // Recorremos los servicios
-                for (let deploymentId in parsedBody.metrics[metricsIndex].deployments[serviceId]) { // Por cada deployment del servicio
-                    for (let componentId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId]) { // Por cada componente del deployment
-                        for (let rolId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId]) { // Por cada rol del componente
-                            for (let instanceId in parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId]) { // Por cada instáncia del rol
-                                if (serviceId.split('/')[5] === 'inbound') { // Si es un inbound
-                                    // Si no habíamos instanciado el deployment en el resultado lo hacemos
-                                    if (!entryPointMetrics[deploymentId]) entryPointMetrics[deploymentId] = {};
-                                    // Si no habíamos instanciado el rol en el resultado lo hacemos
-                                    if (!entryPointMetrics[deploymentId][rolId]) entryPointMetrics[deploymentId][rolId] = {};
-                                    // Inicializamos el array de la instancia en el resultado
-                                    if (!entryPointMetrics[deploymentId][rolId][instanceId]) entryPointMetrics[deploymentId][rolId][instanceId] = new Deployment.Rol.Instance.EntryPointMetrics();
+    addWebdomain(webdomain) {
+        console.log('Enviamos un mensaje para AÑADIR el dominio: ' + JSON.stringify(webdomain));
+    }
 
-                                    entryPointMetrics[deploymentId][rolId][instanceId].addValues(
-                                        Moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(),
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7,
-                                        8,
-                                        9,
-                                        10,
-                                        11,
-                                        12,
-                                        13,
-                                        14
-                                    );
+    deleteWebdomain(webdomain) {
+        console.log('Enviamos un mensaje para ELIMINAR el dominio: ' + JSON.stringify(webdomain));
+    }
 
-                                    console.info(
-                                        'NEW Inbound metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
-                                        + '):\ntime: ' + entryPointMetrics[deploymentId][rolId][instanceId].time
-                                        + '\ntimestamp_init: ' + entryPointMetrics[deploymentId][rolId][instanceId].timestamp_init
-                                        + '\ntimestamp_end: ' + entryPointMetrics[deploymentId][rolId][instanceId].timestamp_end
-                                        + '\nelapsed_msec: ' + entryPointMetrics[deploymentId][rolId][instanceId].elapsed_msec
-                                        + '\nhttp_request_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_request_per_second
-                                        + '\nhttp_errors_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_errors_per_second
-                                        + '\nhttp_size_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_size_in_per_second
-                                        + '\nhttp_size_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_size_out_per_second
-                                        + '\nhttp_chunk_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_chunk_in_per_second
-                                        + '\nhttp_chunk_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_chunk_out_per_second
-                                        + '\nhttp_response_time: ' + entryPointMetrics[deploymentId][rolId][instanceId].http_response_time
-                                        + '\nws_size_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_size_in_per_second
-                                        + '\nws_size_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_size_out_per_second
-                                        + '\nws_chunk_in_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_chunk_in_per_second
-                                        + '\nws_chunk_out_per_second: ' + entryPointMetrics[deploymentId][rolId][instanceId].ws_chunk_out_per_second
-                                    );
-                                } else { // Si no es un inbound (servicio normal)
-                                    // Si no habíamos instanciado el deployment en el resultado lo hacemos
-                                    if (!normalMetrics[deploymentId]) normalMetrics[deploymentId] = {};
-                                    // Si no habíamos instanciado el rol en el resultado lo hacemos
-                                    if (!normalMetrics[deploymentId][rolId]) normalMetrics[deploymentId][rolId] = {};
-                                    // Inicializamos el array de la instancia en el resultado
-                                    if (!normalMetrics[deploymentId][rolId][instanceId]) normalMetrics[deploymentId][rolId][instanceId] = new Deployment.Rol.Instance.CommonMetrics();
+    addDataVolume(params) {
+        console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
+    }
 
-                                    normalMetrics[deploymentId][rolId][instanceId].addValues(
-                                        Moment(parsedBody.metrics[metricsIndex].timeinterval.init).toDate(), // Time
-                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].cpu.mean * 100), // CPU
-                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].memory.mean), // MEM
-                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_input.mean * 100), // NET_IN
-                                        Math.round(parsedBody.metrics[metricsIndex].deployments[serviceId][deploymentId][componentId][rolId][instanceId].bandwith_output.mean * 100), // NET_OUT
-                                        0, // RPM
-                                        0 // RES
-                                    );
-                                    console.info(
-                                        'NEW Normal metric (' + deploymentId + ' ,' + rolId + ' ,' + instanceId
-                                        + '):\ntime: ' + normalMetrics[deploymentId][rolId][instanceId].time
-                                        + '\ncpu: ' + normalMetrics[deploymentId][rolId][instanceId].cpu
-                                        + '\nmem: ' + normalMetrics[deploymentId][rolId][instanceId].mem
-                                        + '\nnet_in: ' + normalMetrics[deploymentId][rolId][instanceId].net_in
-                                        + '\nnet_out: ' + normalMetrics[deploymentId][rolId][instanceId].net_out
-                                        + '\nrpm: ' + normalMetrics[deploymentId][rolId][instanceId].rpm
-                                        + '\nres: ' + normalMetrics[deploymentId][rolId][instanceId].res
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return { 'entryPointMetrics': entryPointMetrics, 'normalMetrics': normalMetrics };
-    });
-}
-*/
-
-export function aplyChangesToDeployment(changes) {
-    console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
-}
-
-// ElementId puede ser un URN o una lista de URNs
-export function deleteElement(elementId) {
-    console.log('Enviamos mensaje para eliminar: ' + JSON.stringify(elementId));
-}
-
-// ElementId puede ser un URN o una lista de URNs
-export function downloadManifest(elementId) {
-    console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
-}
-export function addWebdomain(webdomain) {
-    console.log('Enviamos un mensaje para AÑADIR el dominio: ' + JSON.stringify(webdomain));
-}
-export function deleteWebdomain(webdomain) {
-    console.log('Enviamos un mensaje para ELIMINAR el dominio: ' + JSON.stringify(webdomain));
-}
-export function addDataVolume(params) {
-    console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
-}
-export function addNewElement(params) {
-    console.log('Enviamos un mensaje para añadir un nuevo elemento. El mensaje contiene: ' + JSON.stringify(params));
-}
+    addNewElement(params) {
+        console.log('Enviamos un mensaje para añadir un nuevo elemento. El mensaje contiene: ' + JSON.stringify(params));
+    }
+};

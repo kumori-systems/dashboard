@@ -8,7 +8,7 @@ Vue.use(Vuex);
 import componentInTest from '../../../src/components/views/DataVolumes.vue';
 const componentSelector = '#datavolumes-view';
 
-import { Resource } from '../../../src/store/classes';
+import { DataVolume } from '../../../src/store/classes';
 
 describe('DataVolumes.vue', () => {
     let vm, storeActions, storeGetters, constructor;
@@ -86,7 +86,7 @@ describe('DataVolumes.vue', () => {
     describe('Volumes in dataVolumeList', () => {
         beforeEach(() => {
             storeGetters = {
-                getDataVolumesList: sinon.stub().returns([new Resource('eslap://eslap.cloud/resources/volume/acs/persistent', {})]),
+                getDataVolumesList: sinon.stub().returns([new DataVolume('eslap://eslap.cloud/resources/volume/acs/persistent')]),
                 getIsDataVolumeUsed: sinon.stub().returns((arg) => { return true; }),
                 getDeploymentName: sinon.stub().returns((arg) => { return 'Deployment Name'; }),
                 getDeploymentUsingDataVolume: sinon.stub().returns((arg) => { return 'deploymentId'; }),

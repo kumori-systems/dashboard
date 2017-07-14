@@ -14,25 +14,26 @@
             <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
             <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
         </p>
-        
-        <collapse accordion is-fullwidth>
+    
+        <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
             <collapse-item title="Components" v-if="componentOwnerList.length>0">
-                <div v-for="owner in componentOwnerList" v-if="ownerComponentList(owner).length>0 && (showPublicElements || owner === user)">
+                <div v-for="(owner, index) in componentOwnerList" v-bind:key="index" v-if="ownerComponentList(owner).length>0 && (showPublicElements || owner === user)">
                     <collapse accordion is-fullwidth>
                         <collapse-item v-bind:title="owner">
-                            <div v-for="component in ownerComponentList(owner)" v-if="componentVersionList(owner,component).length>0">
+                            <div v-for="(component, index) in ownerComponentList(owner)" v-bind:key="index" v-if="componentVersionList(owner,component).length>0">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="component" v-on:open="loadInfo('component', owner, component)">
+                                    <collapse-item v-bind:title="component">
                                         <table>
-                                            <tr v-for="version in componentVersionList(owner, component)">
+                                            <tr v-for="(version, index) in componentVersionList(owner, component)" v-bind:key="index">
                                                 <th>{{version}}</th>
-                                                <th>
-                                                    <div v-if="getIsComponentInUse(owner, component, version)">
-                                                        <div>
-                                                            <span class="ON_PROGRESS">in use by service/s:</span>
-                                                        </div>
-                                                        <div v-for="usedBy in getComponentUsedBy(owner, component, version)">{{usedBy}} </div>
+                                                <th v-if="getIsComponentInUse(owner, component, version)">
+                                                    <div>
+                                                        <span class="ON_PROGRESS">in use by service/s:</span>
                                                     </div>
+                                                    <div v-for="(usedBy, index) in getComponentUsedBy(owner, component, version)" v-bind:key="index">{{usedBy}} </div>
+                                                </th>
+                                                <th v-else>
+                                                    not in use
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showComponentInfo(owner, component, version)">
@@ -53,26 +54,29 @@
                 </div>
             </collapse-item>
             <collapse-item title="Services" v-if="serviceOwnerList.length>0">
-                <div v-for="owner in serviceOwnerList">
+                <div v-for="(owner, index) in serviceOwnerList" v-bind:key="index">
                     <collapse accordion is-fullwidth>
                         <collapse-item v-bind:title="owner" v-if="ownerServiceList(owner).length>0">
-                            <div v-for="service in ownerServiceList(owner)">
+                            <div v-for="(service, index) in ownerServiceList(owner)" v-bind:key="index">
                                 <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0" v-on:open="loadInfo('service', owner, service)">
+                                    <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0">
                                         <table>
-                                            <tr v-for="version in serviceVersionList(owner, service)">
+                                            <tr v-for="(version, index) in serviceVersionList(owner, service)" v-bind:key="index">
                                                 <th>{{version}}</th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
                                                     <div>
                                                         <span class="ON_PROGRESS">in use by deployment/s:</span>
                                                     </div>
-                                                    <div v-for="usedBy in getServiceUsedBy(owner, service, version)">{{usedBy}}</div>
+                                                    <div v-for="(usedBy, index) in getServiceUsedBy(owner, service, version)" v-bind:key="index">{{usedBy}}</div>
+                                                </th>
+                                                <th v-else>
+                                                    not in use
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    
+    
                                                     <router-link v-if="selectedServiceIsInbound(getServiceId(owner, service, version))" v-bind:to="'newHTTPEntrypoint'">
                                                         <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
@@ -83,7 +87,7 @@
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
-                                                    
+    
                                                     <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
@@ -99,41 +103,45 @@
                 </div>
             </collapse-item>
             <collapse-item title="Runtimes" v-if="runtimeOwnerList.length>0">
-                <div v-for="owner in runtimeOwnerList">
+                <div v-for="(owner, index) in runtimeOwnerList" v-bind:key="index">
                     <collapse accordion is-fullwidth>
                         <collapse-item v-bind:title="owner">
-                            <div v-for="runtime in ownerRuntimeList(owner)">
-                                <collapse accordion is-fullwidth>
-                                    <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0" v-on:open="loadInfo('runtime', owner, runtime)">
-                                        <table>
-                                            <tr v-for="version in runtimeVersionList(owner, runtime)">
-                                                <th>{{version}}</th>
-                                                <th v-if="getIsRuntimeInUse(owner, runtime, version)">
-                                                    <div>
-                                                        <span class="ON_PROGRESS">in use by component/s:</span>
-                                                    </div>
-                                                    <div v-for="usedBy in getRuntimeUsedBy(owner, runtime, version)">{{usedBy}} </div>
-                                                </th>
-                                                <th>
-                                                    <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
-                                                        <i class="fa fa-info" aria-hidden="true" />
-                                                    </button>
-                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteRuntime(owner, runtime, version)">
-                                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                                    </button>
-                                                    <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">
-                                                </th>
-                                            </tr>
-                                        </table>
-                                    </collapse-item>
-                                </collapse>
-                            </div>
+                            <collapse accordion is-fullwidth v-for="(runtime, index) in ownerRuntimeList(owner)" v-bind:key="index">
+                                <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0">
+                                    <table>
+                                        <tr v-for="(version, index) in runtimeVersionList(owner, runtime)" v-bind:key="index">
+                                            <th>{{version}}</th>
+                                            <th v-if="getIsRuntimeInUse(owner, runtime, version)">
+                                                <div>
+                                                    <span class="ON_PROGRESS">in use by component/s:</span>
+                                                </div>
+                                                <div v-for="(usedBy, index) in getRuntimeUsedBy(owner, runtime, version)" v-bind:key="index">{{usedBy}} </div>
+                                            </th>
+                                            <th v-else>
+                                                not in use
+                                            </th>
+                                            <th>
+                                                <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
+                                                    <i class="fa fa-info" aria-hidden="true" />
+                                                </button>
+                                                <button class="button is-danger" v-if="owner===user" v-on:click="deleteRuntime(owner, runtime, version)">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                                <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">
+                                            </th>
+                                        </tr>
+                                    </table>
+                                </collapse-item>
+                            </collapse>
                         </collapse-item>
                     </collapse>
                 </div>
             </collapse-item>
         </collapse>
-        
+        <div v-else>
+            no elements found
+        </div>
+    
         <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
         <info v-bind:visible="infoIsVisible" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="infoIsVisible=false"></info>
         <delete-group v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group>
@@ -177,7 +185,7 @@ export default class Elements extends Vue {
     // id, tipo, elemento, version
     modalElementList: Array<[string, string, string, string]> = [];
 
-    created(){
+    created() {
         this.$store.dispatch('getElementList');
     }
 
@@ -198,193 +206,136 @@ export default class Elements extends Vue {
 
     get getComponentId() {
         return (owner, component, version) => {
-            let res = this.$store.getters.getComponentId(owner, component, version);
-            console.log('La id del componente es: ',res);
-            return res;
+            return this.$store.getters.getComponentId(owner, component, version);
         }
     }
 
     get componentOwnerList() {
-        let res = this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
-        console.log('componentOwnerList: ', res);
-        return res;
+        return this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerComponentList() {
         return (owner) => {
-            let res = this.$store.getters.getOwnerComponentList(owner, this.search);
-            console.log('ownerComponentList', res);
-            return res;
+            return this.$store.getters.getOwnerComponentList(owner, this.search);
         }
     }
 
     get componentVersionList() {
         return (owner, component) => {
-            let res = this.$store.getters.getComponentVersionList(owner, component, this.search);
-            console.log('componentVersionList', res);
-            return res;
+            return this.$store.getters.getComponentVersionList(owner, component, this.search);
         }
     }
 
     get serviceOwnerList() {
-        let res = this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
-        console.log('serviceOwnerList', res);
-        return res;
+        return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerServiceList() {
         return (owner) => {
-            let res = this.$store.getters.getOwnerServiceList(owner, this.search);
-            console.log('ownerServiceList', res);
-            return res;
+            return this.$store.getters.getOwnerServiceList(owner, this.search);
         }
     }
 
     get selectedServiceIsInbound() {
         return (serviceId) => {
-            let res = this.$store.getters.getServiceIsEntryPoint(serviceId);
-            console.log('serlectedServiceIsInbound', res);
-            return res;
+            return this.$store.getters.getServiceIsEntryPoint(serviceId);
         }
     }
 
     get serviceVersionList() {
         return (owner, service) => {
-            let res = this.$store.getters.getServiceVersionList(owner, service, this.search);
-            console.log('serviceVersionList',res);
-            return res;
+            return this.$store.getters.getServiceVersionList(owner, service, this.search);
         }
     }
     get getIsComponentInUse() {
         return (owner, component, version) => {
-            let res = this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
-            console.log('getIsComponentInUse', res);
-            return res;
+            return this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
         }
     }
 
     get getComponentUsedBy() {
         return (owner, component, version) => {
-            let res =this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
-            console.log('getComponentUsedBy', res);
-            return res;
+            return this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
         }
     }
 
     get getComponentOwner() {
         return (componentId) => {
-            let res = this.$store.getters.getComponentOwner(componentId);
-            console.log('getComponentOwner', res);
-            return res;
+            return this.$store.getters.getComponentOwner(componentId);
         }
     }
 
     get getServiceName() {
         return (serviceId) => {
-            let res = this.$store.getters.getServiceName(serviceId);
-            console.log('getServiceName', res);
-            return res;
+            return this.$store.getters.getServiceName(serviceId);
         };
     }
 
     get getServiceVersion() {
         return (serviceId) => {
-            let res = this.$store.getters.getServiceVersion(serviceId);
-            console.log('getServiceVersion', res);
-            return res;
+            return this.$store.getters.getServiceVersion(serviceId);
         };
     }
     get getServiceId() {
         return (owner, service, version) => {
-            let res = this.$store.getters.getServiceId(owner, service, version);
-            console.log('getServiceId', res);
-            return res;
+            return this.$store.getters.getServiceId(owner, service, version);
         }
     }
     get getIsServiceInUse() {
         return (owner, service, version) => {
-            let res = this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
-            console.log('getIsServiceInUse', res);
-            return res;
+            return this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
         };
     }
     get getServiceUsedBy() {
         return (owner, service, version) => {
-            let res = this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
-            console.log('getServiceUsedBy', res);
-            return res;
+            return this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
         };
     }
     get getServiceOwner() {
         return (serviceId) => {
-            let res = this.$store.getters.getServiceOwner(serviceId);
-            console.log('getServiceOwner', res);
-            return res;
+            return this.$store.getters.getServiceOwner(serviceId);
         };
     }
 
     get runtimeOwnerList() {
-        let res = this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
-        console.log('runimeOwnerList', res);
-        return res;
+        return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
     }
 
     get ownerRuntimeList() {
         return (owner) => {
-            let res = this.$store.getters.getOwnerRuntimeList(owner, this.search);
-            console.log('ownerRuntimeList', res);
-            return res;
+            return this.$store.getters.getOwnerRuntimeList(owner, this.search);
         }
     }
     get getRuntimeVersion() {
         return (runtimeId) => {
-            let res = this.$store.getters.getRuntimeVersion(runtimeId);
-            console.log('getRuntimeVersion', res);
-            return res;
+            return this.$store.getters.getRuntimeVersion(runtimeId);
         }
     }
 
     get getRuntimeId() {
         return (owner, runtime, version) => {
-            let res = this.$store.getters.getRuntimeId(owner, runtime, version);
-            console.log('getRuntimeId', res);
-            return res;
+            return this.$store.getters.getRuntimeId(owner, runtime, version);
         }
     }
 
     get getIsRuntimeInUse() {
         return (owner, runtime, version) => {
-            let res = this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
-            console.log('getIsRuntimeInUse', res);
-            return res;
+            return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
         }
     }
     get getRuntimeUsedBy() {
         return (owner, runtime, version) => {
-            let res = this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
-            console.log('getRuntimeUsedBy', res);
-            return res;
+            return this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
         }
     }
     get getRuntimeOwner() {
         return (runtimeId) => {
-            let res = this.$store.getters.getRuntimeOwner(runtimeId);
-            console.log('getRuntimeOwner', res);
-            return res;
+            return this.$store.getters.getRuntimeOwner(runtimeId);
         };
     }
     get runtimeVersionList() {
         return (owner, runtime) => {
-            let res = this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
-            console.log('runtimeVersionList', res);
-            return res;
-        }
-    }
-
-    loadInfo(type, owner, element){
-        if(this.$store.getters.getNeedElementInfo(type, owner, element)){
-            console.log('Se necesita información del componente: ', type, owner, element);
-            this.$store.dispatch('loadElementInfo', {type, owner, element});
+            return this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
         }
     }
 

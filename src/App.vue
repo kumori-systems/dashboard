@@ -48,7 +48,7 @@ export default class App extends Vue {
 	password: string = null;
 
 	onSubmit() {
-		this.$store.dispatch('init', { 'username': this.username, 'password': this.password });
+		this.$store.dispatch('login', { 'username': this.username, 'password': this.password });
 	}
 
 	beforeMount(): void {

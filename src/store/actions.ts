@@ -1,105 +1,81 @@
-import * as connection from './proxy';
+import { ProxyConnection } from './proxy/index';
 import { DeploymentItem } from './../components';
-import { Deployment, Component } from './classes';
+import { Deployment, Component, Service, Runtime, Resource } from './classes';
 import urlencode from 'urlencode';
+
+const connection: ProxyConnection = new ProxyConnection();
 export default {
-    init({ commit, dispatch }, { username, password }) {
-        connection.login(username, password).then((user) => {
-            console.info('SUCCESSFULLY AUTHENTICATED AS', user);
+    login({ commit, dispatch, getters }, { username, password }) {
+        connection.login(username, password);
+        connection.onLogin((user: string | Error) => {
+            if (typeof user === Error.name) {
+                console.error('Error authenticating the user', user);
+                commit('authError', true);
+            };
             commit('login', user);
-        }).catch((error) => {
-            commit('authError', true);
-            console.error('Error authenticating the user', error);
         });
-    },
-    getDeploymentList({ commit, dispatch }) {
-        // TODO: realizar un timmer para que la función no pueda llamarse en x tiempo
-        connection.getDeploymentList().then((deploymentList) => {
-            commit('setDeploymentList', deploymentList);
-            // añadimos cada deployment como un deploymentMenuItem
-            let res = [];
-            for (let key in deploymentList) {
-                res.push({
-                    'name': deploymentList[key].name,
-                    'path': '/deployment/' + urlencode(key)
-                });
-            }
-            commit('addDeploymentMenuItem', res);
-        }).catch(function (error) {
-            console.error('Error managing deployments: ' + error);
-        });
-    },
-    getElementList({ commit }) {
-        connection.getRegisteredElements().then((registeredElements) => {
-            commit('setRegisteredElements', registeredElements);
-        });
-    },
-    /*
-    getElementInfo({ commit }, serviceId) {
-        connection.getElementInfo(serviceId);
-    },
-    */
-    loadElementInfo({ commit, getters }, { type, owner, element }) {
-        let elementList: Array<string> = getters.getElementBundle(type, owner, element);
-        console.log('La lista de elementos por la que preguntamos es: ', elementList);
-        for (let i = 0; i < elementList.length; i++)
-            connection.getElementInfo(elementList[i]).then((value) => {
-                let elem;
-                console.log('Cuando cargamos la info de un elemento, la conexion nos devuelve', value);
-                switch (type) {
-                    case 'service':
-                        console.log('Se trata de un servicio');
-                        break;
-                    case 'component':
-                        console.log('Se trata de un component');
-                        elem = new Component(
-                            elementList[i], // uri
-                            value.runtime, // runtime
-                            value.configuration.resources, // resourcesConfig: { [resourceName: string]: string }
-                            value.configuration.parameters, // parameters: Object
-                            {}, // proChannels: { [channelId: string]: Channel }
-                            {}, // reqChannels: { [channelId: string]: Channel }
-                        );
-                        commit('addComponent', { id: elementList[i], elem });
-                        break;
-                    case 'runtime':
-                        console.log('Se trata de un runtime');
-                        break;
-                    default:
-                        console.error('¿De qué tipo hemos pedido el elemento?', type);
-                }
+
+        connection.onAddDeployment((deploymentId: string, deployment: Deployment) => {
+            let val: { [id: string]: Deployment } = {};
+            val[deploymentId] = deployment;
+            commit('addDeployment', val);
+            commit('addDeploymentMenuItem', {
+                'name': deployment.name,
+                'path': '/deployment/' + urlencode(deploymentId)
             });
-    },
-    /*
-    getRegisteredElements({ commit }) {
-        connection.getRegisteredElements().then(function ( registeredElements ) {
-            commit('setRegisteredElements', { registeredElements });
-        }).catch(function (error) {
-            console.error('Error obtaining registered elements: ' + error);
+            // ¿Tenemos el servicio asociado?
+            if (getters.getServiceInfo(deployment.serviceId) === undefined) {
+                connection.getElementInfo(deployment.serviceId);
+            }
         });
-    },*/
-    getManifest({ commit }, { uri }) {
-        connection.getElementInfo(uri).then(function (element) {
-            // Guardamos los elementos
-            commit('setElementData', { element });
-        }).catch(function (error) { // TODO: mensaje de advertencia al usuario
-            console.error('Error obtaining registered elements: ' + error);
+
+        connection.onAddService((serviceId: string, service: Service) => {
+            let val: { [id: string]: Service } = {};
+            val[serviceId] = service;
+            commit('addService', val);
+        });
+
+        connection.onAddComponent((componentId: string, component: Component) => {
+            let val: { [id: string]: Component } = {};
+            val[componentId] = component;
+            commit('addComponent', val);
+        });
+
+        connection.onAddRuntime((runtimeId: string, runtime: Runtime) => {
+            let val: { [id: string]: Runtime } = {};
+            val[runtimeId] = runtime;
+            commit('addRuntime', val);
+        });
+
+        connection.onAddResource((resourceId: string, resource: Resource) => {
+            let val: { [id: string]: Resource } = {};
+            val[resourceId] = resource;
+            commit('addResource', val);
         });
     },
-    /*
-    // TODO: Las métricas no se deberían de obtener mediante una llamada, sino mediante eventos
-    getMetrics({ commit }) {
-        connection.getMetrics().then(function (metrics) {
-            commit('addMetrics', metrics);
-        }).catch(function (error) {
-            console.error('Error obtaining metrics: ' + error);
-        });
+    getDeploymentList({ getters, dispatch }) {
+        let deploymentList = getters.getDeploymentList;
+        for (let deploymentId in deploymentList) {
+            return; // Si ya tenemos algo en la lista, no hace falta que volvamos a hacer la llamada
+        }
+        connection.getDeploymentList();
+        // dispatch('getElementList');
     },
-    */
+    getElementList({ dispatch, getters }) {
+        // Se ha escogido runtimeList porque en teoría es la única lista que no puede obtenerse en otras vistas
+        let runtimeList = getters.getRuntimeList;
+        for (let runtimeId in runtimeList) {
+            return; // Si ya tenemos algo en la lista, no hace falta que volvamos a hacer la llamada
+        }
+        connection.getRegisteredElements();
+        dispatch('getDeploymentList');
+    },
+    getManifest(context, { uri }) {
+        connection.getElementInfo(uri);
+    },
     setFabElements({ commit }, { fabElementsList }) {
         commit('setFabElements', { fabElementsList });
     },
-
     toggleMenuItemExpanded({ commit }, { menuItem }) {
         commit('toggleMenuItemExpanded', menuItem);
     },
@@ -109,31 +85,31 @@ export default {
     aplyingChangesToDeployment({ commit }, changes) {
         connection.aplyChangesToDeployment(changes);
     },
-    createNewHTTPENtrypoint({ }, params) {
+    createNewHTTPENtrypoint(context, params) {
         connection.createNewHTTPENtrypoint(params);
     },
-    createNewDeployment({ }, params) {
+    createNewDeployment(context, params) {
         connection.addDeployment(params);
     },
-    deleteElement({ }, elementId) {
+    deleteElement(context, elementId) {
         connection.deleteElement(elementId);
     },
     selectedService({ commit }, serviceId) {
         commit('selectedService', serviceId);
     },
-    downloadManifest({ }, elementId) {
+    downloadManifest(context, elementId) {
         connection.downloadManifest(elementId);
     },
-    addWebDomain({ }, webdomain) {
+    addWebDomain(context, webdomain) {
         connection.addWebdomain(webdomain);
     },
-    deleteWebdomain({ }, webdomain) {
+    deleteWebdomain(context, webdomain) {
         connection.deleteWebdomain(webdomain);
     },
-    addDataVolume({ }, params) {
+    addDataVolume(context, params) {
         connection.addDataVolume(params);
     },
-    addNewElement({ }, params) {
+    addNewElement(context, params) {
         connection.addNewElement(params);
     }
 };

@@ -26,3 +26,7 @@ Visual studio plulgin: vetur (https://marketplace.visualstudio.com/items?itemNam
 En ésta vista, hace falta también obtener la información de los servicios, ya que la urn de un componente la almacena el servicio. Si ésta información la ofreciera el propio rol del deployment nos ahorraríamos unas cuantas llamadas, posiblemente innecesarias.
 
 - En la llamada para la vista Elements, tengo que hacer múltiples llamadas; una para obtener el número de elementos registrados en el sistema y una por cada elemento para obtener su información.
+
+## Preguntas
+- Actualmente con la info que tengo no puedo obtener la información de las resources de un servício,
+ya que tengo el tipo pero no la URI del resource. ¿Cómo podría resolver ésto?

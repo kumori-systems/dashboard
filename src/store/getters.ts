@@ -65,8 +65,8 @@ export default {
   },
   getIsEntryPoint: function (state, getters) {
     return function (deploymentId: string): boolean {
-      if (state.deploymentList[deploymentId] === undefined) return false;
-      return getters.getServiceIsEntryPoint(getters.getDeploymentService(deploymentId));
+      if (state.deploymentList[deploymentId] !== undefined)
+        return getters.getServiceIsEntryPoint(getters.getDeploymentService(deploymentId));
     };
   },
   getServiceIsEntryPoint: function (state) {
@@ -121,10 +121,9 @@ export default {
   */
   getDeploymentProvideChannels: function (state) {
     return (deploymentId: string) => {
-      console.log('Entramos por aquí');
       if (state.deploymentList[deploymentId] === undefined) return [];
-      console.log('Encuentra un deployment');
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      if (serviceId === undefined) return [];
       let res = [];
       for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
         let encontrado: boolean = false;
@@ -228,17 +227,26 @@ export default {
   },
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId: string): Array<string> {
+      console.log('Buscamos los volúmenes del deployment', deploymentId);
       let res: Array<string> = [];
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       if (state.serviceList[serviceId] === undefined) return [];
       let serviceResources = (<Service>state.serviceList[serviceId]).resources;
-      for (let resourceIndex in serviceResources) {
-        if (state.resourceList[serviceResources[resourceIndex]] !== null && (<Resource>state.resourceList[serviceResources[resourceIndex]]).realName && (<Resource>state.resourceList[serviceResources[resourceIndex]]).realName.split('/')[4] === 'volume')
-          res.push(serviceResources[resourceIndex]);
+      for (let serviceResourceIndex in serviceResources) {
+        console.log('El resourceIndex es: ', serviceResourceIndex);
+        console.log('Y su valor:', serviceResources[serviceResourceIndex]);
+        console.log('Donde buscamos contiene: ', state.resourceList[serviceResources[serviceResourceIndex]]);
+        console.log('Y el split nos devuelve', serviceResources[serviceResourceIndex].split('/')[4]);
+        if (
+          state.resourceList[serviceResources[serviceResourceIndex]] !== undefined
+          && serviceResources[serviceResourceIndex].split('/')[4] === 'volume'
+        )
+          res.push(serviceResources[serviceResourceIndex]);
       }
       return res;
     };
   },
+
   getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
       if (state.deploymentList[deploymentId] === undefined) return null;
@@ -507,7 +515,7 @@ export default {
         if (
           state.resourceList[resources[resourceId]]
           && state.resourceList[resources[resourceId]] !== null
-          && (<Resource>state.resourceList[resources[resourceId]]).realName.split('/')[4] === 'volume'
+          && resourceId.split('/')[4] === 'volume'
         ) {
           res.push(resources[resourceId]);
         }
@@ -578,6 +586,12 @@ export default {
   },
   getDeploymentRolInstanceChartData: function (state): Function {
     return function (deploymentId: string, rolId: string, instanceId: string): Deployment.Rol.Instance.Metrics {
+      if (
+        !state.deploymentList[deploymentId]
+        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId]
+        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId]
+      )
+        return null;
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
     };
   },
@@ -590,13 +604,15 @@ export default {
       let res: Array<string> = [];
       let owner: string;
       for (let componentIndex in state.componentList) {
-        owner = getters.getElementOwner(componentIndex);
-        if (
-          (showPublicElements || getters.getUser === owner) // Cumple las condiciones
-          && ((filter && filter !== null && filter.length > 0 && componentIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
-          && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
-        ) {
-          res.push(owner);
+        if (state.componentList[componentIndex] !== undefined) {
+          owner = (<Component>state.componentList[componentIndex]).owner;
+          if (
+            (showPublicElements || getters.getUser === owner) // Cumple las condiciones
+            && ((filter && filter !== null && filter.length > 0 && componentIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+            && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
+          ) {
+            res.push(owner);
+          }
         }
       }
 
@@ -609,9 +625,9 @@ export default {
       // Buscamos todos los componentes del owner
       let res: Array<string> = []; let compName;
       for (let componentId in state.componentList) {
-        if (getters.getElementOwner(componentId) === owner) {
+        if ((<Component>state.componentList[componentId]).owner === owner) {
           // Si el componente ya esta no lo añadimos
-          compName = getters.getComponentName(componentId);
+          compName = (<Component>state.componentList[componentId]).name;
           if (res.findIndex(comp => { return comp === compName; }) === -1) {
             if (filter !== null && filter.length > 0) {
               if (componentId.indexOf(filter) !== -1) {
@@ -628,15 +644,17 @@ export default {
   getComponentVersionList: function (state, getters) {
     return (owner, component, filtro) => {
       let res: Array<string> = [];
-      // Buscamos en la lista de componentes, todos aquellos que encajen con el owner y el componente
-      for (let key in state.componentList) {
-        if (getters.getElementOwner(key) === owner && getters.getComponentName(key) === component) {
+      for (let componentId in state.componentList) {
+        if (
+          (<Component>state.componentList[componentId]).owner === owner
+          && (<Component>state.componentList[componentId]).name === component
+        ) {
           if (filtro !== null && filtro.length > 0) {
-            if (key.indexOf(filtro) !== -1) {
-              res.push(getters.getServiceVersion(key));
+            if (componentId.indexOf(filtro) !== -1) {
+              res.push((<Component>state.componentList[componentId]).version);
             }
           } else {
-            res.push(getters.getServiceVersion(key));
+            res.push((<Component>state.componentList[componentId]).version);
           }
         }
       }
@@ -645,26 +663,13 @@ export default {
     };
   },
 
-  getComponentName: function (state) {
-    return (componentId: string) => {
-      return componentId.split('/')[4];
-    };
-  },
-
-  getComponentVersion: function (state) {
-    return (componentId) => {
-      let splitted = componentId.split('/');
-      return splitted[splitted.length - 1];
-    };
-  },
-
   getIsComponentInUse: function (state, getters) {
-    return (componentId) => {
+    return (componentId: string) => {
       // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
       for (let serviceIndex in state.serviceList) {
         if (state.serviceList[serviceIndex] === undefined || state.serviceList[serviceIndex] === null) return false;
-        for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
-          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
+        for (let rolId in (<Service>state.serviceList[serviceIndex]).roles) {
+          if ((<Service>state.serviceList[serviceIndex]).roles[rolId].component === componentId)
             return true;
         }
       }
@@ -672,14 +677,14 @@ export default {
     };
   },
   getComponentUsedBy: function (state, getters) {
-    return (componentId) => {
+    return (componentId: string) => {
       let res: Array<string> = [];
       // Tenemos que comprobar si el componente está siendo utilizado por algún servicio
       for (let serviceIndex in state.serviceList) {
         if (state.serviceList[serviceIndex] === undefined || state.serviceList[serviceIndex] === null) return false;
-        for (let componentIndex in (<Service>state.serviceList[serviceIndex]).components) {
-          if ((<Service>state.serviceList[serviceIndex]).components[componentIndex] === componentId)
-            res.push((<Service>state.serviceList[serviceIndex]).name + getters.getServiceVersion(serviceIndex));
+        for (let rolId in (<Service>state.serviceList[serviceIndex]).roles) {
+          if ((<Service>state.serviceList[serviceIndex]).roles[rolId].component === componentId)
+            res.push((<Service>state.serviceList[serviceIndex]).name + (<Component>state.serviceList[serviceIndex]).version);
         }
       }
       return res;
@@ -687,14 +692,14 @@ export default {
   },
 
   /**
-   * Devolvemos una lista de servicios web disponibles para el usuario
+   * Devolvemos una lista de servicios disponibles para el usuario
    */
   getServiceOwnerList: function (state, getters) {
     return (showPublicElements: boolean, filter: string): Array<string> => {
       let res: Array<string> = [];
       let owner: string;
       for (let serviceIndex in state.serviceList) {
-        owner = getters.getElementOwner(serviceIndex);
+        owner = (<Service>state.serviceList[serviceIndex]).owner;
         if ((showPublicElements || getters.getUser === owner) // Cumple las condiciones
           && ((filter && filter !== null && filter.length > 0 && serviceIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
@@ -705,16 +710,20 @@ export default {
       return res;
     };
   },
-
+  getServiceInfo: function (state) {
+    return (serviceId) => {
+      return state.serviceList[serviceId];
+    };
+  },
   getOwnerServiceList: function (state, getters) {
     return (owner, filter) => {
       // Buscamos todos los servicios del owner
       let res: Array<string> = [];
       let serviceName;
       for (let serviceId in state.serviceList) {
-        serviceName = getters.getServiceName(serviceId);
+        serviceName = (<Service>state.serviceList[serviceId]).name;
 
-        if (getters.getElementOwner(serviceId) === owner
+        if ((<Service>state.serviceList[serviceId]).owner === owner
           && ((filter && filter !== null && filter.length > 0 && serviceId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && res.findIndex(serv => { return serv === serviceName; }) === -1) {
           res.push(serviceName);
@@ -728,14 +737,15 @@ export default {
     return (owner, service, filtro) => {
       let res: Array<string> = [];
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
-      for (let key in state.serviceList) {
-        if (getters.getElementOwner(key) === owner && getters.getServiceName(key) === service) {
+      for (let serviceId in state.serviceList) {
+        if ((<Service>state.serviceList[serviceId]).owner === owner
+          && (<Service>state.serviceList[serviceId]).name === service) {
           if (filtro !== null && filtro.length > 0) {
-            if (key.indexOf(filtro) !== -1) {
-              res.push(getters.getServiceVersion(key));
+            if (serviceId.indexOf(filtro) !== -1) {
+              res.push((<Service>state.serviceList[serviceId]).version);
             }
           } else {
-            res.push(getters.getServiceVersion(key));
+            res.push((<Service>state.serviceList[serviceId]).version);
           }
 
         }
@@ -749,16 +759,19 @@ export default {
       let res: Array<string> = [];
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
       for (let runtimeId in state.runtimeList) {
-        if (state.runtimeList[runtimeId] !== undefined && state.runtimeList[runtimeId] !== null)
-          if (getters.getElementOwner(runtimeId) === owner && getters.getRuntimeName(runtimeId) === runtime) {
-            if (filtro !== null && filtro.length > 0) {
-              if (runtimeId.indexOf(filtro) !== -1) {
-                res.push(getters.getServiceVersion(runtimeId));
-              }
-            } else {
-              res.push(getters.getServiceVersion(runtimeId));
-            }
+        if (
+          state.runtimeList[runtimeId] !== undefined
+          && state.runtimeList[runtimeId] !== null
+          && (<Runtime>state.runtimeList[runtimeId]).owner === owner
+          && (<Runtime>state.runtimeList[runtimeId]).name === runtime
+        ) {
+          if (filtro !== null && filtro.length > 0) {
+            if (runtimeId.indexOf(filtro) !== -1)
+              res.push((<Runtime>state.runtimeList[runtimeId]).version);
+          } else {
+            res.push((<Runtime>state.runtimeList[runtimeId]).version);
           }
+        }
       }
 
       return res;
@@ -768,7 +781,7 @@ export default {
   getServiceNameList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList)
-      res.push(getters.getServiceName(serviceId));
+      res.push((<Service>state.serviceList[serviceId]).name);
     return res;
   },
 
@@ -779,7 +792,7 @@ export default {
     let res = [];
     for (let serviceId in state.serviceList) {
       if (getters.getServiceIsEntryPoint(serviceId))
-        res.push(getters.getServiceName(serviceId));
+        res.push((<Service>state.serviceList[serviceId]).name);
     }
     return res;
   },
@@ -793,14 +806,15 @@ export default {
       let res: Array<string> = [];
       let owner: string = null;
       for (let runtimeIndex in state.runtimeList) {
-        owner = getters.getElementOwner(runtimeIndex);
-
-        if (
-          (showPublicElements || getters.getUser === owner)
-          && ((filter && filter !== null && filter.length > 0 && runtimeIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
-          && (res.findIndex(menuItem => { return menuItem === owner; }) === -1)
-        ) {
-          res.push(owner);
+        if (state.runtimeList[runtimeIndex] !== undefined) {
+          owner = (<Runtime>state.runtimeList[runtimeIndex]).owner;
+          if (
+            (showPublicElements || getters.getUser === owner)
+            && ((filter && filter !== null && filter.length > 0 && runtimeIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+            && (res.findIndex(menuItem => { return menuItem === owner; }) === -1)
+          ) {
+            res.push(owner);
+          }
         }
       }
       return res;
@@ -812,8 +826,8 @@ export default {
       let res: Array<string> = [];
       let runtimeName;
       for (let runtimeId in state.runtimeList) {
-        runtimeName = getters.getRuntimeName(runtimeId);
-        if ((getters.getElementOwner(runtimeId) === owner)
+        runtimeName = (<Runtime>state.runtimeList[runtimeId]).name;
+        if (((<Runtime>state.runtimeList[runtimeId]).owner === owner)
           && ((filter && filter !== null && filter.length > 0 && runtimeId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && (res.findIndex(serv => { return serv === runtimeName; }) === -1)) {
           res.push(runtimeName);
@@ -823,95 +837,12 @@ export default {
     };
   },
 
-  getRuntimeVersion: function (state) {
-    return (runtimeId) => {
-      let splitted = runtimeId.split('/');
-      return splitted[splitted.length - 1];
-    };
-  },
-
-  getNeedElementInfo: function (state, getters) {
-    return (type, owner, element): Boolean => {
-      let elementVersions: Array<string> = getters.getElementBundle(type, owner, element);
-      console.log('El tipo que tenemos es: ', type, owner, element);
-      console.log('Vamos a preguntar en el estado por los elementos:', elementVersions);
-      for (let i = 0; i < elementVersions.length; i++) {
-        console.log('Preguntamos por el elemento', elementVersions[i]);
-        switch (type) {
-          case 'component':
-            if (
-              state.componentList[elementVersions[i]] === undefined
-              || state.componentList[elementVersions[i]] === null
-            )
-              return true;
-            break;
-          case 'service':
-            if (
-              state.serviceList[elementVersions[i]] === undefined
-              || state.serviceList[elementVersions[i]] === null
-            )
-              return true;
-            break;
-
-          case 'runtime':
-            if (
-              state.runtimeList[elementVersions[i]] === undefined
-              || state.runtimeList[elementVersions[i]] === null
-            )
-              return true;
-            break;
-          default:
-            console.error('getNeedElementInfno error, tipo de elemento no esperado:', type);
-        }
-      }
-      return false;
-    };
-  },
-  getElementBundle: function (state, getters) {
-    // Esta función sirve para obtener las distintas versiones del mismo elemento para cargar su info
-    return (type, owner, element) => {
-      let res: Array<string> = [];
-      switch (type) {
-        case 'component':
-          for (let componentId in state.componentList) {
-            if (
-              getters.getElementOwner(componentId) === owner
-              && getters.getComponentName(componentId) === element
-            )
-              res.push(componentId);
-          }
-          break;
-
-        case 'service':
-          for (let serviceId in state.serviceList) {
-            if (
-              getters.getElementOwner(serviceId) === owner
-              && getters.getServiceName(serviceId) === element
-            )
-              res.push(serviceId);
-          }
-          break;
-        case 'runtime':
-          for (let runtimeId in state.runtimeList) {
-            if (
-              getters.getElementOwner(runtimeId) === owner
-              && getters.getRuntimeName(runtimeId) === element
-            )
-              res.push(runtimeId);
-          }
-          break;
-        default:
-          console.error('¿De qué tipo hemos pedido el elemento?', type);
-      }
-      return res;
-    };
-  },
   getRuntimeId: function (state, getters) {
     return (owner, runtime, version) => {
       for (let runtimeId in state.runtimeList) {
-        if (getters.getElementOwner(runtimeId) === owner
-          && getters.getRuntimeName(runtimeId) === runtime
-          && getters.getRuntimeVersion(runtimeId) === version)
+        if ((<Runtime>state.runtimeList[runtimeId]).owner === owner
+          && (<Runtime>state.runtimeList[runtimeId]).name === runtime
+          && (<Runtime>state.runtimeList[runtimeId]).version === version)
           return runtimeId;
       }
     };
@@ -934,7 +865,10 @@ export default {
       let res = [];
       for (let componentId in state.componentList) {
         if ((<Component>state.componentList[componentId]).runtime === runtimeId)
-          res.push(getters.getComponentName(componentId) + getters.getComponentVersion(componentId));
+          res.push(
+            (<Component>state.componentList[componentId]).name
+            + (<Component>state.componentList[componentId]).version
+          );
       }
       return res;
     };
@@ -942,8 +876,9 @@ export default {
 
   getWebDomainList: function (state): Array<string> {
     let res: Array<string> = [];
-    for (let index in state.webDomainList) {
-      res.push((<Webdomain>state.webDomainList[index]).url);
+    for (let resourceId in state.resourceList) {
+      if ((state.resourceList[resourceId]).domain !== undefined)
+        res.push((<Webdomain>state.resourceList[resourceId]).domain);
     }
     return res;
   },
@@ -952,8 +887,9 @@ export default {
     let usedWebdomain: Array<[string, string]> = [];
     let websiteList: Array<string> = null;
     for (let deploymentId in state.deploymentList) {
-      websiteList = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (websiteList != null) {
+      if (state.deploymentList[deploymentId] !== undefined)
+        websiteList = (<Deployment>state.deploymentList[deploymentId]).website;
+      if (websiteList !== undefined && websiteList !== null) {
         for (let index in websiteList) {
           usedWebdomain.push([getters.getDeploymentName(deploymentId), websiteList[index]]);
         }
@@ -962,11 +898,19 @@ export default {
     return usedWebdomain;
   },
 
-  getWebdomainState: function (state) {
+  getWebdomainResource: function (state) {
+    return (webdomain: string) => {
+      for (let resourceId in state.resourceList) {
+        if ((<Webdomain>state.resourceList[resourceId]).domain === webdomain)
+          return resourceId;
+      }
+    };
+  },
+  getWebdomainState: function (state, getters) {
     return (webdomain) => {
-      return state.webDomainList.find(elem => {
-        return elem.url === webdomain;
-      }).state;
+      let resourceId: string = getters.getWebdomainResource(webdomain);
+      if (resourceId)
+        return (<Webdomain>state.resourceList[resourceId]).state;
     };
   },
 
@@ -974,26 +918,30 @@ export default {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
     let usedWebdomains: Array<string> = getters.getUsedWebDomainList;
-    let index: number;
-    for (let uwd in usedWebdomains) {
-      index = allWebDomains.indexOf(usedWebdomains[uwd]);
-      if (index > -1) {
-        allWebDomains.splice(index, 1);
+    let freeWebdomains = [];
+    for (let domain in allWebDomains) {
+      if (usedWebdomains.indexOf(allWebDomains[domain]) === -1) {
+        freeWebdomains.push(allWebDomains[domain]);
       }
     }
-    // En este punto, en allWebDomains, únicamente quedan aquellos que no están en la lista usedWebdomains
-    return allWebDomains;
+
+
+    console.log('All webdomains contiene:', allWebDomains);
+    console.log('Used webdomains contiene: ', usedWebdomains);
+    console.log('Free webdomains contiene: ', freeWebdomains);
+
+    return freeWebdomains;
   },
 
   getDataVolumesList: function (state, getters): Array<string> {
     let res: Array<string> = [];
-    for (let resourceIndex in state.resourceList) {
+    for (let resourceId in state.resourceList) {
       if (
-        state.resourceList[resourceIndex] !== null
-        && (<Resource>state.resourceList[resourceIndex]).realName
-        && (<Resource>state.resourceList[resourceIndex]).realName.split('/')[4] === 'volume'
+        state.resourceList[resourceId] !== undefined
+        && state.resourceList[resourceId] !== null
+        && resourceId.split('/')[4] === 'volume'
       ) {
-        res.push(resourceIndex);
+        res.push(resourceId);
       }
     }
     return res;
@@ -1006,47 +954,21 @@ export default {
   getComponentId: function (state, getters) {
     return (owner, component, version) => {
       for (let componentId in state.componentList) {
-        if (getters.getElementOwner(componentId) === owner
-          && getters.getComponentName(componentId) === component
-          && getters.getComponentVersion(componentId) === version)
+        if ((<Component>state.componentList[componentId]).owner === owner
+          && (<Component>state.componentList[componentId]).name === component
+          && (<Component>state.componentList[componentId]).version === version)
           return componentId;
       }
     };
   },
 
-  getServiceName: function (state) {
-    return (serviceId: string) => {
-      return serviceId.split('/')[4];
-      /*
-      if (state.serviceList[serviceId] === null) return serviceId;
-      return (<Service>state.serviceList[serviceId]).name;
-      */
-    };
-  },
-  getRuntimeName: function (state, getters) {
-    return (runtimeId) => {
-      let splitted = runtimeId.split('/');
-      if (splitted[5] === getters.getRuntimeVersion(runtimeId))
-        return splitted[4];
-      else
-        return splitted[4] + '.' + splitted[5];
-    };
-  },
-
-  getServiceVersion: function (state) {
-    return (serviceId: string) => {
-      // En el id debería de estar la versión del servicio
-      let splitted = serviceId.split('/');
-      return splitted[splitted.length - 1];
-    };
-  },
   getServiceId: function (state, getters) {
     return (owner, service, version) => {
       let myServiceId;
       for (let serviceId in state.serviceList) {
-        if (getters.getElementOwner(serviceId) === owner
-          && getters.getServiceName(serviceId) === service
-          && getters.getServiceVersion(serviceId) === version)
+        if ((<Service>state.serviceList[serviceId]).owner === owner
+          && (<Service>state.serviceList[serviceId]).name === service
+          && (<Service>state.serviceList[serviceId]).version === version)
           return serviceId;
       }
     };
@@ -1176,13 +1098,12 @@ export default {
   getFreeResource: function (state) {
     return (configId) => {
       let res: Array<string> = [];
-
-      // Miramos el tipo de configId
-      if (state.resourceList[configId] !== null && (<Resource>state.resourceList[configId]).realName) {
-        let type = (<Resource>state.resourceList[configId]).realName.split('/')[4];
-
+      if (
+        state.resourceList[configId] !== undefined
+        && state.resourceList[configId] !== null
+      ) {
         for (let resourceId in (<Array<Resource>>state.resourceList)) {
-          if ((<Resource>state.resourceList[resourceId]).realName && (<Resource>state.resourceList[resourceId]).realName.split('/')[4] === type) {
+          if (resourceId.split('/')[4] === configId.split('/')[4]) {
             res.push(resourceId);
           }
         }
@@ -1192,7 +1113,7 @@ export default {
       for (let deploymentId in (<Array<Deployment>>state.deploymentList)) {
         for (let resourceId in (<Deployment>state.deploymentList[deploymentId]).resourcesConfig) {
           let index = res.indexOf(resourceId);
-          if (index > -1)
+          if (index !== -1)
             res.splice(index, 1);
         }
       }
@@ -1209,7 +1130,7 @@ export default {
     // Tenemos que mirar en los recursos de los servicios
     return (dataVolumeId): boolean => {
       for (let serviceId in state.serviceList) {
-        if ((<Service>state.serviceList[serviceId]).resources.indexOf(dataVolumeId) !== -1)
+        if ((<Service>state.serviceList[serviceId]).resources[dataVolumeId] !== undefined)
           return true;
       }
       return false;

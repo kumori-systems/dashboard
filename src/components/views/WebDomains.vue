@@ -71,16 +71,21 @@ export default class WebDomains extends Vue {
                 case Webdomain.State.ON_VALIDATION:
                     return 'fa fa-exclamation-triangle';
                 default:
-                    console.error('Webdomains view received a non-covered webdomain state');
+                    console.error('Webdomains view received a non-covered webdomain state \'' + JSON.stringify(this.$store.getters.getWebdomainState(webdomain)) + '\' when asking for ' + webdomain + '\'s state');
                     return '';
             }
         }
     }
 
+// monitor-dame-argo.slap53.iti.es
+// 
+
+
+
     deleteWebDomain(webdomain) {
         this.$store.dispatch('deleteWebdomain', webdomain);
     }
-    
+
     addWebDomain() {
         if (this.newWebDomain != null && this.newWebDomain.length > 0)
             this.$store.dispatch('addWebDomain', this.newWebDomain);

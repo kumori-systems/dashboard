@@ -166,7 +166,9 @@ export default class Card extends Vue {
     }
 
     get volumes(): Array<number> {
-        return this.$store.getters.getDeploymentVolumes(this.deploymentId);
+        let res = this.$store.getters.getDeploymentVolumes(this.deploymentId);
+        console.log('Los volúmenes del deployment son: '+res);
+        return res;
     }
 }
 </script>
@@ -185,6 +187,7 @@ $radius: 5px;
 .fa-check-circle {
     color: $color_green;
     font-size: $icon_size;
+    z-index: 0;
 }
 
 .fa-circle {
@@ -230,6 +233,7 @@ $radius: 5px;
 .box {
     margin: 10px;
     background: whitesmoke;
+    z-index:1;
 }
 
 .card-body {

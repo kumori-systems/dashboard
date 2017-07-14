@@ -6,54 +6,37 @@ export default {
   authError(state, value) {
     state.authError = value;
   },
-  setStampState(state, stampState) {
-    // actualizamos el estado del stamp
-    state.deploymentList = { ...state.deploymentList, ...stampState.deploymentList };
-    state.serviceList = { ...state.serviceList, ...stampState.serviceList };
-    state.linkList = state.linkList.concat(stampState.linkList);
-    state.componentList = { ...state.componentList, ...stampState.componentList };
-    state.resourceList = { ...state.resourceList, ...stampState.resourceList };
-    state.runtimeList = { ...state.runtimeList, ...stampState.runtimeList };
+  addDeployment(state, deploymentMap) {
+    state.deploymentList = { ...state.deploymentList, ...deploymentMap };
   },
-  setDeploymentList(state, deploymentList) {
-    state.deploymentList = { ...state.deploymentList, ...deploymentList };
-  },
-  addComponent(state, { id, component }) {
-    state.componentList[id] = component;
-  },
-  setRegisteredElements(state, { runtimes, components, services, resources }) {
-    state.runtimeList = { ...state.runtimesList, ...runtimes };
-    state.componentList = { ...state.componentList, ...components };
-    state.serviceList = { ...state.serviceList, ...services };
-    state.resourceList = { ...state.resourceList, ...resources };
-  },
-  setElementData(state, { element }) {
-    let [elementId, elementData] = element;
-    state.registeredElements[elementId] = elementData;
-  },
-  setFabElements(state, { fabElementsList }) {
-    state.fabElements = fabElementsList;
-  },
-  addDeploymentMenuItem(state, deploymentList) {
+  addDeploymentMenuItem(state, deploymentMenuItem) {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
 
     // Quitamos los hijos anteriores para actualizar de cero
-    menuItem.children = [];
-
-    // añadimos cada deployment a la lista de children
-    deploymentList.forEach(element => {
-      menuItem.children.push(element);
-    });
+    if (!menuItem.children) menuItem.children = [];
+    menuItem.children.push(deploymentMenuItem);
+  },
+  addService(state, serviceMap) {
+    state.serviceList = { ...state.serviceList, ...serviceMap };
+  },
+  addComponent(state, componentMap) {
+    state.componentList = { ...state.componentList, ...componentMap };
+  },
+  addRuntime(state, runtimeMap) {
+    state.runtimeList = { ...state.runtimeList, ...runtimeMap };
+  },
+  addLink(state, link) {
+    state.linkList.push(link);
+  },
+  addResource(state, resourceMap) {
+    state.resourceList = { ...state.resourceList, ...resourceMap };
+  },
+  setFabElements(state, { fabElementsList }) {
+    state.fabElements = fabElementsList;
   },
   toggleMenuItemExpanded(state, menuItem) {
     menuItem.meta.expanded = !menuItem.meta.expanded;
-  },
-  setTemporaryState(state, temporaryState) {
-    state.temporaryState = { ...temporaryState };
-  },
-  clearTemporaryState(state) {
-    state.temporaryState = {};
   },
   addMetrics(state, { entryPointMetrics, normalMetrics }) {
     for (let deploymentId in entryPointMetrics) {

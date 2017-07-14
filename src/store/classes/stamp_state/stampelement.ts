@@ -1,5 +1,6 @@
 export default interface StampElement {
     uri: string;
-    getOwner(): string;
-    getName(): string;
+    owner: string;
+    name: string;
+    version: string;
 }
