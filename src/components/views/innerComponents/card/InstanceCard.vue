@@ -59,7 +59,8 @@ export default class Card extends Vue {
     }
 
     get state(): string {
-        switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
+        let state = this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId);
+        switch (state) {
             case Deployment.Rol.Instance.State.CONNECTED:
                 return 'fa fa-check-circle';
             case Deployment.Rol.Instance.State.DISCONNECTED:
@@ -67,7 +68,7 @@ export default class Card extends Vue {
             case Deployment.Rol.Instance.State.ON_PROGRESS:
                 return 'fa fa-exclamation-triangle';
             default:
-                console.error('InstanceCard received a non-covered instance state');
+                console.error('InstanceCard received a non-covered instance state:', state);
                 return '';
         }
     }
@@ -87,7 +88,7 @@ export default class Card extends Vue {
     get instanceChartData(): any {
         // Los datos a representar son distintos si los servicios son entrypoints
         if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
-            let metrics: Deployment.Rol.Instance.EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+            let metrics: Deployment.EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
                 labels: metrics.time,
                 datasets: [
@@ -180,7 +181,7 @@ export default class Card extends Vue {
             };
         }
         else {
-            let metrics: Deployment.Rol.Instance.CommonMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+            let metrics: Deployment.CommonMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
             return {
                 labels: metrics.time,
                 datasets: [
@@ -196,21 +197,21 @@ export default class Card extends Vue {
                         backgroundColor: '#fce473',
                         borderColor: '#fce473',
                         fill: false,
-                        data: metrics.mem
+                        data: metrics.memory
                     },
                     {
                         label: 'NET_IN',
                         backgroundColor: '#42afe3',
                         borderColor: '#42afe3',
                         fill: false,
-                        data: metrics.net_in
+                        data: metrics.bandwith_input
                     },
                     {
                         label: 'NET_OUT',
                         backgroundColor: '#42afe3',
                         borderColor: '#42afe3',
                         fill: false,
-                        data: metrics.net_out
+                        data: metrics.bandwith_output
                     },
                     {
                         label: 'RPM',

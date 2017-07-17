@@ -25,6 +25,7 @@ export class ProxyConnection extends EventEmitter {
     public onRemoveRuntime: Function;
     public onAddResource: Function;
     public onRemoveResource: Function;
+    public onAddMetrics: Function;
 
     // Constructor
     constructor() {
@@ -40,6 +41,7 @@ export class ProxyConnection extends EventEmitter {
         this.onRemoveRuntime = this.registerEvent<Function>();
         this.onAddResource = this.registerEvent<(resourceId, resource) => any>();
         this.onRemoveResource = this.registerEvent<Function>();
+        this.onAddMetrics = this.registerEvent<(value) => any>();
     }
     login(username: string, password: string) {
         this.acs = new EcloudAcsClient(ACS_URI);
@@ -65,8 +67,7 @@ export class ProxyConnection extends EventEmitter {
                         // Instance event type handler function
                         break;
                     case EcloudEventType.metrics:
-                        console.info('Metrics event received: ' + event.strName);
-                        // Metrics event type handler function
+                        this.emit(this.onAddMetrics, utils.transformEcloudEventDataToMetrics(event));
                         break;
                     default:
                         console.error('Non espected ecloud event type: ' + event.strType + '/' + event.strName);

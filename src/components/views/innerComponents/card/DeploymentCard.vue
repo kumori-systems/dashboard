@@ -166,9 +166,7 @@ export default class Card extends Vue {
     }
 
     get volumes(): Array<number> {
-        let res = this.$store.getters.getDeploymentVolumes(this.deploymentId);
-        console.log('Los volúmenes del deployment son: '+res);
-        return res;
+        return this.$store.getters.getDeploymentVolumes(this.deploymentId);
     }
 }
 </script>
@@ -233,7 +231,7 @@ $radius: 5px;
 .box {
     margin: 10px;
     background: whitesmoke;
-    z-index:1;
+    z-index: 1;
 }
 
 .card-body {

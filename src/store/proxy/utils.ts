@@ -1,6 +1,5 @@
-import { Deployment as EcloudDeployment } from 'admission-client';
-
-import { Deployment, Service, Component, Runtime, Cert, DataVolume, Webdomain } from '../classes';
+import { Deployment as EcloudDeployment, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
+import { Deployment, Service, Resource, Component, Runtime, Cert, DataVolume, Webdomain } from '../classes';
 export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDeployment) {
     let roles: { [rolId: string]: Deployment.Rol } = {};
     let instances: { [instanceId: string]: Deployment.Rol.Instance };
@@ -82,9 +81,7 @@ export function transformManifestToService(manifest: {
             endpoint: string
         }]
     }]
-}) {
-    console.log('El manifiesto que transofrmamos a un servicio contiene: ' + JSON.stringify(manifest));
-    console.log('El manifiesto que transofrmamos a un servicio contiene: ', manifest);
+}): Service {
     let resources = {};
     for (let i = 0; i < manifest.configuration.resources.length; i++) {
         resources[manifest.configuration.resources[i].name] = manifest.configuration.resources[i].type;
@@ -141,7 +138,7 @@ export function transformManifestToComponent(manifest: {
     name: string,
     spec: string,
     codelocator: string
-}) {
+}): Component {
     let resources = {};
     if (manifest.configuration.resources)
         for (let i = 0; i < manifest.configuration.resources.length; i++) {
@@ -169,35 +166,34 @@ export function transformManifestToComponent(manifest: {
         reqChannels // reqChannels: { [channelId: string]: Service.Rol.Channel }
     );
 }
-
-export function transformManifestToResource(manifest: { spec: string, name: string, parameters: any }) {
+export function transformManifestToResource(manifest: { spec: string, name: string, parameters: any }): Resource {
     /*
         {
-            "spec":"eslap://eslap.cloud/resource/vhost/1_0_0",
-            "name":"eslap://eslap.cloud/resources/vhost/acs",
-            "parameters":{
-                "vhost":"acs-dame-argo.slap53.iti.es"
+            'spec':'eslap://eslap.cloud/resource/vhost/1_0_0',
+            'name':'eslap://eslap.cloud/resources/vhost/acs',
+            'parameters':{
+                'vhost':'acs-dame-argo.slap53.iti.es'
             }
         }
     */
     /*    
         {
-            "spec":"eslap://eslap.cloud/resource/cert/server/1_0_0",
-            "name":"eslap://sampleservicecalculator/resources/cert/server/calccert",
-            "parameters":{
-                "content":{
-                    "cert":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN2akNDQWFZQ0FRWXdEUVlKS29aSWh2Y05BUUVMQlFBd2dZQXhDekFKQmdOVkJBWVRBbVZ6TVE0d0RBWUQKVlFRSURBVnpjR0ZwYmpFUk1BOEdBMVVFQnd3SWRtRnNaVzVqYVdFeERqQU1CZ05WQkFvTUJXTmhTVlJKTVE4dwpEUVlEVlFRTERBWmpZVk5KUkVreERqQU1CZ05WQkFNTUJXTmhTVlJKTVIwd0d3WUpLb1pJaHZjTkFRa0JGZzVxCmRtRnNaWEp2UUdsMGFTNWxjekFlRncweE5UQTJNRGt4TlRBME1UaGFGdzB5T1RBeU1UVXhOVEEwTVRoYU1FMHgKQ3pBSkJnTlZCQVlUQWtWVE1SRXdEd1lEVlFRSERBaFdZV3hsYm1OcFlURVNNQkFHQTFVRUNnd0pUV2xGYlhCeQpaWE5oTVJjd0ZRWURWUVFEREE1MWJtOHVaVzF3Y21WellTNWxjekNCbnpBTkJna3Foa2lHOXcwQkFRRUZBQU9CCmpRQXdnWWtDZ1lFQTZyUWtDcGNRVkFvREtBbWZFbjlXNTRra0s5WGp4NlJENWhUb21WMXBGQ1V1K2x6U3NML3YKam04dGJBTFJLTlF0YUJTZHdqbldUTW0vTmRHaWM3R0lQaFlDSXFmUEpRN1NiZ1BuOVE1Zit6SVg1NHQzTWdOagpiN2Q2WHF2RFE4ZThPY0oxTnpzUVYrTGUyZXYrZzRuT09xSWF5MktxaWZTTHhPOEU0ZDk3bVcwQ0F3RUFBVEFOCkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQU9PeEt5ckVpZUs3T2h4V1Fkd0pvTXcxSXlrcENJV0I3MW5uTmFCSVEKRStGMmZvWnhPSitRUS8wWktVRFhud2g5ei9Kd2ZDeHRwZ1U3NVFPanV6SGUwaklqUUFmTWxXek1OaHdtekt1NwpyNUs3bmN6RzJRQnNXYm5NYzFnZkNGZzFYa0UrOWtSNVk2RE5zSUV2dW4zMFlMQ2VuN01QREh6cjVuOEJXVE43Cnh2QmlqM0VUOVQ5MFJPeldnNVNGQ0Z3N2xDc1pka1lIejJDYUdpNStmczVManZ2KzJMb2JTODVpVXpMNm5EZWwKT3NBOE5ETUVpTys4OThvQmRnYS9XV0JuYVplMFJQRTVlT25IaTg4VzZhdUk1Y052cVlTSmhLT2tVcjRVLzdMUgpEZGZOOTh0bHRQaWs3WjQveDFsVzJiSnNRTWwxU0RoTlFXVGZpU0Y2czV4d2VnPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=","key":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWGdJQkFBS0JnUURxdENRS2x4QlVDZ01vQ1o4U2YxYm5pU1FyMWVQSHBFUG1GT2laWFdrVUpTNzZYTkt3CnYrK09ieTFzQXRFbzFDMW9GSjNDT2RaTXliODEwYUp6c1lnK0ZnSWlwODhsRHRKdUErZjFEbC83TWhmbmkzY3kKQTJOdnQzcGVxOE5EeDd3NXduVTNPeEJYNHQ3WjYvNkRpYzQ2b2hyTFlxcUo5SXZFN3dUaDMzdVpiUUlEQVFBQgpBb0dCQUw4bStET24xU1NkQXZVWTRQV3Z3SmZTbWlNWmtPcUlYc1NGUXV1bHFHOC8yWU1QRm9uZHlMMjR6c1dwCmhiQTdIc0FtQ2xhbHhHUEY3SFZveDJaeXNRSlFWYWwrT3JPYUJYTHo2TXpBOEZ2VUJMMjZyK0ZMaHU5ZkNrNVMKb2FvODh2cXR6VU1lTDhrQTB0RnMrbTlVbkV4TXVjaXJKUk8vUUlBYWJjT0YvdTRCQWtFQS90bWdsM0J4N3g2NwpCOFhhY0J2UnRGWGJzK2ZwNnBsc2RnOHBSaCs2ck1mckw2QTdaL3lhRWJuWWI2ZmRESUpxelpDN2swaVZRbFR5ClZSZUlsbFRBbndKQkFPdkRQaUd4VnFHVHRyTkFmVUhqQnNqT1BVT3lJK1h5M0xSQUJIUFY1Qis1dUFJMzVUVmQKaDQ5U3A0eU0ySE5xOXAzZlN1QUx0UHQ2cWFXdHFtRmpybk1DUVFDT2ljd2ZSMzRCL3c4ZW50TzQ1bVpZMWJpbgpHK3dpRWFPdk9IV2VTZnJQenBWRk12cG5BOHBzWmFTZmRxVFU3VkN0SHVrNnpGcm5HYm5jUytoU0pKOERBa0I4ClB6YTlOdUk2NE1mR0M5UjNKcGZxdDVYZDJVSEY2NG1Zakt4TUI0cmpsVkorQ01zSXByUE1PbmtHUHl2TEY3SEUKWFdydVMvMGpFdS9ZMm44U09DQTFBa0VBbElPTkZyaU03NzZJMFR0OUM0UTR2T2Y4bzRXQmdJTjhHN05kcWo0aApiUU5JVlJqZkhNSWZwNTEwbTdVNzkzZEZEUU5hOXVGMFFqdG1MdjRtc016anBnPT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0K"
+            'spec':'eslap://eslap.cloud/resource/cert/server/1_0_0',
+            'name':'eslap://sampleservicecalculator/resources/cert/server/calccert',
+            'parameters':{
+                'content':{
+                    'cert':'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN2akNDQWFZQ0FRWXdEUVlKS29aSWh2Y05BUUVMQlFBd2dZQXhDekFKQmdOVkJBWVRBbVZ6TVE0d0RBWUQKVlFRSURBVnpjR0ZwYmpFUk1BOEdBMVVFQnd3SWRtRnNaVzVqYVdFeERqQU1CZ05WQkFvTUJXTmhTVlJKTVE4dwpEUVlEVlFRTERBWmpZVk5KUkVreERqQU1CZ05WQkFNTUJXTmhTVlJKTVIwd0d3WUpLb1pJaHZjTkFRa0JGZzVxCmRtRnNaWEp2UUdsMGFTNWxjekFlRncweE5UQTJNRGt4TlRBME1UaGFGdzB5T1RBeU1UVXhOVEEwTVRoYU1FMHgKQ3pBSkJnTlZCQVlUQWtWVE1SRXdEd1lEVlFRSERBaFdZV3hsYm1OcFlURVNNQkFHQTFVRUNnd0pUV2xGYlhCeQpaWE5oTVJjd0ZRWURWUVFEREE1MWJtOHVaVzF3Y21WellTNWxjekNCbnpBTkJna3Foa2lHOXcwQkFRRUZBQU9CCmpRQXdnWWtDZ1lFQTZyUWtDcGNRVkFvREtBbWZFbjlXNTRra0s5WGp4NlJENWhUb21WMXBGQ1V1K2x6U3NML3YKam04dGJBTFJLTlF0YUJTZHdqbldUTW0vTmRHaWM3R0lQaFlDSXFmUEpRN1NiZ1BuOVE1Zit6SVg1NHQzTWdOagpiN2Q2WHF2RFE4ZThPY0oxTnpzUVYrTGUyZXYrZzRuT09xSWF5MktxaWZTTHhPOEU0ZDk3bVcwQ0F3RUFBVEFOCkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQU9PeEt5ckVpZUs3T2h4V1Fkd0pvTXcxSXlrcENJV0I3MW5uTmFCSVEKRStGMmZvWnhPSitRUS8wWktVRFhud2g5ei9Kd2ZDeHRwZ1U3NVFPanV6SGUwaklqUUFmTWxXek1OaHdtekt1NwpyNUs3bmN6RzJRQnNXYm5NYzFnZkNGZzFYa0UrOWtSNVk2RE5zSUV2dW4zMFlMQ2VuN01QREh6cjVuOEJXVE43Cnh2QmlqM0VUOVQ5MFJPeldnNVNGQ0Z3N2xDc1pka1lIejJDYUdpNStmczVManZ2KzJMb2JTODVpVXpMNm5EZWwKT3NBOE5ETUVpTys4OThvQmRnYS9XV0JuYVplMFJQRTVlT25IaTg4VzZhdUk1Y052cVlTSmhLT2tVcjRVLzdMUgpEZGZOOTh0bHRQaWs3WjQveDFsVzJiSnNRTWwxU0RoTlFXVGZpU0Y2czV4d2VnPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=','key':'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWGdJQkFBS0JnUURxdENRS2x4QlVDZ01vQ1o4U2YxYm5pU1FyMWVQSHBFUG1GT2laWFdrVUpTNzZYTkt3CnYrK09ieTFzQXRFbzFDMW9GSjNDT2RaTXliODEwYUp6c1lnK0ZnSWlwODhsRHRKdUErZjFEbC83TWhmbmkzY3kKQTJOdnQzcGVxOE5EeDd3NXduVTNPeEJYNHQ3WjYvNkRpYzQ2b2hyTFlxcUo5SXZFN3dUaDMzdVpiUUlEQVFBQgpBb0dCQUw4bStET24xU1NkQXZVWTRQV3Z3SmZTbWlNWmtPcUlYc1NGUXV1bHFHOC8yWU1QRm9uZHlMMjR6c1dwCmhiQTdIc0FtQ2xhbHhHUEY3SFZveDJaeXNRSlFWYWwrT3JPYUJYTHo2TXpBOEZ2VUJMMjZyK0ZMaHU5ZkNrNVMKb2FvODh2cXR6VU1lTDhrQTB0RnMrbTlVbkV4TXVjaXJKUk8vUUlBYWJjT0YvdTRCQWtFQS90bWdsM0J4N3g2NwpCOFhhY0J2UnRGWGJzK2ZwNnBsc2RnOHBSaCs2ck1mckw2QTdaL3lhRWJuWWI2ZmRESUpxelpDN2swaVZRbFR5ClZSZUlsbFRBbndKQkFPdkRQaUd4VnFHVHRyTkFmVUhqQnNqT1BVT3lJK1h5M0xSQUJIUFY1Qis1dUFJMzVUVmQKaDQ5U3A0eU0ySE5xOXAzZlN1QUx0UHQ2cWFXdHFtRmpybk1DUVFDT2ljd2ZSMzRCL3c4ZW50TzQ1bVpZMWJpbgpHK3dpRWFPdk9IV2VTZnJQenBWRk12cG5BOHBzWmFTZmRxVFU3VkN0SHVrNnpGcm5HYm5jUytoU0pKOERBa0I4ClB6YTlOdUk2NE1mR0M5UjNKcGZxdDVYZDJVSEY2NG1Zakt4TUI0cmpsVkorQ01zSXByUE1PbmtHUHl2TEY3SEUKWFdydVMvMGpFdS9ZMm44U09DQTFBa0VBbElPTkZyaU03NzZJMFR0OUM0UTR2T2Y4bzRXQmdJTjhHN05kcWo0aApiUU5JVlJqZkhNSWZwNTEwbTdVNzkzZEZEUU5hOXVGMFFqdG1MdjRtc016anBnPT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0K'
                 }
             }
         }
     */
     /*
     {
-        "spec":"eslap://eslap.cloud/resource/volume/persistent/1_0_0",
-        "name":"eslap://eslap.cloud/resources/volume/acs/persistent",
-        "parameters":{
-            "size":"10",
-            "prefix":"acs-volumes"
+        'spec':'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
+        'name':'eslap://eslap.cloud/resources/volume/acs/persistent',
+        'parameters':{
+            'size':'10',
+            'prefix':'acs-volumes'
         }
     }
     */
@@ -240,6 +236,52 @@ export function transformManifestToRuntime(manifest: {
             [key: string]: any
         }
     }
-}) {
+}): Runtime {
     return new Runtime(manifest.name);
+}
+
+export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
+    [deploymentId: string]: {
+        roles: {
+            [rolId: string]: {
+                instances: { [instanceId: string]: Deployment.Metrics },
+                data: Deployment.Metrics
+            }
+        },
+        data: Deployment.Metrics
+    }
+} {
+    let res = {};
+    let deploymentId = ecloudEvent.data.deploymentUrn;
+    res[deploymentId] = {};
+    res[deploymentId].roles = {};
+    res[deploymentId].data = {};
+    let timestamp = ecloudEvent.timestamp;
+    for (let rolId in ecloudEvent.data.roles) {
+        res[deploymentId].roles[rolId] = {};
+        res[deploymentId].roles[rolId].data = {};
+        res[deploymentId].roles[rolId].instances = {};
+
+        // Obtenemos los datos de las instáncias
+        for (let instanceId in ecloudEvent.data.roles[rolId].instances) {
+            res[deploymentId].roles[rolId].instances[instanceId] = {};
+            for (let property in ecloudEvent.data.roles[rolId].instances[instanceId]) {
+                res[deploymentId].roles[rolId].instances[instanceId][property] = ecloudEvent.data.roles[rolId].instances[instanceId][property].mean;
+            }
+            res[deploymentId].roles[rolId].instances[instanceId]['timestamp'] = timestamp;
+        }
+
+        // Obtenemos los datos de los roles
+        for (let property in ecloudEvent.data.roles[rolId].data) {
+            res[deploymentId].roles[rolId].data[property] = ecloudEvent.data.roles[rolId].data[property].mean;
+        }
+        res[deploymentId].roles[rolId].data['timestamp'] = timestamp;
+    }
+    // Obtenemos los datos de los deployment
+    for (let property in ecloudEvent.data.data) {
+        res[deploymentId].data[property] = ecloudEvent.data.data[property].mean;
+    }
+    res[deploymentId].data['timestamp'] = timestamp;
+
+    return res;
 }

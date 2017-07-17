@@ -52,6 +52,11 @@ export default {
             val[resourceId] = resource;
             commit('addResource', val);
         });
+
+        connection.onAddMetrics((metrics) => {
+            commit('addMetrics', metrics);
+        });
+
     },
     getDeploymentList({ getters, dispatch }) {
         let deploymentList = getters.getDeploymentList;

@@ -32,32 +32,30 @@ export default {
   addResource(state, resourceMap) {
     state.resourceList = { ...state.resourceList, ...resourceMap };
   },
+  addMetrics(state, metrics) {
+    // Metrics with the format [deployment]:{data:metris, roles:{data:metrics, instances:metrics}}
+    for (let deploymentId in metrics) {
+      (<Deployment>state.deploymentList[deploymentId]).addMetrics(metrics[deploymentId].data);
+      for (let rolId in metrics[deploymentId].roles) {
+        (<Deployment>state.deploymentList[deploymentId]).roles[rolId].addMetrics(
+          (<Deployment>state.deploymentList[deploymentId]).isEntrypoint,
+          metrics[deploymentId].roles[rolId].data);
+        for (let instanceId in metrics[deploymentId].roles[rolId].instances) {
+          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
+            (<Deployment>state.deploymentList[deploymentId]).isEntrypoint,
+            metrics[deploymentId].roles[rolId].instances[instanceId]);
+        }
+      }
+    }
+  },
   setFabElements(state, { fabElementsList }) {
     state.fabElements = fabElementsList;
   },
   toggleMenuItemExpanded(state, menuItem) {
     menuItem.meta.expanded = !menuItem.meta.expanded;
   },
-  addMetrics(state, { entryPointMetrics, normalMetrics }) {
-    for (let deploymentId in entryPointMetrics) {
-      for (let rolId in entryPointMetrics[deploymentId]) {
-        for (let instanceId in entryPointMetrics[deploymentId][rolId]) {
-          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].concatEntryPointMetrics(entryPointMetrics[deploymentId][rolId][instanceId]);
-        }
-      }
-    }
 
-    for (let deploymentId in normalMetrics) {
-      for (let rolId in normalMetrics[deploymentId]) {
-        for (let instanceId in normalMetrics[deploymentId][rolId]) {
-          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].concatNormalMetrics(normalMetrics[deploymentId][rolId][instanceId]);
-        }
-      }
-    }
-
-  },
   selectedService(state, serviceId) {
     state.selectedService = serviceId;
   }
-
 };
