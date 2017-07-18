@@ -66,12 +66,6 @@ export default new Router({
       component: NewService
     },
     {
-      name: 'NEW SERVICE (ADVANCED)',
-      path: '/newServiceAdvanced',
-      meta: { expanded: false },
-      component: NewServiceAdvanced
-    },
-    {
       name: 'UPLOAD BUNDLE',
       path: '/newBundle',
       meta: { expanded: false },
