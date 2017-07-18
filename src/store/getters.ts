@@ -434,7 +434,7 @@ export default {
 
   getDeploymentRolNumInstances: function (state): Function {
     return function (deploymentId: string, rolId: string) {
-      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList.length;
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceNumber;
     };
   },
 

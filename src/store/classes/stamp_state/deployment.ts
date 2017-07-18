@@ -223,6 +223,7 @@ export module Deployment {
         bandwidth: number;
         resilience: number;
         instanceList: { [instanceId: string]: Rol.Instance };
+        instanceNumber: number;
         metrics: Deployment.Metrics;
         constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
             this.cpu = cpu;
@@ -232,6 +233,10 @@ export module Deployment {
             this.bandwidth = bandwidth;
             this.resilience = resilience;
             this.instanceList = instanceList;
+            this.instanceNumber = 0;
+            for (let key in instanceList) {
+                this.instanceNumber++;
+            }
         };
 
         addMetrics(isEntrypoint, m) {
