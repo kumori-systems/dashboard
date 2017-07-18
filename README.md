@@ -43,3 +43,18 @@ ya que tengo el tipo pero no la URI del resource. ¿Cómo podría resolver ésto
     Lo pregunto porque estos valores no los pedimos y éstos son los que he puesto por defecto.
 
 - ¿Debería de pedir un campo 'name' para los entrypoints? En el manifiesto de despliegue está
+
+# Problemas
+Estoy teniendo actualmente un problema con la actualización de los charts de los rols y las instáncias.
+Consiste en que los datos son almacenados correctamente, pero vue no reconoce los cambios y, por tanto, no actualiza
+los charts.
+El problema parece ir relacionado con: 'https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats'.
+Sin embargo, no está claro si vuex escucha correctamente los cambios o no.
+
+Este comentario del creador puede ayudar a guiarnos..
+"No, the actual mutation happens on the object inside the array, not the array itself, so it is not subject to the index detection caveat."
+
+Mutations to Arrays in JavaScript happen through methods like push() and pop().
+
+If you want to store things with string keys you should use an Object.
+And since you are adding a new property, you should use Vue.set().
