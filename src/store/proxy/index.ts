@@ -117,7 +117,7 @@ export class ProxyConnection extends EventEmitter {
 
     getElementInfo(uri: string) {
         return this.admission.getStorageManifest(uri).then((element) => {
-            switch (utils.getElementTipe(element)) {
+            switch (utils.getElementTipe(uri)) {
                 case utils.ElementType.runtime:
                     this.emit(
                         this.onAddRuntime,

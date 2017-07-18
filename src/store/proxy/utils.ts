@@ -289,9 +289,9 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
 
 export enum ElementType { deployment, service, runtime, component, resource }
 
-export function getElementTipe(element): ElementType {
+export function getElementTipe(uri: string): ElementType {
     let res: ElementType;
-    switch (element.split('/')[3]) {
+    switch (uri.split('/')[3]) {
         case 'runtime':
         case 'runtimes':
             res = ElementType.runtime;
@@ -309,7 +309,7 @@ export function getElementTipe(element): ElementType {
             res = ElementType.resource;
             break;
         default:
-            console.info('Element type not covered', element);
+            console.info('Element type not covered', uri);
     }
     return res;
 }
