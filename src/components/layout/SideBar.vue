@@ -1,7 +1,7 @@
 <template>
   <aside class="menu app-sidebar animated slideInDown">
     <ul class="menu-list">
-      <li v-for="menuItem in menuItems" v-bind:key="menuItem">
+      <li v-for="(menuItem, index) in menuItems" v-bind:key="index">
         <router-link v-bind:to="menuItem.path" v-on:click.native="onClick(menuItem)">
           {{ menuItem.name }}
           <span class="icon is-small is-angle fa" v-if="menuItem.children && menuItem.children.length > 0">
@@ -11,7 +11,7 @@
         </router-link>
         <expanding v-show="menuItem.meta.expanded">
           <ul>
-            <li v-for="subItem in menuItem.children" v-bind:key="subItem">
+            <li v-for="(subItem, index) in menuItem.children" v-bind:key="index">
               <router-link v-bind:to="subItem.path">
                 {{ subItem.name }}
               </router-link>

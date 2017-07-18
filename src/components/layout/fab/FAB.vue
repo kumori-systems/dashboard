@@ -2,9 +2,9 @@
     <div>
         <collapse class="tile fab" v-if="fabElements.length > 0">
             <collapse-item>
-                <router-link v-for="element in fabElements" v-bind:key="element" v-bind:to="element.to">
+                <router-link v-for="(element, index) in fabElements" v-bind:key="index" v-bind:to="element.to">
                     <div>
-                    {{ element.name }}
+                        {{ element.name }}
                     </div>
                 </router-link>
             </collapse-item>
