@@ -30,3 +30,15 @@ En ésta vista, hace falta también obtener la información de los servicios, ya
 ## Preguntas
 - Actualmente con la info que tengo no puedo obtener la información de las resources de un servício,
 ya que tengo el tipo pero no la URI del resource. ¿Cómo podría resolver ésto?
+
+### Entrypoints
+- Tiene sentido que al crear un entrypoint definamos esto?:
+    '__cpu': 1,
+    '__memory': 2,
+    '__ioperf': 1,
+    '__iopsintensive': false,
+    '__bandwidth': 100,
+    
+    Lo pregunto porque estos valores no los pedimos y éstos son los que he puesto por defecto.
+
+- ¿Debería de pedir un campo 'name' para los entrypoints? En el manifiesto de despliegue está
