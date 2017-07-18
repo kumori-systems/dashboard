@@ -246,179 +246,32 @@ export default {
 
   getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
-      if (!state.deploymentList[deploymentId]) return {};
-      if (getters.getIsEntryPoint(deploymentId)) {
-        let res: Deployment.EntryPointMetrics = new Deployment.EntryPointMetrics();
-
-        for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
-          let aux = getters.getDeploymentRolChartData(deploymentId, rolId);
-          res = res.groupValues(aux);
+      console.log('Entramos en getDeploymentChartData');
+      let res: Deployment.Metrics;
+      if (
+        !state.deploymentList[deploymentId]
+        || !(<Deployment>state.deploymentList[deploymentId]).metrics
+      ) {
+        if (getters.getIsEntryPoint(deploymentId)) {
+          res = new Deployment.EntryPointMetrics();
+        } else {
+          res = new Deployment.CommonMetrics();
         }
-        return getters.formatChartData(true, res);
       } else {
-        let res: Deployment.CommonMetrics = new Deployment.CommonMetrics();
-        for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
-          res = res.groupValues(getters.getDeploymentRolChartData(deploymentId, rolId));
-        }
-        return getters.formatChartData(false, res);
+        res = (<Deployment>state.deploymentList[deploymentId]).metrics;
       }
-    };
-  },
-
-  formatChartData: function (state, getters): Function {
-    return function (isEntryPoint: boolean, chartData: Deployment.Metrics) {
-      if (isEntryPoint) {
-        return {
-          labels: chartData.time,
-          datasets: [
-            {
-              label: 'timestamp_init',
-              backgroundColor: '#1fc8db',
-              borderColor: '#1fc8db',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).timestamp_init
-            },
-            {
-              label: 'timestamp_end',
-              backgroundColor: '#fce473',
-              borderColor: '#fce473',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).timestamp_end
-            },
-            {
-              label: 'elapsed_msec',
-              backgroundColor: '#42afe3',
-              borderColor: '#42afe3',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).elapsed_msec
-            },
-            {
-              label: 'http_request_per_second',
-              backgroundColor: '#42afe3',
-              borderColor: '#42afe3',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).http_request_per_second
-            },
-            {
-              label: 'http_errors_per_second',
-              backgroundColor: '#ed6c63',
-              borderColor: '#ed6c63',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).http_errors_per_second
-            },
-            {
-              label: 'http_size_in_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).http_size_in_per_second
-            },
-            {
-              label: 'http_size_out_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).http_size_out_per_second
-            },
-            {
-              label: 'http_response_time',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).http_response_time
-            },
-            {
-              label: 'ws_size_in_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).ws_size_in_per_second
-            },
-            {
-              label: 'ws_size_out_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).ws_size_out_per_second
-            },
-            {
-              label: 'ws_chunk_in_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).ws_chunk_in_per_second
-            },
-            {
-              label: 'ws_chunk_out_per_second',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.EntryPointMetrics>chartData).ws_chunk_out_per_second
-            }
-          ]
-        };
-      }
-      else {
-        return {
-          labels: chartData.time,
-          datasets: [
-            {
-              label: 'CPU',
-              backgroundColor: '#1fc8db',
-              borderColor: '#1fc8db',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).cpu
-            },
-            {
-              label: 'MEM',
-              backgroundColor: '#fce473',
-              borderColor: '#fce473',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).memory
-            },
-            {
-              label: 'NET_IN',
-              backgroundColor: '#42afe3',
-              borderColor: '#42afe3',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).bandwith_input
-            },
-            {
-              label: 'NET_OUT',
-              backgroundColor: '#42afe3',
-              borderColor: '#42afe3',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).bandwith_output
-            },
-            {
-              label: 'RPM',
-              backgroundColor: '#ed6c63',
-              borderColor: '#ed6c63',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).rpm
-            },
-            {
-              label: 'RES',
-              backgroundColor: '#97cd76',
-              borderColor: '#97cd76',
-              fill: false,
-              data: (<Deployment.CommonMetrics>chartData).res
-            }
-          ]
-        };
-      }
+      return res.getFormattedMetrics();
     };
   },
 
   /* ROLES */
   getDeploymentRoles: function (state): Function {
     return function (deploymentId: string): Array<string> {
-      let deployment: Deployment = state.deploymentList[deploymentId];
-      if (deployment === undefined) return [];
-
       let res: Array<string> = [];
-      for (let rolId in deployment.roles) {
-        res.push(rolId);
+      if (state.deploymentList[deploymentId] !== undefined) {
+        for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
+          res.push(rolId);
+        }
       }
       return res;
     };
@@ -463,28 +316,25 @@ export default {
   },
   getDeploymentRolChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): Object {
-      // Buscamos todas las instancias del rol
-      if (getters.getIsEntryPoint(deploymentId)) {
-        let res: Deployment.EntryPointMetrics = new Deployment.EntryPointMetrics();
-        for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
-          let aux = getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId);
-          res = res.groupValues(aux);
+      console.log('Entramos en getDeploymentRolChartData');
+      let res: Deployment.Metrics;
+      if (
+        !state.deploymentList[deploymentId]
+        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId]
+        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics
+      ) {
+        if (getters.getIsEntryPoint(deploymentId)) {
+          res = new Deployment.EntryPointMetrics();
+        } else {
+          res = new Deployment.CommonMetrics();
         }
-        return res;
       } else {
-        let res: Deployment.CommonMetrics = new Deployment.CommonMetrics();
-        for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
-          res = res.groupValues(getters.getDeploymentRolInstanceChartData(deploymentId, rolId, instanceId));
-        }
-        return res;
+        res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics;
       }
+      console.log('Vamos a devolver res con el valor', res);
+      console.log('Y formateado..', res.getFormattedMetrics());
+      return res.getFormattedMetrics();
     };
-  },
-  getDeploymentRolChartDataFormatted: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string): any {
-      return getters.formatChartData(getters.getIsEntryPoint(deploymentId), getters.getDeploymentRolChartData(deploymentId, rolId));
-    };
-
   },
   getDeploymentRolMemNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
@@ -589,21 +439,24 @@ export default {
     };
   },
   getDeploymentRolInstanceChartData: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string, instanceId: string): Deployment.Metrics {
-
+    return function (deploymentId: string, rolId: string, instanceId: string) {
+      console.log('Entramos en getDeploymentRolInstanceChartData');
+      let res: Deployment.Metrics;
       if (
         !state.deploymentList[deploymentId]
         || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId]
         || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId]
         || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics
-      )
+      ) {
         if (getters.getIsEntryPoint(deploymentId)) {
-          return new Deployment.EntryPointMetrics();
+          res =  new Deployment.EntryPointMetrics();
         } else {
-          return new Deployment.CommonMetrics();
+          res =  new Deployment.CommonMetrics();
         }
-
-      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
+      } else {
+        res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
+      }
+      return res.getFormattedMetrics();
     };
   },
 

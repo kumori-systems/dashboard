@@ -39,10 +39,11 @@ export class Deployment {
     }
 
     addMetrics(m) {
-        if (this.isEntrypoint)
-            (<Deployment.EntryPointMetrics>this.metrics).addValues(m.time, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second);
-        else
-            (<Deployment.CommonMetrics>this.metrics).addValues(m.time, m.cpu, m.mem, m.netIn, m.netOut, m.rpm, m.res);
+        console.log('En Deployment.addMetrics recibimos', m);
+        if (!this.metrics && this.isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
+        if (!this.metrics && !this.isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
+        if (this.isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
+        else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
     }
 }
 
@@ -53,15 +54,7 @@ export module Deployment {
         constructor() {
             this.time = [];
         }
-
-        groupValues(m: Metrics) {
-            if (this.time.length === 0)
-                this.time = m.time;
-        };
-
-        concat(m: Metrics) {
-            this.time = this.time.concat(m.time);
-        }
+        abstract getFormattedMetrics();
     }
     export class EntryPointMetrics extends Metrics {
         timestamp_init: Array<number>;
@@ -95,28 +88,25 @@ export module Deployment {
             this.ws_chunk_in_per_second = [];
             this.ws_chunk_out_per_second = [];
         }
-
-        concat(m: EntryPointMetrics) {
-            super.concat(m);
-            this.timestamp_init = this.timestamp_init.concat(m.timestamp_init);
-            this.timestamp_end = this.timestamp_end.concat(m.timestamp_end);
-            this.elapsed_msec = this.elapsed_msec.concat(m.timestamp_init);
-            this.http_request_per_second = this.http_request_per_second.concat(m.timestamp_init);
-            this.http_errors_per_second = this.http_errors_per_second.concat(m.http_errors_per_second);
-            this.http_size_in_per_second = this.http_size_in_per_second.concat(m.timestamp_init);
-            this.http_size_out_per_second = this.http_size_out_per_second.concat(m.http_size_out_per_second);
-            this.http_chunk_in_per_second = this.http_chunk_in_per_second.concat(m.http_chunk_in_per_second);
-            this.http_chunk_out_per_second = this.http_chunk_out_per_second.concat(m.http_chunk_out_per_second);
-            this.http_response_time = this.http_response_time.concat(m.http_response_time);
-            this.ws_size_in_per_second = this.ws_size_in_per_second.concat(m.ws_size_in_per_second);
-            this.ws_size_out_per_second = this.ws_size_out_per_second.concat(m.ws_size_out_per_second);
-            this.ws_chunk_in_per_second = this.ws_chunk_in_per_second.concat(m.ws_chunk_in_per_second);
-            this.ws_chunk_out_per_second = this.ws_chunk_out_per_second.concat(m.ws_chunk_out_per_second);
-        }
-
-
-
-        addValues(time: Date, timestamp_init: number, timestamp_end: number, elapsed_msec: number, http_request_per_second: number, http_errors_per_second: number, http_size_in_per_second: number, http_size_out_per_second: number, http_chunk_in_per_second: number, http_chunk_out_per_second: number, http_response_time: number, ws_size_in_per_second: number, ws_size_out_per_second: number, ws_chunk_in_per_second: number, ws_chunk_out_per_second: number) {
+        /**
+         *  Adds some values to the metrics
+         * @param time 
+         * @param timestamp_init 
+         * @param timestamp_end 
+         * @param elapsed_msec 
+         * @param http_request_per_second 
+         * @param http_errors_per_second 
+         * @param http_size_in_per_second 
+         * @param http_size_out_per_second 
+         * @param http_chunk_in_per_second 
+         * @param http_chunk_out_per_second 
+         * @param http_response_time 
+         * @param ws_size_in_per_second 
+         * @param ws_size_out_per_second 
+         * @param ws_chunk_in_per_second 
+         * @param ws_chunk_out_per_second 
+         */
+        addValues(time: Date, timestamp_init: number, timestamp_end: number, elapsed_msec: number, http_request_per_second: number, http_errors_per_second: number, http_size_in_per_second: number, http_size_out_per_second: number, http_chunk_in_per_second: number, http_chunk_out_per_second: number, http_response_time: number, ws_size_in_per_second: number, ws_size_out_per_second: number, ws_chunk_in_per_second: number, ws_chunk_out_per_second: number): void {
             this.time.push(time);
             this.timestamp_init.push(timestamp_init);
             this.timestamp_end.push(timestamp_end);
@@ -133,28 +123,96 @@ export module Deployment {
             this.ws_chunk_in_per_second.push(ws_chunk_in_per_second);
             this.ws_chunk_out_per_second.push(ws_chunk_out_per_second);
         }
-
-        groupValues(m: EntryPointMetrics) {
-            super.groupValues(m);
-            let res: EntryPointMetrics = new EntryPointMetrics();
-            res.time = this.time; // Cuando acumulamos valores, el tiempo se mantiene
-            for (let i = 0; i < res.time.length; i++) {
-                res.timestamp_init.push((this.timestamp_init[i] + m.timestamp_init[i]) / 2);
-                res.timestamp_end.push((this.timestamp_end[i] + m.timestamp_end[i]) / 2);
-                res.elapsed_msec.push((this.elapsed_msec[i] + m.elapsed_msec[i]) / 2);
-                res.http_request_per_second.push((this.http_request_per_second[i] + m.http_request_per_second[i]) / 2);
-                res.http_errors_per_second.push((this.http_errors_per_second[i] + m.http_errors_per_second[i]) / 2);
-                res.http_size_in_per_second.push((this.http_size_in_per_second[i] + m.http_size_in_per_second[i]) / 2);
-                res.http_size_out_per_second.push((this.http_size_out_per_second[i] + m.http_size_out_per_second[i]) / 2);
-                res.http_chunk_in_per_second.push((this.http_chunk_in_per_second[i] + m.http_chunk_in_per_second[i]) / 2);
-                res.http_chunk_out_per_second.push((this.http_chunk_out_per_second[i] + m.http_chunk_out_per_second[i]) / 2);
-                res.http_response_time.push((this.http_response_time[i] + m.http_response_time[i]) / 2);
-                res.ws_size_in_per_second.push((this.ws_size_in_per_second[i] + m.ws_size_in_per_second[i]) / 2);
-                res.ws_size_out_per_second.push((this.ws_size_out_per_second[i] + m.ws_size_out_per_second[i]) / 2);
-                res.ws_chunk_in_per_second.push((this.ws_chunk_in_per_second[i] + m.ws_chunk_in_per_second[i]) / 2);
-                res.ws_chunk_out_per_second.push((this.ws_chunk_out_per_second[i] + m.ws_chunk_out_per_second[i]) / 2);
-            }
-            return res;
+        getFormattedMetrics() {
+            return {
+                labels: this.time,
+                datasets: [
+                    {
+                        label: 'timestamp_init',
+                        backgroundColor: '#1fc8db',
+                        borderColor: '#1fc8db',
+                        fill: false,
+                        data: this.timestamp_init
+                    },
+                    {
+                        label: 'timestamp_end',
+                        backgroundColor: '#fce473',
+                        borderColor: '#fce473',
+                        fill: false,
+                        data: this.timestamp_end
+                    },
+                    {
+                        label: 'elapsed_msec',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: this.elapsed_msec
+                    },
+                    {
+                        label: 'http_request_per_second',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: this.http_request_per_second
+                    },
+                    {
+                        label: 'http_errors_per_second',
+                        backgroundColor: '#ed6c63',
+                        borderColor: '#ed6c63',
+                        fill: false,
+                        data: this.http_errors_per_second
+                    },
+                    {
+                        label: 'http_size_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.http_size_in_per_second
+                    },
+                    {
+                        label: 'http_size_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.http_size_out_per_second
+                    },
+                    {
+                        label: 'http_response_time',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.http_response_time
+                    },
+                    {
+                        label: 'ws_size_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.ws_size_in_per_second
+                    },
+                    {
+                        label: 'ws_size_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.ws_size_out_per_second
+                    },
+                    {
+                        label: 'ws_chunk_in_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.ws_chunk_in_per_second
+                    },
+                    {
+                        label: 'ws_chunk_out_per_second',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.ws_chunk_out_per_second
+                    }
+                ]
+            };
         }
     }
 
@@ -175,7 +233,17 @@ export module Deployment {
             this.res = []; // Response time
         }
 
-        addValues(time: Date, cpu: number, memory: number, bandwith_input: number, bandwith_output: number, rpm: number, res: number) {
+        /**
+         * Adds some values to metrics
+         * @param time 
+         * @param cpu 
+         * @param memory 
+         * @param bandwith_input 
+         * @param bandwith_output 
+         * @param rpm 
+         * @param res 
+         */
+        addValues(time: Date, cpu: number, memory: number, bandwith_input: number, bandwith_output: number, rpm: number, res: number): void {
             this.time.push(time);
             this.cpu.push(cpu);
             this.memory.push(memory);
@@ -184,35 +252,54 @@ export module Deployment {
             this.rpm.push(rpm);
             this.res.push(res);
         }
-
-        concat(m: CommonMetrics) {
-            super.concat(m);
-            this.cpu = this.cpu.concat(m.cpu);
-            this.memory = this.memory.concat(m.memory);
-            this.bandwith_input = this.bandwith_input.concat(m.bandwith_input);
-            this.bandwith_output = this.bandwith_output.concat(m.bandwith_output);
-            this.rpm = this.rpm.concat(m.rpm);
-            this.res = this.res.concat(m.res);
-        }
-
-        groupValues(m: CommonMetrics) {
-            super.groupValues(m);
-            if (this.time.length > 0) {
-                let res: CommonMetrics = new CommonMetrics();
-                res.time = this.time;
-                let i;
-                for (i = 0; i < res.time.length; i++) {
-                    res.cpu.push((this.cpu[i] + m.cpu[i]) / 2);
-                    res.memory.push((this.memory[i] + m.memory[i]) / 2);
-                    res.bandwith_input.push((this.bandwith_input[i] + m.bandwith_input[i]) / 2);
-                    res.bandwith_output.push((this.bandwith_output[i] + m.bandwith_output[i]) / 2);
-                    res.rpm.push(this.rpm[i] + m.rpm[i]); // En el caso de peticiones por minuto sumamos y no sacamos la media
-                    res.res.push((this.res[i] + m.res[i]) / 2);
-                }
-                return res;
-            } else { // Caso en que concatenemos con métricas vacías
-                return m;
-            }
+        getFormattedMetrics() {
+            return {
+                labels: this.time,
+                datasets: [
+                    {
+                        label: 'CPU',
+                        backgroundColor: '#1fc8db',
+                        borderColor: '#1fc8db',
+                        fill: false,
+                        data: this.cpu
+                    },
+                    {
+                        label: 'MEM',
+                        backgroundColor: '#fce473',
+                        borderColor: '#fce473',
+                        fill: false,
+                        data: this.memory
+                    },
+                    {
+                        label: 'NET_IN',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: this.bandwith_input
+                    },
+                    {
+                        label: 'NET_OUT',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
+                        fill: false,
+                        data: this.bandwith_output
+                    },
+                    {
+                        label: 'RPM',
+                        backgroundColor: '#ed6c63',
+                        borderColor: '#ed6c63',
+                        fill: false,
+                        data: this.rpm
+                    },
+                    {
+                        label: 'RES',
+                        backgroundColor: '#97cd76',
+                        borderColor: '#97cd76',
+                        fill: false,
+                        data: this.res
+                    }
+                ]
+            };
         }
     }
     export class Rol {
@@ -240,6 +327,7 @@ export module Deployment {
         };
 
         addMetrics(isEntrypoint, m) {
+            console.log('En Rol.addMetrics recibimos', isEntrypoint, m);
             if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
             if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
             if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.time, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
@@ -281,7 +369,7 @@ export module Deployment {
             }
 
             addMetrics(isEntrypoint, m) {
-                console.log('El objeto que recibimos en addmetrics es: ', m);
+                console.log('En Instance.addMetrics recibimos', isEntrypoint, m);
                 if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
                 if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
                 if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.time, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }

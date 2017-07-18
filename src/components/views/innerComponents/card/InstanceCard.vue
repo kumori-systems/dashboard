@@ -12,11 +12,12 @@
                     <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
                     <label for="killInstance">kill instance</label>
                 </span>
-    
             </div>
         </div>
-        <div class="is-child is-pulled-right box instance-chart">
-            <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+        <div>
+            <div class="is-child is-pulled-right box instance-chart">
+                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+            </div>
         </div>
     </div>
 </template>
@@ -86,152 +87,7 @@ export default class Card extends Vue {
     }
 
     get instanceChartData(): any {
-        // Los datos a representar son distintos si los servicios son entrypoints
-        if (this.$store.getters.getIsEntryPoint(this.deploymentId)) {
-            let metrics: Deployment.EntryPointMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
-            return {
-                labels: metrics.time,
-                datasets: [
-                    {
-                        label: 'timestamp_init',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: metrics.timestamp_init
-                    },
-                    {
-                        label: 'timestamp_end',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: metrics.timestamp_end
-                    },
-                    {
-                        label: 'elapsed_msec',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.elapsed_msec
-                    },
-                    {
-                        label: 'http_request_per_second',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.http_request_per_second
-                    },
-                    {
-                        label: 'http_errors_per_second',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: metrics.http_errors_per_second
-                    },
-                    {
-                        label: 'http_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_size_in_per_second
-                    },
-                    {
-                        label: 'http_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_size_out_per_second
-                    },
-                    {
-                        label: 'http_response_time',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.http_response_time
-                    },
-                    {
-                        label: 'ws_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_size_in_per_second
-                    },
-                    {
-                        label: 'ws_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_size_out_per_second
-                    },
-                    {
-                        label: 'ws_chunk_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_chunk_in_per_second
-                    },
-                    {
-                        label: 'ws_chunk_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.ws_chunk_out_per_second
-                    }
-                ]
-
-            };
-        }
-        else {
-            let metrics: Deployment.CommonMetrics = this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
-            return {
-                labels: metrics.time,
-                datasets: [
-                    {
-                        label: 'CPU',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: metrics.cpu
-                    },
-                    {
-                        label: 'MEM',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: metrics.memory
-                    },
-                    {
-                        label: 'NET_IN',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.bandwith_input
-                    },
-                    {
-                        label: 'NET_OUT',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: metrics.bandwith_output
-                    },
-                    {
-                        label: 'RPM',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: metrics.rpm
-                    },
-                    {
-                        label: 'RES',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: metrics.res
-                    }
-                ]
-
-            };
-        }
-
+        return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
     }
 
     /**

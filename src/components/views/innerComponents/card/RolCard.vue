@@ -48,13 +48,16 @@
                     </div>
                 </div>
             </div>
-            <div class="is-child  box rol-chart">
-                <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" :width="600" :height="300"></chart>
+            <div>
+                <div class="is-child is-pulled-right box rol-chart">
+                    <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                </div>
             </div>
-        </div>
+        </div>    
         <collapse>
             <collapse-item title="View instances">
-                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear" />
+                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
+                </instance-card>
             </collapse-item>
         </collapse>
         <div class="card-footer" v-if="false"></div>
@@ -138,7 +141,7 @@ export default class Card extends Vue {
     }
 
     get rolChartData() {
-        return this.$store.getters.getDeploymentRolChartDataFormatted(this.deploymentId, this.rolId);
+        return this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
     }
 
     get rolInstances() {

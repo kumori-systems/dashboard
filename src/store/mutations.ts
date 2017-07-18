@@ -33,17 +33,20 @@ export default {
     state.resourceList = { ...state.resourceList, ...resourceMap };
   },
   addMetrics(state, metrics) {
+    console.log('El objeto que recibimos en addmetrics es', metrics);
     // Metrics with the format [deployment]:{data:metris, roles:{data:metrics, instances:metrics}}
     for (let deploymentId in metrics) {
-      (<Deployment>state.deploymentList[deploymentId]).addMetrics(metrics[deploymentId].data);
-      for (let rolId in metrics[deploymentId].roles) {
-        (<Deployment>state.deploymentList[deploymentId]).roles[rolId].addMetrics(
-          (<Deployment>state.deploymentList[deploymentId]).isEntrypoint,
-          metrics[deploymentId].roles[rolId].data);
-        for (let instanceId in metrics[deploymentId].roles[rolId].instances) {
-          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
+      if (state.deploymentList[deploymentId]) { // Es posible que nada más conectarnos recibamos métricas, cuando todavía no tenemos los deployment
+        (<Deployment>state.deploymentList[deploymentId]).addMetrics(metrics[deploymentId].data);
+        for (let rolId in metrics[deploymentId].roles) {
+          (<Deployment>state.deploymentList[deploymentId]).roles[rolId].addMetrics(
             (<Deployment>state.deploymentList[deploymentId]).isEntrypoint,
-            metrics[deploymentId].roles[rolId].instances[instanceId]);
+            metrics[deploymentId].roles[rolId].data);
+          for (let instanceId in metrics[deploymentId].roles[rolId].instances) {
+            (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].addMetrics(
+              (<Deployment>state.deploymentList[deploymentId]).isEntrypoint,
+              metrics[deploymentId].roles[rolId].instances[instanceId]);
+          }
         }
       }
     }
