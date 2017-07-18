@@ -285,3 +285,97 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
 
     return res;
 }
+
+
+export enum ElementType { deployment, service, runtime, component, resource }
+
+export function getElementTipe(element): ElementType {
+    let res: ElementType;
+    switch (element.split('/')[3]) {
+        case 'runtime':
+        case 'runtimes':
+            res = ElementType.runtime;
+            break;
+        case 'service':
+        case 'services':
+            res = ElementType.service;
+            break;
+        case 'component':
+        case 'components':
+            res = ElementType.component;
+            break;
+        case 'resource':
+        case 'resources':
+            res = ElementType.resource;
+            break;
+        default:
+            console.info('Element type not covered', element);
+    }
+    return res;
+}
+
+export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolean, name: string, certificate: string, domain: string, acceptTls: boolean, requireClientCertificates: boolean, instances: number, resilience: number) {
+    if (usePlatformGeneratedDomain) {
+        console.error('Platform generated domain not enabled yet');
+    }
+
+    return {
+        'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
+        'servicename': 'eslap://eslap.cloud/services/http/inbound/1_0_0',
+        'name': name,
+        'interconnection': true,
+        'configuration': {
+            'resources': {
+                'server_cert': certificate,
+                'vhost': domain
+            },
+            'parameters': {
+                'TLS': acceptTls,
+                'clientcert': requireClientCertificates
+            }
+        },
+        'roles': {
+            'sep': {
+                'resources': {
+                    '__instances': instances,
+                    '__cpu': 1,
+                    '__memory': 2,
+                    '__ioperf': 1,
+                    '__iopsintensive': false,
+                    '__bandwidth': 100,
+                    '__resilience': resilience
+                }
+            }
+        }
+    };
+}
+
+export function transformDeploymentToManifest(deploymentName: string, domain: string, service: string, serviceConfig: any, config: any, roles: any) {
+
+    let manifestRoles = {};
+
+    for (let rolId in roles) {
+        manifestRoles[rolId] = {};
+        manifestRoles[rolId].resources = {};
+        manifestRoles[rolId].resources['__instances'] = (<Deployment.Rol>roles[rolId]).instanceList.length;
+        manifestRoles[rolId].resources['__cpu'] = (<Deployment.Rol>roles[rolId]).cpu;
+        manifestRoles[rolId].resources['__memory'] = (<Deployment.Rol>roles[rolId]).memory;
+        manifestRoles[rolId].resources['__ioperf'] = (<Deployment.Rol>roles[rolId]).ioperf;
+        manifestRoles[rolId].resources['__iopsinstensive'] = (<Deployment.Rol>roles[rolId]).iopsintensive;
+        manifestRoles[rolId].resources['__bandwidth'] = (<Deployment.Rol>roles[rolId]).bandwidth;
+        manifestRoles[rolId].resources['__resilience'] = (<Deployment.Rol>roles[rolId]).resilience;
+    }
+
+    return {
+        'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
+        'servicename': service,
+        'name': deploymentName,
+        'interconnection': true,
+        'configuration': {
+            'resources': {},
+            'parameters': {
+            }
+        },
+        'roles': manifestRoles
+    };
+}

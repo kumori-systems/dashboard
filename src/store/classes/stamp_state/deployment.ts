@@ -223,16 +223,16 @@ export module Deployment {
         ioperf: number;
         iopsintensive: boolean;
         bandwidth: number;
-        resilence: number;
+        resilience: number;
         instanceList: { [instanceId: string]: Rol.Instance };
         metrics: Deployment.Metrics;
-        constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilence: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+        constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
             this.cpu = cpu;
             this.memory = memory;
             this.ioperf = ioperf;
             this.iopsintensive = iopsintensive;
             this.bandwidth = bandwidth;
-            this.resilence = resilence;
+            this.resilience = resilience;
             this.instanceList = instanceList;
         };
 

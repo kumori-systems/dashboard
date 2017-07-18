@@ -83,6 +83,7 @@ export default class NewHTTPEntrypoint extends Vue {
         this.$store.dispatch('createNewHTTPENtrypoint', {
             'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
             'domain': this.selectedDomain,
+            'certificate': this.selectedCertificate,
             'accept-tls': this.acceptTLSSSL,
             'require-client-certificates': this.requireClientCertificates,
             'instances': this.instances,
@@ -95,7 +96,8 @@ export default class NewHTTPEntrypoint extends Vue {
 #acceptTLSSSL {
     margin-top: 1em;
 }
-.name{
+
+.name {
     padding-top: 1em;
 }
 </style>

@@ -56,6 +56,7 @@ export default {
         connection.onAddMetrics((metrics) => {
             commit('addMetrics', metrics);
         });
+        // connection.on
 
     },
     getDeploymentList({ getters, dispatch }) {
@@ -93,8 +94,8 @@ export default {
     createNewHTTPENtrypoint(context, params) {
         connection.createNewHTTPENtrypoint(params);
     },
-    createNewDeployment(context, params) {
-        connection.addDeployment(params);
+    createNewDeployment(context, deployment) {
+        connection.addDeployment(deployment);
     },
     deleteElement(context, elementId) {
         connection.deleteElement(elementId);

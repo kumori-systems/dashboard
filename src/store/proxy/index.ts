@@ -3,6 +3,7 @@ import { AcsClient as EcloudAcsClient } from 'acs-client';
 import { ADMISSION_URI, ACS_URI } from './config';
 import { EventEmitter, Listener } from 'typed-event-emitter';
 import * as utils from './utils';
+import { Deployment } from '../classes';
 
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá actuar acorde al evento que lea.
@@ -70,7 +71,7 @@ export class ProxyConnection extends EventEmitter {
                         this.emit(this.onAddMetrics, utils.transformEcloudEventDataToMetrics(event));
                         break;
                     default:
-                        console.error('Non espected ecloud event type: ' + event.strType + '/' + event.strName);
+                        console.error('Not espected ecloud event type: ' + event.strType + '/' + event.strName);
                 }
             });
 
@@ -80,7 +81,11 @@ export class ProxyConnection extends EventEmitter {
 
             this.admission.init().then(() => {
                 this.emit(this.onLogin, user.name);
+            }).catch((error) => {
+                console.error('Error connecting to admission', error);
             });
+        }).catch((error) => {
+            console.error('Error connecting to acs', error);
         });
     }
     getDeploymentList() {
@@ -88,6 +93,8 @@ export class ProxyConnection extends EventEmitter {
             for (let deploymentId in deploymentList) {
                 this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
             }
+        }).catch((error) => {
+            console.error('Error getting deployment list', error);
         });
     }
     getRegisteredElements() {
@@ -95,38 +102,40 @@ export class ProxyConnection extends EventEmitter {
             for (let i = 0; i < registeredElements.length; i++) {
                 this.getElementInfo(registeredElements[i]);
             }
+        }).catch((error) => {
+            console.error('Error getting registered elements', error);
         });
     }
 
     undeployDeployment(deploymentURN: string): void {
-        this.admission.undeploy(deploymentURN);
+        this.admission.undeploy(deploymentURN).then((value) => {
+            console.log('Tras realizar undeploy admission devuelve', value);
+        }).catch((error) => {
+            console.error('Error makin undeploy');
+        });
     }
 
     getElementInfo(uri: string) {
         return this.admission.getStorageManifest(uri).then((element) => {
-            switch (uri.split('/')[3]) {
-                case 'runtime':
-                case 'runtimes':
+            switch (utils.getElementTipe(element)) {
+                case utils.ElementType.runtime:
                     this.emit(
                         this.onAddRuntime,
                         uri,
                         utils.transformManifestToRuntime(element));
                     break;
-                case 'service':
-                case 'services':
+                case utils.ElementType.service:
                     this.emit(
                         this.onAddService,
                         uri,
                         utils.transformManifestToService(element));
                     break;
-                case 'component':
-                case 'components':
+                case utils.ElementType.component:
                     this.emit(this.onAddComponent,
                         uri,
                         utils.transformManifestToComponent(element));
                     break;
-                case 'resource':
-                case 'resources':
+                case utils.ElementType.resource:
                     this.emit(
                         this.onAddResource,
                         uri,
@@ -136,29 +145,64 @@ export class ProxyConnection extends EventEmitter {
                 default:
                     console.info('Case not covered', uri, element);
             }
+        }).catch((error) => {
+            console.error('Error getting element info', error);
         });
     }
 
-    createNewHTTPENtrypoint(params: any) {
-        console.info('Enviada la petición para crear un nuevo HTTPEntrypoint: ' + JSON.stringify(params));
+    createNewHTTPENtrypoint(params) {
+        this.admission.deploy(utils.transformEntrypointToManifest(
+            params.usePlatformGeneratedDomain,
+            'http', // Nombre!!
+            params.selectedDomain,
+            params.selectedCertificate,
+            params.acceptTLSSSL,
+            params.requireClientCertificates,
+            params.instances,
+            params.resilence
+        )).then((value) => {
+            console.log('Después de hacer un deploy de HTTPEntrypoint admission devuelve', value);
+        }).catch((error) => {
+            console.error('Error creating a new http entrypoint', error);
+        });
     }
 
     addDeployment(params) {
-        console.log('Creando un nuevo deployment con los parámetros: ' + JSON.stringify(params));
+        this.admission.deploy(utils.transformDeploymentToManifest(
+            params.name,
+            params.website,
+            params.service,
+            params.serviceConfig,
+            params.config,
+            params.roles
+        )).then((value) => {
+            console.log('Después de hacer un deployment de un servicio normal, admission devuelve', value);
+        }).catch((error) => {
+            console.error('Error creating a service', error);
+        });
     }
-
     aplyChangesToDeployment(changes) {
         console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
     }
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
-        console.log('Enviamos mensaje para eliminar: ' + JSON.stringify(elementId));
+        this.admission.removeStorage(elementId).then((value) => {
+            console.info('La llamada a admission removeStorage nos ha devuelto', value);
+        }).then((value) => {
+            console.log('Después de enviar una petición de delete Element, admission devuelve', value);
+        }).catch((error) => {
+            console.error('Error creating a service', error);
+        });
     }
 
     // @param elementId: Elemento o lista de elementos
     downloadManifest(elementId) {
-        console.log('Descargando el manifiesto de: ' + JSON.stringify(elementId));
+        this.admission.getStorageManifest(elementId).then((value) => {
+            console.log('Cuando preguntamos por el storage manifest obtenemos', value);
+        }).catch((error) => {
+            console.error('Error obtaining a manifest', error);
+        });
     }
 
     addWebdomain(webdomain) {
