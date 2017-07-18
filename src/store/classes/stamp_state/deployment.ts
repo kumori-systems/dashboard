@@ -137,9 +137,7 @@ export module Deployment {
         groupValues(m: EntryPointMetrics) {
             super.groupValues(m);
             let res: EntryPointMetrics = new EntryPointMetrics();
-            console.log('Entramos en la función de agrupar valores');
             res.time = this.time; // Cuando acumulamos valores, el tiempo se mantiene
-            console.log('Hemos accedido a la variable time sin problemas');
             for (let i = 0; i < res.time.length; i++) {
                 res.timestamp_init.push((this.timestamp_init[i] + m.timestamp_init[i]) / 2);
                 res.timestamp_end.push((this.timestamp_end[i] + m.timestamp_end[i]) / 2);
