@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { Deployment } from './classes';
 export default {
   login(state, user) {
@@ -7,6 +8,41 @@ export default {
     state.authError = value;
   },
   addDeployment(state, deploymentMap) {
+
+    /*
+    Los deployoment tienen una estructura muy grande y si la añadimos toda de golpe vue no guarda una referéncia
+    para escuchar cambios en los roles o las instáncias.
+    vue:(https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats)
+    vuex: (https://vuex.vuejs.org/en/mutations.html)
+
+    Lo adecuado es que guardemos aquellas referencias a estructuras internas de una en una
+    */
+
+
+    for (let deploymentId in deploymentMap) {
+      Vue.set(state.deploymentList, deploymentId, deploymentMap[deploymentId]);
+
+      // Sobreescribimos los roles (pese a que ya se los hemos pasado), para que guarde correctamente la referéncia
+      for (let rolId in (<Deployment>deploymentMap[deploymentId]).roles) {
+        Vue.set((<Deployment>state.deploymentList[deploymentId]).roles, rolId, deploymentMap[deploymentId].roles[rolId]);
+        Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'memory', (<Deployment>deploymentMap[deploymentId]).roles[rolId].memory);
+        Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'cpu', (<Deployment>deploymentMap[deploymentId]).roles[rolId].cpu);
+        Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'bandwidth', (<Deployment>deploymentMap[deploymentId]).roles[rolId].bandwidth);
+        Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'metrics', (<Deployment>deploymentMap[deploymentId]).roles[rolId].metrics);
+
+        for (let instanceId in (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList) {
+          Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList, instanceId, (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId]);
+          Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId], 'metrics', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].metrics);
+
+          Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'memory', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.memory);
+          Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'cpu', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.cpu);
+          Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'bandwith', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.bandwith);
+
+        }
+      }
+    }
+
+
     state.deploymentList = { ...state.deploymentList, ...deploymentMap };
   },
   addDeploymentMenuItem(state, deploymentMenuItem) {

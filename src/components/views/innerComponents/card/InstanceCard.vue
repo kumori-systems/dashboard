@@ -4,14 +4,16 @@
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
                 <span class="title">{{instanceId}}</span>
-                <span>{{instanceMem}} MEM</span>
-                <span>{{instanceCPU}} CPU</span>
-                <span>{{instanceNet}} NET</span>
-                <span>
-                    <span>&#160;</span>
-                    <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
-                    <label for="killInstance">kill instance</label>
-                </span>
+                <div>
+                    <span>{{instanceMem}} MEM</span>
+                    <span>{{instanceCPU}} CPU</span>
+                    <span>{{instanceNet}} NET</span>
+                    <span>
+                        <span>&#160;</span>
+                        <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
+                        <label for="killInstance">kill instance</label>
+                    </span>
+                </div>
             </div>
         </div>
         <div>
