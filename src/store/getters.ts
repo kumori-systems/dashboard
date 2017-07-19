@@ -246,7 +246,6 @@ export default {
 
   getDeploymentChartData: function (state, getters): Function {
     return function (deploymentId: string): Object {
-      console.log('Entramos en getDeploymentChartData');
       let res: Deployment.Metrics;
       if (
         !state.deploymentList[deploymentId]
@@ -316,7 +315,6 @@ export default {
   },
   getDeploymentRolChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): Object {
-      console.log('Entramos en getDeploymentRolChartData');
       let res: Deployment.Metrics;
       if (
         !state.deploymentList[deploymentId]
@@ -331,8 +329,8 @@ export default {
       } else {
         res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics;
       }
-      console.log('Vamos a devolver res con el valor', res);
-      console.log('Y formateado..', res.getFormattedMetrics());
+      console.log('En getDeploymentRolChartData vamos a devolver', res);
+      console.log('Y formateado vale', res.getFormattedMetrics());
       return res.getFormattedMetrics();
     };
   },
@@ -440,7 +438,6 @@ export default {
   },
   getDeploymentRolInstanceChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, instanceId: string) {
-      console.log('Entramos en getDeploymentRolInstanceChartData');
       let res: Deployment.Metrics;
       if (
         !state.deploymentList[deploymentId]
@@ -449,9 +446,9 @@ export default {
         || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics
       ) {
         if (getters.getIsEntryPoint(deploymentId)) {
-          res =  new Deployment.EntryPointMetrics();
+          res = new Deployment.EntryPointMetrics();
         } else {
-          res =  new Deployment.CommonMetrics();
+          res = new Deployment.CommonMetrics();
         }
       } else {
         res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;

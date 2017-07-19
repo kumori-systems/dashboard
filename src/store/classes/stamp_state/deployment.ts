@@ -39,10 +39,9 @@ export class Deployment {
     }
 
     addMetrics(m) {
-        console.log('En Deployment.addMetrics recibimos', m);
         if (!this.metrics && this.isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
         if (!this.metrics && !this.isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-        if (this.isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
+        if (this.isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
         else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
     }
 }
@@ -60,7 +59,7 @@ export module Deployment {
         timestamp_init: Array<number>;
         timestamp_end: Array<number>;
         elapsed_msec: Array<number>;
-        http_request_per_second: Array<number>;
+        http_requests_per_second: Array<number>;
         http_errors_per_second: Array<number>;
         http_size_in_per_second: Array<number>;
         http_size_out_per_second: Array<number>;
@@ -76,7 +75,7 @@ export module Deployment {
             this.timestamp_init = [];
             this.timestamp_end = [];
             this.elapsed_msec = [];
-            this.http_request_per_second = [];
+            this.http_requests_per_second = [];
             this.http_errors_per_second = [];
             this.http_size_in_per_second = [];
             this.http_size_out_per_second = [];
@@ -106,12 +105,12 @@ export module Deployment {
          * @param ws_chunk_in_per_second 
          * @param ws_chunk_out_per_second 
          */
-        addValues(time: Date, timestamp_init: number, timestamp_end: number, elapsed_msec: number, http_request_per_second: number, http_errors_per_second: number, http_size_in_per_second: number, http_size_out_per_second: number, http_chunk_in_per_second: number, http_chunk_out_per_second: number, http_response_time: number, ws_size_in_per_second: number, ws_size_out_per_second: number, ws_chunk_in_per_second: number, ws_chunk_out_per_second: number): void {
+        addValues(time: Date, timestamp_init: number, timestamp_end: number, elapsed_msec: number, http_requests_per_second: number, http_errors_per_second: number, http_size_in_per_second: number, http_size_out_per_second: number, http_chunk_in_per_second: number, http_chunk_out_per_second: number, http_response_time: number, ws_size_in_per_second: number, ws_size_out_per_second: number, ws_chunk_in_per_second: number, ws_chunk_out_per_second: number): void {
             this.time.push(time);
             this.timestamp_init.push(timestamp_init);
             this.timestamp_end.push(timestamp_end);
             this.elapsed_msec.push(elapsed_msec);
-            this.http_request_per_second.push(http_request_per_second);
+            this.http_requests_per_second.push(http_requests_per_second);
             this.http_errors_per_second.push(http_errors_per_second);
             this.http_size_in_per_second.push(http_size_in_per_second);
             this.http_size_out_per_second.push(http_size_out_per_second);
@@ -149,11 +148,11 @@ export module Deployment {
                         data: this.elapsed_msec
                     },
                     {
-                        label: 'http_request_per_second',
+                        label: 'http_requests_per_second',
                         backgroundColor: '#42afe3',
                         borderColor: '#42afe3',
                         fill: false,
-                        data: this.http_request_per_second
+                        data: this.http_requests_per_second
                     },
                     {
                         label: 'http_errors_per_second',
@@ -327,10 +326,9 @@ export module Deployment {
         };
 
         addMetrics(isEntrypoint, m) {
-            console.log('En Rol.addMetrics recibimos', isEntrypoint, m);
             if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
             if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-            if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.time, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
+            if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
             else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
         }
     }
@@ -369,10 +367,9 @@ export module Deployment {
             }
 
             addMetrics(isEntrypoint, m) {
-                console.log('En Instance.addMetrics recibimos', isEntrypoint, m);
                 if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
                 if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-                if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.time, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_request_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
+                if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
                 else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
             }
 
