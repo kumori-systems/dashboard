@@ -51,7 +51,10 @@ export default {
 
     if (!menuItem.children)
       Vue.set(menuItem, 'children', []);
-    menuItem.children.push(deploymentMenuItem);
+
+    let aux = (<Array<any>>menuItem.children).find(mItem => mItem.name === deploymentMenuItem.name);
+    if (!aux)
+      menuItem.children.push(deploymentMenuItem);
   },
   addService(state, serviceMap) {
     state.serviceList = { ...state.serviceList, ...serviceMap };
@@ -99,6 +102,7 @@ export default {
   },
 
   selectedService(state, serviceId) {
-    state.selectedService = serviceId;
+    if (serviceId && state.serviceList[serviceId])
+      state.selectedService = serviceId;
   }
 };

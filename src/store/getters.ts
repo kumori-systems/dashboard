@@ -642,6 +642,11 @@ export default {
     };
   },
 
+  getServiceName: function (state, getters) {
+    return (serviceId) => {
+      return (<Service>state.serviceList[serviceId]).name;
+    };
+  },
   getServiceNameList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList)
@@ -652,11 +657,11 @@ export default {
   /**
    * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
    */
-  getNoEPServiceNameList: function (state, getters): Array<string> {
+  getNoEPServiceList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
-      if (!getters.getServiceIsEntryPoint(serviceId))
-        res.push((<Service>state.serviceList[serviceId]).name);
+      if ((<Service>state.serviceList[serviceId]) && !getters.getServiceIsEntryPoint(serviceId))
+        res.push({ id: serviceId, name: (<Service>state.serviceList[serviceId]).name });
     }
     return res;
   },
@@ -854,33 +859,23 @@ export default {
   },
 
   getServiceRoles: function (state) {
-    return function (serviceName: string) {
-      if (serviceName == null) return [];
+    return function (serviceId: string) {
       let res: Array<string> = [];
-
-      // Tenemos que buscar el servicio por su nombre
-      for (let serviceId in state.serviceList) {
-        if (state.serviceList[serviceId].name === serviceName) {
-          // Y obtener sus roles
-          for (let rol in (<Service>state.serviceList[serviceId]).roles) {
-            res.push(rol);
-          }
-        }
+      for (let rol in (<Service>state.serviceList[serviceId]).roles) {
+        res.push(rol);
       }
       return res;
     };
   },
 
   getServiceResources: function (state, getters) {
-    return (serviceName: string) => {
-      let serviceId = getters.getServiceIdFromName(serviceName);
-      if (serviceId == null) return [];
-
+    return (serviceId: string) => {
       let res: Array<string> = [];
-      for (let resourceIndex in (<Service>state.serviceList[serviceId]).resources) {
-        res.push((<Service>state.serviceList[serviceId]).resources[resourceIndex]);
-      }
-
+      if ((<Service>state.serviceList[serviceId]) && (<Service>state.serviceList[serviceId]).resources)
+        for (let resourceIndex in (<Service>state.serviceList[serviceId]).resources) {
+          if ((<Service>state.serviceList[serviceId]).resources[resourceIndex])
+            res.push((<Service>state.serviceList[serviceId]).resources[resourceIndex]);
+        }
       return res;
     };
   },
@@ -909,13 +904,8 @@ export default {
   },
 
   getServiceReqChannels: function (state, getters) {
-    return (serviceName: string) => {
-      if (serviceName == null) return [];
-      let res: Array<string> = [];
-
-      let serviceId = getters.getServiceIdFromName(serviceName);
-      // Tenemos que buscar el servicio por su nombre
-
+    return (serviceId: string) => {
+      let res = [];
       for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
         res.push(reqChannel);
       }
@@ -977,7 +967,7 @@ export default {
     };
   },
 
-  getSelectedService: function (state): string {
+  getSelectedService: function (state) {
     return state.selectedService;
   },
 

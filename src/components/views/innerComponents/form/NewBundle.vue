@@ -33,5 +33,6 @@ export default class NewBundle extends Vue {
             this.$store.dispatch('addNewElement', this.fileList.item(0));
         }
     }
+
 }
 </script>

@@ -1,4 +1,4 @@
-import { AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
+import { FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
 import { ADMISSION_URI, ACS_URI } from './config';
 import { EventEmitter, Listener } from 'typed-event-emitter';
@@ -151,6 +151,7 @@ export class ProxyConnection extends EventEmitter {
     }
 
     createNewHTTPENtrypoint(params) {
+        /*
         this.admission.deploy(utils.transformEntrypointToManifest(
             params.usePlatformGeneratedDomain,
             'http', // Nombre!!
@@ -164,18 +165,27 @@ export class ProxyConnection extends EventEmitter {
             console.log('Después de hacer un deploy de HTTPEntrypoint admission devuelve', value);
         }).catch((error) => {
             console.error('Error creating a new http entrypoint', error);
-        });
+        });*/
     }
 
     addDeployment(params) {
-        this.admission.deploy(utils.transformDeploymentToManifest(
-            params.name,
-            params.website,
-            params.service,
-            params.serviceConfig,
-            params.config,
-            params.roles
-        )).then((value) => {
+        this.admission.deploy(
+            new FileStream(
+                new Blob([
+                    JSON.stringify(
+                        utils.transformDeploymentToManifest(
+                            params.name,
+                            params.website,
+                            params.service,
+                            params.serviceConfig,
+                            params.config,
+                            params.roles
+                        )
+                    )
+
+                ])
+            )
+        ).then((value) => {
             console.log('Después de hacer un deployment de un servicio normal, admission devuelve', value);
         }).catch((error) => {
             console.error('Error creating a service', error);
@@ -218,10 +228,8 @@ export class ProxyConnection extends EventEmitter {
         console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
     }
 
-
     addNewElement(file: File) {
-        console.log('Vamos a enviar un bundle que contiene', file);
-        this.admission.sendBundle(file)
+        this.admission.sendBundle(new FileStream(file))
             .then((value) => {
                 console.log('Después de enviar un bundle, admission nos devuelve ', value);
             })

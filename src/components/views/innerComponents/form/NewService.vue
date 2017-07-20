@@ -7,8 +7,7 @@
                     <div class="select">
                         <select v-model="selectedService">
                             <option disabled value="">Please select one</option>
-    
-                            <option v-for="(service, index) in serviceList" v-bind:key="index">{{service}}</option>
+                            <option v-for="(service, index) in serviceList" v-bind:key="index" v-bind:value="service">{{service.name}}</option>
                         </select>
     
                     </div>
@@ -18,7 +17,7 @@
                 </th>
             </tr>
     
-            <tr v-if="selectedService !=null" class="tile is-3">
+            <tr v-if="selectedService && selectedService!==null" class="tile is-3">
                 <th>
                     <span>NAME</span>
                 </th>
@@ -26,10 +25,10 @@
                     <input class="input" v-model="deploymentName" placeholder="Deployment name">
                 </th>
             </tr>
-            <tr v-if="serviceRolList.length > 0">
+            <tr v-if="selectedService && selectedService !==null && serviceRolList.length > 0">
                 <th>ROLES</th>
             </tr>
-            <tr v-for="(rol, index) in serviceRolList" v-bind:key="index">
+            <tr v-if="selectedService &&  selectedService !==null" v-for="(rol, index) in serviceRolList" v-bind:key="index">
                 <th>
                     <table>
                         <tr class="tile is-3">
@@ -73,10 +72,10 @@
                     </table>
                 </th>
             </tr>
-            <tr v-if="serviceProChannelList.length>0 || serviceReqChannelList.length>0">
+            <tr v-if="selectedService &&  selectedService !==null && serviceProChannelList.length>0 || serviceReqChannelList.length>0">
                 <th> CHANNELS</th>
             </tr>
-            <tr v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
+            <tr v-if="selectedService && selectedService !==null" v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
                 <th>
                     <table class="tile is-6">
                         <tr class="tile is-12">
@@ -94,7 +93,7 @@
                     </table>
                 </th>
             </tr>
-            <tr v-for="(channel, index) in serviceReqChannelList" v-bind:key="index">
+            <tr v-if="selectedService && selectedService !==null" v-for="(channel, index) in serviceReqChannelList" v-bind:key="index">
                 <th>
                     <table class="tile is-6">
                         <tr class="tile is-12">
@@ -112,10 +111,10 @@
                     </table>
                 </th>
             </tr>
-            <tr v-if="serviceResourcesList.length>0">
+            <tr v-if="selectedService && selectedService !==null && serviceResourcesList.length>0">
                 <th>RESOURCES CONFIGURATION</th>
             </tr>
-            <tr v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
+            <tr v-if="selectedService && selectedService !==null && serviceResourcesList.length>0"" v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
                 <th>
                     <table>
                         <tr>
@@ -139,10 +138,10 @@
                     </table>
                 </th>
             </tr>
-            <tr v-if="selectedService!=null">
-                <th>SERVICE '{{selectedService}}' CONFIGURATION</th>
+            <tr v-if="selectedService && selectedService!==null">
+                <th>SERVICE '{{selectedService.name}}' CONFIGURATION</th>
             </tr>
-            <tr v-if="selectedService!=null">
+            <tr v-if="selectedService && selectedService!==null">
                 <th class="tile is-6">
                     <textarea class="textarea" v-model="serviceConfig" placeholder="text/json"></textarea>
                 </th>
@@ -159,13 +158,13 @@ import { FabElement, Deployment, Resource } from '../../../../store/classes';
 import InputNumber from '../input/InputNumber.vue';
 
 @Component({
-    name: 'new-webservice-advanced',
+    name: 'new-service',
     components: {
         'inputnumber': InputNumber
     }
 })
 export default class NewService extends Vue {
-    selectedService: string = null;
+    selectedService: { id: string, name: string }=null;
     deploymentName: string = null;
     rolMem: Array<number> = [];
     rolCPU: Array<number> = [];
@@ -182,16 +181,23 @@ export default class NewService extends Vue {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
         let serviceId = this.$store.getters.getSelectedService;
-        if (serviceId != null)
-            this.selectedService = this.$store.getters.getServiceName(serviceId);
+
+        if (serviceId && serviceId !== null){
+            
+            this.selectedService = {
+                id: serviceId,
+                name: this.$store.getters.getServiceName(serviceId)
+            };
+        }
     }
 
     get serviceList() {
-        return this.$store.getters.getNoEPServiceNameList;
+        return this.$store.getters.getNoEPServiceList;
     }
 
     get serviceRolList(): Array<string> {
-        let rolList: Array<string> = this.$store.getters.getServiceRoles(this.selectedService);
+        if(!this.selectedService || this.selectedService === null)return [];
+        let rolList: Array<string> = this.$store.getters.getServiceRoles(this.selectedService.id);
         this.rolMem = new Array<number>(rolList.length);
         this.rolCPU = new Array<number>(rolList.length);
         this.rolNet = new Array<number>(rolList.length);
@@ -209,20 +215,23 @@ export default class NewService extends Vue {
 
 
     get serviceProChannelList(): Array<string> {
-        let res = this.$store.getters.getServiceProChannels(this.selectedService);
+        if(!this.selectedService || this.selectedService === null)return [];
+        let res = this.$store.getters.getServiceProChannels(this.selectedService.id);
         this.selectedRequiredChannel = new Array<string>(res.length);
         return res;
     }
     get serviceReqChannelList(): Array<string> {
-        let res = this.$store.getters.getServiceReqChannels(this.selectedService);
+        if(!this.selectedService || this.selectedService === null)return [];
+        let res = this.$store.getters.getServiceReqChannels(this.selectedService.id);
         this.selectedProvidedChannel = new Array<string>(res.length);
         return res;
     }
 
     get serviceResourcesList(): Array<string> {
-        let resourceList = this.$store.getters.getServiceResources(this.selectedService);
+        let resourceList = []
+        if(this.selectedService && this.selectedService !== null)
+            resourceList = this.$store.getters.getServiceResources(this.selectedService.id);
         this.resourceConfig = new Array<string>(resourceList.length);
-
         return resourceList;
     }
 
@@ -239,7 +248,7 @@ export default class NewService extends Vue {
     }
 
     get allSelected() {
-        if (this.selectedService === undefined) return false;
+        if(!this.selectedService || this.selectedService === null)return false;
         if (this.deploymentName == null || this.deploymentName.length < 1) return false;
         for (let index in this.rolMem) {
             if (this.rolMem[index] === undefined) return false
@@ -298,7 +307,7 @@ export default class NewService extends Vue {
         this.$store.dispatch('createNewDeployment',
             {
                 'name': this.deploymentName,
-                'service': this.selectedService,
+                'service': this.selectedService.id,
                 'config': config,
                 'serviceConfig': this.serviceConfig,
                 'roles': roles,
@@ -334,7 +343,7 @@ export default class NewService extends Vue {
 table {
     border-collapse: collapse;
     border-bottom-width: 0px;
-    tr {
+    tr,th {
         border-bottom-width: 0px;
     }
 }
