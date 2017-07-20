@@ -21,15 +21,12 @@ import Breadcrumb from 'vue-bulma-breadcrumb/src/Breadcrumb.vue'
 })
 export default class NavBar extends Vue {
     get deploymentId(): string {
-        console.log('DeploymentId devuelve');
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
     }
     get deploymentName(): string {
-        console.log('getDeploymentNAme devuelve');
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
     get list(): Array<{ name: string, path: string }> {
-        console.log('list devuelve');
         let res: Array<{ name: string, path: string }> = [];
         if (this.$route.path.startsWith('/deployment/')) {
             res.push(this.$store.getters.menuElement('/'));
@@ -45,10 +42,8 @@ export default class NavBar extends Vue {
         } else if (this.$route.path.startsWith('/newDomain')) {
             res.push({ name: 'New Domain', path: this.$route.path });
         } else {
-            console.log('Entramos en el ELSE')
             res.push(this.$store.getters.menuElement(this.$route.path));
         }
-        console.log('Res va a devolver', res);
         return res;
     }
 }
