@@ -1,0 +1,88 @@
+<template>
+    <div>
+        <p>NEW VOLUME RESERVATION</p>
+        <div class="tile is-4">
+            <span>Prefix:</span>
+            <input class="input" v-model="prefix">
+        </div>
+        <div class="tile is-4">
+            <span>Number of Chunks:</span>
+            <inputnumber class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
+        </div>
+        <div class="tile is-4" v-for="n in chunkNum" v-bind:key="n">
+            <span>Chunk {{n}}:</span>
+            <inputnumber class="tile is-2"v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
+            <span>GB</span>
+        </div>
+        <div>Size: {{totalGB}}GB</div>
+        <button class="button is-primary" v-on:click="addDataVolume" v-bind:disabled="prefix.length<=0">ADD</button>
+    </div>
+</template>
+<script lang="ts">
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import InputNumber from '../input/InputNumber.vue';
+
+@Component({
+    name: 'addvolume',
+    components: {
+        'inputnumber': InputNumber
+    }
+})
+export default class AddVolume extends Vue {
+    prefix: string = '';
+    chunkNum: number = 1;
+    size: Array<number> = [0, 1];
+    totalGB: number = 1;
+
+    mounted() {
+        this.$watch('chunkNum', function (value) {
+            this.size = new Array<number>(value + 1);
+            this.size[0] = 0;
+            for (let index = 1; index <= value; index++) {
+                this.size[index] = 1;
+            }
+        });
+    }
+
+    get chunkSize() {
+        return (chunkIndex) => {
+            return this.size[chunkIndex];
+        }
+    }
+
+    set chunkSize(chunkIndex) {
+        (value) => {
+            this.size[chunkIndex(1)] = value;
+        }
+    }
+
+    addDataVolume() {
+        this.size.shift(); // Eliminamos el 0 inicial
+        let params = {
+            'prefix': this.prefix,
+            'chunks': this.size
+        };
+        this.size = [0].concat(this.size); // Restauramos el 0 inicial
+        this.$store.dispatch('addDataVolume', params);
+    }
+
+    updateInputValue(value) {
+        let index, propertyType, newValue;
+        [index, propertyType, newValue] = value;
+
+        if (index == null) {
+            this.chunkNum = newValue;
+            this.totalGB = newValue;
+        }
+        else {
+            this.size[index] = newValue;
+            let res = 0;
+            for (let i = 1; i < this.size.length; i++) {
+                res += this.size[i];
+            }
+            this.totalGB = res;
+        }
+    }
+}
+</script>
