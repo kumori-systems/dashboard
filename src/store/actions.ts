@@ -32,6 +32,11 @@ export default {
             }
         });
 
+        connection.onRemoveDeploymemt((deploymentId) => {
+            commit('removeDeploymentMenuItem', '/deployment/' + urlencode(deploymentId));
+            commit('removeDeployment', deploymentId);
+        });
+
         connection.onAddService((serviceId: string, service: Service) => {
             let val: { [id: string]: Service } = {};
             val[serviceId] = service;

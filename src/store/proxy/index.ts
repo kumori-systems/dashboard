@@ -33,7 +33,7 @@ export class ProxyConnection extends EventEmitter {
         super();
         this.onLogin = this.registerEvent<Function>();
         this.onAddDeployment = this.registerEvent<(deploymentId, deployment) => any>();
-        this.onRemoveDeploymemt = this.registerEvent<Function>();
+        this.onRemoveDeploymemt = this.registerEvent<(deploymentId) => any>();
         this.onAddService = this.registerEvent<(serviceId, service) => any>();
         this.onRemoveService = this.registerEvent<Function>();
         this.onAddComponent = this.registerEvent<(componentId, component) => any>();
@@ -109,9 +109,10 @@ export class ProxyConnection extends EventEmitter {
 
     undeployDeployment(deploymentURN: string): void {
         this.admission.undeploy(deploymentURN).then((value) => {
-            console.log('Tras realizar undeploy admission devuelve', value);
+            this.emit(this.onRemoveDeploymemt, deploymentURN);
+            console.info('SUCCESSFULLY undeployed ' + deploymentURN);
         }).catch((error) => {
-            console.error('Error makin undeploy');
+            console.error('The deployment ' + deploymentURN + ' could not be undeployed: ' + error);
         });
     }
 

@@ -45,6 +45,9 @@ export default {
 
     state.deploymentList = { ...state.deploymentList, ...deploymentMap };
   },
+  removeDeployment(state, deploymentId) {
+    Vue.delete(state.deploymentList, deploymentId);
+  },
   addDeploymentMenuItem(state, deploymentMenuItem) {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
@@ -55,6 +58,13 @@ export default {
     let aux = (<Array<any>>menuItem.children).find(mItem => mItem.name === deploymentMenuItem.name);
     if (!aux)
       menuItem.children.push(deploymentMenuItem);
+  },
+  removeDeploymentMenuItem(state, deploymentPath) {
+    let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+    let index = (<Array<any>>menuItem.children).find(item => item.path === deploymentPath);
+    index = (<Array<any>>state.menuItemList).indexOf(index);
+
+    menuItem.children = (<Array<any>>menuItem.children).slice(0, index).concat((<Array<any>>menuItem.children).slice(index + 1, menuItem.children.lenght - 1));
   },
   addService(state, serviceMap) {
     state.serviceList = { ...state.serviceList, ...serviceMap };
