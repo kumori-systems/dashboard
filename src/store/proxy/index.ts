@@ -181,6 +181,7 @@ export class ProxyConnection extends EventEmitter {
             console.error('Error creating a service', error);
         });
     }
+
     aplyChangesToDeployment(changes) {
         console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
     }
@@ -217,7 +218,15 @@ export class ProxyConnection extends EventEmitter {
         console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
     }
 
-    addNewElement(params) {
-        console.log('Enviamos un mensaje para añadir un nuevo elemento. El mensaje contiene: ' + JSON.stringify(params));
+
+    addNewElement(file: File) {
+        console.log('Vamos a enviar un bundle que contiene', file);
+        this.admission.sendBundle(file)
+            .then((value) => {
+                console.log('Después de enviar un bundle, admission nos devuelve ', value);
+            })
+            .catch((error) => {
+                console.error('Error uploading a bundle');
+            });
     }
 };

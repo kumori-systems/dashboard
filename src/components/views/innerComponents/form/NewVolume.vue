@@ -11,7 +11,7 @@
         </div>
         <div class="tile is-4" v-for="n in chunkNum" v-bind:key="n">
             <span>Chunk {{n}}:</span>
-            <inputnumber class="tile is-2"v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
+            <inputnumber class="tile is-2" v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
             <span>GB</span>
         </div>
         <div>Size: {{totalGB}}GB</div>
@@ -24,12 +24,12 @@ import Component from 'vue-class-component';
 import InputNumber from '../input/InputNumber.vue';
 
 @Component({
-    name: 'addvolume',
+    name: 'newvolume',
     components: {
         'inputnumber': InputNumber
     }
 })
-export default class AddVolume extends Vue {
+export default class NewVolume extends Vue {
     prefix: string = '';
     chunkNum: number = 1;
     size: Array<number> = [0, 1];

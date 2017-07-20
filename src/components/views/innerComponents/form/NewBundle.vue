@@ -30,7 +30,7 @@ export default class NewBundle extends Vue {
 
     addElement() {
         if (this.fileList) {
-            this.$store.dispatch('addNewElement', this.fileList);
+            this.$store.dispatch('addNewElement', this.fileList.item(0));
         }
     }
 }

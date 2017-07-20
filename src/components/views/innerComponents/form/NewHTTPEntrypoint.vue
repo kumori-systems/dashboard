@@ -27,36 +27,29 @@
                 <label for="requireClientCertificates"> Require Client Certificates</label>
             </div>
         </div>
-        <div class="tile">
-            <span class="name">Instances {{instances}}</span>
-            <div>
-                <div class="tile is-vertical">
-                    <button class="button is-small fa fa-angle-up" v-on:click="instances += 1"></button>
-                    <button class="button is-small fa fa-angle-down" v-on:click="instances>1? instances--:1"></button>
-                </div>
-            </div>
+    
+        <div class="tile is-6">
+            <span class="name">Instances</span>
+            <inputnumber class="tile is-1" v-model="instances"></inputnumber>
         </div>
-        <div class="tile">
-            <span class="name">Resilence {{resilence}}</span>
-            <div>
-                <div class="tile is-vertical">
-                    <button class="button is-small fa fa-angle-up" v-on:click="resilence += 1"></button>
-                    <button class="button is-small fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
-                </div>
-            </div>
+        <div class="tile is-6">
+            <span class="name">Resilence</span>
+            <inputnumber class="tile is-1" v-model="resilience"></inputnumber>
         </div>
     </div>
 </template>
 <script lang="ts">
-// TODO: No se pueden listar dominios que ya estén en uso
-// TODO: Los certificados los tenemos que obtener de otro documento distinto al stamp state
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../../../store/classes';
+import InputNumber from '../input/InputNumber.vue';
 
 @Component({
-    name: 'new-httpentrypoint'
+    name: 'new-httpentrypoint',
+    components: {
+        'inputnumber': InputNumber
+    }
 })
 export default class NewHTTPEntrypoint extends Vue {
     usePlatformGeneratedDomain: boolean = false;
@@ -65,7 +58,7 @@ export default class NewHTTPEntrypoint extends Vue {
     acceptTLSSSL: boolean = false;
     requireClientCertificates: boolean = false;
     instances: number = 1;
-    resilence: number = 1;
+    resilience: number = 1;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
@@ -87,7 +80,7 @@ export default class NewHTTPEntrypoint extends Vue {
             'accept-tls': this.acceptTLSSSL,
             'require-client-certificates': this.requireClientCertificates,
             'instances': this.instances,
-            'resilence': this.resilence
+            'resilience': this.resilience
         });
     }
 }

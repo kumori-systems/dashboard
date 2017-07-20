@@ -1,98 +1,153 @@
 <template>
     <div>
-        <p class="control">
-            SERVICE:
-            <span class="select">
-                <select v-model="selectedService">
-                    <option disabled value="">Please select one</option>
-                    <option v-for="(service, index) in serviceList" v-bind:key="index">{{service}}</option>
-                </select>
-            </span>
-            <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
-        </p>
-        <p v-if="selectedService !=null" class="tile is-3">
-            NAME:
-            <input class="input" v-model="deploymentName" placeholder="Deployment name">
-        </p>
-        <p v-if="serviceRolList.length > 0">
-            ROLES
-            <div v-for="(rol, index) in serviceRolList" v-bind:key="index">
-                {{rol}}
-                <div class="inner-content">
-                    <p class="tile is-6">
-                        <span class="tile inner-content">
-                            <inputnumber v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue" />MEM
-                        </span>
-                        <span class="tile inner-content">
-                            <inputnumber v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue" />CPU
-                        </span>
-                        <span class="tile inner-content">
-                            <inputnumber v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue" />NET
-                        </span>
-                    </p>
-    
-                    <p class="tile is-6">
-                        <span class="tile inner-content">
-                            <inputnumber v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue" />Instances
-                        </span>
-                        <span class="tile inner-content">
-                            <inputnumber v-bind:value="rolResilence[index]" v-bind:numElement="index" v-bind:property="'RES'" v-on:input="updateInputValue" />Resilence
-                        </span>
-                    </p>
-                </div>
-            </div>
-        </p>
-        <p v-if="serviceProChannelList.length>0">
-            CHANNELS PROVIDES
-            <div class="inner-content" v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
-                {{channel}} ->
-                <span class="select">
-                    <select v-model="selectedRequiredChannel[index]">
-                        <option disabled value="">Please select one</option>
-                        <option v-for="(requiredChannel, index) in totalRequiredDeploymentChannels" v-bind:key="index">{{requiredChannel}}</option>
-                    </select>
-                </span>
-            </div>
-        </p>
-        <p v-if="serviceReqChannelList.length>0">
-            CHANNELS REQUIRES
-            <div class="inner-content" v-for="(channel, index) in serviceReqChannelList" v-bind:key="index">
-                {{channel}}
-                <- <span class="select">
-                    <select v-model="selectedProvidedChannel[index]">
-                        <option disabled value="">Please select one</option>
-                        <option v-for="(providedChannel, index) in totalProvidedDeploymentChannels" v-bind:key="index">{{providedChannel}}</option>
-                    </select>
-                    </span>
-            </div>
-        </p>
-        <div v-if="selectedService!=null">
-            <p>CONFIGURATION</p>
-            <div v-if="serviceResourcesList.length>0">
-    
-                <div v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
-                    {{resource}}
-    
-                    <span class="select">
-                        <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index]!==undefined && resourceConfig[index].length >0">
+        <table>
+            <tr class="tile is-3">
+                <th>SERVICE:</th>
+                <th>
+                    <div class="select">
+                        <select v-model="selectedService">
                             <option disabled value="">Please select one</option>
-                            <option v-for="(resourceConfig, index) in totalResourceConfig(resource)" v-bind:key="index">{{resourceConfig}}</option>
+    
+                            <option v-for="(service, index) in serviceList" v-bind:key="index">{{service}}</option>
                         </select>
-                    </span>
     
-                    <p class="inner-content is-6 tile">
-                        <textarea class="textarea" v-model="resourceConfig[index]" placeholder="text/json"></textarea>
-                    </p>
-                    </select>
-                </div>
+                    </div>
+                </th>
+                <th>
+                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
+                </th>
+            </tr>
     
-            </div>
+            <tr v-if="selectedService !=null" class="tile is-3">
+                <th>
+                    <span>NAME</span>
+                </th>
+                <th>
+                    <input class="input" v-model="deploymentName" placeholder="Deployment name">
+                </th>
+            </tr>
+            <tr v-if="serviceRolList.length > 0">
+                <th>ROLES</th>
+            </tr>
+            <tr v-for="(rol, index) in serviceRolList" v-bind:key="index">
+                <th>
+                    <table>
+                        <tr class="tile is-3">
+                            <th class="tile is-6">{{rol}}</th>
+                            <th class="is-3">
+                                <tr>
+                                    <th>MEM</th>
+                                    <th>
+                                        <inputnumber v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue"></inputnumber>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>CPU</th>
+                                    <th>
+                                        <inputnumber v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue"></inputnumber>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>NET</th>
+                                    <th>
+                                        <inputnumber v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue"></inputnumber>
+                                    </th>
+                                </tr>
     
-            {{selectedService}}config:
-            <p class="inner-content is-6 tile">
-                <textarea class="textarea" v-model="serviceConfig" placeholder="text/json"></textarea>
-            </p>
-        </div>
+                                <tr>
+                                    <th>Instances</th>
+                                    <th>
+                                        <inputnumber v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue"></inputnumber>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>Resilence</span>
+                                    </th>
+                                    <th>
+                                        <inputnumber v-bind:value="rolResilence[index]" v-bind:numElement="index" v-bind:property="'RES'" v-on:input="updateInputValue"></inputnumber>
+                                    </th>
+                                </tr>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr v-if="serviceProChannelList.length>0 || serviceReqChannelList.length>0">
+                <th> CHANNELS</th>
+            </tr>
+            <tr v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
+                <th>
+                    <table class="tile is-6">
+                        <tr class="tile is-12">
+                            <th class="tile is-2"> {{channel}}</th>
+                            <th>-&gt;</th>
+                            <th>
+                                <div class="select">
+                                    <select v-model="selectedRequiredChannel[index]">
+                                        <option disabled value="">Please select one</option>
+                                        <option v-for="(requiredChannel, index) in totalRequiredDeploymentChannels" v-bind:key="index">{{requiredChannel}}</option>
+                                    </select>
+                                </div>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr v-for="(channel, index) in serviceReqChannelList" v-bind:key="index">
+                <th>
+                    <table class="tile is-6">
+                        <tr class="tile is-12">
+                            <th class="tile is-2"> {{channel}} </th>
+                            <th>&lt;-</th>
+                            <th>
+                                <div class="select">
+                                    <select v-model="selectedProvidedChannel[index]">
+                                        <option disabled value="">Please select one</option>
+                                        <option v-for="(providedChannel, index) in totalProvidedDeploymentChannels" v-bind:key="index">{{providedChannel}}</option>
+                                    </select>
+                                </div>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr v-if="serviceResourcesList.length>0">
+                <th>RESOURCES CONFIGURATION</th>
+            </tr>
+            <tr v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
+                <th>
+                    <table>
+                        <tr>
+                            <th>{{resource}} </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                <div class="select">
+                                    <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index]!==undefined && resourceConfig[index].length >0">
+                                        <option disabled value="">Please select one</option>
+                                        <option v-for="(resourceConfig, index) in totalResourceConfig(resource)" v-bind:key="index">{{resourceConfig}}</option>
+                                    </select>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="tile is-6">
+                                <textarea class="textarea" v-model="resourceConfig[index]" placeholder="text/json"></textarea>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr v-if="selectedService!=null">
+                <th>SERVICE '{{selectedService}}' CONFIGURATION</th>
+            </tr>
+            <tr v-if="selectedService!=null">
+                <th class="tile is-6">
+                    <textarea class="textarea" v-model="serviceConfig" placeholder="text/json"></textarea>
+                </th>
+            </tr>
+        </table>
     </div>
 </template>
 
@@ -109,7 +164,7 @@ import InputNumber from '../input/InputNumber.vue';
         'inputnumber': InputNumber
     }
 })
-export default class NewWebServiceAdvanced extends Vue {
+export default class NewService extends Vue {
     selectedService: string = null;
     deploymentName: string = null;
     rolMem: Array<number> = [];
@@ -275,3 +330,12 @@ export default class NewWebServiceAdvanced extends Vue {
     }
 }
 </script>
+<style lang="scss" scoped>
+table {
+    border-collapse: collapse;
+    border-bottom-width: 0px;
+    tr {
+        border-bottom-width: 0px;
+    }
+}
+</style>

@@ -26,6 +26,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import Expanding from 'vue-bulma-expanding/src/Expanding.vue';
+import { Overview, DeploymentItem, AlarmsAndLogs, DataVolumes, Elements, Help, Domains } from '../../components';
 
 @Component({
   name: 'side-bar',
@@ -34,6 +35,47 @@ import Expanding from 'vue-bulma-expanding/src/Expanding.vue';
   }
 })
 export default class Sidebar extends Vue {
+  mounted() {
+    const initialMenu = [
+      {
+        name: 'OVERVIEW',
+        path: '/',
+        meta: { expanded: false },
+        component: Overview,
+      },
+      {
+        name: 'ELEMENTS',
+        path: '/elements',
+        meta: { expanded: false },
+        component: Elements
+      },
+      {
+        name: 'DOMAINS',
+        path: '/domains',
+        meta: { expanded: false },
+        component: Domains
+      },
+      {
+        name: 'DATA VOLUMES',
+        path: '/dataVolumes',
+        meta: { expanded: false },
+        component: DataVolumes
+      },
+      {
+        name: 'ALARMS & LOGS',
+        path: '/alarmsAndLogs',
+        meta: { expanded: false },
+        component: AlarmsAndLogs
+      },
+      {
+        name: 'HELP',
+        path: '/help',
+        meta: { expanded: false },
+        component: Help
+      }
+    ];
+    this.$store.dispatch('setMenu', initialMenu);
+  }
 
   // Computed
   get menuItems() {

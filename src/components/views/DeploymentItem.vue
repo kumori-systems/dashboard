@@ -69,7 +69,9 @@ export default class DeploymentItem extends Vue {
     showModal: boolean = false;
     modalOkCallback: Function = function () { };
     chartOptions = ChartOptions;
-
+    created() {
+        this.$store.dispatch('getDeploymentList');
+    }
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });

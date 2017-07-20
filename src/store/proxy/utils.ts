@@ -373,8 +373,7 @@ export function transformDeploymentToManifest(deploymentName: string, domain: st
         'interconnection': true,
         'configuration': {
             'resources': {},
-            'parameters': {
-            }
+            'parameters': {}
         },
         'roles': manifestRoles
     };

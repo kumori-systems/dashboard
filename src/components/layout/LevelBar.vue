@@ -21,27 +21,34 @@ import Breadcrumb from 'vue-bulma-breadcrumb/src/Breadcrumb.vue'
 })
 export default class NavBar extends Vue {
     get deploymentId(): string {
+        console.log('DeploymentId devuelve');
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
     }
     get deploymentName(): string {
+        console.log('getDeploymentNAme devuelve');
         return this.$store.getters.getDeploymentName(this.deploymentId);
     }
     get list(): Array<{ name: string, path: string }> {
+        console.log('list devuelve');
         let res: Array<{ name: string, path: string }> = [];
         if (this.$route.path.startsWith('/deployment/')) {
             res.push(this.$store.getters.menuElement('/'));
             res.push({ name: this.deploymentName, path: this.$route.path });
         } else if (this.$route.path.startsWith('/newHTTPEntrypoint')) {
             res.push({ name: 'New HTTP Entrypoint', path: this.$route.path });
-        } else if (this.$route.path.startsWith('/newWebServiceAdvanced')) {
-            res.push({ name: 'New Webservice (Advanced)', path: this.$route.path });
-        } else if (this.$route.path.startsWith('/newWebService')) {
-            res.push({ name: 'New Webservice', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newService')) {
+            res.push({ name: 'New Service', path: this.$route.path });
         } else if (this.$route.path.startsWith('/newBundle')) {
             res.push({ name: 'New Bundle', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newVolume')) {
+            res.push({ name: 'New Volume', path: this.$route.path });
+        } else if (this.$route.path.startsWith('/newDomain')) {
+            res.push({ name: 'New Domain', path: this.$route.path });
         } else {
-            res.push(this.$store.getters.menuElement(this.$route.path))
+            console.log('Entramos en el ELSE')
+            res.push(this.$store.getters.menuElement(this.$route.path));
         }
+        console.log('Res va a devolver', res);
         return res;
     }
 }

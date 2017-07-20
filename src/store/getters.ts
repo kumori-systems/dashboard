@@ -14,7 +14,12 @@ export default {
   menuElement: function (state) {
     return function (path) {
       let menuItem = (<Array<any>>state.menuItemList).find(elemen => elemen.path === path);
-      return { name: menuItem.name, path: menuItem.path };
+      let res;
+      if (menuItem)
+        res = { name: menuItem.name, path: menuItem.path };
+      else
+        res = { name: 'OVERVIEW', path: '/' };
+      return res;
     };
   },
   getFabElements: function (state): Array<FabElement> {
@@ -329,8 +334,6 @@ export default {
       } else {
         res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics;
       }
-      console.log('En getDeploymentRolChartData vamos a devolver', res);
-      console.log('Y formateado vale', res.getFormattedMetrics());
       return res.getFormattedMetrics();
     };
   },
@@ -652,7 +655,7 @@ export default {
   getNoEPServiceNameList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
-      if (getters.getServiceIsEntryPoint(serviceId))
+      if (!getters.getServiceIsEntryPoint(serviceId))
         res.push((<Service>state.serviceList[serviceId]).name);
     }
     return res;
@@ -792,8 +795,7 @@ export default {
     let res: Array<string> = [];
     for (let resourceId in state.resourceList) {
       if (
-        state.resourceList[resourceId] !== undefined
-        && state.resourceList[resourceId] !== null
+        state.resourceList[resourceId]
         && resourceId.split('/')[4] === 'volume'
       ) {
         res.push(resourceId);
@@ -983,7 +985,10 @@ export default {
     // Tenemos que mirar en los recursos de los servicios
     return (dataVolumeId): boolean => {
       for (let serviceId in state.serviceList) {
-        if ((<Service>state.serviceList[serviceId]).resources[dataVolumeId] !== undefined)
+        if (
+          (<Service>state.serviceList[serviceId])
+          && (<Service>state.serviceList[serviceId]).resources[dataVolumeId]
+        )
           return true;
       }
       return false;
@@ -994,18 +999,19 @@ export default {
     return (dataVolumeId) => {
       // Tenemos que entrar en resourcesConfig de cada deployment y mirar si está el volumen
       for (let deploymentId in state.deploymentList) {
-        if ((<Deployment>state.deploymentList[deploymentId]).resourcesConfig[dataVolumeId] !== undefined) {
+        if ((<Deployment>state.deploymentList[deploymentId]).resourcesConfig[dataVolumeId])
           return deploymentId;
-        }
       }
+      return null;
     };
   },
 
   getRolUsingDataVolume: function (state, getters) {
     return (dataVolumeId) => {
       let deploymentId = getters.getDeploymentUsingDataVolume(dataVolumeId);
+      if (!<Deployment>state.deploymentList[deploymentId]) return false;
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (state.serviceList[serviceId] === undefined) return false;
+      if (deploymentId === null || !state.serviceList[serviceId]) return false;
       for (let rolId in (<Service>state.serviceList[serviceId]).roles) {
         if ((<Service>state.serviceList[serviceId]).roles[rolId].resources[dataVolumeId] !== undefined)
           return rolId;

@@ -186,7 +186,7 @@ export default class Elements extends Vue {
     modalElementList: Array<[string, string, string, string]> = [];
 
     created() {
-        this.$store.dispatch('getElementList');
+        this.$store.dispatch('getDeploymentList');
     }
 
     mounted() {

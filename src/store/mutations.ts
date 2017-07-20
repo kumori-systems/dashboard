@@ -49,8 +49,8 @@ export default {
     // obtenemos el menuitem deployments
     let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
 
-    // Quitamos los hijos anteriores para actualizar de cero
-    if (!menuItem.children) menuItem.children = [];
+    if (!menuItem.children)
+      Vue.set(menuItem, 'children', []);
     menuItem.children.push(deploymentMenuItem);
   },
   addService(state, serviceMap) {
@@ -69,7 +69,6 @@ export default {
     state.resourceList = { ...state.resourceList, ...resourceMap };
   },
   addMetrics(state, metrics) {
-    console.log('El objeto que recibimos en addmetrics es', metrics);
     // Metrics with the format [deployment]:{data:metris, roles:{data:metrics, instances:metrics}}
     for (let deploymentId in metrics) {
       if (state.deploymentList[deploymentId]) { // Es posible que nada más conectarnos recibamos métricas, cuando todavía no tenemos los deployment
@@ -85,6 +84,11 @@ export default {
           }
         }
       }
+    }
+  },
+  setMenu(state, menuItems) {
+    for (let i = 0; i < menuItems.length; i++) {
+      state.menuItemList.push(menuItems[i]);
     }
   },
   setFabElements(state, { fabElementsList }) {

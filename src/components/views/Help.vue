@@ -12,6 +12,9 @@ import { FabElement } from '../../store/classes';
     name: 'help'
 })
 export default class Help extends Vue {
+    created() {
+        this.$store.dispatch('getDeploymentList');
+    }
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });

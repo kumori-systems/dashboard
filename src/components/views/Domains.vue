@@ -1,9 +1,5 @@
 <template>
     <div>
-        <div class="tile is-4">
-            <input class="input" v-model="newWebDomain" placeholder="New web domain">
-            <button class="button is-primary" v-on:click="addWebDomain">add</button>
-        </div>
         <table class="table">
             <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
                 <th>
@@ -48,10 +44,12 @@ import { FabElement, Webdomain } from '../../store/classes';
     name: 'WebDomains'
 })
 export default class WebDomains extends Vue {
-    newWebDomain = null;
+    created() {
+        this.$store.dispatch('getDeploymentList');
+    }
     mounted() {
         let fabElementsList: Array<FabElement> = [];
-        // fabElementsList.push(new FabElement('Add new web domain', ''));
+        fabElementsList.push(new FabElement('Add new domain', '/newDomain'));
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
@@ -77,18 +75,8 @@ export default class WebDomains extends Vue {
         }
     }
 
-// monitor-dame-argo.slap53.iti.es
-// 
-
-
-
     deleteWebDomain(webdomain) {
         this.$store.dispatch('deleteWebdomain', webdomain);
-    }
-
-    addWebDomain() {
-        if (this.newWebDomain != null && this.newWebDomain.length > 0)
-            this.$store.dispatch('addWebDomain', this.newWebDomain);
     }
 }
 </script>

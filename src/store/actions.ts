@@ -5,6 +5,9 @@ import urlencode from 'urlencode';
 
 const connection: ProxyConnection = new ProxyConnection();
 export default {
+    setMenu({ commit }, menu) {
+        commit('setMenu', menu);
+    },
     login({ commit, dispatch, getters }, { username, password }) {
         connection.login(username, password);
         connection.onLogin((user: string | Error) => {
@@ -65,16 +68,10 @@ export default {
             return; // Si ya tenemos algo en la lista, no hace falta que volvamos a hacer la llamada
         }
         connection.getDeploymentList();
-        // dispatch('getElementList');
+        dispatch('getElementList');
     },
     getElementList({ dispatch, getters }) {
-        // Se ha escogido runtimeList porque en teoría es la única lista que no puede obtenerse en otras vistas
-        let runtimeList = getters.getRuntimeList;
-        for (let runtimeId in runtimeList) {
-            return; // Si ya tenemos algo en la lista, no hace falta que volvamos a hacer la llamada
-        }
         connection.getRegisteredElements();
-        dispatch('getDeploymentList');
     },
     getManifest(context, { uri }) {
         connection.getElementInfo(uri);
@@ -83,7 +80,8 @@ export default {
         commit('setFabElements', { fabElementsList });
     },
     toggleMenuItemExpanded({ commit }, { menuItem }) {
-        commit('toggleMenuItemExpanded', menuItem);
+        if (menuItem.children)
+            commit('toggleMenuItemExpanded', menuItem);
     },
     undeployDeployment({ commit }, { deploymentId }) {
         connection.undeployDeployment(deploymentId);

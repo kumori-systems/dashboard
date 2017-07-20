@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
+import { Overview, DeploymentItem, Elements, Domains, DataVolumes, AlarmsAndLogs, Help } from '../components';
 import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
 import NewService from '../components/views/innerComponents/form/NewService.vue';
 import NewServiceAdvanced from '../components/views/innerComponents/form/NewServiceAdvanced.vue';
-import AddVolume from '../components/views/innerComponents/form/AddVolume.vue';
+import NewVolume from '../components/views/innerComponents/form/NewVolume.vue';
+import NewDomain from '../components/views/innerComponents/form/NewDomain.vue';
 import NewBundle from '../components/views/innerComponents/form/NewBundle.vue';
 
 Vue.use(Router);
@@ -30,10 +31,10 @@ export default new Router({
       component: Elements
     },
     {
-      name: 'WEB DOMAINS',
-      path: '/webdomains',
+      name: 'DOMAINS',
+      path: '/domains',
       meta: { expanded: false },
-      component: WebDomains
+      component: Domains
     },
     {
       name: 'DATA VOLUMES',
@@ -64,6 +65,18 @@ export default new Router({
       path: '/newService',
       meta: { expanded: false },
       component: NewService
+    },
+    {
+      name: 'NEW DOMAIN',
+      path: '/newDomain',
+      meta: { expanded: false },
+      component: NewDomain
+    },
+    {
+      name: 'NEW VOLUME',
+      path: '/newVolume',
+      meta: { expanded: false },
+      component: NewVolume
     },
     {
       name: 'UPLOAD BUNDLE',
