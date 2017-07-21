@@ -378,14 +378,17 @@ export function transformDeploymentToManifest(deploymentName: string, domain: st
         'roles': manifestRoles
     };
 }
-export function transformWebdomainToManifest(user: string, webdomain: string) {
-    console.error('IGNORANDO USERNAME, utilizando dashboard');
+export function transformWebdomainToManifest(webdomain: string) {
+    console.error('Creado nombre de resource con posibles colisiones: eslap://dashboard/resources/vhost/*');
     return {
         spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-        name: 'eslap://' + 'dashboard' + '/resources/vhost/' + webdomain,
+        name: 'eslap://dashboard/resources/vhost/' + webdomain,
         parameters: {
             vhost: webdomain
         }
     };
+}
+export function transformDataVolumeinToManifest(params) {
+    console.log('Los parámetros que nos llegan para transformar son', params);
 
 }

@@ -238,8 +238,8 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    addWebdomain(user: string, webdomain: string) {
-        const manifest = utils.transformWebdomainToManifest(user, webdomain);
+    addWebdomain(webdomain: string) {
+        const manifest = utils.transformWebdomainToManifest(webdomain);
         let zip = new JSZip();
         let content: string = JSON.stringify(manifest) + '\n';
         zip.file('Manifest.json', content);
@@ -288,6 +288,46 @@ export class ProxyConnection extends EventEmitter {
 
     addDataVolume(params) {
         console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
+
+
+
+
+        const manifest = utils.transformDataVolumeinToManifest(params);
+        let zip = new JSZip();
+        let content: string = JSON.stringify(manifest) + '\n';
+        zip.file('Manifest.json', content);
+        // var img = zip.folder("images");
+        // img.file("smile.gif", imgData, { base64: true });
+        /* api: https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
+        type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
+        */
+        let instance = this;
+        zip.generateAsync({ type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true })
+            .then((content) => {
+                console.log('El contenido que no está generado generateAsync es', content);
+
+                let file = new File([content], 'Bundle.zip', {
+                    type: 'application/zip'
+                });
+
+                instance.sendBundle(file).then((value) => {
+                    let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
+                    // eslap://omunoz/resources/vhost/elWebDomainDeJeroQueVoyAEliminar1
+                    let res = utils.transformManifestToResource({
+                        spec: 'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
+                        name: uri,
+                        parameters: {
+                            size: '10',
+                            prefix: 'acs-volumes'
+                        }
+                    });
+                    this.emit(this.onAddResource, uri, res);
+                }).catch((error) => {
+                    console.error('Error registering a webdomain', error);
+                });
+            }).catch((error) => {
+                console.error('Error creating a bundle for a webdomain manifest', error);
+            });
     }
 
     addNewElement(file: File) {

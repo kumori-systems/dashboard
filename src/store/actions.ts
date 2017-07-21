@@ -117,7 +117,7 @@ export default {
         connection.downloadManifest(elementId);
     },
     addWebDomain({ getters }, webdomain) {
-        connection.addWebdomain(getters.getUser, webdomain);
+        connection.addWebdomain(webdomain);
     },
     deleteWebdomain(context, webdomain) {
         connection.deleteWebdomain(webdomain);
