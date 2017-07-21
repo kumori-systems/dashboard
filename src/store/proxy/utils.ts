@@ -379,6 +379,7 @@ export function transformDeploymentToManifest(deploymentName: string, domain: st
     };
 }
 export function transformWebdomainToManifest(user: string, webdomain: string) {
+    console.error('IGNORANDO USERNAME, utilizando dashboard');
     return {
         spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
         name: 'eslap://' + 'dashboard' + '/resources/vhost/' + webdomain,
