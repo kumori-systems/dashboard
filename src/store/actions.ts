@@ -32,6 +32,10 @@ export default {
             }
         });
 
+        connection.onModifyDeployment((value) => {
+            console.log('Nos ha llegado un evento para modificar un deployment. Los valores son:', value);
+        });
+
         connection.onRemoveDeploymemt((deploymentId) => {
             commit('removeDeploymentMenuItem', '/deployment/' + urlencode(deploymentId));
             commit('removeDeployment', deploymentId);
@@ -91,8 +95,8 @@ export default {
     undeployDeployment({ commit }, { deploymentId }) {
         connection.undeployDeployment(deploymentId);
     },
-    aplyingChangesToDeployment({ commit }, changes) {
-        connection.aplyChangesToDeployment(changes);
+    aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances, killInstances }) {
+        connection.aplyChangesToDeployment(deploymentId, rolNumInstances, killInstances);
     },
     createNewHTTPENtrypoint(context, params) {
         connection.createNewHTTPENtrypoint(params);
@@ -109,8 +113,8 @@ export default {
     downloadManifest(context, elementId) {
         connection.downloadManifest(elementId);
     },
-    addWebDomain(context, webdomain) {
-        connection.addWebdomain(webdomain);
+    addWebDomain({ getters }, webdomain) {
+        connection.addWebdomain(getters.getUser, webdomain);
     },
     deleteWebdomain(context, webdomain) {
         connection.deleteWebdomain(webdomain);

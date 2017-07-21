@@ -378,3 +378,13 @@ export function transformDeploymentToManifest(deploymentName: string, domain: st
         'roles': manifestRoles
     };
 }
+export function transformWebdomainToManifest(user: string, webdomain: string) {
+    return {
+        spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
+        name: 'eslap://' + 'omunoz' + '/resources/vhost/' + webdomain,
+        parameters: {
+            vhost: webdomain
+        }
+    };
+
+}

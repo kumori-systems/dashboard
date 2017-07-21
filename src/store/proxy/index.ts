@@ -1,7 +1,8 @@
-import { FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
+import { RegistrationResult, ScalingDeploymentModification, FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
 import { ADMISSION_URI, ACS_URI } from './config';
 import { EventEmitter, Listener } from 'typed-event-emitter';
+import JSZip from 'jszip';
 import * as utils from './utils';
 import { Deployment } from '../classes';
 
@@ -17,6 +18,7 @@ export class ProxyConnection extends EventEmitter {
     // Eventos
     public onLogin: Function;
     public onAddDeployment: Function;
+    public onModifyDeployment: Function;
     public onRemoveDeploymemt: Function;
     public onAddService: Function;
     public onRemoveService: Function;
@@ -33,6 +35,7 @@ export class ProxyConnection extends EventEmitter {
         super();
         this.onLogin = this.registerEvent<Function>();
         this.onAddDeployment = this.registerEvent<(deploymentId, deployment) => any>();
+        this.onModifyDeployment = this.registerEvent<(value) => any>();
         this.onRemoveDeploymemt = this.registerEvent<(deploymentId) => any>();
         this.onAddService = this.registerEvent<(serviceId, service) => any>();
         this.onRemoveService = this.registerEvent<Function>();
@@ -47,6 +50,7 @@ export class ProxyConnection extends EventEmitter {
     login(username: string, password: string) {
         this.acs = new EcloudAcsClient(ACS_URI);
         this.acs.login(username, password).then(({ accessToken, user }) => {
+            console.log('El usuario que nos devuelve acs es', user);
             this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
             // this.admission = new EcloudAdmissionClient(ADMISSION_URI);
             this.admission.onConnected(() => {
@@ -193,8 +197,24 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    aplyChangesToDeployment(changes) {
-        console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(changes));
+    aplyChangesToDeployment(deploymentId: string, rolNumInstances: { [rolId: string]: number }, killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
+        console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(deploymentId));
+
+        if (rolNumInstances) {
+            let sdm = new ScalingDeploymentModification();
+            sdm.deploymentURN = deploymentId;
+            sdm.scaling = rolNumInstances;
+            this.admission.modifyDeployment(sdm).then((value) => {
+                console.log('Cuando intentamos aplicar cambios a un deployment admission nos devuelve', value);
+                this.emit(this.onModifyDeployment, value);
+            }).catch((error) => {
+                console.error('Error trying to make changes to a deployment', error);
+            });
+        }
+
+        if (killInstances) {
+            console.info('The functionality to kill an instance is under development');
+        }
     }
 
     // @param elementId: Elemento o lista de elementos
@@ -217,11 +237,46 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    addWebdomain(webdomain) {
-        console.log('Enviamos un mensaje para AÑADIR el dominio: ' + JSON.stringify(webdomain));
+    addWebdomain(user: string, webdomain: string) {
+        const manifest = utils.transformWebdomainToManifest(user, webdomain);
+        let zip = new JSZip();
+        let content: string = JSON.stringify(manifest) + '\n';
+        zip.file('Manifest.json', content);
+        // var img = zip.folder("images");
+        // img.file("smile.gif", imgData, { base64: true });
+        /* api: https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
+        type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
+        */
+        let instance = this;
+        zip.generateAsync({ type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true })
+            .then((content) => {
+                console.log('El contenido que no está generado generateAsync es', content);
+
+                let file = new File([content], 'Bundle.zip', {
+                    type: 'application/zip'
+                });
+
+                instance.sendBundle(file).then((value) => {
+                    let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
+                    // eslap://omunoz/resources/vhost/elWebDomainDeJeroQueVoyAEliminar1
+                    let res = utils.transformManifestToResource({
+                        spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
+                        name: uri,
+                        parameters: {
+                            vhost: webdomain
+                        }
+                    });
+                    this.emit(this.onAddResource, uri, res);
+                }).catch((error) => {
+                    console.error('Error registering a webdomain', error);
+                });
+            }).catch((error) => {
+                console.error('Error creating a bundle for a webdomain manifest', error);
+            });
     }
 
     deleteWebdomain(webdomain) {
+
         console.log('Enviamos un mensaje para ELIMINAR el dominio: ' + JSON.stringify(webdomain));
     }
 
@@ -230,12 +285,17 @@ export class ProxyConnection extends EventEmitter {
     }
 
     addNewElement(file: File) {
-        this.admission.sendBundle(new FileStream(file))
+        this.sendBundle(file);
+    }
+
+    private sendBundle(file: File) {
+        return this.admission.sendBundle(new FileStream(file))
             .then((value) => {
                 console.log('Después de enviar un bundle, admission nos devuelve ', value);
+                return value;
             })
             .catch((error) => {
-                console.error('Error uploading a bundle');
+                console.error('Error uploading a bundle', error);
             });
     }
 };

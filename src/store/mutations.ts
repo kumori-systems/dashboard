@@ -41,8 +41,6 @@ export default {
         }
       }
     }
-
-
     state.deploymentList = { ...state.deploymentList, ...deploymentMap };
   },
   removeDeployment(state, deploymentId) {
