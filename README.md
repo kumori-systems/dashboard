@@ -44,3 +44,8 @@ ya que tengo el tipo pero no la URI del resource. ¿Cómo podría resolver ésto
     Lo pregunto porque estos valores no los pedimos y éstos son los que he puesto por defecto.
 
 - ¿Debería de pedir un campo 'name' para los entrypoints? En el manifiesto de despliegue está
+
+
+## Errores pendientes para jero
+- Modificar número de instáncias de un rol
+- Error al intentar eliminar un dominio

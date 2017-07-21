@@ -44,7 +44,7 @@ export class ProxyConnection extends EventEmitter {
         this.onAddRuntime = this.registerEvent<(runtimeId, runtime) => any>();
         this.onRemoveRuntime = this.registerEvent<Function>();
         this.onAddResource = this.registerEvent<(resourceId, resource) => any>();
-        this.onRemoveResource = this.registerEvent<Function>();
+        this.onRemoveResource = this.registerEvent<(resourceId) => any>();
         this.onAddMetrics = this.registerEvent<(value) => any>();
     }
     login(username: string, password: string) {
@@ -219,6 +219,7 @@ export class ProxyConnection extends EventEmitter {
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
+        console.log('A Connection DeleteElement nos llega', elementId);
         this.admission.removeStorage(elementId).then((value) => {
             console.info('La llamada a admission removeStorage nos ha devuelto', value);
         }).then((value) => {
@@ -276,8 +277,13 @@ export class ProxyConnection extends EventEmitter {
     }
 
     deleteWebdomain(webdomain) {
-
-        console.log('Enviamos un mensaje para ELIMINAR el dominio: ' + JSON.stringify(webdomain));
+        console.log('a deleteWebDomain nos llega', webdomain);
+        this.admission.removeStorage(webdomain).then((value) => {
+            console.log('Cuando eliminamos un webdomain admission devuelve', value);
+            this.emit(this.onRemoveResource, webdomain);
+        }).catch((error) => {
+            console.error('Error removing a webdomain', error);
+        });
     }
 
     addDataVolume(params) {

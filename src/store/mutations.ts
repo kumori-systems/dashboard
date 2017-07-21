@@ -79,6 +79,9 @@ export default {
   addResource(state, resourceMap) {
     state.resourceList = { ...state.resourceList, ...resourceMap };
   },
+  removeResource(state, resourceId) {
+    Vue.delete(state.resourceList, resourceId);
+  },
   addMetrics(state, metrics) {
     // Metrics with the format [deployment]:{data:metris, roles:{data:metrics, instances:metrics}}
     for (let deploymentId in metrics) {

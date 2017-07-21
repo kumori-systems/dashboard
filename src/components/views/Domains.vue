@@ -76,7 +76,7 @@ export default class WebDomains extends Vue {
     }
 
     deleteWebDomain(webdomain) {
-        this.$store.dispatch('deleteWebdomain', webdomain);
+        this.$store.dispatch('deleteWebdomain', this.$store.getters.getWebdomainResource(webdomain));
     }
 }
 </script>

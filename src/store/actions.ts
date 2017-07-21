@@ -64,6 +64,9 @@ export default {
             val[resourceId] = resource;
             commit('addResource', val);
         });
+        connection.onRemoveResource((resourceId: string) => {
+            commit('removeResource', resourceId);
+        });
 
         connection.onAddMetrics((metrics) => {
             commit('addMetrics', metrics);
