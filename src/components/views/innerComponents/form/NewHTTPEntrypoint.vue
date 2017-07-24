@@ -101,6 +101,7 @@ export default class NewHTTPEntrypoint extends Vue {
             'instances': this.instances,
             'resilience': this.resilience
         });
+        this.$router.go(-1);
     }
 }
 </script>

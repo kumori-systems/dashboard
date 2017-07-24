@@ -177,6 +177,20 @@ export class ProxyConnection extends EventEmitter {
     }
 
     addDeployment(params) {
+
+
+        console.log('Cuando vamos a realizar un deployment enviamos',
+            utils.transformDeploymentToManifest(
+                params.name,
+                params.website,
+                params.service,
+                params.serviceConfig,
+                params.config,
+                params.roles
+            )
+        );
+
+
         this.admission.deploy(
             new FileStream(
                 new Blob([

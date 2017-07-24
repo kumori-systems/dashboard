@@ -65,7 +65,7 @@ export default class NewVolume extends Vue {
         };
         this.size = [0].concat(this.size); // Restauramos el 0 inicial
         this.$store.dispatch('addDataVolume', params);
-
+        this.$router.go(-1);
     }
 
     updateInputValue(value) {

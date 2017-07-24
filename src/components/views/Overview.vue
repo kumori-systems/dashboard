@@ -39,7 +39,7 @@ export default class Overview extends Vue {
     }
 
     get route(): boolean {
-        if (this.$route.name === 'OVERVIEW') {
+        if (this.$route.name === 'Overview') {
             let fabElementsList: Array<FabElement> = [];
             fabElementsList.push(new FabElement('Deploy a new HTTP Entrypoint', 'newHTTPEntrypoint'));
             fabElementsList.push(new FabElement('Deploy a new Service', 'newService'));

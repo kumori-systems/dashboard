@@ -38,37 +38,37 @@ export default class Sidebar extends Vue {
   mounted() {
     const initialMenu = [
       {
-        name: 'OVERVIEW',
+        name: 'Overview',
         path: '/',
         meta: { expanded: false },
         component: Overview,
       },
       {
-        name: 'ELEMENTS',
+        name: 'Elements',
         path: '/elements',
         meta: { expanded: false },
         component: Elements
       },
       {
-        name: 'DOMAINS',
+        name: 'Domains',
         path: '/domains',
         meta: { expanded: false },
         component: Domains
       },
       {
-        name: 'DATA VOLUMES',
+        name: 'Data volumes',
         path: '/dataVolumes',
         meta: { expanded: false },
         component: DataVolumes
       },
       {
-        name: 'ALARMS & LOGS',
+        name: 'Alarms & logs',
         path: '/alarmsAndLogs',
         meta: { expanded: false },
         component: AlarmsAndLogs
       },
       {
-        name: 'HELP',
+        name: 'Help',
         path: '/help',
         meta: { expanded: false },
         component: Help

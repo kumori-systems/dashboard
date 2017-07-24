@@ -314,6 +314,7 @@ export default class NewService extends Vue {
                 'domain': website
             }
         );
+        this.$router.go(-1);
     }
 
     updateInputValue(emitedArguments) {

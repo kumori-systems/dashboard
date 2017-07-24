@@ -48,7 +48,7 @@ export default {
   },
   addDeploymentMenuItem(state, deploymentMenuItem) {
     // obtenemos el menuitem deployments
-    let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+    let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'Overview'; });
 
     if (!menuItem.children)
       Vue.set(menuItem, 'children', []);
@@ -58,7 +58,7 @@ export default {
       menuItem.children.push(deploymentMenuItem);
   },
   removeDeploymentMenuItem(state, deploymentPath) {
-    let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'OVERVIEW'; });
+    let menuItem = state.menuItemList.find(menuItem => { return menuItem.name === 'Overview'; });
     let index = (<Array<any>>menuItem.children).find(item => item.path === deploymentPath);
     index = (<Array<any>>state.menuItemList).indexOf(index);
 

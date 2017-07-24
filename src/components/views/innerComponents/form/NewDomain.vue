@@ -18,8 +18,11 @@ export default class AddDomain extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
     addWebDomain() {
-        if (this.newWebDomain != null && this.newWebDomain.length > 0)
+        if (this.newWebDomain != null && this.newWebDomain.length > 0) {
             this.$store.dispatch('addWebDomain', this.newWebDomain);
+            this.$router.go(-1);
+        }
+
     }
 }
 </script>

@@ -357,11 +357,11 @@ export function transformDeploymentToManifest(deploymentName: string, domain: st
     for (let rolId in roles) {
         manifestRoles[rolId] = {};
         manifestRoles[rolId].resources = {};
-        manifestRoles[rolId].resources['__instances'] = (<Deployment.Rol>roles[rolId]).instanceList.length;
+        manifestRoles[rolId].resources['__instances'] = (<Deployment.Rol>roles[rolId]).instanceNumber;
         manifestRoles[rolId].resources['__cpu'] = (<Deployment.Rol>roles[rolId]).cpu;
         manifestRoles[rolId].resources['__memory'] = (<Deployment.Rol>roles[rolId]).memory;
         manifestRoles[rolId].resources['__ioperf'] = (<Deployment.Rol>roles[rolId]).ioperf;
-        manifestRoles[rolId].resources['__iopsinstensive'] = (<Deployment.Rol>roles[rolId]).iopsintensive;
+        manifestRoles[rolId].resources['__iopsintensive'] = (<Deployment.Rol>roles[rolId]).iopsintensive;
         manifestRoles[rolId].resources['__bandwidth'] = (<Deployment.Rol>roles[rolId]).bandwidth;
         manifestRoles[rolId].resources['__resilience'] = (<Deployment.Rol>roles[rolId]).resilience;
     }

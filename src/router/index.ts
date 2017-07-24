@@ -13,7 +13,7 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      name: 'OVERVIEW',
+      name: 'Overview',
       path: '/',
       meta: { expanded: false },
       component: Overview,
@@ -25,61 +25,61 @@ export default new Router({
       ]
     },
     {
-      name: 'ELEMENTS',
+      name: 'Elements',
       path: '/elements',
       meta: { expanded: false },
       component: Elements
     },
     {
-      name: 'DOMAINS',
+      name: 'Domains',
       path: '/domains',
       meta: { expanded: false },
       component: Domains
     },
     {
-      name: 'DATA VOLUMES',
+      name: 'Data volumes',
       path: '/dataVolumes',
       meta: { expanded: false },
       component: DataVolumes
     },
     {
-      name: 'ALARMS & LOGS',
+      name: 'Alarms & logs',
       path: '/alarmsAndLogs',
       meta: { expanded: false },
       component: AlarmsAndLogs
     },
     {
-      name: 'HELP',
+      name: 'Help',
       path: '/help',
       meta: { expanded: false },
       component: Help
     },
     {
-      name: 'NEW HTTP ENTRYPOINT',
+      name: 'New http entrypoint',
       path: '/newHTTPEntrypoint',
       meta: { expanded: false },
       component: NewHTTPEntrypoint
     },
     {
-      name: 'NEW SERVICE',
+      name: 'New service',
       path: '/newService',
       meta: { expanded: false },
       component: NewService
     },
     {
-      name: 'NEW DOMAIN',
+      name: 'New domain',
       path: '/newDomain',
       meta: { expanded: false },
       component: NewDomain
     },
     {
-      name: 'NEW VOLUME',
+      name: 'New volume',
       path: '/newVolume',
       meta: { expanded: false },
       component: NewVolume
     },
     {
-      name: 'UPLOAD BUNDLE',
+      name: 'Upload bundle',
       path: '/newBundle',
       meta: { expanded: false },
       component: NewBundle
