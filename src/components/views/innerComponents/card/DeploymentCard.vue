@@ -1,8 +1,12 @@
 <template>
     <div class="card" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
-            {{name | truncateLeft(7)}}
-            <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
+            <router-link v-bind:to="deploymentPath" class="tile">
+                {{name | truncateLeft(7)}}
+                <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
+            </router-link>
+
+            
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
@@ -71,10 +75,6 @@
                     none
                 </span>
             </div>
-            <router-link v-bind:to="deploymentPath">
-                <i class="fa fa-caret-square-o-down" aria-hidden="true" />
-            </router-link>
-    
         </div>
         <div class="card-footer" v-if="false" />
     </div>

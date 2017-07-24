@@ -6,6 +6,7 @@
                 <span class="icon is-small">
                     <i class="fa fa-search"></i>
                 </span>
+                <span>&#160;</span>
                 <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
                 <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
             </span>
@@ -26,7 +27,9 @@
                                     <collapse-item v-bind:title="component">
                                         <table>
                                             <tr v-for="(version, index) in componentVersionList(owner, component)" v-bind:key="index">
-                                                <th>{{version}}</th>
+                                                <th>
+                                                    <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)"> {{version}}
+                                                </th>
                                                 <th v-if="getIsComponentInUse(owner, component, version)">
                                                     <div>
                                                         <span class="ON_PROGRESS">in use by service/s:</span>
@@ -43,7 +46,6 @@
                                                     <button class="button is-danger" v-if="owner===user" v-on:click="deleteComponent(owner, component, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
-                                                    <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)">
                                                 </th>
                                             </tr>
                                         </table>
@@ -63,7 +65,9 @@
                                     <collapse-item v-bind:title="service" v-if="serviceVersionList(owner,service).length>0">
                                         <table>
                                             <tr v-for="(version, index) in serviceVersionList(owner, service)" v-bind:key="index">
-                                                <th>{{version}}</th>
+                                                <th>
+                                                    <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)"> {{version}}
+                                                </th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
                                                     <div>
                                                         <span class="ON_PROGRESS">in use by deployment/s:</span>
@@ -92,7 +96,6 @@
                                                     <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
-                                                    <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)">
                                                 </th>
                                             </tr>
                                         </table>
@@ -111,7 +114,9 @@
                                 <collapse-item v-bind:title="runtime" v-if="runtimeVersionList(owner, runtime).length>0">
                                     <table>
                                         <tr v-for="(version, index) in runtimeVersionList(owner, runtime)" v-bind:key="index">
-                                            <th>{{version}}</th>
+                                            <th>
+                                                <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)"> {{version}}
+                                            </th>
                                             <th v-if="getIsRuntimeInUse(owner, runtime, version)">
                                                 <div>
                                                     <span class="ON_PROGRESS">in use by component/s:</span>
@@ -128,7 +133,6 @@
                                                 <button class="button is-danger" v-if="owner===user" v-on:click="deleteRuntime(owner, runtime, version)">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </button>
-                                                <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)">
                                             </th>
                                         </tr>
                                     </table>
