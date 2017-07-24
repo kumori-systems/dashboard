@@ -11,9 +11,11 @@
             </header>
             <section class="modal-card-body">
                 <p>
-                    <span>This action <strong>CAN'T BE UNDONE</strong> and will </span>
+                    <span>This action
+                        <strong>CAN'T BE UNDONE</strong> and will </span>
                     <strong>ERASE</strong>
-                    <span> the version {{elementVersion}} of the {{elementType}} {{elementName}}</span>.
+                    <span> the {{elementType}}
+                        <strong>'{{elementName}}{{elementVersion}}'</strong> in the system</span>.
                 </p>
             </section>
             <a class="button is-primary is-danger" v-on:click="deleteElement">Delete</a>

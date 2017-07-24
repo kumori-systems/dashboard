@@ -29,8 +29,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
-import NprogressContainer from 'vue-nprogress/src/NprogressContainer.vue'
-import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components'
+import NprogressContainer from 'vue-nprogress/src/NprogressContainer.vue';
+import { NavBar, AppMain, SideBar, FAB, FooterBar } from './components';
 
 @Component({
 	name: 'App',
@@ -66,9 +66,7 @@ export default class App extends Vue {
 		document.addEventListener('visibilitychange', handler);
 		window.addEventListener('DOMContentLoaded', handler);
 		window.addEventListener('resize', handler);
-
 		// Enviamos una petición para obtener los deployments
-
 	}
 
 	get user() {
@@ -77,6 +75,7 @@ export default class App extends Vue {
 	get authError() {
 		return this.$store.getters.authError;
 	}
+
 }
 </script>
 <style lang="scss">

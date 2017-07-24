@@ -279,16 +279,6 @@ export class ProxyConnection extends EventEmitter {
             });
     }
 
-    deleteWebdomain(webdomain) {
-        console.log('a deleteWebDomain nos llega', webdomain);
-        this.admission.removeStorage(webdomain).then((value) => {
-            console.log('Cuando eliminamos un webdomain admission devuelve', value);
-            this.emit(this.onRemoveResource, webdomain);
-        }).catch((error) => {
-            console.error('Error removing a webdomain', error);
-        });
-    }
-
     addDataVolume(params) {
         console.error('Datavolume creation is under development');
         /*

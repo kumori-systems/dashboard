@@ -33,6 +33,7 @@
                 </th>
             </tr>
         </table>
+        <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
     </div>
 </template>
 
@@ -40,10 +41,22 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Webdomain } from '../../store/classes';
+import Delete from './innerComponents/modal/Delete.vue';
 @Component({
-    name: 'WebDomains'
+    name: 'WebDomains',
+    components: {
+        'delete': Delete,
+    }
 })
 export default class WebDomains extends Vue {
+    // Modal Arguments
+    deleteIsVisible: boolean = false;
+    deleteGroupIsVisible: boolean = false;
+    infoIsVisible: boolean = false;
+    modalElementType: string = '';
+    modalElementId: string = '';
+    modalElementName: string = '';
+    modalElementVersion: string = '';
     created() {
         this.$store.dispatch('getDeploymentList');
     }
@@ -74,10 +87,20 @@ export default class WebDomains extends Vue {
             }
         }
     }
+    get webdomainId() {
+        return (webdomain): string => {
+            return this.$store.getters.getWebdomainResource(webdomain);
+        }
+    }
 
     deleteWebDomain(webdomain) {
-        this.$store.dispatch('deleteWebdomain', this.$store.getters.getWebdomainResource(webdomain));
+        this.deleteIsVisible = true;
+        this.modalElementType = 'webdomain';
+        this.modalElementId = this.webdomainId(webdomain);
+        this.modalElementName = webdomain;
+        this.modalElementVersion = '';
     }
+
 }
 </script>
 <style lang="scss" scoped>

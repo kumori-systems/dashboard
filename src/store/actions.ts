@@ -2,6 +2,7 @@ import { ProxyConnection } from './proxy/index';
 import { DeploymentItem } from './../components';
 import { Deployment, Component, Service, Runtime, Resource } from './classes';
 import urlencode from 'urlencode';
+import { Notification, createNotification, notificationType } from '../components/views/innerComponents/notification';
 
 const connection: ProxyConnection = new ProxyConnection();
 export default {
@@ -16,6 +17,8 @@ export default {
                 commit('authError', true);
             };
             commit('login', user);
+            createNotification('LOGIN', 'sucessfully loged in', notificationType.SUCCESS);
+            createNotification('Retrieving info', '', notificationType.WARNING);
         });
 
         connection.onAddDeployment((deploymentId: string, deployment: Deployment) => {
@@ -30,6 +33,7 @@ export default {
             if (getters.getServiceInfo(deployment.serviceId) === undefined) {
                 connection.getElementInfo(deployment.serviceId);
             }
+            createNotification('New deployment', 'A new deployment has been created', notificationType.SUCCESS);
         });
 
         connection.onModifyDeployment((value) => {
@@ -39,33 +43,56 @@ export default {
         connection.onRemoveDeploymemt((deploymentId) => {
             commit('removeDeploymentMenuItem', '/deployment/' + urlencode(deploymentId));
             commit('removeDeployment', deploymentId);
+            createNotification('Remove deployment', 'A deployment has been removed', notificationType.DANGER
+            );
         });
 
         connection.onAddService((serviceId: string, service: Service) => {
             let val: { [id: string]: Service } = {};
             val[serviceId] = service;
             commit('addService', val);
+            createNotification('New service', 'A service has been created', notificationType.SUCCESS);
         });
 
         connection.onAddComponent((componentId: string, component: Component) => {
             let val: { [id: string]: Component } = {};
             val[componentId] = component;
             commit('addComponent', val);
+            createNotification(
+                'New component',
+                'A component has been created',
+                notificationType.SUCCESS
+            );
         });
 
         connection.onAddRuntime((runtimeId: string, runtime: Runtime) => {
             let val: { [id: string]: Runtime } = {};
             val[runtimeId] = runtime;
             commit('addRuntime', val);
+            createNotification(
+                'New runtime',
+                'A runtime has been created',
+                notificationType.SUCCESS
+            );
         });
 
         connection.onAddResource((resourceId: string, resource: Resource) => {
             let val: { [id: string]: Resource } = {};
             val[resourceId] = resource;
             commit('addResource', val);
+            createNotification(
+                'New resource',
+                'A resource has been created',
+                notificationType.SUCCESS
+            );
         });
         connection.onRemoveResource((resourceId: string) => {
             commit('removeResource', resourceId);
+            createNotification(
+                'Remove resource',
+                'A resource has been removed',
+                notificationType.SUCCESS
+            );
         });
 
         connection.onAddMetrics((metrics) => {
@@ -118,9 +145,6 @@ export default {
     },
     addWebDomain({ getters }, webdomain) {
         connection.addWebdomain(webdomain);
-    },
-    deleteWebdomain(context, webdomain) {
-        connection.deleteWebdomain(webdomain);
     },
     addDataVolume(context, params) {
         connection.addDataVolume(params);
