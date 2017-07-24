@@ -37,26 +37,26 @@
                                 <tr>
                                     <th>MEM</th>
                                     <th>
-                                        <inputnumber v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue"></inputnumber>
+                                        <number-input v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
                                 <tr>
                                     <th>CPU</th>
                                     <th>
-                                        <inputnumber v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue"></inputnumber>
+                                        <number-input v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
                                 <tr>
                                     <th>NET</th>
                                     <th>
-                                        <inputnumber v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue"></inputnumber>
+                                        <number-input v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
     
                                 <tr>
                                     <th>Instances</th>
                                     <th>
-                                        <inputnumber v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue"></inputnumber>
+                                        <number-input v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
                                 <tr>
@@ -64,7 +64,7 @@
                                         <span>Resilence</span>
                                     </th>
                                     <th>
-                                        <inputnumber v-bind:value="rolResilence[index]" v-bind:numElement="index" v-bind:property="'RES'" v-on:input="updateInputValue"></inputnumber>
+                                        <number-input v-bind:value="rolResilence[index]" v-bind:numElement="index" v-bind:property="'RES'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
                             </th>
@@ -155,12 +155,12 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Deployment, Resource } from '../../../../store/classes';
-import InputNumber from '../input/InputNumber.vue';
+import NumberInput from '../input/NumberInput.vue';
 
 @Component({
     name: 'new-service',
     components: {
-        'inputnumber': InputNumber
+        'number-input': NumberInput
     }
 })
 export default class NewService extends Vue {

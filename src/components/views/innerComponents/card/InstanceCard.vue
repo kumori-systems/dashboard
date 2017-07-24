@@ -10,8 +10,7 @@
                     <span>{{instanceNet}} NET</span>
                     <span>
                         <span>&#160;</span>
-                        <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
-                        <label for="killInstance">kill instance</label>
+                        <checkbox-input v-model="killInstance" v-bind:text="' Kill instance'"></checkbox-input>
                     </span>
                 </div>
             </div>
@@ -31,6 +30,7 @@ import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import Chart from '../chart/Chart';
 import ChartOptions from '../chart/ChartOptions';
 import { Deployment } from '../../../../store/classes';
+import Checkbox from '../input/CheckboxInput.vue';
 
 @Component({
     name: 'instance-card',
@@ -43,7 +43,8 @@ import { Deployment } from '../../../../store/classes';
     components: {
         'collapse': Collapse,
         'collapse-item': CollapseItem,
-        'chart': Chart
+        'chart': Chart,
+        'checkbox-input': Checkbox
     }
 })
 export default class Card extends Vue {

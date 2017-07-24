@@ -1,14 +1,14 @@
 <template>
-    <div class="card">
+    <div class="card" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
-            {{name}}
-            <span class="subtitle">{{shotDeploymentId}}</span>
+            {{name | truncateLeft(7)}}
+            <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
             <div>
                 <u>Service:</u>
-                {{service}}
+                {{service| truncateLeft(50)}}
             </div>
             <div class="roles">
                 <u>Roles:</u>
@@ -16,8 +16,8 @@
                     <div v-for="(rol, index) in roles" v-bind:key="index" class="tile">
                         <i class="fa-circle fa"></i>
                         <div>
-                            <strong>{{rol}}</strong>
-                            <div>{{rolComponentURN(rol)}}</div>
+                            <strong>{{rol| truncateLeft(30)}}</strong>
+                            <div class="rol-component">{{rolComponentURN(rol) | truncateLeft(50)}}</div>
                         </div>
                         <div class="box">
                             {{rolNumInstances(rol)}}
@@ -29,13 +29,11 @@
                 </div>
             </div>
             <div class="tile is-horizontal">
-    
                 <u>Websites:</u>
-    
                 <div v-if="website !== null && website.length>0">
                     <div v-for="(web, index) in website" v-bind:key="index">
                         <a v-bind:href="'http://'+web">
-                            {{web}}
+                            {{web | truncateLeft(50)}}
                         </a>
                     </div>
                 </div>
@@ -92,8 +90,15 @@ import { Deployment } from './../../../../store/classes';
         deploymentId: { required: true, type: String }
     },
     filters: {
-        truncate: function (string, value) {
+        truncateRight: function (string, value) {
             return string.substring(0, value) + '...';
+        },
+        truncateLeft: function (string, value) {
+            if (string) {
+                if (string.length < value) return string;
+                return '...' + string.substring(string.length - value, string.length)
+            }
+
         }
     }
 })
@@ -176,10 +181,19 @@ $color_yellow:#f5d164;
 $color_red:#ff6666;
 $icon_size: 90px;
 $radius: 5px;
+#deployment-card {
+    min-width: 35em;
+}
+
+.rol-component {
+    min-width: 25em;
+    max-width: 25em;
+}
+
 .state {
     position: absolute;
     right: 10px;
-    bottom: 80px;
+    top: 62px;
 }
 
 .fa-check-circle {

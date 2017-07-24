@@ -2,8 +2,8 @@
     <div>
         <router-view v-if="route"></router-view>
         <div v-else-if="deploymentList.length > 0">
-            <input type="checkbox" v-model="hideEntrypoints"></input>
-            <label for="hideEntryPoints"> Hide HTTP entrypoints</label>
+            <checkbox-input v-model="hideEntrypoints" v-bind:text="' Hide HTTP entrypoints'"></checkbox-input>
+    
             <div class="tile is-4" v-for="(deployment, index) in deploymentList" v-bind:key="index">
                 <deployment-card v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
             </div>
@@ -20,6 +20,7 @@ import Component from 'vue-class-component';
 
 // Componentes
 import DeploymentCard from './innerComponents/card/DeploymentCard.vue';
+import CheckboxInput from './innerComponents/input/CheckboxInput.vue'
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { Deployment, FabElement } from '../../store/classes';
 
@@ -28,7 +29,8 @@ import { Deployment, FabElement } from '../../store/classes';
     components: {
         'deployment-card': DeploymentCard,
         'collapse': Collapse,
-        'collapse-item': CollapseItem
+        'collapse-item': CollapseItem,
+        'checkbox-input': CheckboxInput
     }
 })
 export default class Overview extends Vue {
@@ -37,7 +39,6 @@ export default class Overview extends Vue {
     created() {
         this.$store.dispatch('getDeploymentList');
     }
-
     get route(): boolean {
         if (this.$route.name === 'Overview') {
             let fabElementsList: Array<FabElement> = [];

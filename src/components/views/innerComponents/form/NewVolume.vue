@@ -7,11 +7,11 @@
         </div>
         <div class="tile is-4">
             <span>Number of Chunks:</span>
-            <inputnumber class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
+            <number-input class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></number-input>
         </div>
         <div class="tile is-4" v-for="n in chunkNum" v-bind:key="n">
             <span>Chunk {{n}}:</span>
-            <inputnumber class="tile is-2" v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
+            <number-input class="tile is-2" v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></number-input>
             <span>GB</span>
         </div>
         <div>Size: {{totalGB}}GB</div>
@@ -21,12 +21,13 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import InputNumber from '../input/InputNumber.vue';
+import NumberInput from '../input/NumberInput.vue';
+import { FabElement } from '../../../../store/classes';
 
 @Component({
     name: 'newvolume',
     components: {
-        'inputnumber': InputNumber
+        'number-input': NumberInput
     }
 })
 export default class NewVolume extends Vue {
@@ -43,6 +44,9 @@ export default class NewVolume extends Vue {
                 this.size[index] = 1;
             }
         });
+        let fabElementsList: Array<FabElement> = [];
+        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+        let serviceId = this.$store.getters.getSelectedService;
     }
 
     get chunkSize() {

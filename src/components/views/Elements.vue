@@ -11,8 +11,9 @@
             </span>
         </div>
         <p>
-            <input type="checkbox" id="showpublic3rdpartyelements" v-model="showPublicElements">
-            <label for="showpublic3rdpartyelements">Show public 3rd party elements</label>
+            <i id="showpublic3rdpartyelements" v-bind:class="showpublic3rdpartyelementsCheckboxClass" v-on:click="showPublicElements=!showPublicElements">
+                <strong> Show public 3rd party elements</strong>
+            </i>
         </p>
     
         <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
@@ -194,6 +195,17 @@ export default class Elements extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
+
+    get showpublic3rdpartyelementsCheckboxClass(): string {
+        let res: string = 'is-unselectable fa '
+        if (this.showPublicElements) {
+            res += 'fa-check-square-o';
+        }
+        else {
+            res += 'fa-square-o';
+        }
+        return res;
+    }
     get user() {
         return this.$store.getters.getUser;
     }

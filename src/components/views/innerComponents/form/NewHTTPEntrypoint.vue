@@ -12,8 +12,7 @@
     
                 </th>
                 <th>
-                    <input class="checkbox" type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain"></input>
-                    <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
+                    <checkbox-input v-model="usePlatformGeneratedDomain" v-bind:text="' Use platform-generated domain'"></checkbox-input>
                 </th>
                 <th>
                     <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
@@ -21,8 +20,7 @@
             </tr>
             <tr>
                 <th>
-                    <input class="checkbox" type="checkbox" id="acceptTLSSSL" v-model="acceptTLSSSL"></input>
-                    <label for="acceptTLSSSL"> Accept TLS/SSL</label>
+                    <checkbox-input v-model="acceptTLSSSL" v-bind:text="' Accept TLS/SSL'"></checkbox-input>
                     <span class="select">
                         <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
                             <option disabled value="">Please select one</option>
@@ -33,15 +31,14 @@
             </tr>
             <tr>
                 <th>
-                    <input class="checkbox is-large" type="checkbox" id="requireClientCertificates" v-model="requireClientCertificates"></input>
-                    <label for="requireClientCertificates"> Require Client Certificates</label>
+                    <checkbox-input v-model="requireClientCertificates" v-bind:text="' Require client certificates'"></checkbox-input>
                 </th>
             </tr>
             <tr>
                 <th>
                     <div class="tile is-6">
                         <span class="name">Instances</span>
-                        <inputnumber class="tile is-3" v-model="instances"></inputnumber>
+                        <number-input class="tile is-3" v-model="instances"></number-input>
                     </div>
                 </th>
             </tr>
@@ -49,7 +46,7 @@
                 <th>
                     <div class="tile is-6">
                         <span class="name">Resilence</span>
-                        <inputnumber class="tile is-3" v-model="resilience"></inputnumber>
+                        <number-input class="tile is-3" v-model="resilience"></number-input>
                     </div>
                 </th>
             </tr>
@@ -62,12 +59,14 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement } from '../../../../store/classes';
-import InputNumber from '../input/InputNumber.vue';
+import CheckboxInput from '../input/CheckboxInput.vue'
+import NumberInput from '../input/NumberInput.vue';
 
 @Component({
     name: 'new-httpentrypoint',
     components: {
-        'inputnumber': InputNumber
+        'number-input': NumberInput,
+        'checkbox-input': CheckboxInput
     }
 })
 export default class NewHTTPEntrypoint extends Vue {
@@ -87,9 +86,11 @@ export default class NewHTTPEntrypoint extends Vue {
     get domainList() {
         return this.$store.getters.getFreeWebDomainList;
     }
+
     get certificateList() {
         return this.$store.getters.getCertificateList;
     }
+
     createNewDeployment() {
         this.usePlatformGeneratedDomain
         this.$store.dispatch('createNewHTTPENtrypoint', {
@@ -106,13 +107,14 @@ export default class NewHTTPEntrypoint extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-#acceptTLSSSL {
-    margin-top: 1em;
+#usePlatformGeneratedDomain {
+    margin-top: 0.5em;
 }
 
-.name {
-    padding-top: 1em;
+#acceptTLSSSL {
+    margin-top: 0.5em;
 }
+
 
 table {
     border-collapse: collapse;

@@ -7,7 +7,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Deployment, Resource } from '../../../../store/classes';
 @Component({
-    name: 'numberinput',
+    name: 'number-input',
     props: {
         value: { required: false, type: Number, default: 0 }
     }
@@ -16,8 +16,6 @@ export default class NumberInput extends Vue {
     value: number = this.value;
     numElement: number = this.numElement;
     property: string = this.property;
-
-
 
     updateValue(value: string) {
         let formattedValue: number = isNaN(Number.parseInt(value.trim())) ? 1 : Number.parseInt(value.trim());
