@@ -1,5 +1,5 @@
 <template>
-    <i ref="checkbox" type="checkbox" v-bind:class="inputClass" v-on:click="updateValue(!value)">
+    <i ref="checkbox" type="checkbox" class="is-unselectable fa" v-bind:class="inputClass" v-on:click="updateValue(!value)">
         <strong>{{text}}</strong>
     </i>
 </template>
@@ -26,14 +26,7 @@ export default class CheckboxInput extends Vue {
     }
 
     get inputClass(): string {
-        let res: string = 'is-unselectable fa '
-        if (this.value) {
-            res += 'fa-check-square-o';
-        }
-        else {
-            res += 'fa-square-o';
-        }
-        return res;
+        return this.value ? 'fa-check-square-o' : 'fa-square-o';
     }
 }
 </script>
