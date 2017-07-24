@@ -389,6 +389,6 @@ export function transformWebdomainToManifest(webdomain: string) {
     };
 }
 export function transformDataVolumeinToManifest(params) {
-    console.log('Los parámetros que nos llegan para transformar son', params);
+    console.error('DataVolume creation is under development');
 
 }

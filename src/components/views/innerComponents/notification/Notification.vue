@@ -6,9 +6,10 @@
 <script>
 import Vue from 'vue'
 import VueNotification from 'vue-bulma-notification';
+Vue.use(VueNotification);
 export default {
-    components:{
-        'vue-notification':VueNotification
+    components: {
+        'vue-notification': VueNotification
     },
     props: {
         type: String,
@@ -34,7 +35,7 @@ export default {
             show: true
         }
     },
-
+/*
     created() {
         let $parent = this.$parent
         if (!$parent) {
@@ -61,7 +62,8 @@ export default {
             this.$_parent_ = $parent
         }
     },
-
+*/
+/*
     mounted() {
         if (this.$_parent_) {
             this.$_parent_.$el.appendChild(this.$el)
@@ -72,7 +74,7 @@ export default {
             this.timer = setTimeout(() => this.close(), this.duration)
         }
     },
-
+*/
     destroyed() {
         this.$el.remove()
     },

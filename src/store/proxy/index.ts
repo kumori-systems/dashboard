@@ -50,12 +50,13 @@ export class ProxyConnection extends EventEmitter {
     login(username: string, password: string) {
         this.acs = new EcloudAcsClient(ACS_URI);
         this.acs.login(username, password).then(({ accessToken, user }) => {
-            console.log('El usuario que nos devuelve acs es', user);
+
             this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
-            // this.admission = new EcloudAdmissionClient(ADMISSION_URI);
+
             this.admission.onConnected(() => {
                 console.info('Successfully connected to admission');
             });
+
             this.admission.onEcloudEvent((event: EcloudEvent) => {
                 console.info('Evento: ', event);
                 switch (event.type) {
@@ -88,6 +89,7 @@ export class ProxyConnection extends EventEmitter {
             }).catch((error) => {
                 console.error('Error connecting to admission', error);
             });
+
         }).catch((error) => {
             console.error('Error connecting to acs', error);
         });
@@ -156,6 +158,7 @@ export class ProxyConnection extends EventEmitter {
     }
 
     createNewHTTPENtrypoint(params) {
+        console.error('The creation of an entrypoint is under development');
         /*
         this.admission.deploy(utils.transformEntrypointToManifest(
             params.usePlatformGeneratedDomain,
@@ -287,29 +290,23 @@ export class ProxyConnection extends EventEmitter {
     }
 
     addDataVolume(params) {
-        console.log('Enviamos un mensaje para añadir un volúmen de datos con los siguientes parámetros: ' + JSON.stringify(params));
-
-
-
-
+        console.error('Datavolume creation is under development');
+        /*
         const manifest = utils.transformDataVolumeinToManifest(params);
         let zip = new JSZip();
         let content: string = JSON.stringify(manifest) + '\n';
         zip.file('Manifest.json', content);
         // var img = zip.folder("images");
         // img.file("smile.gif", imgData, { base64: true });
-        /* api: https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
-        type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
-        */
+        // api: https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
+        // type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
+
         let instance = this;
         zip.generateAsync({ type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true })
             .then((content) => {
-                console.log('El contenido que no está generado generateAsync es', content);
-
                 let file = new File([content], 'Bundle.zip', {
                     type: 'application/zip'
                 });
-
                 instance.sendBundle(file).then((value) => {
                     let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
                     // eslap://omunoz/resources/vhost/elWebDomainDeJeroQueVoyAEliminar1
@@ -323,11 +320,12 @@ export class ProxyConnection extends EventEmitter {
                     });
                     this.emit(this.onAddResource, uri, res);
                 }).catch((error) => {
-                    console.error('Error registering a webdomain', error);
+                    console.error('Error adding a volume', error);
                 });
             }).catch((error) => {
-                console.error('Error creating a bundle for a webdomain manifest', error);
+                console.error('Error creating a bundle for a volume manifest', error);
             });
+            */
     }
 
     addNewElement(file: File) {
