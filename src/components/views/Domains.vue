@@ -20,12 +20,13 @@
                 </th>
             </tr>
             <tr v-for="freeWebdomain in freeWebDomainList" v-bind:key="freeWebdomain">
-                <th>{{freeWebdomain}}
+                <th>{{freeWebdomain}}</th>
+                <th>
+                    <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true"></i>
                 </th>
                 <th>
-                    <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true" />
+                    not in use
                 </th>
-                <th></th>
                 <th>
                     <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
                         <i class="fa fa-trash" aria-hidden="true"></i>
