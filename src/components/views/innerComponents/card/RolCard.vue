@@ -1,5 +1,5 @@
 <template>
-    <div class="card">
+    <div id="rol-card" class="card">
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
             <span class="title">{{rolId}}</span>
@@ -55,7 +55,7 @@
             </div>
         </div>    
         <collapse>
-            <collapse-item title="View instances">
+            <collapse-item title="Instances">
                 <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
                 </instance-card>
             </collapse-item>
@@ -185,6 +185,9 @@ $color_yellow:#f5d164;
 $color_red:#ff6666;
 $icon_size: 40px;
 $radius: 5px;
+#rol-card {
+    min-width: 80em;
+}
 
 button {
     height: 30px;

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="deployment-item-view">
         <i v-bind:class="state" aria-hidden="true"></i>
         <span class="title">{{deploymentName}}</span>
         <div>
@@ -171,6 +171,12 @@ $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
 $icon_size: 40px;
+
+
+#deployment-item-view {
+    min-width: 84em;
+}
+
 .deployment-chart {
     width: 800px;
     height: 250px;
