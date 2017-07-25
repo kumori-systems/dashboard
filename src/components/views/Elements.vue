@@ -12,9 +12,7 @@
             </span>
         </div>
         <p>
-            <i id="showpublic3rdpartyelements" v-bind:class="showpublic3rdpartyelementsCheckboxClass" v-on:click="showPublicElements=!showPublicElements">
-                <strong> Show public 3rd party elements</strong>
-            </i>
+            <checkbox-input v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
         </p>
     
         <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
@@ -28,7 +26,8 @@
                                         <table>
                                             <tr v-for="(version, index) in componentVersionList(owner, component)" v-bind:key="index">
                                                 <th>
-                                                    <input type="checkbox" id="selected" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)"> {{version}}
+                                                    <checkbox-input v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)"></checkbox-input>
+                                                    {{version}}
                                                 </th>
                                                 <th v-if="getIsComponentInUse(owner, component, version)">
                                                     <div>
@@ -66,7 +65,7 @@
                                         <table>
                                             <tr v-for="(version, index) in serviceVersionList(owner, service)" v-bind:key="index">
                                                 <th>
-                                                    <input type="checkbox" id="selected" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)"> {{version}}
+                                                    <checkbox-input v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)"></checkbox-input> {{version}}
                                                 </th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
                                                     <div>
@@ -115,7 +114,7 @@
                                     <table>
                                         <tr v-for="(version, index) in runtimeVersionList(owner, runtime)" v-bind:key="index">
                                             <th>
-                                                <input type="checkbox" id="selected" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)"> {{version}}
+                                                <checkbox-input v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)"></checkbox-input> {{version}}
                                             </th>
                                             <th v-if="getIsRuntimeInUse(owner, runtime, version)">
                                                 <div>
@@ -160,6 +159,7 @@ import DeleteGroup from './innerComponents/modal/DeleteGroup.vue';
 import Info from './innerComponents/modal/Info.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
+import CheckboxInput from './innerComponents/input/CheckboxInput.vue';
 
 @Component({
     name: 'Elements',
@@ -168,7 +168,8 @@ import { FabElement } from '../../store/classes';
         'collapse-item': CollapseItem,
         'delete': Delete,
         'delete-group': DeleteGroup,
-        'info': Info
+        'info': Info,
+        'checkbox-input': CheckboxInput
     }
 })
 export default class Elements extends Vue {
@@ -192,23 +193,10 @@ export default class Elements extends Vue {
     created() {
         this.$store.dispatch('getDeploymentList');
     }
-
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         fabElementsList.push(new FabElement('Upload bundle', 'newBundle'));
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-    }
-
-
-    get showpublic3rdpartyelementsCheckboxClass(): string {
-        let res: string = 'is-unselectable fa '
-        if (this.showPublicElements) {
-            res += 'fa-check-square-o';
-        }
-        else {
-            res += 'fa-square-o';
-        }
-        return res;
     }
     get user() {
         return this.$store.getters.getUser;
@@ -218,45 +206,37 @@ export default class Elements extends Vue {
             return true;
         return false;
     }
-
     get getComponentId() {
         return (owner, component, version) => {
             return this.$store.getters.getComponentId(owner, component, version);
         }
     }
-
     get componentOwnerList() {
         return this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
     }
-
     get ownerComponentList() {
         return (owner) => {
             return this.$store.getters.getOwnerComponentList(owner, this.search);
         }
     }
-
     get componentVersionList() {
         return (owner, component) => {
             return this.$store.getters.getComponentVersionList(owner, component, this.search);
         }
     }
-
     get serviceOwnerList() {
         return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
     }
-
     get ownerServiceList() {
         return (owner) => {
             return this.$store.getters.getOwnerServiceList(owner, this.search);
         }
     }
-
     get selectedServiceIsInbound() {
         return (serviceId) => {
             return this.$store.getters.getServiceIsEntryPoint(serviceId);
         }
     }
-
     get serviceVersionList() {
         return (owner, service) => {
             return this.$store.getters.getServiceVersionList(owner, service, this.search);
@@ -267,25 +247,21 @@ export default class Elements extends Vue {
             return this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
         }
     }
-
     get getComponentUsedBy() {
         return (owner, component, version) => {
             return this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
         }
     }
-
     get getComponentOwner() {
         return (componentId) => {
             return this.$store.getters.getComponentOwner(componentId);
         }
     }
-
     get getServiceName() {
         return (serviceId) => {
             return this.$store.getters.getServiceName(serviceId);
         };
     }
-
     get getServiceVersion() {
         return (serviceId) => {
             return this.$store.getters.getServiceVersion(serviceId);
@@ -311,11 +287,9 @@ export default class Elements extends Vue {
             return this.$store.getters.getServiceOwner(serviceId);
         };
     }
-
     get runtimeOwnerList() {
         return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
     }
-
     get ownerRuntimeList() {
         return (owner) => {
             return this.$store.getters.getOwnerRuntimeList(owner, this.search);
@@ -326,13 +300,11 @@ export default class Elements extends Vue {
             return this.$store.getters.getRuntimeVersion(runtimeId);
         }
     }
-
     get getRuntimeId() {
         return (owner, runtime, version) => {
             return this.$store.getters.getRuntimeId(owner, runtime, version);
         }
     }
-
     get getIsRuntimeInUse() {
         return (owner, runtime, version) => {
             return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
@@ -353,7 +325,6 @@ export default class Elements extends Vue {
             return this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
         }
     }
-
     deleteElement(elementType, elementId, elementName, elementVersion) {
         this.deleteIsVisible = true;
         this.modalElementType = elementType;
@@ -370,7 +341,6 @@ export default class Elements extends Vue {
     deleteComponent(owner, component, version) {
         this.deleteElement('component', this.getComponentId(owner, component, version), component, version);
     }
-
     showElementInfo(elementId, elementName, version) {
         this.infoIsVisible = true;
         this.modalElementId = elementId;
@@ -386,15 +356,12 @@ export default class Elements extends Vue {
     showComponentInfo(owner, component, version) {
         this.showElementInfo(this.getComponentId(owner, component, version), component, version);
     }
-
     selectedService(serviceId) {
         this.$store.dispatch('selectedService', serviceId);
     }
-
     downloadManifest() {
         this.$store.dispatch('downloadManifest', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
-
     deleteSelected() {
         this.modalElementList = [];
         // id, tipo, elemento, version
@@ -426,6 +393,5 @@ export default class Elements extends Vue {
 
         this.deleteGroupIsVisible = true;
     }
-
 }
 </script>

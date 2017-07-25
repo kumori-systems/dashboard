@@ -12,7 +12,7 @@
     
                 </th>
                 <th>
-                    <checkbox-input v-model="usePlatformGeneratedDomain" v-bind:text="' Use platform-generated domain'"></checkbox-input>
+                    <checkbox-input v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
                 </th>
                 <th>
                     <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
@@ -20,7 +20,7 @@
             </tr>
             <tr>
                 <th>
-                    <checkbox-input v-model="acceptTLSSSL" v-bind:text="' Accept TLS/SSL'"></checkbox-input>
+                    <checkbox-input v-model="acceptTLSSSL"> Accept TLS/SSL</checkbox-input>
                     <span class="select">
                         <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
                             <option disabled value="">Please select one</option>
@@ -31,7 +31,7 @@
             </tr>
             <tr>
                 <th>
-                    <checkbox-input v-model="requireClientCertificates" v-bind:text="' Require client certificates'"></checkbox-input>
+                    <checkbox-input v-model="requireClientCertificates"> Require client certificates</checkbox-input>
                 </th>
             </tr>
             <tr>

@@ -2,7 +2,7 @@
     <div>
         <router-view v-if="route"></router-view>
         <div v-else-if="deploymentList.length > 0">
-            <checkbox-input v-model="hideEntrypoints" v-bind:text="' Hide HTTP entrypoints'"></checkbox-input>
+            <checkbox-input v-model="hideEntrypoints"> Hide HTTP entrypoints</checkbox-input>
     
             <div class="tile is-4" v-for="(deployment, index) in deploymentList" v-bind:key="index">
                 <deployment-card v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
