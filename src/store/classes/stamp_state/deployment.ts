@@ -128,36 +128,36 @@ export module Deployment {
                 datasets: [
                     {
                         label: 'http_requests_per_second',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
+                        backgroundColor: '#1fc8db',
+                        borderColor: '#1fc8db',
                         fill: false,
                         data: this.http_requests_per_second
                     },
                     {
                         label: 'http_errors_per_second',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
+                        backgroundColor: '#fce473',
+                        borderColor: '#fce473',
                         fill: false,
                         data: this.http_errors_per_second
                     },
                     {
                         label: 'http_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
+                        backgroundColor: '#42afe3',
+                        borderColor: '#42afe3',
                         fill: false,
                         data: this.http_size_in_per_second
                     },
                     {
                         label: 'http_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
+                        backgroundColor: '#9999ff',
+                        borderColor: '#9999ff',
                         fill: false,
                         data: this.http_size_out_per_second
                     },
                     {
                         label: 'http_response_time',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
+                        backgroundColor: '#ed6c63',
+                        borderColor: '#ed6c63',
                         fill: false,
                         data: this.http_response_time
                     },
@@ -170,8 +170,8 @@ export module Deployment {
                     },
                     {
                         label: 'ws_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
+                        backgroundColor: '##ffb366',
+                        borderColor: '##ffb366',
                         fill: false,
                         data: this.ws_size_out_per_second
                     }

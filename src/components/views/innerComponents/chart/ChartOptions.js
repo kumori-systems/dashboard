@@ -7,9 +7,23 @@ export default {
     scales: {
         xAxes: [{
             type: "time",
+            ticks:{
+                maxRotation: 0
+            },
             time: {
+                /**
+                 * Al definir para todos el mismo formato evitamos que las gráficas cambien de tamaño
+                 */
                 displayFormats: {
-                    quarter: 'MMM YYYY'
+                    millisecond: 'hh:mm:ss a',
+                    second: 'hh:mm:ss a',
+                    minute: 'hh:mm:ss a',
+                    hour: 'hh:mm:ss a',
+                    day: 'hh:mm:ss a',
+                    week: 'hh:mm:ss a',
+                    month: 'hh:mm:ss a',
+                    quarter: 'hh:mm:ss a',
+                    year: 'hh:mm:ss a'
                 }
             }
         }],

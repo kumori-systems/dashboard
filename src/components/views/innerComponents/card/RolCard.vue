@@ -50,7 +50,7 @@
             </div>
             <div>
                 <div class="is-child is-pulled-right box rol-chart">
-                    <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                    <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
                 </div>
             </div>
         </div>    
@@ -197,7 +197,7 @@ button i {
 
 .rol-chart {
     width: 800px;
-    height: 400px;
+    height: 250;
     margin-right: 30px;
 }
 

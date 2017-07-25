@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="is-child is-pulled-right box deployment-chart">
-                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
             </div>
         </div>
         <div>
@@ -173,7 +173,7 @@ $color_red:#ff6666;
 $icon_size: 40px;
 .deployment-chart {
     width: 800px;
-    height: 400px;
+    height: 250px;
     margin-right: 40px;
 }
 

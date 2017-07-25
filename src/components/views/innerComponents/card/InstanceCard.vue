@@ -17,7 +17,7 @@
         </div>
         <div>
             <div class="is-child is-pulled-right box instance-chart">
-                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
             </div>
         </div>
     </div>
@@ -110,7 +110,7 @@ $icon_size: 40px;
 $radius: 5px;
 .instance-chart {
     width: 800px;
-    height: 400px;
+    height: 250;
 }
 
 .fa-check-circle {
