@@ -127,27 +127,6 @@ export module Deployment {
                 labels: this.time,
                 datasets: [
                     {
-                        label: 'timestamp_init',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: this.timestamp_init
-                    },
-                    {
-                        label: 'timestamp_end',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: this.timestamp_end
-                    },
-                    {
-                        label: 'elapsed_msec',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: this.elapsed_msec
-                    },
-                    {
                         label: 'http_requests_per_second',
                         backgroundColor: '#42afe3',
                         borderColor: '#42afe3',
@@ -195,20 +174,6 @@ export module Deployment {
                         borderColor: '#97cd76',
                         fill: false,
                         data: this.ws_size_out_per_second
-                    },
-                    {
-                        label: 'ws_chunk_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_chunk_in_per_second
-                    },
-                    {
-                        label: 'ws_chunk_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_chunk_out_per_second
                     }
                 ]
             };
@@ -244,7 +209,7 @@ export module Deployment {
          */
         addValues(time: Date, cpu: number, memory: number, bandwith_input: number, bandwith_output: number, rpm: number, res: number): void {
             this.time.push(time);
-            this.cpu.push(cpu);
+            this.cpu.push(cpu * 100);
             this.memory.push(memory);
             this.bandwith_input.push(bandwith_input);
             this.bandwith_output.push(bandwith_output);
@@ -278,8 +243,8 @@ export module Deployment {
                     },
                     {
                         label: 'NET_OUT',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
+                        backgroundColor: '#9999ff',
+                        borderColor: '#9999ff',
                         fill: false,
                         data: this.bandwith_output
                     },

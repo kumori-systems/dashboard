@@ -2,9 +2,11 @@
     <div>
         <i v-bind:class="state" aria-hidden="true"></i>
         <span class="title">{{deploymentName}}</span>
-        <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
-        <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
-        <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        <div>
+            <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
+            <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
+            <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        </div>
         <div class="is-parent tile">
             <div class="tile">
                 <div>
