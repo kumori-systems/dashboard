@@ -39,14 +39,10 @@
                                     <th>
                                         <number-input v-bind:value="rolMem[index]" v-bind:numElement="index" v-bind:property="'MEM'" v-on:input="updateInputValue"></number-input>
                                     </th>
-                                </tr>
-                                <tr>
                                     <th>CPU</th>
                                     <th>
                                         <number-input v-bind:value="rolCPU[index]" v-bind:numElement="index" v-bind:property="'CPU'" v-on:input="updateInputValue"></number-input>
                                     </th>
-                                </tr>
-                                <tr>
                                     <th>NET</th>
                                     <th>
                                         <number-input v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue"></number-input>
@@ -58,8 +54,6 @@
                                     <th>
                                         <number-input v-bind:value="rolInstances[index]" v-bind:numElement="index" v-bind:property="'INS'" v-on:input="updateInputValue"></number-input>
                                     </th>
-                                </tr>
-                                <tr>
                                     <th>
                                         <span>Resilence</span>
                                     </th>
@@ -347,5 +341,8 @@ table {
     tr,th {
         border-bottom-width: 0px;
     }
+}
+.input{
+    min-width: 5em;
 }
 </style>
