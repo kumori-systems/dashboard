@@ -5,6 +5,9 @@ export default {
   getUser: function (state): string {
     return state.user;
   },
+  getNumNotifications: function (state): number {
+    return (<Array<any>>state.notifications).length;
+  },
   authError: function (state): boolean {
     return state.authError;
   },

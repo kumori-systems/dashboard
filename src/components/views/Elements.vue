@@ -27,6 +27,8 @@
                                             <tr v-for="(version, index) in componentVersionList(owner, component)" v-bind:key="index">
                                                 <th>
                                                     <checkbox-input class="fa-2x" v-model="selectedComponents" v-bind:value="getComponentId(owner,component,version)"></checkbox-input>
+                                                </th>
+                                                <th>
                                                     {{version}}
                                                 </th>
                                                 <th v-if="getIsComponentInUse(owner, component, version)">
@@ -65,7 +67,10 @@
                                         <table>
                                             <tr v-for="(version, index) in serviceVersionList(owner, service)" v-bind:key="index">
                                                 <th>
-                                                    <checkbox-input  class="fa-2x" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)"></checkbox-input> {{version}}
+                                                    <checkbox-input class="fa-2x" v-model="selectedServices" v-bind:value="getServiceId(owner,service,version)"></checkbox-input>
+                                                </th>
+                                                <th>
+                                                    {{version}}
                                                 </th>
                                                 <th v-if="getIsServiceInUse(owner, service, version)">
                                                     <div>
@@ -114,7 +119,10 @@
                                     <table>
                                         <tr v-for="(version, index) in runtimeVersionList(owner, runtime)" v-bind:key="index">
                                             <th>
-                                                <checkbox-input  class="fa-2x" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)"></checkbox-input> {{version}}
+                                                <checkbox-input class="fa-2x" v-model="selectedRuntimes" v-bind:value="getRuntimeId(owner,runtime,version)"></checkbox-input>
+                                            </th>
+                                            <th>
+                                                {{version}}
                                             </th>
                                             <th v-if="getIsRuntimeInUse(owner, runtime, version)">
                                                 <div>

@@ -1,5 +1,5 @@
 <template>
-    <i ref="checkbox" type="checkbox" class="is-unselectable fa" v-bind:class="selected" v-on:click="updateValue(checked)">
+    <i id="checkbox" ref="checkbox" type="checkbox" class="is-unselectable fa" v-bind:class="selected" v-on:click="updateValue(checked)">
         <strong>
             <slot></slot>
         </strong>

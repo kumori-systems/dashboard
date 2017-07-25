@@ -20,7 +20,8 @@ export default new Vuex.Store({
         'fabElements': {},
         'selectedService': null,
         'user': null,
-        'authError': false
+        'authError': false,
+        'notifications': []
     },
     'getters': getters,
     'mutations': mutations,

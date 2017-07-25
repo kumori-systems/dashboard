@@ -8,9 +8,13 @@
             </div>
             <div class="nav-center">
             </div>
-            <div class="nav-right">
-                <i class="fa fa-bell" aria-hidden="true"></i>
-                <p>{{user}}</p>
+            <div class="nav-right tile">
+                <div id="notification-box" class="box">
+                    <i class="fa fa-bell" aria-hidden="true"></i>
+                    <span id="numNotifications">{{numNotifications}}</span>
+                </div>
+                <i class="fa fa-user fa-2x"></i>
+                <div id="username">{{user}}</div>
             </div>
         </nav>
     </section>
@@ -35,6 +39,9 @@ export default class NavBar extends Vue {
     get user() {
         return this.$store.getters.getUser;
     }
+    get numNotifications(){
+        return this.$store.getters.getNumNotifications;
+    }
 }
 </script>
 
@@ -52,6 +59,20 @@ export default class NavBar extends Vue {
         .fa {
             margin: auto 10px;
         }
+    }
+    #notification-box{
+        padding:10px;
+        margin:2px;
+        .fa-bell{
+            margin-top: 5px;
+        }
+        #numNotifications{
+            padding:0px;
+            margin: 0px;
+        }
+    }
+    #username{
+        margin:10px;
     }
 }
 </style>
