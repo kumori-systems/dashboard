@@ -10,7 +10,7 @@
                     <span>{{instanceNet}} NET</span>
                     <span>
                         <span>&#160;</span>
-                        <checkbox-input v-model="killInstance" v-bind:text="' Kill instance'"></checkbox-input>
+                        <checkbox-input v-model="killInstance"> Kill instance</checkbox-input>
                     </span>
                 </div>
             </div>

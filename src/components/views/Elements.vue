@@ -12,7 +12,7 @@
             </span>
         </div>
         <p>
-            <checkbox-input v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
+            <checkbox-input id="showpublicelements" v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
         </p>
     
         <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
@@ -403,3 +403,8 @@ export default class Elements extends Vue {
     }
 }
 </script>
+<style lang="scss">
+#showpublicelements{
+    padding:15px;
+}
+</style>

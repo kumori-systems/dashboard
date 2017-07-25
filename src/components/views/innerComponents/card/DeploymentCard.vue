@@ -225,7 +225,7 @@ $radius: 5px;
 
 .card {
     min-width: 30em;
-    margin: 10px;
+    margin: 20px;
     padding: 2px;
     border-radius: $radius;
 }
