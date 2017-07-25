@@ -36,18 +36,26 @@
             </tr>
             <tr>
                 <th>
-                    <div class="tile is-6">
-                        <span class="name">Instances</span>
-                        <number-input class="tile is-3" v-model="instances"></number-input>
-                    </div>
+                    <table>
+                        <tr>
+                            <th>Instances</th>
+                            <th>
+                                <number-input class="tile is-3" v-model="instances"></number-input>
+                            </th>
+                        </tr>
+                    </table>
                 </th>
             </tr>
             <tr>
                 <th>
-                    <div class="tile is-6">
-                        <span class="name">Resilence</span>
-                        <number-input class="tile is-3" v-model="resilience"></number-input>
-                    </div>
+                    <table>
+                        <tr>
+                            <th>Resilence</th>
+                            <th>
+                                <number-input class="tile is-3" v-model="resilience"></number-input>
+                            </th>
+                        </tr>
+                    </table>
                 </th>
             </tr>
     
@@ -107,6 +115,10 @@ export default class NewHTTPEntrypoint extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+.input {
+    min-width: 5em;
+}
+
 #usePlatformGeneratedDomain {
     margin-top: 0.5em;
 }
