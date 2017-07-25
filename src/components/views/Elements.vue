@@ -1,15 +1,18 @@
 <template>
     <div>
         <div class="tile">
-            <span class="control has-icon tile is-4">
+            <div class="control has-icon tile is-4">
                 <input class="input" placeholder="Search" v-model="search">
                 <span class="icon is-small">
                     <i class="fa fa-search"></i>
                 </span>
-                <span>&#160;</span>
+            </div>
+            <div class="tile is-4"></div>
+            <div class="tile is-4">
                 <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
                 <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
-            </span>
+                <button class="button is-warning" v-bind:disabled="!someoneSelected" v-on:click="clearSelected">Cancel</button>
+            </div>
         </div>
         <p>
             <checkbox-input id="showpublicelements" v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
@@ -401,10 +404,15 @@ export default class Elements extends Vue {
 
         this.deleteGroupIsVisible = true;
     }
+    clearSelected() {
+        this.selectedComponents = [];
+        this.selectedServices = [];
+        this.selectedRuntimes = [];
+    }
 }
 </script>
 <style lang="scss">
-#showpublicelements{
-    padding:15px;
+#showpublicelements {
+    padding: 15px;
 }
 </style>

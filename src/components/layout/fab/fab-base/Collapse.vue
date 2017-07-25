@@ -16,7 +16,7 @@ export default {
 <style lang="scss" scoped>
 .collapse {
   margin-top: 10vh;
-  margin-left: 70vw;
+  margin-left: 80vw;
   position: fixed;
   z-index: 1;
   border-radius: 25px;
