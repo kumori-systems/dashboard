@@ -157,7 +157,7 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    createNewHTTPENtrypoint(params) {
+    createNewHTTPEntrypoint(params) {
         console.error('The creation of an entrypoint is under development');
         /*
         this.admission.deploy(utils.transformEntrypointToManifest(

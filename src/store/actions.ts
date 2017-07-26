@@ -128,8 +128,8 @@ export default {
     aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances, killInstances }) {
         connection.aplyChangesToDeployment(deploymentId, rolNumInstances, killInstances);
     },
-    createNewHTTPENtrypoint(context, params) {
-        connection.createNewHTTPENtrypoint(params);
+    createNewHTTPEntrypoint(context, params) {
+        connection.createNewHTTPEntrypoint(params);
     },
     createNewDeployment(context, deployment) {
         connection.addDeployment(deployment);
