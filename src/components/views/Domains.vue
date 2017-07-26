@@ -42,7 +42,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Webdomain } from '../../store/classes';
-import Delete from './innerComponents/modal/Delete.vue';
+import Delete from './innerComponents/modal/DeleteModal.vue';
 @Component({
     name: 'WebDomains',
     components: {

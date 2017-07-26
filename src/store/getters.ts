@@ -466,6 +466,55 @@ export default {
   componentList: function (state) {
     return state.componentList;
   },
+  getComponentName: function (state) {
+    return (componentId): string => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).name;
+      return '';
+    };
+  },
+  getComponentVersion: function (state) {
+    return (componentId): string => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).version;
+      return '';
+    };
+  },
+  getComponentOwner: function (state) {
+    return (componentId): string => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).owner;
+      return '';
+    };
+  },
+  getComponentProChannels: function (state) {
+    return (componentId) => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).proChannels;
+      return '';
+    };
+  },
+  getComponentReqChannels: function (state) {
+    return (componentId) => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).reqChannels;
+      return '';
+    };
+  },
+  getComponentResourcesConfig: function (state) {
+    return (componentId) => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).resourcesConfig;
+      return '';
+    };
+  },
+  getComponentRuntime: function (state) {
+    return (componentId) => {
+      if ((<Component>state.componentList[componentId]))
+        return (<Component>state.componentList[componentId]).runtime;
+      return '';
+    };
+  },
   getComponentOwnerList: function (state, getters) {
     return (showPublicElements: boolean, filter): Array<string> => {
       let res: Array<string> = [];
@@ -621,6 +670,28 @@ export default {
     };
   },
 
+  getRuntimeName: function (state) {
+    return (runtimeId) => {
+      if ((<Runtime>state.runtimeList[runtimeId]))
+        return (<Runtime>state.runtimeList[runtimeId]).name;
+      return '';
+    };
+  },
+
+  getRuntimeVersion: function (state) {
+    return (runtimeId) => {
+      if ((<Runtime>state.runtimeList[runtimeId]))
+        return (<Runtime>state.runtimeList[runtimeId]).version;
+      return '';
+    };
+  },
+  getRuntimeOwner: function (state) {
+    return (runtimeId) => {
+      if ((<Runtime>state.runtimeList[runtimeId]))
+        return (<Runtime>state.runtimeList[runtimeId]).owner;
+      return '';
+    };
+  },
   getRuntimeVersionList: function (state, getters) {
     return (owner, runtime, filtro) => {
       let res: Array<string> = [];
@@ -645,9 +716,32 @@ export default {
     };
   },
 
-  getServiceName: function (state, getters) {
+  getServiceName: function (state) {
     return (serviceId) => {
-      return (<Service>state.serviceList[serviceId]).name;
+      if ((<Service>state.serviceList[serviceId]))
+        return (<Service>state.serviceList[serviceId]).name;
+      return '';
+    };
+  },
+  getServiceVersion: function (state, getters) {
+    return (serviceId) => {
+      if ((<Service>state.serviceList[serviceId]))
+        return (<Service>state.serviceList[serviceId]).version;
+      return '';
+    };
+  },
+  getServiceOwner: function (state, getters) {
+    return (serviceId) => {
+      if ((<Service>state.serviceList[serviceId]))
+        return (<Service>state.serviceList[serviceId]).owner;
+      return '';
+    };
+  },
+  getServiceParameters: function (state, getters) {
+    return (serviceId) => {
+      if ((<Service>state.serviceList[serviceId]))
+        return (<Service>state.serviceList[serviceId]).parameters;
+      return '';
     };
   },
   getServiceNameList: function (state, getters): Array<string> {
@@ -864,9 +958,10 @@ export default {
   getServiceRoles: function (state) {
     return function (serviceId: string) {
       let res: Array<string> = [];
-      for (let rol in (<Service>state.serviceList[serviceId]).roles) {
-        res.push(rol);
-      }
+      if ((<Service>state.serviceList[serviceId]))
+        for (let rol in (<Service>state.serviceList[serviceId]).roles) {
+          res.push(rol);
+        }
       return res;
     };
   },
@@ -895,13 +990,12 @@ export default {
     };
   },
   getServiceProChannels: function (state, getters) {
-    return (serviceName: string) => {
-      let serviceId = getters.getServiceIdFromName(serviceName);
-      if (serviceId === null) return [];
-      let res: Array<string> = [];
-      for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
-        res.push(proChannel);
-      }
+    return (serviceId: string) => {
+      let res = [];
+      if ((<Service>state.serviceList[serviceId]))
+        for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
+          res.push(proChannel);
+        }
       return res;
     };
   },
@@ -909,9 +1003,10 @@ export default {
   getServiceReqChannels: function (state, getters) {
     return (serviceId: string) => {
       let res = [];
-      for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
-        res.push(reqChannel);
-      }
+      if ((<Service>state.serviceList[serviceId]))
+        for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
+          res.push(reqChannel);
+        }
       return res;
     };
   },

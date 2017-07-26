@@ -53,7 +53,7 @@ import { FabElement, Deployment, Service } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
 import ChartOptions from './innerComponents/chart/ChartOptions.js';
-import Undeploy from './innerComponents/modal/Undeploy.vue';
+import Undeploy from './innerComponents/modal/UndeployModal.vue';
 
 @Component({
     name: 'DeploymentItem',

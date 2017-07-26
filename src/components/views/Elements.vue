@@ -156,31 +156,37 @@
         <div v-else>
             no elements found
         </div>
-        <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
-        <info v-bind:visible="infoIsVisible" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="infoIsVisible=false"></info>
-        <delete-group v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group>
+        <delete-modal v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete-modal>
+        <component-info-modal v-bind:visible="componentInfoIsVisible" v-bind:componentId="modalElementId" v-on:close="componentInfoIsVisible=false"></component-info-modal>
+        <service-info-modal v-bind:visible="serviceInfoIsVisible" v-bind:serviceId="modalElementId" v-on:close="serviceInfoIsVisible=false"></service-info-modal>
+        <runtime-info-modal v-bind:visible="runtimeInfoIsVisible" v-bind:runtimeId="modalElementId" v-on:close="runtimeInfoIsVisible=false"></runtime-info-modal>
+        <delete-group-modal v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group-modal>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Delete from './innerComponents/modal/Delete.vue';
-import DeleteGroup from './innerComponents/modal/DeleteGroup.vue';
-import Info from './innerComponents/modal/Info.vue';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
 import CheckboxInput from './innerComponents/input/CheckboxInput.vue';
+import DeleteModal from './innerComponents/modal/DeleteModal.vue';
+import DeleteGroupModal from './innerComponents/modal/DeleteGroupModal.vue';
+import ComponentInfoModal from './innerComponents/modal/ComponentInfoModal.vue';
+import ServiceInfoModal from './innerComponents/modal/ServiceInfoModal.vue';
+import RuntimeInfoModal from './innerComponents/modal/RuntimeInfoModal.vue';
 
 @Component({
     name: 'Elements',
     components: {
         'collapse': Collapse,
         'collapse-item': CollapseItem,
-        'delete': Delete,
-        'delete-group': DeleteGroup,
-        'info': Info,
-        'checkbox-input': CheckboxInput
+        'checkbox-input': CheckboxInput,
+        'delete-modal': DeleteModal,
+        'delete-group-modal': DeleteGroupModal,
+        'component-info-modal': ComponentInfoModal,
+        'service-info-modal': ServiceInfoModal,
+        'runtime-info-modal': RuntimeInfoModal
     }
 })
 export default class Elements extends Vue {
@@ -193,7 +199,9 @@ export default class Elements extends Vue {
     // Modal Arguments
     deleteIsVisible: boolean = false;
     deleteGroupIsVisible: boolean = false;
-    infoIsVisible: boolean = false;
+    componentInfoIsVisible: boolean = false;
+    serviceInfoIsVisible: boolean = false;
+    runtimeInfoIsVisible: boolean = false;
     modalElementType: string = '';
     modalElementId: string = '';
     modalElementName: string = '';
@@ -353,18 +361,20 @@ export default class Elements extends Vue {
         this.deleteElement('component', this.getComponentId(owner, component, version), component, version);
     }
     showElementInfo(elementId, elementName, version) {
-        this.infoIsVisible = true;
         this.modalElementId = elementId;
         this.modalElementName = elementName;
         this.modalElementVersion = version;
     }
     showRuntimeInfo(owner, runtime, version) {
+        this.runtimeInfoIsVisible = true;
         this.showElementInfo(this.getRuntimeId(owner, runtime, version), runtime, version);
     }
     showServiceInfo(owner, service, version) {
+        this.serviceInfoIsVisible = true;
         this.showElementInfo(this.getServiceId(owner, service, version), service, version);
     }
     showComponentInfo(owner, component, version) {
+        this.componentInfoIsVisible = true;
         this.showElementInfo(this.getComponentId(owner, component, version), component, version);
     }
     selectedService(serviceId) {
