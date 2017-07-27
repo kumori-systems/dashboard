@@ -49,7 +49,7 @@ export class ProxyConnection extends EventEmitter {
     }
     login(username: string, password: string) {
         this.acs = new EcloudAcsClient(ACS_URI);
-        this.acs.login(username, password).then(({ accessToken, user }) => {
+        return this.acs.login(username, password).then(({ accessToken, user }) => {
 
             this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
 
@@ -90,35 +90,30 @@ export class ProxyConnection extends EventEmitter {
                 console.error('Error connecting to admission', error);
             });
 
-        }).catch((error) => {
-            console.error('Error connecting to acs', error);
         });
     }
     getDeploymentList() {
-        this.admission.findDeployments().then((deploymentList) => {
+        return this.admission.findDeployments().then((deploymentList) => {
             for (let deploymentId in deploymentList) {
                 this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
             }
-        }).catch((error) => {
-            console.error('Error getting deployment list', error);
-        });
-    }
-    getRegisteredElements() {
-        this.admission.findStorage().then((registeredElements) => {
-            for (let i = 0; i < registeredElements.length; i++) {
-                this.getElementInfo(registeredElements[i]);
-            }
-        }).catch((error) => {
-            console.error('Error getting registered elements', error);
         });
     }
 
-    undeployDeployment(deploymentURN: string): void {
-        this.admission.undeploy(deploymentURN).then((value) => {
+
+    getRegisteredElements() {
+        return this.admission.findStorage().then((registeredElements) => {
+            let promiseList: Array<Promise<any>> = [];
+            for (let i = 0; i < registeredElements.length; i++) {
+                promiseList.push(this.getElementInfo(registeredElements[i]));
+            }
+            return Promise.all(promiseList);
+        });
+    }
+
+    undeployDeployment(deploymentURN: string) {
+        return this.admission.undeploy(deploymentURN).then((value) => {
             this.emit(this.onRemoveDeploymemt, deploymentURN);
-            console.info('SUCCESSFULLY undeployed ' + deploymentURN);
-        }).catch((error) => {
-            console.error('The deployment ' + deploymentURN + ' could not be undeployed: ' + error);
         });
     }
 
@@ -150,7 +145,7 @@ export class ProxyConnection extends EventEmitter {
                     );
                     break;
                 default:
-                    console.info('Case not covered', uri, element);
+                    console.error('Case not covered', uri, element);
             }
         }).catch((error) => {
             console.error('Error getting element info', error);
@@ -177,21 +172,7 @@ export class ProxyConnection extends EventEmitter {
     }
 
     addDeployment(params) {
-
-
-        console.log('Cuando vamos a realizar un deployment enviamos',
-            utils.transformDeploymentToManifest(
-                params.name,
-                params.website,
-                params.service,
-                params.serviceConfig,
-                params.config,
-                params.roles
-            )
-        );
-
-
-        this.admission.deploy(
+        return this.admission.deploy(
             new FileStream(
                 new Blob([
                     JSON.stringify(
@@ -204,19 +185,18 @@ export class ProxyConnection extends EventEmitter {
                             params.roles
                         )
                     )
-
                 ])
             )
-        ).then((value) => {
-            console.log('Después de hacer un deployment de un servicio normal, admission devuelve', value);
-        }).catch((error) => {
-            console.error('Error creating a service', error);
+        ).then((deploymentList) => {
+            for (let deploymentId in deploymentList) {
+                this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+            }
         });
     }
 
     aplyChangesToDeployment(deploymentId: string, rolNumInstances: { [rolId: string]: number }, killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
-        console.log('Intentando aplicar cambios al deployment: ' + JSON.stringify(deploymentId));
-
+        console.error('The modification of a deploymet is under development');
+        /*
         if (rolNumInstances) {
             let sdm = new ScalingDeploymentModification();
             sdm.deploymentURN = deploymentId;
@@ -232,11 +212,11 @@ export class ProxyConnection extends EventEmitter {
         if (killInstances) {
             console.info('The functionality to kill an instance is under development');
         }
+        */
     }
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
-        console.log('A Connection DeleteElement nos llega', elementId);
         this.admission.removeStorage(elementId).then((value) => {
             console.info('La llamada a admission removeStorage nos ha devuelto', value);
         }).then((value) => {

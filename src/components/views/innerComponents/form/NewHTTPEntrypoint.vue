@@ -70,8 +70,6 @@ import { FabElement } from '../../../../store/classes';
 import CheckboxInput from '../input/CheckboxInput.vue'
 import NumberInput from '../input/NumberInput.vue';
 
-import { Notification, createNotification, notificationType } from '../notification';
-
 @Component({
     name: 'new-httpentrypoint',
     components: {
@@ -111,7 +109,6 @@ export default class NewHTTPEntrypoint extends Vue {
             'instances': this.instances,
             'resilience': this.resilience
         });
-        createNotification('Create New HTTP Entrypoint', 'Function not available', notificationType.DANGER);
         this.$router.go(-1);
     }
 }
