@@ -55,7 +55,7 @@ export default new Router({
       component: Help
     },
     {
-      name: 'New http entrypoint',
+      name: 'Add entrypoint',
       path: '/newHTTPEntrypoint',
       meta: { expanded: false },
       component: NewHTTPEntrypoint

@@ -4,8 +4,8 @@
             <tr v-for="(dataVolume, index) in dataVolumeList" v-bind:key="index">
                 <th>{{dataVolume}}</th>
                 <th>
-                    <span class="ON_PROGRESS" v-if="isDataVolumeUsed(dataVolume)">in use</span>
-                    <span>by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</span>
+                    <span v-if="isDataVolumeUsed(dataVolume)" class="ON_PROGRESS" >in use by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</span>
+                    <span v-else>¿in use?:not available</span>
                 </th>
                 <th>{{numberOfChunks(dataVolume)}} chunks</th>
                 <th>
@@ -27,9 +27,7 @@ import { FabElement } from '../../store/classes';
 })
 export default class DataVolumes extends Vue {
     addVolume: boolean = true;
-    created() {
-        this.$store.dispatch('getDeploymentList');
-    }
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         fabElementsList.push(new FabElement('Add new volume', '/newVolume'));

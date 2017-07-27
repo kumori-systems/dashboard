@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<div v-if="user !== null">
+		<div v-if="user">
 			<nprogress-container></nprogress-container>
 			<nav-bar v-bind:show="true"></nav-bar>
 			<fab></fab>
@@ -14,10 +14,13 @@
 					The access to this preview requires authentication
 					<div>
 						<div class="box tile is-vertical is-parent">
-							<input class="input is-small is-child" type="text" v-model="username" placeholder="Username">
-							<input class="input is-small is-child" type="password" v-model="password" placeholder="Password">
-							<span v-if="authError" class="invalid">Invalid username or password</span>
-							<i class="button fa fa-sign-in" v-on:click="onSubmit"> Sign-in</i>
+							<input v-bind:disabled="userState==='authenticated'" class="input loginstate" type="text" v-model="username" placeholder="Username">
+							<input v-bind:disabled="userState==='authenticated'" class="input loginstate" type="password" v-model="password" placeholder="Password">
+							<div class="tile loginactionbar">
+								<i class="button fa fa-sign-in" v-bind:class="userState==='authenticated'?'is-loading':''" v-on:click="onSubmit"> Sign in</i>
+								<div v-if="userState==='authenticated'" class="loginstate">Loading..</div>
+								<div v-if="userState==='error'" class="loginstate invalid">Invalid username or password</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -72,8 +75,8 @@ export default class App extends Vue {
 	get user() {
 		return this.$store.getters.getUser;
 	}
-	get authError() {
-		return this.$store.getters.authError;
+	get userState() {
+		return this.$store.getters.userState;
 	}
 
 }
@@ -95,6 +98,7 @@ html {
 $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
+
 $padding: 10px;
 $icon_size: 100px;
 $state_icon_size: 50px;
@@ -103,6 +107,14 @@ $state_icon_size: 50px;
 	width: 100%;
 	height: 50px;
 	pointer-events: none;
+}
+
+.loginactionbar {
+	margin: 10px;
+}
+
+.loginstate {
+	margin: 5px;
 }
 
 .CONNECTED_FONT_COLOR {

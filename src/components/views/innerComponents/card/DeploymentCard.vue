@@ -1,12 +1,11 @@
 <template>
     <div class="card" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
-            <router-link v-bind:to="deploymentPath" class="tile">
+            <router-link v-bind:to="deploymentPath" class="tile title">
                 {{name | truncateLeft(7)}}
                 <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
             </router-link>
-
-            
+    
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
@@ -23,7 +22,7 @@
                             <strong>{{rol| truncateLeft(30)}}</strong>
                             <div class="rol-component">{{rolComponentURN(rol) | truncateLeft(50)}}</div>
                         </div>
-                        <div class="box">
+                        <div class="box is-unselectable">
                             {{rolNumInstances(rol)}}
                         </div>
                     </div>
@@ -32,6 +31,7 @@
                     <span>No roles found</span>
                 </div>
             </div>
+    
             <div class="tile is-horizontal">
                 <u>Websites:</u>
                 <div v-if="website !== null && website.length>0">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <span v-else>
-                    none
+                    unavailable
                 </span>
     
             </div>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <span v-else>
-                    none
+                    unavailable
                 </span>
             </div>
             <div>
@@ -72,11 +72,10 @@
                     </div>
                 </div>
                 <span v-else>
-                    none
+                    unavailable
                 </span>
             </div>
         </div>
-        <div class="card-footer" v-if="false" />
     </div>
 </template>
 <script lang="ts">
@@ -183,6 +182,10 @@ $icon_size: 90px;
 $radius: 5px;
 #deployment-card {
     min-width: 35em;
+}
+
+.title {
+    color: black;
 }
 
 .rol-component {

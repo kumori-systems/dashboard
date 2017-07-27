@@ -11,7 +11,6 @@
             <div class="tile is-4">
                 <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
                 <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
-                <button class="button is-warning" v-bind:disabled="!someoneSelected" v-on:click="clearSelected">Cancel</button>
             </div>
         </div>
         <p>
@@ -209,9 +208,6 @@ export default class Elements extends Vue {
     // id, tipo, elemento, version
     modalElementList: Array<[string, string, string, string]> = [];
 
-    created() {
-        this.$store.dispatch('getDeploymentList');
-    }
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         fabElementsList.push(new FabElement('Upload bundle', 'newBundle'));
@@ -413,11 +409,6 @@ export default class Elements extends Vue {
         }
 
         this.deleteGroupIsVisible = true;
-    }
-    clearSelected() {
-        this.selectedComponents = [];
-        this.selectedServices = [];
-        this.selectedRuntimes = [];
     }
 }
 </script>

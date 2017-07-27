@@ -37,10 +37,10 @@ import Tooltip from 'vue-bulma-tooltip'
 export default class NavBar extends Vue {
 
     get user() {
-        return this.$store.getters.getUser;
+        return this.$store.getters.getUserName;
     }
     get numNotifications(){
-        return this.$store.getters.getNumNotifications;
+        return this.$store.getters.getNumAlerts;
     }
 }
 </script>

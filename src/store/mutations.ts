@@ -1,11 +1,12 @@
 import Vue from 'vue';
 import { Deployment } from './classes';
 export default {
-  login(state, user) {
-    state.user = user;
+  login(state, {id, name, roles}) {
+    state.user.id = id;
+    state.user.name = name;
   },
-  authError(state, value) {
-    state.authError = value;
+  loginstate(state, value) {
+    state.user.state = value;
   },
   addDeployment(state, deploymentMap) {
 

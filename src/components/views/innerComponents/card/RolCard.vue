@@ -3,7 +3,7 @@
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
             <span class="title">{{rolId}}</span>
-            <span class="box">{{numInstances}}</span>
+            <span class="box is-unselectable">{{numInstances}}</span>    
             <div>
                 <div class="tile is-vertical">
                     <button class="button is-primary" v-on:click="numInstances = 1">
@@ -30,21 +30,19 @@
                         </div>
                     </p>
                     <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
-                        <p>
-                            Connected to:
-                            <div class="left-padding">
-                                <div v-for="(connection, index) in rolProConnectedTo" v-bind:key="index">
-                                    <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
-                                        {{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
-                                    </div>
-                                </div>
-                                <div v-for="(connection, index) in rolReqConnectedTo" v-bind:key="index">
-                                    <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
-                                        {{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
-                                    </div>
+                        Connected to:
+                        <div class="left-padding">
+                            <div v-for="(connection, index) in rolProConnectedTo" v-bind:key="index">
+                                <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
+                                    {{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
                                 </div>
                             </div>
-                        </p>
+                            <div v-for="(connection, index) in rolReqConnectedTo" v-bind:key="index">
+                                <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
+                                    {{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,7 +51,7 @@
                     <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
                 </div>
             </div>
-        </div>    
+        </div>
         <collapse>
             <collapse-item title="Instances">
                 <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">

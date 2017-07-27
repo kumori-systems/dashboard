@@ -54,23 +54,19 @@ export class ProxyConnection extends EventEmitter {
             this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
 
             this.admission.onConnected(() => {
-                console.info('Successfully connected to admission');
+                console.info('Successfully connected to the service');
             });
 
             this.admission.onEcloudEvent((event: EcloudEvent) => {
-                console.info('Evento: ', event);
                 switch (event.type) {
                     case EcloudEventType.service:
-                        console.info('Service event received: ' + event.strName);
-                        // Service event type handler function
+                        console.warn('Event under development: Service event received: ', event.strName, event);
                         break;
                     case EcloudEventType.node:
-                        console.info('Node event received: ' + event.strName);
-                        // Node event type handler function
+                        console.warn('Event under development: Node event received: ', event.strName, event);
                         break;
                     case EcloudEventType.instance:
-                        console.info('Instance event received: ' + event.strName);
-                        // Instance event type handler function
+                        console.warn('Event under development: Instance event received: ', event.strName, event);
                         break;
                     case EcloudEventType.metrics:
                         this.emit(this.onAddMetrics, utils.transformEcloudEventDataToMetrics(event));
@@ -84,12 +80,9 @@ export class ProxyConnection extends EventEmitter {
                 console.error('Error received from admission-client: ' + JSON.stringify(error));
             });
 
-            this.admission.init().then(() => {
-                this.emit(this.onLogin, user.name);
-            }).catch((error) => {
-                console.error('Error connecting to admission', error);
+            return this.admission.init().then(() => {
+                return user;
             });
-
         });
     }
     getDeploymentList() {
@@ -202,7 +195,6 @@ export class ProxyConnection extends EventEmitter {
             sdm.deploymentURN = deploymentId;
             sdm.scaling = rolNumInstances;
             this.admission.modifyDeployment(sdm).then((value) => {
-                console.log('Cuando intentamos aplicar cambios a un deployment admission nos devuelve', value);
                 this.emit(this.onModifyDeployment, value);
             }).catch((error) => {
                 console.error('Error trying to make changes to a deployment', error);
@@ -220,7 +212,7 @@ export class ProxyConnection extends EventEmitter {
         this.admission.removeStorage(elementId).then((value) => {
             console.info('La llamada a admission removeStorage nos ha devuelto', value);
         }).then((value) => {
-            console.log('Después de enviar una petición de delete Element, admission devuelve', value);
+            console.info('Element suceffully deleted', elementId);
         }).catch((error) => {
             console.error('Error creating a service', error);
         });
@@ -229,7 +221,7 @@ export class ProxyConnection extends EventEmitter {
     // @param elementId: Elemento o lista de elementos
     downloadManifest(elementId) {
         this.admission.getStorageManifest(elementId).then((value) => {
-            console.log('Cuando preguntamos por el storage manifest obtenemos', value);
+            console.log('Cuando preguntamos por el manifiesto..', value);
         }).catch((error) => {
             console.error('Error obtaining a manifest', error);
         });

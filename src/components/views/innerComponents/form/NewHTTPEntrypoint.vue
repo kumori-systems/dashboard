@@ -6,7 +6,8 @@
                     <span class="select">
                         <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
                             <option disabled value="">Please select one</option>
-                            <option v-for="domain in domainList" v-bind:key="domain">{{domain}}</option>
+                            <option disabled v-for="domain in freeDomainList" v-bind:key="domain">{{domain}}</option>
+                            <option disabled v-for="domain in usedDomainList" v-bind:key="domain">{{domain}}</option>
                         </select>
                     </span>
     
@@ -91,8 +92,12 @@ export default class NewHTTPEntrypoint extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
-    get domainList() {
+    get freeDomainList() {
         return this.$store.getters.getFreeWebDomainList;
+    }
+
+    get usedDomainList() {
+        return this.$store.getters.getUsedWebDomainList;
     }
 
     get certificateList() {

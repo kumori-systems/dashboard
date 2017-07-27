@@ -4,7 +4,7 @@
         <span class="title">{{deploymentName}}</span>
         <div>
             <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
-            <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
+            <button v-bind:disabled="!haveChanges" class="button is-success is-medium " v-on:click="applyChanges">APPLY CHANGES</button>
             <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
         </div>
         <div class="is-parent tile">
@@ -71,9 +71,7 @@ export default class DeploymentItem extends Vue {
     showModal: boolean = false;
     modalOkCallback: Function = function () { };
     chartOptions = ChartOptions;
-    created() {
-        this.$store.dispatch('getDeploymentList');
-    }
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });

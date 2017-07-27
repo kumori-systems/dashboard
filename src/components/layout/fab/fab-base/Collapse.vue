@@ -15,8 +15,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .collapse {
-  margin-top: 10vh;
-  margin-left: 80vw;
+  margin-top: 80vh;
+  margin-left: 70vw;
   position: fixed;
   z-index: 1;
   border-radius: 25px;

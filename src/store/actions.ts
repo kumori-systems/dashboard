@@ -10,14 +10,18 @@ export default {
         commit('setMenu', menu);
     },
     login({ commit, dispatch, getters }, { username, password }) {
-        connection.login(username, password).catch((error) => {
-            console.error('Error authenticating the user');
-            commit('authError', true);
-        });
-        connection.onLogin((user: string | Error) => {
-            commit('login', user);
-            createNotification('LOGIN', 'sucessfully loged in', notificationType.SUCCESS);
-            createNotification('Retrieving info', 'In this preview you should wait till all info is loaded or you can face unconsistent state', notificationType.WARNING);
+        let myUser;
+        connection.login(username, password).then((user) => {
+            commit('loginstate', 'authenticated');
+            myUser = user;
+            return connection.getDeploymentList();
+        }).then(() => {
+            return connection.getRegisteredElements();
+        }).then(() => {
+            commit('login', myUser);
+        }).catch((error) => {
+            console.error('Error authenticating the user', error);
+            commit('loginstate', 'error');
         });
 
         connection.onAddDeployment((deploymentId: string, deployment: Deployment) => {
@@ -32,11 +36,10 @@ export default {
             if (getters.getServiceInfo(deployment.serviceId) === undefined) {
                 connection.getElementInfo(deployment.serviceId);
             }
-            createNotification('New deployment', 'A new deployment has been created', notificationType.SUCCESS);
         });
 
         connection.onModifyDeployment((value) => {
-            console.log('Nos ha llegado un evento para modificar un deployment. Los valores son:', value);
+            console.error('Received event onModifyDeployment, which is still under development');
         });
 
         connection.onRemoveDeploymemt((deploymentId) => {
@@ -50,40 +53,44 @@ export default {
             let val: { [id: string]: Service } = {};
             val[serviceId] = service;
             commit('addService', val);
-            createNotification('New service', 'A service has been created', notificationType.SUCCESS);
+            if (getters.getUser)
+                createNotification('New service', 'A service has been created', notificationType.SUCCESS);
         });
 
         connection.onAddComponent((componentId: string, component: Component) => {
             let val: { [id: string]: Component } = {};
             val[componentId] = component;
             commit('addComponent', val);
-            createNotification(
-                'New component',
-                'A component has been created',
-                notificationType.SUCCESS
-            );
+            if (getters.getUser)
+                createNotification(
+                    'New component',
+                    'A component has been created',
+                    notificationType.SUCCESS
+                );
         });
 
         connection.onAddRuntime((runtimeId: string, runtime: Runtime) => {
             let val: { [id: string]: Runtime } = {};
             val[runtimeId] = runtime;
             commit('addRuntime', val);
-            createNotification(
-                'New runtime',
-                'A runtime has been created',
-                notificationType.SUCCESS
-            );
+            if (getters.getUser)
+                createNotification(
+                    'New runtime',
+                    'A runtime has been created',
+                    notificationType.SUCCESS
+                );
         });
 
         connection.onAddResource((resourceId: string, resource: Resource) => {
             let val: { [id: string]: Resource } = {};
             val[resourceId] = resource;
             commit('addResource', val);
-            createNotification(
-                'New resource',
-                'A resource has been created',
-                notificationType.SUCCESS
-            );
+            if (getters.getUser)
+                createNotification(
+                    'New resource',
+                    'A resource has been created',
+                    notificationType.SUCCESS
+                );
         });
         connection.onRemoveResource((resourceId: string) => {
             commit('removeResource', resourceId);
@@ -97,32 +104,7 @@ export default {
         connection.onAddMetrics((metrics) => {
             commit('addMetrics', metrics);
         });
-        // connection.on
 
-    },
-    getDeploymentList({ getters, dispatch }) {
-        let deploymentList = getters.getDeploymentList;
-        for (let deploymentId in deploymentList) {
-            return; // Si ya tenemos algo en la lista, no hace falta que volvamos a hacer la llamada
-        }
-        connection.getDeploymentList().then(() => {
-            dispatch('getElementList');
-        }).catch((error) => {
-            console.error('Error getting deployment list', error);
-            createNotification(
-                'Error obtaining info',
-                'The page may not be in a consistent state',
-                notificationType.DANGER
-            );
-        });
-    },
-    getElementList({ dispatch, getters }) {
-        connection.getRegisteredElements().then(() => {
-            createNotification('Retrieving info FINISHED', 'Thank you for waiting', notificationType.WARNING);
-        }).catch((error) => {
-            console.error('Error getting registered elements', error);
-            createNotification('Error retrieving initial information', 'You can face an unconsistent state. Please reload the page', notificationType.DANGER);
-        });
     },
     getManifest(context, { uri }) {
         connection.getElementInfo(uri);
@@ -148,7 +130,7 @@ export default {
     },
     createNewHTTPEntrypoint(context, params) {
         connection.createNewHTTPEntrypoint(params);
-        createNotification('Create New HTTP Entrypoint', 'Function not available in the dashboard. Please use the option \'upload bundle\' in elements view', notificationType.DANGER);
+        createNotification('Add Entripoint', 'This functionality is under development', notificationType.DANGER);
     },
     createNewDeployment(context, deployment) {
         connection.addDeployment(deployment).then(() => {

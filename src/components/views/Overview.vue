@@ -40,14 +40,11 @@ import { Deployment, FabElement } from '../../store/classes';
 export default class Overview extends Vue {
     hideEntrypoints: boolean = false;
 
-    created() {
-        this.$store.dispatch('getDeploymentList');
-    }
     get route(): boolean {
         if (this.$route.name === 'Overview') {
             let fabElementsList: Array<FabElement> = [];
-            fabElementsList.push(new FabElement('Deploy a new HTTP Entrypoint', 'newHTTPEntrypoint'));
-            fabElementsList.push(new FabElement('Deploy a new Service', 'newService'));
+            fabElementsList.push(new FabElement('Add Entrypoint', 'newHTTPEntrypoint'));
+            fabElementsList.push(new FabElement('Add Service Deployment', 'newService'));
             this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
             return false;
         }

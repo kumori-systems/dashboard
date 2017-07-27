@@ -3,13 +3,19 @@ import urlencode from 'urlencode';
 export default {
   /* GENERAL */
   getUser: function (state): string {
-    return state.user;
+    return state.user.id;
   },
-  getNumNotifications: function (state): number {
-    return (<Array<any>>state.notifications).length;
+  /**
+   * @returns string 'authenticated'|'error'
+   */
+  userState: function (state): boolean {
+    return state.user.state;
   },
-  authError: function (state): boolean {
-    return state.authError;
+  getUserName: function (state): string {
+    return state.user.name;
+  },
+  getNumAlerts: function (state): number {
+    return state.alerts.length;
   },
   sidebar: function (state) {
     return state.sidebar;

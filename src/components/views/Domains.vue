@@ -25,7 +25,8 @@
                     <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true"></i>
                 </th>
                 <th>
-                    not in use
+                    <!-- not in use-->
+                    ¿in use?: not available
                 </th>
                 <th>
                     <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
@@ -34,7 +35,17 @@
                 </th>
             </tr>
         </table>
-        <delete v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete>
+        <delete-modal
+        v-bind:visible="deleteModalIsVisible"
+        v-bind:elementType="modalElementType"
+        v-bind:elementId="domainId"
+        v-bind:elementName="modalElementName"
+        v-bind:elementVersion="modalElementVersion"
+        v-on:close="deleteModalIsVisible=false">
+            <div slot="header">
+                header
+            </div>
+        </delete-modal>
     </div>
 </template>
 
@@ -42,25 +53,21 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { FabElement, Webdomain } from '../../store/classes';
-import Delete from './innerComponents/modal/DeleteModal.vue';
+import DeleteModal from './innerComponents/modal/DeleteModal.vue';
 @Component({
     name: 'WebDomains',
     components: {
-        'delete': Delete,
+        'delete-modal': DeleteModal,
     }
 })
 export default class WebDomains extends Vue {
     // Modal Arguments
-    deleteIsVisible: boolean = false;
-    deleteGroupIsVisible: boolean = false;
-    infoIsVisible: boolean = false;
-    modalElementType: string = '';
-    modalElementId: string = '';
+    deleteModalIsVisible: boolean = false;
+    modalElementType: string = 'domain';
+    domainId: string = '';
     modalElementName: string = '';
     modalElementVersion: string = '';
-    created() {
-        this.$store.dispatch('getDeploymentList');
-    }
+
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         fabElementsList.push(new FabElement('Add new domain', '/newDomain'));
@@ -95,9 +102,9 @@ export default class WebDomains extends Vue {
     }
 
     deleteWebDomain(webdomain) {
-        this.deleteIsVisible = true;
+        this.deleteModalIsVisible = true;
         this.modalElementType = 'webdomain';
-        this.modalElementId = this.webdomainId(webdomain);
+        this.domainId = this.webdomainId(webdomain);
         this.modalElementName = webdomain;
         this.modalElementVersion = '';
     }

@@ -237,8 +237,6 @@ export function transformManifestToRuntime(manifest: {
         }
     }
 }): Runtime {
-
-    console.log('Cuando recibimos un runtime contiene', manifest);
     return new Runtime(manifest.name);
 }
 

@@ -108,7 +108,7 @@
             <tr v-if="selectedService && selectedService !==null && serviceResourcesList.length>0">
                 <th>RESOURCES CONFIGURATION</th>
             </tr>
-            <tr v-if="selectedService && selectedService !==null && serviceResourcesList.length>0"" v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
+            <tr v-if="selectedService && selectedService !==null && serviceResourcesList.length>0" v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
                 <th>
                     <table>
                         <tr>
@@ -133,7 +133,7 @@
                 </th>
             </tr>
             <tr v-if="selectedService && selectedService!==null">
-                <th>SERVICE '{{selectedService.name}}' CONFIGURATION</th>
+                <th>SERVICE CONFIGURATION</th>
             </tr>
             <tr v-if="selectedService && selectedService!==null">
                 <th class="tile is-6">
@@ -158,7 +158,7 @@ import NumberInput from '../input/NumberInput.vue';
     }
 })
 export default class NewService extends Vue {
-    selectedService: { id: string, name: string }=null;
+    selectedService: { id: string, name: string } = null;
     deploymentName: string = null;
     rolMem: Array<number> = [];
     rolCPU: Array<number> = [];
@@ -176,8 +176,8 @@ export default class NewService extends Vue {
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
         let serviceId = this.$store.getters.getSelectedService;
 
-        if (serviceId && serviceId !== null){
-            
+        if (serviceId && serviceId !== null) {
+
             this.selectedService = {
                 id: serviceId,
                 name: this.$store.getters.getServiceName(serviceId)
@@ -190,7 +190,7 @@ export default class NewService extends Vue {
     }
 
     get serviceRolList(): Array<string> {
-        if(!this.selectedService || this.selectedService === null)return [];
+        if (!this.selectedService || this.selectedService === null) return [];
         let rolList: Array<string> = this.$store.getters.getServiceRoles(this.selectedService.id);
         this.rolMem = new Array<number>(rolList.length);
         this.rolCPU = new Array<number>(rolList.length);
@@ -209,13 +209,13 @@ export default class NewService extends Vue {
 
 
     get serviceProChannelList(): Array<string> {
-        if(!this.selectedService || this.selectedService === null)return [];
+        if (!this.selectedService || this.selectedService === null) return [];
         let res = this.$store.getters.getServiceProChannels(this.selectedService.id);
         this.selectedRequiredChannel = new Array<string>(res.length);
         return res;
     }
     get serviceReqChannelList(): Array<string> {
-        if(!this.selectedService || this.selectedService === null)return [];
+        if (!this.selectedService || this.selectedService === null) return [];
         let res = this.$store.getters.getServiceReqChannels(this.selectedService.id);
         this.selectedProvidedChannel = new Array<string>(res.length);
         return res;
@@ -223,7 +223,7 @@ export default class NewService extends Vue {
 
     get serviceResourcesList(): Array<string> {
         let resourceList = []
-        if(this.selectedService && this.selectedService !== null)
+        if (this.selectedService && this.selectedService !== null)
             resourceList = this.$store.getters.getServiceResources(this.selectedService.id);
         this.resourceConfig = new Array<string>(resourceList.length);
         return resourceList;
@@ -242,7 +242,7 @@ export default class NewService extends Vue {
     }
 
     get allSelected() {
-        if(!this.selectedService || this.selectedService === null)return false;
+        if (!this.selectedService || this.selectedService === null) return false;
         if (this.deploymentName == null || this.deploymentName.length < 1) return false;
         for (let index in this.rolMem) {
             if (this.rolMem[index] === undefined) return false
@@ -338,11 +338,13 @@ export default class NewService extends Vue {
 table {
     border-collapse: collapse;
     border-bottom-width: 0px;
-    tr,th {
+    tr,
+    th {
         border-bottom-width: 0px;
     }
 }
-.input{
+
+.input {
     min-width: 5em;
 }
 </style>
