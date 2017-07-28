@@ -10,14 +10,14 @@
                     <span>{{instanceNet}} NET</span>
                     <span>
                         <span>&#160;</span>
-                        <checkbox-input v-model="killInstance"> Kill instance</checkbox-input>
+                        <checkbox-input v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                     </span>
                 </div>
             </div>
         </div>
         <div>
             <div class="is-child is-pulled-right box instance-chart">
-                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
+                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart>
             </div>
         </div>
     </div>

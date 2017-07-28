@@ -26,7 +26,7 @@
                 </th>
                 <th>
                     <!-- not in use-->
-                    ¿in use?: not available
+                    in use?: unavailable
                 </th>
                 <th>
                     <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
@@ -42,9 +42,6 @@
         v-bind:elementName="modalElementName"
         v-bind:elementVersion="modalElementVersion"
         v-on:close="deleteModalIsVisible=false">
-            <div slot="header">
-                header
-            </div>
         </delete-modal>
     </div>
 </template>

@@ -12,7 +12,7 @@ export default new Vuex.Store({
     'state': {
         'user': {
             'id': undefined,
-            'domain': 'eslap.cloud', // temporary test domain
+            'domain': undefined,
             'name': undefined,
             'state': undefined
         },

@@ -45,7 +45,7 @@ export default {
         connection.onRemoveDeploymemt((deploymentId) => {
             commit('removeDeploymentMenuItem', '/deployment/' + urlencode(deploymentId));
             commit('removeDeployment', deploymentId);
-            createNotification('Undeployed', 'A deployment has been removed', notificationType.DANGER
+            createNotification('Undeployed', 'A deployment has been removed', notificationType.SUCCESS
             );
         });
 
@@ -127,6 +127,7 @@ export default {
     },
     aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances, killInstances }) {
         connection.aplyChangesToDeployment(deploymentId, rolNumInstances, killInstances);
+        createNotification('Apply changes', 'This functionality is under development', notificationType.DANGER);
     },
     createNewHTTPEntrypoint(context, params) {
         connection.createNewHTTPEntrypoint(params);
@@ -142,6 +143,7 @@ export default {
         createNotification('Deploying..', 'A new instance of the service is under creation', notificationType.PRIMARY);
     },
     deleteElement(context, elementId) {
+        createNotification('Delete element', 'This functionality is under development', notificationType.DANGER);
         connection.deleteElement(elementId);
     },
     selectedService({ commit }, serviceId) {

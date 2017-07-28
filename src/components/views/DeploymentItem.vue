@@ -21,20 +21,22 @@
                     </p>
                     <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0"> Connected to:
                         <div v-for="(proChannel, index) in serviceProvideChannels" v-bind:key="index" class="inner-content">
-                            {{proChannel.myChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
+                            {{proChannel.myChannel}} -&gt;
+                            <!-- {{proChannel.toDeployment}} ({{proChannel.toChannel}}) -->unavailable
                         </div>
                         <div v-for="(reqChannel, index) in serviceRequireChannels" v-bind:key="index" class="inner-content">
-                            {{reqChannel.myChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
+                            {{reqChannel.myChannel}} &lt;-
+                            <!-- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) -->unavailable
+                        </div>
                     </p>
                 </div>
             </div>
             <div class="is-child is-pulled-right box deployment-chart">
-                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
+                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart>
             </div>
         </div>
         <div>
-            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false">
-            </rol-card>
+            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
         </div>
         <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
             This action will
@@ -75,7 +77,13 @@ export default class DeploymentItem extends Vue {
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+        /*
+        this.$router.beforeEach((to, from, next) => {
+             if (this.cancelChanges) this.cancelChanges();
+         });
+         */
     }
+
     get state(): string {
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
             case Deployment.Rol.Instance.State.CONNECTED:
@@ -135,6 +143,8 @@ export default class DeploymentItem extends Vue {
             'rolNumInstances': this.rolNumInstances,
             'killInstances': this.instanceKill
         });
+
+        this.cancelChanges(); // TODO: This won't be needed when the change functionaliti is available
     }
     cancelChanges(): void {
         this.rolNumInstances = {};

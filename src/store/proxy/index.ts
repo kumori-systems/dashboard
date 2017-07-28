@@ -209,6 +209,8 @@ export class ProxyConnection extends EventEmitter {
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
+        console.error('Delete Element is under development');
+        /*
         this.admission.removeStorage(elementId).then((value) => {
             console.info('La llamada a admission removeStorage nos ha devuelto', value);
         }).then((value) => {
@@ -216,6 +218,7 @@ export class ProxyConnection extends EventEmitter {
         }).catch((error) => {
             console.error('Error creating a service', error);
         });
+        */
     }
 
     // @param elementId: Elemento o lista de elementos

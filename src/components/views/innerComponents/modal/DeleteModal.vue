@@ -1,11 +1,11 @@
 <template>
     <modal v-bind:visible="visible" v-on:close="close" v-bind:primaryButtonText="primaryButtonText" v-bind:primaryButtonClass="primaryButtonClass" v-bind:primaryButtonCallback="primaryButtonCallback">
-        <div prop="title">
+        <div slot="title">
             <span>Are you </span>
             <strong>ABSOLUTELY</strong>
             <span> sure?</span>
         </div>
-        <div prop="body">
+        <div slot="body">
             This action
             <strong>CAN'T BE UNDONE</strong> and will
             <strong>ERASE</strong> the {{elementType}}

@@ -30,7 +30,7 @@
                         </div>
                     </p>
                     <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
-                        Connected to:
+                        Connected to: unavailable
                         <div class="left-padding">
                             <div v-for="(connection, index) in rolProConnectedTo" v-bind:key="index">
                                 <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
@@ -48,7 +48,7 @@
             </div>
             <div>
                 <div class="is-child is-pulled-right box rol-chart">
-                    <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="150"></chart>
+                    <chart v-bind:chartData="rolChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart>
                 </div>
             </div>
         </div>
@@ -173,6 +173,7 @@ export default class Card extends Vue {
      * al deployment para que lo almacene en un estado temporal
      */
     handleKillInstanceChange(payload) {
+        console.log('Rol recive evento para matar instáncia');
         this.$emit('killInstanceChange', [this.rolId, ...payload]);
     }
 }

@@ -5,7 +5,7 @@
                 <th>{{dataVolume}}</th>
                 <th>
                     <span v-if="isDataVolumeUsed(dataVolume)" class="ON_PROGRESS" >in use by {{deploymentUsingDataVolume(dataVolume)}}, {{rolUsingDataVolume(dataVolume)}}</span>
-                    <span v-else>¿in use?:not available</span>
+                    <span v-else>in use?: unavailable</span>
                 </th>
                 <th>{{numberOfChunks(dataVolume)}} chunks</th>
                 <th>
