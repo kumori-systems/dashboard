@@ -1,5 +1,5 @@
 <template>
-    <i id="checkbox" ref="checkbox" type="checkbox" class="is-unselectable fa" v-bind:class="selected" v-on:click="updateValue(checked)">
+    <i id="checkbox" v-bind:disabled="disabled" ref="checkbox" type="checkbox" class="is-unselectable fa" v-bind:class="selected" v-on:click="updateValue(checked)">
         <strong>
             <slot></slot>
         </strong>
@@ -16,7 +16,8 @@ import { FabElement, Deployment, Resource } from '../../../../store/classes';
 
     props: {
         checked: { required: true },
-        value: { required: false }
+        value: { required: false },
+        disabled: { required: false, default: false }
     },
     model: {
         prop: 'checked',
@@ -26,8 +27,10 @@ import { FabElement, Deployment, Resource } from '../../../../store/classes';
 export default class CheckboxInput extends Vue {
     checked = this.checked;
     value = this.value;
+    disabled = this.disabled;
 
     updateValue(checked) {
+        if (this.disabled) return;
         switch (typeof checked) {
             case 'boolean':
                 this.$emit('change', !checked);
@@ -65,3 +68,8 @@ export default class CheckboxInput extends Vue {
     }
 }
 </script>
+<style lang="scss">
+i[disabled] {
+    cursor: not-allowed;
+}
+</style>

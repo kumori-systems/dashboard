@@ -10,7 +10,7 @@
             <div class="tile is-4"></div>
             <div class="tile is-4">
                 <button class="button is-primary" v-bind:disabled="!someoneSelected" v-on:click="downloadManifest">Download manifest</button>
-                <button class="button is-danger" v-bind:disabled="!someoneSelected" v-on:click="deleteSelected">Delete</button>
+                <button class="button is-danger" v-bind:disabled="true || !someoneSelected" v-on:click="deleteSelected">Delete</button>
             </div>
         </div>
         <p>

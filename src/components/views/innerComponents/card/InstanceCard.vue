@@ -4,14 +4,11 @@
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
                 <span class="title">{{instanceId}}</span>
-                <div>
-                    <span>{{instanceMem}} MEM</span>
-                    <span>{{instanceCPU}} CPU</span>
-                    <span>{{instanceNet}} NET</span>
-                    <span>
-                        <span>&#160;</span>
-                        <checkbox-input v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
-                    </span>
+                <div class="tile is-parent">
+                    <div>{{instanceMem}} MEM</div>
+                    <div>{{instanceCPU}} CPU</div>
+                    <div>{{instanceNet}} NET</div>
+                    <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                 </div>
             </div>
         </div>
@@ -56,7 +53,7 @@ export default class Card extends Vue {
 
     mounted() {
         this.$watch('clear', function (value) {
-            if (value == true) {
+            if (value === true) {
                 this.killInstance = false;
             }
         })
@@ -140,6 +137,11 @@ $radius: 5px;
 
 .card-body {
     padding: 10px;
+}
+
+#killinstance {
+    padding-left: 10px;
+    
 }
 
 a {

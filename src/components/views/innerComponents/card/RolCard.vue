@@ -3,13 +3,13 @@
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
             <span class="title">{{rolId}}</span>
-            <span class="box is-unselectable">{{numInstances}}</span>    
+            <span class="box is-unselectable">{{numInstances}}</span>
             <div>
                 <div class="tile is-vertical">
-                    <button class="button is-primary" v-on:click="numInstances = 1">
+                    <button class="button is-primary" v-on:click="numInstances = 1" disabled>
                         <i class="fa fa-angle-up"></i>
                     </button>
-                    <button class="button is-primary is-outlined" v-on:click="numInstances = -1">
+                    <button class="button is-primary is-outlined" v-on:click="numInstances = -1" disabled>
                         <i class="fa fa-angle-down"></i>
                     </button>
                 </div>
@@ -173,7 +173,6 @@ export default class Card extends Vue {
      * al deployment para que lo almacene en un estado temporal
      */
     handleKillInstanceChange(payload) {
-        console.log('Rol recive evento para matar instáncia');
         this.$emit('killInstanceChange', [this.rolId, ...payload]);
     }
 }
