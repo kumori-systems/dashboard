@@ -3,6 +3,7 @@ import { AcsClient as EcloudAcsClient } from 'acs-client';
 import { ADMISSION_URI, ACS_URI } from './config';
 import { EventEmitter, Listener } from 'typed-event-emitter';
 import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 import * as utils from './utils';
 import { Deployment } from '../classes';
 
@@ -223,8 +224,14 @@ export class ProxyConnection extends EventEmitter {
 
     // @param elementId: Elemento o lista de elementos
     downloadManifest(elementId) {
-        this.admission.getStorageManifest(elementId).then((value) => {
-            console.log('Cuando preguntamos por el manifiesto..', value);
+        this.admission.getStorageManifest(elementId).then((manifest) => {
+            FileSaver.saveAs(
+                new Blob([
+                    JSON.stringify(manifest) + '\n'
+                ], { type: 'application/json;charset=utf-8' }),
+                'Manifest.json'
+            );
+
         }).catch((error) => {
             console.error('Error obtaining a manifest', error);
         });
@@ -243,15 +250,12 @@ export class ProxyConnection extends EventEmitter {
         let instance = this;
         zip.generateAsync({ type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true })
             .then((content) => {
-                console.log('El contenido que no está generado generateAsync es', content);
-
                 let file = new File([content], 'Bundle.zip', {
                     type: 'application/zip'
                 });
 
                 instance.sendBundle(file).then((value) => {
                     let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-                    // eslap://omunoz/resources/vhost/elWebDomainDeJeroQueVoyAEliminar1
                     let res = utils.transformManifestToResource({
                         spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
                         name: uri,
@@ -288,7 +292,6 @@ export class ProxyConnection extends EventEmitter {
                 });
                 instance.sendBundle(file).then((value) => {
                     let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-                    // eslap://omunoz/resources/vhost/elWebDomainDeJeroQueVoyAEliminar1
                     let res = utils.transformManifestToResource({
                         spec: 'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
                         name: uri,
@@ -313,10 +316,6 @@ export class ProxyConnection extends EventEmitter {
 
     private sendBundle(file: File) {
         return this.admission.sendBundle(new FileStream(file))
-            .then((value) => {
-                console.log('Después de enviar un bundle, admission nos devuelve ', value);
-                return value;
-            })
             .catch((error) => {
                 console.error('Error uploading a bundle', error);
             });
