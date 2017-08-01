@@ -26,13 +26,14 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
 
         // TODO: Esto debería de resolverse en una actualización de la api
         roles[rolId] = new Deployment.Rol(
-            1, // ecloudDeployment.roles[rolId].configuration.cpu : number
-            1, // ecloudDeployment.roles[rolId].configuration.memory : number
-            1, // ecloudDeployment.roles[rolId].configuration.ioperf : number
-            false, // ecloudDeployment.roles[rolId].configuration.iopsintensive : boolean
-            1, // ecloudDeployment.roles[rolId].configuration.bandwidth : number
-            1, // ecloudDeployment.roles[rolId].configuration.resilence : number
-            instances // : { [instanceId: string]: Deployment.Rol.Instance }
+            ecloudDeployment.roles[rolId].configuration,
+            1, // ecloudDeployment.roles[rolId].arrangement.cpu : number
+            1, // ecloudDeployment.roles[rolId].arrangement.memory : number
+            1, // ecloudDeployment.roles[rolId].arrangement.ioperf : number
+            false, // ecloudDeployment.roles[rolId].arrangement.iopsintensive : boolean
+            1, // ecloudDeployment.roles[rolId].arrangement.bandwidth : number
+            1, // ecloudDeployment.roles[rolId].arrangement.resilence : number
+            instances
         );
     }
 

@@ -267,6 +267,7 @@ export module Deployment {
         }
     }
     export class Rol {
+        configuration: any;
         cpu: number;
         memory: number;
         ioperf: number;
@@ -276,7 +277,8 @@ export module Deployment {
         instanceList: { [instanceId: string]: Rol.Instance };
         instanceNumber: number;
         metrics: Deployment.Metrics;
-        constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+        constructor(configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+            this.configuration = configuration;
             this.cpu = cpu;
             this.memory = memory;
             this.ioperf = ioperf;

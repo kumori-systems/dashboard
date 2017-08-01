@@ -287,6 +287,7 @@ export default class NewService extends Vue {
             }
 
             roles[this.serviceRolList[rolIndex]] = new Deployment.Rol(
+                null,
                 this.rolCPU[rolIndex],
                 this.rolMem[rolIndex],
                 0, //ioperf
