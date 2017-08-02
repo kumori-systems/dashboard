@@ -3,15 +3,15 @@
         <table class="table">
             <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
                 <th>
-                    <a v-bind:href="'http://'+usedWebdomain[1]">
-                        {{usedWebdomain[1]}}
+                    <a v-bind:href="'http://'+usedWebdomain">
+                        {{usedWebdomain}}
                     </a>
                 </th>
                 <th>
                     <i class="fa fa-check-circle" aria-hidden="true" />
                 </th>
                 <th>
-                    <span class="ON_PROGRESS">in use</span> by {{usedWebdomain[0]}}
+                    <span class="ON_PROGRESS">in use</span> by {{serviceUsingDomain(usedWebdomain)}}
                 </th>
                 <th>
                     <button class="button is-danger">
@@ -25,8 +25,7 @@
                     <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true"></i>
                 </th>
                 <th>
-                    <!-- not in use-->
-                    in use?: unavailable
+                    not in use
                 </th>
                 <th>
                     <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
@@ -35,13 +34,7 @@
                 </th>
             </tr>
         </table>
-        <delete-modal
-        v-bind:visible="deleteModalIsVisible"
-        v-bind:elementType="modalElementType"
-        v-bind:elementId="domainId"
-        v-bind:elementName="modalElementName"
-        v-bind:elementVersion="modalElementVersion"
-        v-on:close="deleteModalIsVisible=false">
+        <delete-modal v-bind:visible="deleteModalIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="domainId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteModalIsVisible=false">
         </delete-modal>
     </div>
 </template>
@@ -96,6 +89,12 @@ export default class WebDomains extends Vue {
         return (webdomain): string => {
             return this.$store.getters.getWebdomainResource(webdomain);
         }
+    }
+
+    get serviceUsingDomain() {
+        return (webdomain): string => {
+            return this.$store.getters.getServiceUsingDomain(webdomain);
+        };
     }
 
     deleteWebDomain(webdomain) {

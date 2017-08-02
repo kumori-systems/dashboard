@@ -149,7 +149,7 @@ export default {
   },
   getDeploymentRequireChannels: function (state) {
     return (deploymentId: string) => {
-       if (state.deploymentList[deploymentId] === undefined) return [];
+      if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       if (serviceId === undefined) return [];
       let res = [];
@@ -796,16 +796,9 @@ export default {
   },
 
   getUsedWebDomainList: function (state, getters) {
-    let usedWebdomain: Array<[string, string]> = [];
-    let websiteList: Array<string> = null;
+    let usedWebdomain: Array<string> = [];
     for (let deploymentId in state.deploymentList) {
-      if (state.deploymentList[deploymentId] !== undefined)
-        websiteList = (<Deployment>state.deploymentList[deploymentId]).website;
-      if (websiteList !== undefined && websiteList !== null) {
-        for (let index in websiteList) {
-          usedWebdomain.push([getters.getDeploymentName(deploymentId), websiteList[index]]);
-        }
-      }
+      usedWebdomain = usedWebdomain.concat((<Deployment>state.deploymentList[deploymentId]).website);
     }
     return usedWebdomain;
   },
@@ -825,11 +818,27 @@ export default {
         return (<Webdomain>state.resourceList[resourceId]).state;
     };
   },
+  getServiceUsingDomain: function (state, getters) {
+    return (webdomain): string => {
+      // Miramos qué entrypoint lo está utilizando
+      for (let deploymentId in state.deploymentList) {
+        // Devolvemos el link conectado a su canal
+        if ((<Deployment>state.deploymentList[deploymentId]).isEntrypoint
+          && (<Deployment>state.deploymentList[deploymentId]).website.indexOf(webdomain) !== -1) {
+          // Recorremos el link en busca del servicio conectado
+          return (<Deployment>state.deploymentList[
+            (<Deployment>state.deploymentList[deploymentId]).links[0].deploymentTwo
+          ]).name;
+        }
+      }
+    };
+  },
 
   getFreeWebDomainList: function (state, getters) {
     // Buscamos los inbound
     let allWebDomains: Array<string> = getters.getWebDomainList;
     let usedWebdomains: Array<string> = getters.getUsedWebDomainList;
+
     let freeWebdomains = [];
     for (let domain in allWebDomains) {
       if (usedWebdomains.indexOf(allWebDomains[domain]) === -1) {
