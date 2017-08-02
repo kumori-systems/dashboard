@@ -54,7 +54,7 @@ export default {
     if (!menuItem.children)
       Vue.set(menuItem, 'children', []);
 
-    let aux = (<Array<any>>menuItem.children).find(mItem => mItem.name === deploymentMenuItem.name);
+    let aux = (<Array<any>>menuItem.children).find(mItem => mItem.path === deploymentMenuItem.path);
     if (!aux)
       menuItem.children.push(deploymentMenuItem);
   },
