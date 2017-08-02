@@ -2,13 +2,12 @@
     <div class="card" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
             <router-link v-bind:to="deploymentPath" class="tile title">
-                {{name | truncateLeft(7)}}
+                {{name | truncateLeft(20)}}
                 <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
             </router-link>
-    
         </div>
         <div class="card-body">
-            <i class="state" v-bind:class="stateIcon" aria-hidden="true" />
+            <i class="state" v-bind:class="stateIcon" aria-hidden="true"></i>
             <div>
                 <u>Service:</u>
                 {{service| truncateLeft(50)}}
@@ -42,7 +41,7 @@
                     </div>
                 </div>
                 <span v-else>
-                    unavailable
+                    none
                 </span>
     
             </div>
@@ -52,7 +51,7 @@
                     <div v-for="(link, index) in links" v-bind:key="index" class="tile">
                         <i class="fa fa-circle"></i>
                         <div>
-                            <strong>{{link.myChannel}}</strong>
+                            <strong>{{link.fromChannel}}</strong>
                             <div>
                                 Connnected to -> {{link.toDeployment}}
                             </div>
@@ -60,7 +59,7 @@
                     </div>
                 </div>
                 <span v-else>
-                    unavailable
+                    none
                 </span>
             </div>
             <div>

@@ -1,3 +1,4 @@
+import StampElement from './stampelement';
 export class Link {
     deploymentOne: string;
     channelOne: string;
@@ -11,21 +12,32 @@ export class Link {
     }
 }
 
-export class Deployment {
+export class Deployment implements StampElement {
+    uri: string;
+    owner: string;
+    version: string;
     name: string; // nombre amistoso para el usuario
     serviceId: string; // servicio que define el despliegue
     resourcesConfig: { [resource: string]: any }; // encaja cómo llama el servicio a las resources con la definición real de las resources
     parameters: any;
     roles: { [rolName: string]: Deployment.Rol };
     website: Array<string>;
+    links: Array<Link>;
     metrics: Deployment.Metrics;
     isEntrypoint: boolean;
-    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, website: Array<string>) {
+    constructor(uri: string, name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, links: Array<Link>, website: Array<string>) {
+        this.uri = uri;
+
+        let splitted: Array<string> = this.uri.split('/');
+        this.owner = splitted[2];
+        this.version = splitted[splitted.length - 1];
+
         this.name = name;
         this.serviceId = serviceId;
         this.resourcesConfig = resourcesConfig;
         this.parameters = parameters;
         this.roles = roles;
+        this.links = links;
         this.website = website;
 
         if (this.serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0') {

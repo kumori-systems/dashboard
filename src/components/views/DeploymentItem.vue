@@ -21,12 +21,10 @@
                     </p>
                     <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0"> Connected to:
                         <div v-for="(proChannel, index) in serviceProvideChannels" v-bind:key="index" class="inner-content">
-                            {{proChannel.myChannel}} -&gt;
-                            <!-- {{proChannel.toDeployment}} ({{proChannel.toChannel}}) -->unavailable
+                            {{proChannel.fromChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
                         </div>
                         <div v-for="(reqChannel, index) in serviceRequireChannels" v-bind:key="index" class="inner-content">
-                            {{reqChannel.myChannel}} &lt;-
-                            <!-- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) -->unavailable
+                            {{reqChannel.fromChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}})
                         </div>
                     </p>
                 </div>

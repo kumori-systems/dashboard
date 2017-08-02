@@ -1,5 +1,5 @@
 import { Deployment as EcloudDeployment, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
-import { Deployment, Service, Resource, Component, Runtime, Cert, DataVolume, Webdomain } from '../classes';
+import { Deployment, Link, Service, Resource, Component, Runtime, Cert, DataVolume, Webdomain } from '../classes';
 export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDeployment) {
     let roles: { [rolId: string]: Deployment.Rol } = {};
     let instances: { [instanceId: string]: Deployment.Rol.Instance };
@@ -40,14 +40,30 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
 
     let resourcesConfig: { [resource: string]: any } = {};
     let parameters: any = {};
-    let website: Array<string> = null;
+
+    let website: Array<string> = [];
+    if (ecloudDeployment.service === 'eslap://eslap.cloud/services/http/inbound/1_0_0'
+        && ecloudDeployment.roles['sep']
+        && ecloudDeployment.roles['sep'].entrypoint
+        && ecloudDeployment.roles['sep'].entrypoint.domain)
+        website.push(ecloudDeployment.roles['sep'].entrypoint.domain);
+
+    let links: Array<Link> = [];
+
+    for (let firstChannel in ecloudDeployment.links) {
+        for (let secondDeployment in ecloudDeployment.links[firstChannel])
+            for (let secondChannel in ecloudDeployment.links[firstChannel][secondDeployment])
+                links.push(new Link(ecloudDeployment.urn, firstChannel, secondDeployment, secondChannel));
+    }
 
     return new Deployment(
-        ecloudDeployment.urn, // name: string
+        ecloudDeployment.urn,
+        (<any>ecloudDeployment).name || ecloudDeployment.service.split('/')[4] + ecloudDeployment.service.split('/')[5], // name: string
         ecloudDeployment.service, // serviceId: string
         resourcesConfig, // resourcesConfig: { [resource: string]: any }
         parameters, // parameters: any
         roles, // roles: { [rolName: string]: DeploymentRol }
+        links,
         website, // website: Array<string>
     );
 }

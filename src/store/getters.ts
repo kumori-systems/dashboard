@@ -97,18 +97,12 @@ export default {
       // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
       // lincado y sea un entrypoint (tenga un website != null)
 
-      for (let linkIndex in state.linkList) {
-        if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
-          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website.length > 0) {
-            website = website.concat((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).website);
-          }
-        }
-        if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
-          if ((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website.length > 0)
-            website = website.concat((<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).website);
+      for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
+
+        if ((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).isEntrypoint) {
+          website = website.concat((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).website);
         }
       }
-
       return website;
     };
   },
@@ -139,80 +133,35 @@ export default {
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       if (serviceId === undefined) return [];
       let res = [];
-      /* // TODO: Esto debería de ser posible de realizar en una actualización de la API
       for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
         let encontrado: boolean = false;
-        for (let linkIndex in state.linkList) {
-          if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
-            if ((<Link>state.linkList[linkIndex]).channelOne === proChannel) {
-              res.push({
-                'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
-                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
-                'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
-              });
-              encontrado = true;
-            }
-
-          }
-          if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
-            if ((<Link>state.linkList[linkIndex]).channelTwo === proChannel) {
-              res.push({
-                'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
-                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
-                'toChannel': (<Link>state.linkList[linkIndex]).channelOne
-              });
-              encontrado = true;
-            }
-          }
+        for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
+          if ((<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelOne === proChannel)
+            res.push({
+              'fromChannel': proChannel,
+              'toDeployment': (<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).name,
+              'toChannel': (<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelTwo
+            });
         }
-        if (!encontrado) { // Se utiliza para cubrir el caso en que el canal de servicio no tenga link
-          res.push({
-            'myChannel': proChannel,
-            'toDeployment': 'none',
-            'toChannel': 'none'
-          });
-        }
-      }*/
+      }
       return res;
     };
   },
   getDeploymentRequireChannels: function (state) {
     return (deploymentId: string) => {
-      if (state.deploymentList[deploymentId] === undefined) return [];
+       if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (state.serviceList[serviceId] === undefined) return [];
+      if (serviceId === undefined) return [];
       let res = [];
       for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
         let encontrado: boolean = false;
-        for (let linkIndex in state.linkList) {
-          if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
-            if ((<Link>state.linkList[linkIndex]).channelOne === reqChannel) {
-              res.push({
-                'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
-                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
-                'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
-              });
-              encontrado = true;
-            }
-
-          }
-          if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
-            if ((<Link>state.linkList[linkIndex]).channelTwo === reqChannel) {
-              res.push({
-                'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
-                'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
-                'toChannel': (<Link>state.linkList[linkIndex]).channelOne
-              });
-              encontrado = true;
-            }
-          }
-        }
-        if (!encontrado) { // Se utiliza para cubrir el caso en el que el canal de servicio no tenga link
-          res.push({
-            'myChannel': reqChannel,
-            'toDeployment': 'none',
-            'toChannel': 'none'
-          });
+        for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
+          if ((<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelOne === reqChannel)
+            res.push({
+              'fromChannel': reqChannel,
+              'toDeployment': (<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).name,
+              'toChannel': (<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelTwo
+            });
         }
       }
       return res;
@@ -222,21 +171,12 @@ export default {
     return function (deploymentId: string) {
       let res = [];
       // Buscamos en los links las conexiones de este deployment
-      for (let linkIndex in state.linkList) {
-        if ((<Link>state.linkList[linkIndex]).deploymentOne === deploymentId) {
-          res.push({
-            'myChannel': (<Link>state.linkList[linkIndex]).channelOne,
-            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentTwo]).name,
-            'toChannel': (<Link>state.linkList[linkIndex]).channelTwo
-          });
-        }
-        if ((<Link>state.linkList[linkIndex]).deploymentTwo === deploymentId) {
-          res.push({
-            'myChannel': (<Link>state.linkList[linkIndex]).channelTwo,
-            'toDeployment': (<Deployment>state.deploymentList[(<Link>state.linkList[linkIndex]).deploymentOne]).name,
-            'toChannel': (<Link>state.linkList[linkIndex]).channelOne
-          });
-        }
+      for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
+        res.push({
+          'fromChannel': (<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelOne,
+          'toDeployment': (<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).name,
+          'toChannel': (<Deployment>state.deploymentList[deploymentId]).links[linkIndex].channelTwo
+        });
       }
       return res;
     };

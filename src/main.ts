@@ -8,6 +8,8 @@ import store from './store';
 import { sync } from 'vuex-router-sync';
 sync(store, router);
 
+require('./assets/config.json');
+
 new Vue({
   el: '#app',
   store,

@@ -1,12 +1,14 @@
 import { RegistrationResult, ScalingDeploymentModification, FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
-import { ADMISSION_URI, ACS_URI } from './config';
+let Data = require('../../assets/config.json');
 import { EventEmitter, Listener } from 'typed-event-emitter';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import * as utils from './utils';
 import { Deployment } from '../classes';
 
+const ADMISSION_URI = Data.ADMISSION_URI;
+const ACS_URI = Data.ACS_URI;
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá actuar acorde al evento que lea.
  * Los eventos se lanzan a partir de llamar a los distintos métodos.
