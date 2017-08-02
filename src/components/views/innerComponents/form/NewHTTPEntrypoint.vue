@@ -6,7 +6,7 @@
                     <span class="select">
                         <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
                             <option disabled value="">Please select one</option>
-                            <option disabled v-for="domain in freeDomainList" v-bind:key="domain">{{domain}}</option>
+                            <option v-for="domain in freeDomainList" v-bind:key="domain">{{domain}}</option>
                             <option disabled v-for="domain in usedDomainList" v-bind:key="domain">{{domain}}</option>
                         </select>
                     </span>

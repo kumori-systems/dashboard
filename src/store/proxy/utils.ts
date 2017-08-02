@@ -347,8 +347,8 @@ export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolea
                 'vhost': domain
             },
             'parameters': {
-                'TLS': acceptTls,
-                'clientcert': requireClientCertificates
+                'TLS': acceptTls ? 'True' : 'False',
+                'clientcert': requireClientCertificates ? 'True' : 'False'
             }
         },
         'roles': {

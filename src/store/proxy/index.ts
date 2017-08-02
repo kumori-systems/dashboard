@@ -149,22 +149,26 @@ export class ProxyConnection extends EventEmitter {
     }
 
     createNewHTTPEntrypoint(params) {
-        console.error('The creation of an entrypoint is under development');
-        /*
-        this.admission.deploy(utils.transformEntrypointToManifest(
-            params.usePlatformGeneratedDomain,
-            'http', // Nombre!!
-            params.selectedDomain,
-            params.selectedCertificate,
-            params.acceptTLSSSL,
-            params.requireClientCertificates,
-            params.instances,
-            params.resilence
-        )).then((value) => {
+        this.admission.deploy(
+            new FileStream(new Blob(
+                [JSON.stringify(
+                    utils.transformEntrypointToManifest(
+                        params.usePlatformGeneratedDomain,
+                        'http',
+                        params.selectedCertificate,
+                        params.selectedDomain,
+                        params.acceptTLSSSL,
+                        params.requireClientCertificates,
+                        params.instances,
+                        params.resilence
+                    )
+                )]
+            ))
+        ).then((value) => {
             console.log('Después de hacer un deploy de HTTPEntrypoint admission devuelve', value);
         }).catch((error) => {
             console.error('Error creating a new http entrypoint', error);
-        });*/
+        });
     }
 
     addDeployment(params) {

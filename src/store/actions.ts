@@ -131,7 +131,6 @@ export default {
     },
     createNewHTTPEntrypoint(context, params) {
         connection.createNewHTTPEntrypoint(params);
-        createNotification('Add Entripoint', 'This functionality is under development', notificationType.DANGER);
     },
     createNewDeployment(context, deployment) {
         connection.addDeployment(deployment).then(() => {
