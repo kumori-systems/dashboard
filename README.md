@@ -3,8 +3,11 @@ Dashboard single web page for Kumori Ecloud.
 
 ## Authentication
 The authentication depends on acs, but we are actually using:
+
+```
 user: josep@iti.es
 password: josep
+```
 
 ## Development Setup
 ``` bash
