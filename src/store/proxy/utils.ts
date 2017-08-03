@@ -352,7 +352,7 @@ export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolea
                 'resources': {
                     '__instances': instances,
                     '__cpu': 1,
-                    '__memory': 2,
+                    '__memory': 1,
                     '__ioperf': 1,
                     '__iopsintensive': false,
                     '__bandwidth': 100,
