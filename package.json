@@ -5,7 +5,7 @@
   "author": "Óscar Muñoz Garrigós <omunoz@iti.es>",
   "private": true,
   "bin": {
-    "build-dashboard-page": "build/build.js"
+    "build-dashboard-page": "bin/main.js"
   },
   "scripts": {
     "dev": "node build/dev-server.js",
