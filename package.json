@@ -4,9 +4,6 @@
   "description": "Single web page para Ecloud",
   "author": "Óscar Muñoz Garrigós <omunoz@iti.es>",
   "private": true,
-  "bin": {
-    "build-dashboard-page": "bin/main.js"
-  },
   "scripts": {
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",
@@ -16,7 +13,7 @@
     "unit-debug": "karma start test/unit/karma.conf.js --browsers=Chrome --auto-watch --no-colors",
     "lint": "tslint src/**/*.ts"
   },
-  "dependencies": {
+  "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.40",
     "@types/node": "^8.0.8",
