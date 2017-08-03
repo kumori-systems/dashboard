@@ -826,9 +826,11 @@ export default {
         if ((<Deployment>state.deploymentList[deploymentId]).isEntrypoint
           && (<Deployment>state.deploymentList[deploymentId]).website.indexOf(webdomain) !== -1) {
           // Recorremos el link en busca del servicio conectado
-          return (<Deployment>state.deploymentList[
-            (<Deployment>state.deploymentList[deploymentId]).links[0].deploymentTwo
-          ]).name;
+          if ((<Deployment>state.deploymentList[deploymentId]).links.length > 0)
+            return (<Deployment>state.deploymentList[
+              (<Deployment>state.deploymentList[deploymentId]).links[0].deploymentTwo
+            ]).name;
+          return 'none';
         }
       }
     };

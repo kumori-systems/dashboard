@@ -332,10 +332,6 @@ export function getElementTipe(uri: string): ElementType {
 }
 
 export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolean, name: string, certificate: string, domain: string, acceptTls: boolean, requireClientCertificates: boolean, instances: number, resilience: number) {
-    if (usePlatformGeneratedDomain) {
-        console.error('Platform generated domain not enabled yet');
-    }
-
     return {
         'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
         'servicename': 'eslap://eslap.cloud/services/http/inbound/1_0_0',
@@ -343,12 +339,12 @@ export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolea
         'interconnection': true,
         'configuration': {
             'resources': {
-                'server_cert': certificate,
+                'server_cert': certificate.length > 0 ? certificate : null,
                 'vhost': domain
             },
             'parameters': {
-                'TLS': acceptTls ? 'True' : 'False',
-                'clientcert': requireClientCertificates ? 'True' : 'False'
+                'TLS': acceptTls,
+                'clientcert': requireClientCertificates
             }
         },
         'roles': {

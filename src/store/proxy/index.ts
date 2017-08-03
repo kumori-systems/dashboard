@@ -149,26 +149,22 @@ export class ProxyConnection extends EventEmitter {
     }
 
     createNewHTTPEntrypoint(params) {
-        this.admission.deploy(
+       return  this.admission.deploy(
             new FileStream(new Blob(
                 [JSON.stringify(
                     utils.transformEntrypointToManifest(
                         params.usePlatformGeneratedDomain,
                         'http',
-                        params.selectedCertificate,
-                        params.selectedDomain,
-                        params.acceptTLSSSL,
-                        params.requireClientCertificates,
+                        params.certificate,
+                        params.domain,
+                        params['accept-tls'],
+                        params['require-client-certificates'],
                         params.instances,
                         params.resilence
                     )
                 )]
             ))
-        ).then((value) => {
-            console.log('Después de hacer un deploy de HTTPEntrypoint admission devuelve', value);
-        }).catch((error) => {
-            console.error('Error creating a new http entrypoint', error);
-        });
+        );
     }
 
     addDeployment(params) {

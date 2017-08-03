@@ -130,7 +130,10 @@ export default {
         createNotification('Apply changes', 'This functionality is under development', notificationType.DANGER);
     },
     createNewHTTPEntrypoint(context, params) {
-        connection.createNewHTTPEntrypoint(params);
+        connection.createNewHTTPEntrypoint(params).catch((error) => {
+            console.error('The entrypoint couldn\'t be deployed: ' + error);
+            createNotification('Add HTTP Entrypoint', 'Error adding an Entrypoint', notificationType.DANGER);
+        });
     },
     createNewDeployment(context, deployment) {
         connection.addDeployment(deployment).then(() => {

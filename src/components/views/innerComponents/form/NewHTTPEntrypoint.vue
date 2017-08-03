@@ -13,7 +13,7 @@
     
                 </th>
                 <th>
-                    <checkbox-input v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
+                    <checkbox-input v-bind:disabled="true" v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
                 </th>
                 <th>
                     <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
@@ -21,7 +21,7 @@
             </tr>
             <tr>
                 <th>
-                    <checkbox-input v-model="acceptTLSSSL"> Accept TLS/SSL</checkbox-input>
+                    <checkbox-input v-bind:disabled="true" v-model="acceptTLSSSL"> Accept TLS/SSL</checkbox-input>
                     <span class="select">
                         <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
                             <option disabled value="">Please select one</option>
@@ -32,7 +32,7 @@
             </tr>
             <tr>
                 <th>
-                    <checkbox-input v-model="requireClientCertificates"> Require client certificates</checkbox-input>
+                    <checkbox-input  v-bind:disabled="true" v-model="requireClientCertificates"> Require client certificates</checkbox-input>
                 </th>
             </tr>
             <tr>
@@ -107,7 +107,7 @@ export default class NewHTTPEntrypoint extends Vue {
     createNewDeployment() {
         this.$store.dispatch('createNewHTTPEntrypoint', {
             'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
-            'domain': this.selectedDomain,
+            'domain': this.$store.getters.getWebdomainResource(this.selectedDomain),
             'certificate': this.selectedCertificate,
             'accept-tls': this.acceptTLSSSL,
             'require-client-certificates': this.requireClientCertificates,
