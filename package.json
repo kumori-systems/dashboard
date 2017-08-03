@@ -4,7 +4,9 @@
   "description": "Single web page para Ecloud",
   "author": "Óscar Muñoz Garrigós <omunoz@iti.es>",
   "private": true,
-  "bin": "build/build.js",
+  "bin": {
+    "build-dashboard-page": "build/build.js"
+  },
   "scripts": {
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",
