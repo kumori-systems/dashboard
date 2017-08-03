@@ -1,14 +1,14 @@
 import { RegistrationResult, ScalingDeploymentModification, FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
-let Data = require('../../assets/config.json');
+
 import { EventEmitter, Listener } from 'typed-event-emitter';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import * as utils from './utils';
 import { Deployment } from '../classes';
 
-const ADMISSION_URI = Data.ADMISSION_URI;
-const ACS_URI = Data.ACS_URI;
+import {ADMISSION_URI, ACS_URI} from '../../../static/config.js';
+
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá actuar acorde al evento que lea.
  * Los eventos se lanzan a partir de llamar a los distintos métodos.
@@ -149,7 +149,7 @@ export class ProxyConnection extends EventEmitter {
     }
 
     createNewHTTPEntrypoint(params) {
-       return  this.admission.deploy(
+        return this.admission.deploy(
             new FileStream(new Blob(
                 [JSON.stringify(
                     utils.transformEntrypointToManifest(
