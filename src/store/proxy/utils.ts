@@ -308,20 +308,25 @@ export enum ElementType { deployment, service, runtime, component, resource }
 
 export function getElementTipe(uri: string): ElementType {
     let res: ElementType;
-    switch (uri.split('/')[3]) {
+
+    let splitted = uri.split('/');
+
+    let i = 3;
+
+    if (splitted[2] === 'temporary') { i = i + 2; }
+
+    // Obtenemos el tipo. En caso de que sea temprary, el tipo estará 2 huecos desplazado
+    switch (splitted[i]) {
         case 'runtime':
         case 'runtimes':
             res = ElementType.runtime;
             break;
-        case 'service':
         case 'services':
             res = ElementType.service;
             break;
-        case 'component':
         case 'components':
             res = ElementType.component;
             break;
-        case 'resource':
         case 'resources':
             res = ElementType.resource;
             break;
