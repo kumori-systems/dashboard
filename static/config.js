@@ -1,2 +1,2 @@
-export const ACS_URI = undefined;
-export const ADMISSION_URI = undefined;
+export const ACS_URI = "acs.argo.kumori.cloud";
+export const ADMISSION_URI = "admission.argo.kumori.cloud";
