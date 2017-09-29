@@ -234,6 +234,10 @@ export default {
     return function (deploymentId: string, rolId: string) {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       if (state.serviceList[serviceId] === undefined) { return null; }
+      if (!(<Service>state.serviceList[serviceId]).roles[rolId]) {
+        console.warn('Found deploymen with a rol not defined in the service. deployment %s, rol %s', deploymentId, rolId);
+        return null;
+      }
       return (<Service>state.serviceList[serviceId]).roles[rolId].component;
     };
   },
