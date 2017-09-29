@@ -144,7 +144,9 @@ export module Deployment {
                         borderColor: '#1fc8db',
                         fill: false,
                         data: this.http_requests_per_second
-                    },
+                    }
+                    /*
+                    ,
                     {
                         label: 'http_errors_per_second',
                         backgroundColor: '#fce473',
@@ -187,6 +189,7 @@ export module Deployment {
                         fill: false,
                         data: this.ws_size_out_per_second
                     }
+                    */
                 ]
             };
         }
@@ -221,7 +224,7 @@ export module Deployment {
          */
         addValues(time: Date, cpu: number, memory: number, bandwith_input: number, bandwith_output: number, rpm: number, res: number): void {
             this.time.push(time);
-            this.cpu.push(cpu * 100);
+            this.cpu.push(cpu);
             this.memory.push(memory);
             this.bandwith_input.push(bandwith_input);
             this.bandwith_output.push(bandwith_output);
