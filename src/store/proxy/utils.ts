@@ -317,8 +317,9 @@ export function getElementTipe(uri: string): ElementType {
 
     // Obtenemos el tipo. En caso de que sea temprary, el tipo estará 2 huecos desplazado
     switch (splitted[i]) {
-        case 'runtime':
         case 'runtimes':
+            console.warn('deprecated element type \'runtimes\'');
+        case 'runtime':
             res = ElementType.runtime;
             break;
         case 'services':
@@ -408,5 +409,4 @@ export function transformWebdomainToManifest(webdomain: string) {
 }
 export function transformDataVolumeinToManifest(params) {
     console.error('DataVolume creation is under development');
-
 }
