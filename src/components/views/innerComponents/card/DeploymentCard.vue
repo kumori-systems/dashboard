@@ -30,7 +30,7 @@
                     <span>No roles found</span>
                 </div>
             </div>
-    
+
             <div class="tile is-horizontal">
                 <u>Websites:</u>
                 <div v-if="website !== null && website.length>0">
@@ -43,7 +43,7 @@
                 <span v-else>
                     none
                 </span>
-    
+
             </div>
             <div>
                 <u>Links:</u>
@@ -88,10 +88,10 @@ import { Deployment } from './../../../../store/classes';
         deploymentId: { required: true, type: String }
     },
     filters: {
-        truncateRight: function (string, value) {
+        truncateRight: function(string, value) {
             return string.substring(0, value) + '...';
         },
-        truncateLeft: function (string, value) {
+        truncateLeft: function(string, value) {
             if (string) {
                 if (string.length < value) return string;
                 return '...' + string.substring(string.length - value, string.length)
@@ -149,13 +149,13 @@ export default class Card extends Vue {
     }
 
     get rolComponentURN(): Function {
-        return function (rolId): string {
+        return function(rolId): string {
             return this.$store.getters.getDeploymentRolComponentURN(this.deploymentId, rolId);
         }
     }
 
     get rolNumInstances(): Function {
-        return function (rolId): number {
+        return function(rolId): number {
             return this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, rolId);
         }
     }
