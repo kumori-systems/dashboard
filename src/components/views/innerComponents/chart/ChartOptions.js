@@ -1,15 +1,17 @@
 export default {
+    /*
     legend: {
         display: true,
         position: 'right'
     },
-
+    */
     scales: {
         xAxes: [{
             type: "time",
+            /*
             ticks:{
                 maxRotation: 0
-            },
+            },*/
             time: {
                 /**
                  * Al definir para todos el mismo formato evitamos que las gráficas cambien de tamaño
@@ -32,7 +34,10 @@ export default {
                 suggestedMin: 0,
                 suggestedMax: 100
             }
-        }, {
+        }
+        
+        /*
+        , {
             position: 'right',
             ticks: {
                 fontColor: '#97cd76',
@@ -48,6 +53,7 @@ export default {
                 suggestedMax: 1000
             }
         }
+        */
         ]
     }
 };
