@@ -24,7 +24,7 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
             );
         }
 
-        // TODO: Esto debería de resolverse en una actualización de la api
+        // TODO ERROR001: Esto debería de resolverse en una actualización de la api
         roles[rolId] = new Deployment.Rol(
             ecloudDeployment.roles[rolId].configuration,
             1, // ecloudDeployment.roles[rolId].arrangement.cpu : number
