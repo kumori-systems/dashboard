@@ -87,7 +87,7 @@ export default class DeploymentItem extends Vue {
             case Deployment.State.WARNING:
                 res += 'fa-exclamation-triangle';
             default:
-                res += 'fa-spinner';
+                res += 'fa-question-circle';
         }
         return res;
     }

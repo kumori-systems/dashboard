@@ -67,7 +67,7 @@ export default class Card extends Vue {
             case Deployment.Rol.Instance.State.DISCONNECTED:
                 res += 'fa-exclamation-circle';
             default:
-                res += 'fa-spinner';
+                res += 'fa-question-circle';
         }
         return res;
     }

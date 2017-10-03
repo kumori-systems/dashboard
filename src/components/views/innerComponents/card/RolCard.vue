@@ -113,7 +113,7 @@ export default class Card extends Vue {
             case Deployment.State.WARNING:
                 res += 'fa-exclamation-triangle';
             default:
-                res += 'fa-spinner';
+                res += 'fa-question-circle';
         }
         return res;
     }
