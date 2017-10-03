@@ -69,31 +69,27 @@ export default class DeploymentItem extends Vue {
     haveChanges: boolean = false;
     clear: boolean = false;
     showModal: boolean = false;
-    modalOkCallback: Function = function () { };
+    modalOkCallback: Function = function() { };
     chartOptions = ChartOptions;
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-        /*
-        this.$router.beforeEach((to, from, next) => {
-             if (this.cancelChanges) this.cancelChanges();
-         });
-         */
     }
 
     get state(): string {
+        let res: string = 'fa ';
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case Deployment.Rol.Instance.State.CONNECTED:
-                return 'fa fa-check-circle';
-            case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'fa fa-exclamation-circle';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'fa fa-exclamation-triangle';
+            case Deployment.State.OK:
+                res += 'fa-check-circle';
+            case Deployment.State.DANGER:
+                res += 'fa-exclamation-circle';
+            case Deployment.State.WARNING:
+                res += 'fa-exclamation-triangle';
             default:
-                console.error('DeploymentItem received a non-covered instance state');
-                return '';
+                res += 'fa-spinner';
         }
+        return res;
     }
 
     get deploymentId() {
@@ -123,11 +119,20 @@ export default class DeploymentItem extends Vue {
     get deploymentService(): string {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
+
+    get serviceInfo(){
+        if(this.$store.getters.getServiceInfo(this.deploymentService) === undefined)
+            this.$store.dispatch('getElementInfo', { uri: this.deploymentService });
+        return null;
+    }
+
     get serviceProvideChannels(): Array<Service.Rol.Channel> {
+        this.serviceInfo;
         return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
 
     get serviceRequireChannels(): Array<Service.Rol.Channel> {
+        this.serviceInfo;
         return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
     }
 
@@ -144,15 +149,17 @@ export default class DeploymentItem extends Vue {
 
         this.cancelChanges(); // TODO: This won't be needed when the change functionaliti is available
     }
+
     cancelChanges(): void {
         this.rolNumInstances = {};
         this.instanceKill = {};
         this.clear = true;
         this.haveChanges = false;
     }
+
     undeploy(): void {
         const deploymentId = this.deploymentId;
-        this.modalOkCallback = function () { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
+        this.modalOkCallback = function() { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
         this.showModal = true;
     }
 
@@ -164,6 +171,7 @@ export default class DeploymentItem extends Vue {
             this.instanceKill[tempRol] = {};
         this.instanceKill[tempRol][tempInst] = value;
     }
+
     handleNumInstancesChange(payload) {
         this.haveChanges = true;
         let tempRol, value;
@@ -177,7 +185,6 @@ $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
 $icon_size: 40px;
-
 
 #deployment-item-view {
     min-width: 84em;

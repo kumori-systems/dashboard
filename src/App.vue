@@ -98,6 +98,7 @@ html {
 $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
+$color_grey:#e6f2ff;
 
 $padding: 10px;
 $icon_size: 100px;
@@ -117,51 +118,8 @@ $state_icon_size: 50px;
 	margin: 5px;
 }
 
-.CONNECTED_FONT_COLOR {
-	color: $color_green;
-}
-
-.CONNECTED {
-	background: $color_green;
-}
-
-.CONNECTED_COLOR {
-	color: $color_green;
-	font-size: $state_icon_size;
-}
-
-.DISCONNECTED_FONT_COLOR {
-	color: $color_red;
-}
-
 .invalid {
 	color: $color_red;
-}
-
-.DISCONNECTED {
-	background: $color_red;
-}
-
-.DISCONNECTED_COLOR {
-	color: $color_red;
-	font-size: $state_icon_size;
-}
-
-.ON_PROGRESS_FONT_COLOR {
-	color: $color_yellow;
-}
-
-.ON_PROGRESS {
-	background: $color_yellow;
-}
-
-.ON_PROGRESS_COLOR {
-	color: $color_yellow;
-	font-size: $state_icon_size;
-}
-
-.fa-hdd-o {
-	font-size: 30px;
 }
 
 .login {

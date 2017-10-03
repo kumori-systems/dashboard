@@ -52,7 +52,7 @@ export default class Card extends Vue {
     chartOptions = ChartOptions;
 
     mounted() {
-        this.$watch('clear', function (value) {
+        this.$watch('clear', function(value) {
             if (value === true) {
                 this.killInstance = false;
             }
@@ -60,18 +60,16 @@ export default class Card extends Vue {
     }
 
     get state(): string {
-        let state = this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId);
-        switch (state) {
+        let res: string = 'fa ';
+        switch (this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId)) {
             case Deployment.Rol.Instance.State.CONNECTED:
-                return 'fa fa-check-circle';
+                res += 'fa-check-circle';
             case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'fa fa-exclamation-circle';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'fa fa-exclamation-triangle';
+                res += 'fa-exclamation-circle';
             default:
-                console.error('InstanceCard received a non-covered instance state:', state);
-                return '';
+                res += 'fa-spinner';
         }
+        return res;
     }
 
     get instanceMem(): number {
@@ -141,7 +139,6 @@ $radius: 5px;
 
 #killinstance {
     padding-left: 10px;
-    
 }
 
 a {

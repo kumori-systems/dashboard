@@ -1,25 +1,31 @@
 import { Deployment, Runtime, Component, Service, Webdomain, Link, Resource, FabElement } from './classes';
 import urlencode from 'urlencode';
+import { getElementOwner, getElementName, getElementVersion, isServiceEntrypoint } from './proxy/utils';
 export default {
   /* GENERAL */
   getUser: function (state): string {
     return state.user.id;
   },
+
   /**
    * @returns string 'authenticated'|'error'
    */
   userState: function (state): boolean {
     return state.user.state;
   },
+
   getUserName: function (state): string {
     return state.user.name;
   },
+
   getNumAlerts: function (state): number {
     return state.alerts.length;
   },
+
   sidebar: function (state) {
     return state.sidebar;
   },
+
   menuElement: function (state) {
     return function (path) {
       let menuItem = (<Array<any>>state.menuItemList).find(elemen => elemen.path === path);
@@ -31,6 +37,7 @@ export default {
       return res;
     };
   },
+
   getFabElements: function (state): Array<FabElement> {
     return state.fabElements;
   },
@@ -53,52 +60,48 @@ export default {
     }
     return res;
   },
+
   getDeploymentIdFromDeploymentRoute: function (state): Function {
     return function (deploymentRoute: string): string {
       return urlencode.decode(deploymentRoute.split('/')[2]);
     };
   },
+
   getDeploymentPath: function (state): Function {
     return function (deploymentId: String): string {
       // Obtenemos la vista que contiene los deployment == OVERVIEW
       return '/deployment/' + urlencode(deploymentId);
     };
   },
+
   getDeploymentName: function (state): Function {
     return function (deploymentId: string): string {
-      if ((<Deployment>state.deploymentList[deploymentId]))
-        return (<Deployment>state.deploymentList[deploymentId]).name;
-      return '';
+      return (<Deployment>state.deploymentList[deploymentId]).name;
     };
   },
+
   getDeploymentService: function (state): Function {
     return function (deploymentId: string): string {
-      if (state.deploymentList[deploymentId] === undefined) return null;
       return (<Deployment>state.deploymentList[deploymentId]).serviceId;
     };
   },
+
   getIsEntryPoint: function (state, getters) {
     return function (deploymentId: string): boolean {
-      if (state.deploymentList[deploymentId] !== undefined)
-        return getters.getServiceIsEntryPoint(getters.getDeploymentService(deploymentId));
+      return (<Deployment>state.deploymentList[deploymentId]).isEntrypoint;
     };
   },
-  getServiceIsEntryPoint: function (state) {
-    return function (serviceId: string): boolean {
-      if (serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0')
-        return true;
-      return false;
-    };
+
+  getServiceIsEntryPoint: function (state, getters) {
+    return (uri: string) => { return isServiceEntrypoint(uri); };
   },
+
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): Array<string> {
-      if (state.deploymentList[deploymentId] === undefined) return [];
       let website: Array<string> = (<Deployment>state.deploymentList[deploymentId]).website;
       // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
       // lincado y sea un entrypoint (tenga un website != null)
-
       for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
-
         if ((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).isEntrypoint) {
           website = website.concat((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).website);
         }
@@ -106,20 +109,10 @@ export default {
       return website;
     };
   },
+
   getDeploymentState: function (state, getters): Function {
-    return function (deploymentId: string): Deployment.Rol.Instance.State {
-      let onProgress = false;
-      if (state.deploymentList[deploymentId] === undefined) return Deployment.Rol.Instance.State.ON_PROGRESS;
-      for (let rolId in (<Deployment>state.deploymentList[deploymentId]).roles) {
-        switch (getters.getDeploymentRolState(deploymentId, rolId)) {
-          case Deployment.Rol.Instance.State.DISCONNECTED:
-            return Deployment.Rol.Instance.State.DISCONNECTED;
-          case Deployment.Rol.Instance.State.ON_PROGRESS:
-            onProgress = true;
-        }
-      }
-      if (onProgress === true) return Deployment.Rol.Instance.State.ON_PROGRESS;
-      return Deployment.Rol.Instance.State.CONNECTED;
+    return function (deploymentId: string): Deployment.State {
+      return (<Deployment>state.deploymentList[deploymentId]).state;
     };
   },
 
@@ -129,9 +122,8 @@ export default {
   */
   getDeploymentProvideChannels: function (state) {
     return (deploymentId: string) => {
-      if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (serviceId === undefined) return [];
+      if ((<Service>state.serviceList[serviceId]) === undefined) return [];
       let res = [];
       for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
         let encontrado: boolean = false;
@@ -149,9 +141,8 @@ export default {
   },
   getDeploymentRequireChannels: function (state) {
     return (deploymentId: string) => {
-      if (state.deploymentList[deploymentId] === undefined) return [];
       let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (serviceId === undefined) return [];
+      if ((<Service>state.serviceList[serviceId]) === undefined) return [];
       let res = [];
       for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
         let encontrado: boolean = false;
@@ -249,19 +240,11 @@ export default {
   },
 
   getDeploymentRolState: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string): Deployment.Rol.Instance.State {
-      let onProgress = false;
-      for (let instanceId in (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList) {
-        switch (getters.getDeploymentRolInstanceState(deploymentId, rolId, instanceId)) {
-          case Deployment.Rol.Instance.State.DISCONNECTED: return Deployment.Rol.Instance.State.DISCONNECTED;
-          case Deployment.Rol.Instance.State.ON_PROGRESS: onProgress = true; break;
-          default:
-        }
-      }
-      if (onProgress === true) return Deployment.Rol.Instance.State.ON_PROGRESS;
-      return Deployment.Rol.Instance.State.CONNECTED;
+    return function (deploymentId: string, rolId: string): Deployment.Rol.State {
+      return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].state;
     };
   },
+
   getDeploymentRolRuntime: function (state): Function {
     return function (deploymentId: string, rolId: string): string {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
@@ -271,6 +254,7 @@ export default {
       return (<Component>state.componentList[componentId]).runtime;
     };
   },
+
   getDeploymentRolChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string): Object {
       let res: Deployment.Metrics;
@@ -290,21 +274,25 @@ export default {
       return res.getFormattedMetrics();
     };
   },
+
   getDeploymentRolMemNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].memory;
     };
   },
+
   getDeploymentRolCPUNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].cpu;
     };
   },
+
   getDeploymentRolNetNumber: function (state): Function {
     return function (deploymentId: string, rolId: string): number {
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].bandwidth;
     };
   },
+
   getDeploymentRolVolumeList: function (state) {
     return (deploymentId, rolId) => {
       let res = [];
@@ -326,6 +314,7 @@ export default {
       return res;
     };
   },
+
   getDeploymentRolInstances: function (state) {
     return function (deploymentId: string, rolId: string): Array<string> {
       let res: Array<string> = [];
@@ -334,6 +323,7 @@ export default {
       return res;
     };
   },
+
   getDeploymentRolReqConnectedTo: function (state): Function {
     return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
@@ -347,6 +337,7 @@ export default {
       return res;
     };
   },
+
   getDeploymentRolProConnectedTo: function (state): Function {
     return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
@@ -369,29 +360,32 @@ export default {
         return state.temporaryState[deploymentId];
     };
   },
+
   /* INSTANCES */
   getDeploymentRolInstanceState: function (state) {
     return function (deploymentId: string, rolId: string, instanceId: string): number {
-      if (!(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state)
-        return Deployment.Rol.Instance.State.ON_PROGRESS;
       return (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].state;
     };
   },
+
   getDeploymentRolInstanceMem: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, instanceId: string): number {
       return getters.getDeploymentRolMemNumber(deploymentId, rolId);
     };
   },
+
   getDeploymentRolInstanceCPU: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
       return getters.getDeploymentRolCPUNumber(deploymentId, rolId);
     };
   },
+
   getDeploymentRolInstanceNet: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
       return getters.getDeploymentRolNetNumber(deploymentId, rolId);
     };
   },
+
   getDeploymentRolInstanceChartData: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, instanceId: string) {
       let res: Deployment.Metrics;
@@ -416,27 +410,7 @@ export default {
   componentList: function (state) {
     return state.componentList;
   },
-  getComponentName: function (state) {
-    return (componentId): string => {
-      if ((<Component>state.componentList[componentId]))
-        return (<Component>state.componentList[componentId]).name;
-      return '';
-    };
-  },
-  getComponentVersion: function (state) {
-    return (componentId): string => {
-      if ((<Component>state.componentList[componentId]))
-        return (<Component>state.componentList[componentId]).version;
-      return '';
-    };
-  },
-  getComponentOwner: function (state) {
-    return (componentId): string => {
-      if ((<Component>state.componentList[componentId]))
-        return (<Component>state.componentList[componentId]).owner;
-      return '';
-    };
-  },
+
   getComponentProChannels: function (state) {
     return (componentId) => {
       if ((<Component>state.componentList[componentId]))
@@ -444,6 +418,7 @@ export default {
       return '';
     };
   },
+
   getComponentReqChannels: function (state) {
     return (componentId) => {
       if ((<Component>state.componentList[componentId]))
@@ -451,6 +426,7 @@ export default {
       return '';
     };
   },
+
   getComponentResourcesConfig: function (state) {
     return (componentId) => {
       if ((<Component>state.componentList[componentId]))
@@ -458,6 +434,7 @@ export default {
       return '';
     };
   },
+
   getComponentRuntime: function (state) {
     return (componentId) => {
       if ((<Component>state.componentList[componentId]))
@@ -465,23 +442,21 @@ export default {
       return '';
     };
   },
+
   getComponentOwnerList: function (state, getters) {
     return (showPublicElements: boolean, filter): Array<string> => {
       let res: Array<string> = [];
-      let owner: string;
+      let owner: string = null;
       for (let componentIndex in state.componentList) {
-        if (state.componentList[componentIndex] !== undefined) {
-          owner = (<Component>state.componentList[componentIndex]).owner;
-          if (
-            (showPublicElements || getters.getUser === owner) // Cumple las condiciones
-            && ((filter && filter !== null && filter.length > 0 && componentIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
-            && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
-          ) {
-            res.push(owner);
-          }
+        owner = getElementOwner(componentIndex);
+        if (
+          (showPublicElements || getters.getUser === owner) // Cumple las condiciones
+          && ((filter && filter !== null && filter.length > 0 && componentIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
+        ) {
+          res.push(owner);
         }
       }
-
       return res;
     };
   },
@@ -489,11 +464,12 @@ export default {
   getOwnerComponentList: function (state, getters) {
     return (owner, filter) => {
       // Buscamos todos los componentes del owner
-      let res: Array<string> = []; let compName;
+      let res: Array<string> = [];
+      let compName;
       for (let componentId in state.componentList) {
-        if ((<Component>state.componentList[componentId]).owner === owner) {
+        if (getElementOwner(componentId) === owner) {
           // Si el componente ya esta no lo añadimos
-          compName = (<Component>state.componentList[componentId]).name;
+          compName = getElementName(componentId);
           if (res.findIndex(comp => { return comp === compName; }) === -1) {
             if (filter !== null && filter.length > 0) {
               if (componentId.indexOf(filter) !== -1) {
@@ -512,15 +488,15 @@ export default {
       let res: Array<string> = [];
       for (let componentId in state.componentList) {
         if (
-          (<Component>state.componentList[componentId]).owner === owner
-          && (<Component>state.componentList[componentId]).name === component
+          getElementOwner(componentId) === owner
+          && getElementName(componentId) === component
         ) {
           if (filtro !== null && filtro.length > 0) {
             if (componentId.indexOf(filtro) !== -1) {
-              res.push((<Component>state.componentList[componentId]).version);
+              res.push(getElementVersion(componentId));
             }
           } else {
-            res.push((<Component>state.componentList[componentId]).version);
+            res.push(getElementVersion(componentId));
           }
         }
       }
@@ -565,7 +541,7 @@ export default {
       let res: Array<string> = [];
       let owner: string;
       for (let serviceIndex in state.serviceList) {
-        owner = (<Service>state.serviceList[serviceIndex]).owner;
+        owner = getElementOwner(serviceIndex);
         if ((showPublicElements || getters.getUser === owner) // Cumple las condiciones
           && ((filter && filter !== null && filter.length > 0 && serviceIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && (res.findIndex(elem => { return elem === owner; }) === -1) // Todavía no lo tenemos
@@ -576,20 +552,22 @@ export default {
       return res;
     };
   },
+
   getServiceInfo: function (state) {
     return (serviceId) => {
       return state.serviceList[serviceId];
     };
   },
+
   getOwnerServiceList: function (state, getters) {
     return (owner, filter) => {
       // Buscamos todos los servicios del owner
       let res: Array<string> = [];
       let serviceName;
       for (let serviceId in state.serviceList) {
-        serviceName = (<Service>state.serviceList[serviceId]).name;
+        serviceName = getElementName(serviceId);
 
-        if ((<Service>state.serviceList[serviceId]).owner === owner
+        if (getElementOwner(serviceId) === owner
           && ((filter && filter !== null && filter.length > 0 && serviceId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && res.findIndex(serv => { return serv === serviceName; }) === -1) {
           res.push(serviceName);
@@ -604,14 +582,14 @@ export default {
       let res: Array<string> = [];
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
       for (let serviceId in state.serviceList) {
-        if ((<Service>state.serviceList[serviceId]).owner === owner
-          && (<Service>state.serviceList[serviceId]).name === service) {
+        if (getElementOwner(serviceId) === owner
+          && getElementName(serviceId) === service) {
           if (filtro !== null && filtro.length > 0) {
             if (serviceId.indexOf(filtro) !== -1) {
-              res.push((<Service>state.serviceList[serviceId]).version);
+              res.push(getElementVersion(serviceId));
             }
           } else {
-            res.push((<Service>state.serviceList[serviceId]).version);
+            res.push(getElementVersion(serviceId));
           }
 
         }
@@ -620,21 +598,7 @@ export default {
     };
   },
 
-  getRuntimeName: function (state) {
-    return (runtimeId) => {
-      if ((<Runtime>state.runtimeList[runtimeId]))
-        return (<Runtime>state.runtimeList[runtimeId]).name;
-      return '';
-    };
-  },
 
-  getRuntimeVersion: function (state) {
-    return (runtimeId) => {
-      if ((<Runtime>state.runtimeList[runtimeId]))
-        return (<Runtime>state.runtimeList[runtimeId]).version;
-      return '';
-    };
-  },
   getRuntimeOwner: function (state) {
     return (runtimeId) => {
       if ((<Runtime>state.runtimeList[runtimeId]))
@@ -648,16 +612,15 @@ export default {
       // Buscamos en la lista de servicios, todos aquellos que encajen con el owner y el servicio
       for (let runtimeId in state.runtimeList) {
         if (
-          state.runtimeList[runtimeId] !== undefined
-          && state.runtimeList[runtimeId] !== null
-          && (<Runtime>state.runtimeList[runtimeId]).owner === owner
-          && (<Runtime>state.runtimeList[runtimeId]).name === runtime
+          state.runtimeList[runtimeId] !== null
+          && getElementOwner(runtimeId) === owner
+          && getElementName(runtimeId) === runtime
         ) {
           if (filtro !== null && filtro.length > 0) {
             if (runtimeId.indexOf(filtro) !== -1)
-              res.push((<Runtime>state.runtimeList[runtimeId]).version);
+              res.push(getElementVersion(runtimeId));
           } else {
-            res.push((<Runtime>state.runtimeList[runtimeId]).version);
+            res.push(getElementVersion(runtimeId));
           }
         }
       }
@@ -666,27 +629,6 @@ export default {
     };
   },
 
-  getServiceName: function (state) {
-    return (serviceId) => {
-      if ((<Service>state.serviceList[serviceId]))
-        return (<Service>state.serviceList[serviceId]).name;
-      return '';
-    };
-  },
-  getServiceVersion: function (state, getters) {
-    return (serviceId) => {
-      if ((<Service>state.serviceList[serviceId]))
-        return (<Service>state.serviceList[serviceId]).version;
-      return '';
-    };
-  },
-  getServiceOwner: function (state, getters) {
-    return (serviceId) => {
-      if ((<Service>state.serviceList[serviceId]))
-        return (<Service>state.serviceList[serviceId]).owner;
-      return '';
-    };
-  },
   getServiceParameters: function (state, getters) {
     return (serviceId) => {
       if ((<Service>state.serviceList[serviceId]))
@@ -694,16 +636,21 @@ export default {
       return '';
     };
   },
+
+  /*
   getServiceNameList: function (state, getters): Array<string> {
+    console.warn('Se llama a service name list');
     let res = [];
     for (let serviceId in state.serviceList)
       res.push((<Service>state.serviceList[serviceId]).name);
     return res;
   },
+  */
 
   /**
    * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
    */
+  /*
   getNoEPServiceList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
@@ -712,6 +659,7 @@ export default {
     }
     return res;
   },
+  */
 
   /**
    * Devolvemos una lista de runtimes disponibles para el usuario
@@ -722,15 +670,13 @@ export default {
       let res: Array<string> = [];
       let owner: string = null;
       for (let runtimeIndex in state.runtimeList) {
-        if (state.runtimeList[runtimeIndex] !== undefined) {
-          owner = (<Runtime>state.runtimeList[runtimeIndex]).owner;
-          if (
-            (showPublicElements || getters.getUser === owner)
-            && ((filter && filter !== null && filter.length > 0 && runtimeIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
-            && (res.findIndex(menuItem => { return menuItem === owner; }) === -1)
-          ) {
-            res.push(owner);
-          }
+        owner = getElementOwner(runtimeIndex);
+        if (
+          (showPublicElements || getters.getUser === owner)
+          && ((filter && filter !== null && filter.length > 0 && runtimeIndex.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
+          && (res.findIndex(menuItem => { return menuItem === owner; }) === -1)
+        ) {
+          res.push(owner);
         }
       }
       return res;
@@ -742,8 +688,8 @@ export default {
       let res: Array<string> = [];
       let runtimeName;
       for (let runtimeId in state.runtimeList) {
-        runtimeName = (<Runtime>state.runtimeList[runtimeId]).name;
-        if (((<Runtime>state.runtimeList[runtimeId]).owner === owner)
+        runtimeName = getElementName(runtimeId);
+        if ((getElementOwner(runtimeId) === owner)
           && ((filter && filter !== null && filter.length > 0 && runtimeId.indexOf(filter) !== -1) || (filter === undefined || filter === null || filter.length <= 0)) // Pasa el filtro
           && (res.findIndex(serv => { return serv === runtimeName; }) === -1)) {
           res.push(runtimeName);
@@ -756,9 +702,9 @@ export default {
   getRuntimeId: function (state, getters) {
     return (owner, runtime, version) => {
       for (let runtimeId in state.runtimeList) {
-        if ((<Runtime>state.runtimeList[runtimeId]).owner === owner
-          && (<Runtime>state.runtimeList[runtimeId]).name === runtime
-          && (<Runtime>state.runtimeList[runtimeId]).version === version)
+        if (getElementOwner(runtimeId) === owner
+          && getElementName(runtimeId) === runtime
+          && getElementVersion(runtimeId) === version)
           return runtimeId;
       }
     };
@@ -769,7 +715,7 @@ export default {
       // Recorremos la lista de componentes.
       // Si encontramos el runtime en alguno de los componentes devolvemos true
       for (let componentId in state.componentList) {
-        if ((<Component>state.componentList[componentId]).runtime === runtimeId)
+        if (state.componentList[componentId] && (<Component>state.componentList[componentId]).runtime === runtimeId)
           return true;
       }
       return false;
@@ -782,8 +728,8 @@ export default {
       for (let componentId in state.componentList) {
         if ((<Component>state.componentList[componentId]).runtime === runtimeId)
           res.push(
-            (<Component>state.componentList[componentId]).name
-            + (<Component>state.componentList[componentId]).version
+            getElementName(componentId)
+            + getElementVersion(componentId)
           );
       }
       return res;
@@ -793,7 +739,7 @@ export default {
   getWebDomainList: function (state): Array<string> {
     let res: Array<string> = [];
     for (let resourceId in state.resourceList) {
-      if ((state.resourceList[resourceId]).domain !== undefined)
+      if (state.resourceList[resourceId] !== undefined && (state.resourceList[resourceId]).domain !== undefined)
         res.push((<Webdomain>state.resourceList[resourceId]).domain);
     }
     return res;
@@ -874,9 +820,9 @@ export default {
   getComponentId: function (state, getters) {
     return (owner, component, version) => {
       for (let componentId in state.componentList) {
-        if ((<Component>state.componentList[componentId]).owner === owner
-          && (<Component>state.componentList[componentId]).name === component
-          && (<Component>state.componentList[componentId]).version === version)
+        if (getElementOwner(componentId) === owner
+          && getElementName(componentId) === component
+          && getElementVersion(componentId) === version)
           return componentId;
       }
     };
@@ -886,9 +832,9 @@ export default {
     return (owner, service, version) => {
       let myServiceId;
       for (let serviceId in state.serviceList) {
-        if ((<Service>state.serviceList[serviceId]).owner === owner
-          && (<Service>state.serviceList[serviceId]).name === service
-          && (<Service>state.serviceList[serviceId]).version === version)
+        if (getElementOwner(serviceId) === owner
+          && getElementName(serviceId) === service
+          && getElementVersion(version) === version)
           return serviceId;
       }
     };

@@ -2,15 +2,15 @@
     <div class="card" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
             <router-link v-bind:to="deploymentPath" class="tile title">
-                {{name | truncateLeft(20)}}
-                <span class="subtitle">{{shotDeploymentId | truncateLeft(7)}}</span>
+                {{ name || 'unavailable' | truncateLeft(20) }}
+                <span class="subtitle">{{ shotDeploymentId || 'unavailable' | truncateLeft(7) }}</span>
             </router-link>
         </div>
         <div class="card-body">
             <i class="state" v-bind:class="stateIcon" aria-hidden="true"></i>
             <div>
                 <u>Service:</u>
-                {{service| truncateLeft(50)}}
+                {{ service || 'unavailable' | truncateLeft(50) }}
             </div>
             <div class="roles">
                 <u>Roles:</u>
@@ -19,10 +19,10 @@
                         <i class="fa-circle fa"></i>
                         <div>
                             <strong>{{rol| truncateLeft(30)}}</strong>
-                            <div class="rol-component">{{rolComponentURN(rol) | truncateLeft(50)}}</div>
+                            <div class="rol-component">{{ rolComponentURN(rol) || 'unavailable' | truncateLeft(50) }}</div>
                         </div>
                         <div class="box is-unselectable">
-                            {{rolNumInstances(rol)}}
+                            {{ rolNumInstances(rol) }}
                         </div>
                     </div>
                 </div>
@@ -35,8 +35,8 @@
                 <u>Websites:</u>
                 <div v-if="website !== null && website.length>0">
                     <div v-for="(web, index) in website" v-bind:key="index">
-                        <a v-bind:href="'http://'+web">
-                            {{web | truncateLeft(50)}}
+                        <a v-bind:href="'http://' + web">
+                            {{ web | truncateLeft(50) }}
                         </a>
                     </div>
                 </div>
@@ -110,30 +110,35 @@ export default class Card extends Vue {
         return this.deploymentId.substring(this.deploymentId.indexOf('/deployments/') + 13, this.deploymentId.length);
     }
     get state(): string {
+        let res: string;
         switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case Deployment.Rol.Instance.State.CONNECTED:
-                return 'CONNECTED';
-            case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'DISCONNECTED';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'ON_PROGRESS';
+            case Deployment.State.OK:
+                res = 'OK';
+                break;
+            case Deployment.State.WARNING:
+                res = 'WARNING';
+                break;
+            case Deployment.State.DANGER:
+                res = 'DANGER';
+                break;
             default:
-                console.error('DeploymentCard received a non-covered instance state');
-                return '';
+                res = 'UNKOWN';
         }
+        return res;
     }
     get stateIcon(): string {
+        let res: string = 'fa '
         switch (this.state) {
-            case 'CONNECTED':
-                return 'fa fa-check-circle';
-            case 'ON_PROGRESS':
-                return 'fa fa-exclamation-triangle';
-            case 'DISCONNECTED':
-                return 'fa fa-exclamation-circle';
+            case 'OK':
+                res += 'fa-check-circle';
+            case 'WARNING':
+                res += 'fa-exclamation-triangle';
+            case 'DANGER':
+                res += 'fa-exclamation-circle';
             default:
-                console.error('DeploymentCard received a non-covered instance state');
-                return '';
+                res += 'fa-question-circle';
         }
+        return res;
     }
 
     get name(): string {
@@ -177,53 +182,10 @@ export default class Card extends Vue {
 $color_green:#93c47d;
 $color_yellow:#f5d164;
 $color_red:#ff6666;
-$icon_size: 90px;
+$color_grey: lightgrey;
+
+$icon_size: 50px;
 $radius: 5px;
-#deployment-card {
-    min-width: 35em;
-}
-
-.title {
-    color: black;
-}
-
-.rol-component {
-    min-width: 25em;
-    max-width: 25em;
-}
-
-.state {
-    position: absolute;
-    right: 10px;
-    top: 62px;
-}
-
-.fa-check-circle {
-    color: $color_green;
-    font-size: $icon_size;
-    z-index: 0;
-}
-
-.fa-circle {
-    padding: 10px;
-}
-
-.fa-exclamation-triangle {
-    color: $color_yellow;
-    font-size: $icon_size;
-}
-
-.fa-exclamation-circle {
-    color: $color_red;
-    font-size: $icon_size;
-}
-
-.fa-caret-square-o-down {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    font-size: 60px;
-}
 
 .card {
     min-width: 30em;
@@ -237,6 +199,10 @@ $radius: 5px;
     border-radius: $radius;
 }
 
+.title {
+    color: black;
+}
+
 .card-header span {
     color: grey;
     position: absolute;
@@ -247,7 +213,7 @@ $radius: 5px;
 .box {
     margin: 10px;
     background: whitesmoke;
-    z-index: 1;
+    z-index: 0;
 }
 
 .card-body {
@@ -256,5 +222,61 @@ $radius: 5px;
 
 a {
     padding-left: 10px;
+}
+
+#deployment-card {
+    min-width: 35em;
+}
+
+.OK {
+    background-color: $color_green;
+}
+
+.WARNING {
+    background-color: $color_yellow;
+}
+
+.DANGER {
+    background-color: $color_red;
+}
+
+.UNKOWN {
+    background-color: $color_grey;
+}
+
+.state {
+    position: absolute;
+    right: 10px;
+    top: 62px;
+    font-size: $icon_size;
+}
+
+.fa-check-circle {
+    color: $color_green;
+}
+
+.fa-exclamation-triangle {
+    color: $color_yellow;
+}
+
+.fa-exclamation-circle {
+    color: $color_red;
+}
+
+.fa-question-circle {
+    color: $color_grey;
+}
+
+.fa-hdd-o {
+    font-size: 10px;
+}
+
+.fa-circle {
+    padding: 10px;
+}
+
+.rol-component {
+    min-width: 25em;
+    max-width: 25em;
 }
 </style>

@@ -12,6 +12,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import InfoModal from './InfoModal.vue';
+import { getElementName, getElementOwner, getElementVersion } from '../../../../store/proxy/utils';
 
 
 @Component({
@@ -33,13 +34,13 @@ export default class RuntimeInfoModal extends Vue {
     }
 
     get runtimeName() {
-        return this.$store.getters.getRuntimeName(this.runtimeId);
+        return getElementName(this.runtimeId) || '';
     }
     get runtimeVersion() {
-        return this.$store.getters.getRuntimeVersion(this.runtimeId);
+        return getElementVersion(this.runtimeId) || '';
     }
     get runtimeOwner() {
-        return this.$store.getters.getRuntimeOwner(this.runtimeId);
+        return getElementOwner(this.runtimeId) || '';
     }
 }
 </script>

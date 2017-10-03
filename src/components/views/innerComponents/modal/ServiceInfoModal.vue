@@ -17,6 +17,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import InfoModal from './InfoModal.vue';
+import { getElementName, getElementOwner, getElementVersion } from '../../../../store/proxy/utils';
 
 @Component({
     name: 'service-info-modal',
@@ -37,14 +38,14 @@ export default class ServiceInfoModal extends Vue {
     }
 
     get serviceName() {
-        return this.$store.getters.getServiceName(this.serviceId);
+        return getElementName(this.serviceId) || '';
     }
 
     get serviceVersion() {
-        return this.$store.getters.getServiceVersion(this.serviceId);
+        return getElementVersion(this.serviceId) || '';
     }
     get serviceOwner() {
-        return this.$store.getters.getServiceOwner(this.serviceId);
+        return getElementOwner(this.serviceId) || '';
     }
     get serviceParameters() {
         return this.$store.getters.getServiceParameters(this.serviceId);

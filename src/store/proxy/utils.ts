@@ -306,7 +306,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
 
 export enum ElementType { deployment, service, runtime, component, resource }
 
-export function getElementTipe(uri: string): ElementType {
+export function getElementType(uri: string): ElementType {
     let res: ElementType;
 
     let splitted = uri.split('/');
@@ -335,6 +335,29 @@ export function getElementTipe(uri: string): ElementType {
             console.info('Element type not covered', uri);
     }
     return res;
+}
+
+export function getElementOwner(uri: string): string {
+    return uri.split('/')[2];
+}
+
+export function getElementName(uri: string): string {
+    let splitted: Array<string> = uri.split('/');
+    let name = splitted[4];
+    for (let i = 5; i < splitted.length - 1; i++) {
+        name += '.' + splitted[i];
+    }
+    return name;
+}
+
+export function getElementVersion(uri: string): string {
+    let splitted: Array<string> = uri.split('/');
+    return splitted[splitted.length - 1];
+}
+
+export function isServiceEntrypoint(uri: string): boolean {
+    const entrypoints = ['eslap://eslap.cloud/services/http/inbound/1_0_0'];
+    return entrypoints.indexOf(uri) === -1;
 }
 
 export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolean, name: string, certificate: string, domain: string, acceptTls: boolean, requireClientCertificates: boolean, instances: number, resilience: number) {
@@ -407,6 +430,6 @@ export function transformWebdomainToManifest(webdomain: string) {
         }
     };
 }
-export function transformDataVolumeinToManifest(params) {
+export function transformDataVolumeToManifest(params) {
     console.error('DataVolume creation is under development');
 }

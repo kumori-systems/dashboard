@@ -57,7 +57,6 @@ export default new Vuex.Store({
             }
         ],
         'deploymentList': {},
-        'linkList': [],
         'serviceList': {},
         'componentList': {},
         'runtimeList': {},

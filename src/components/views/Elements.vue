@@ -16,7 +16,7 @@
         <p>
             <checkbox-input id="showpublicelements" v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
         </p>
-    
+
         <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
             <collapse-item title="Components" v-if="componentOwnerList.length>0">
                 <div v-for="(owner, index) in componentOwnerList" v-bind:key="index" v-if="ownerComponentList(owner).length>0 && (showPublicElements || owner === user)">
@@ -40,7 +40,7 @@
                                                     <div v-for="(usedBy, index) in getComponentUsedBy(owner, component, version)" v-bind:key="index">{{usedBy}} </div>
                                                 </th>
                                                 <th v-else>
-                                                    not in use
+                                                    (In use?)unavailable
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showComponentInfo(owner, component, version)">
@@ -81,13 +81,13 @@
                                                     <div v-for="(usedBy, index) in getServiceUsedBy(owner, service, version)" v-bind:key="index">{{usedBy}}</div>
                                                 </th>
                                                 <th v-else>
-                                                    not in use
+                                                    (In use?)unavailable
                                                 </th>
                                                 <th>
                                                     <button class="button is-info" v-on:click="showServiceInfo(owner, service, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-    
+
                                                     <router-link v-if="selectedServiceIsInbound(getServiceId(owner, service, version))" v-bind:to="'newHTTPEntrypoint'">
                                                         <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
@@ -98,7 +98,7 @@
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
-    
+
                                                     <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
@@ -133,7 +133,7 @@
                                                 <div v-for="(usedBy, index) in getRuntimeUsedBy(owner, runtime, version)" v-bind:key="index">{{usedBy}} </div>
                                             </th>
                                             <th v-else>
-                                                not in use
+                                                (In use?)unavailable
                                             </th>
                                             <th>
                                                 <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
@@ -156,7 +156,7 @@
             no elements found
         </div>
         <delete-modal v-bind:visible="deleteIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteIsVisible=false"></delete-modal>
-        <component-info-modal v-bind:visible="componentInfoIsVisible" v-bind:componentId="modalElementId" v-on:close="componentInfoIsVisible=false"></component-info-modal>
+        <component-info-modal v-bind:visible="componentInfoIsVisible" v-bind:elementName="modalElementName" v-bind:componentId="modalElementId" v-on:close="componentInfoIsVisible=false"></component-info-modal>
         <service-info-modal v-bind:visible="serviceInfoIsVisible" v-bind:serviceId="modalElementId" v-on:close="serviceInfoIsVisible=false"></service-info-modal>
         <runtime-info-modal v-bind:visible="runtimeInfoIsVisible" v-bind:runtimeId="modalElementId" v-on:close="runtimeInfoIsVisible=false"></runtime-info-modal>
         <delete-group-modal v-bind:visible="deleteGroupIsVisible" v-bind:elementList="modalElementList" v-on:close="deleteGroupIsVisible=false"></delete-group-modal>
@@ -205,6 +205,7 @@ export default class Elements extends Vue {
     modalElementId: string = '';
     modalElementName: string = '';
     modalElementVersion: string = '';
+
     // id, tipo, elemento, version
     modalElementList: Array<[string, string, string, string]> = [];
 
@@ -213,133 +214,149 @@ export default class Elements extends Vue {
         fabElementsList.push(new FabElement('Upload bundle', 'newBundle'));
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
+    /** GENERAL */
     get user() {
         return this.$store.getters.getUser;
     }
+
     get someoneSelected() {
         if (this.selectedComponents.length > 0 || this.selectedServices.length > 0 || this.selectedRuntimes.length > 0)
             return true;
         return false;
     }
+
+    /** COMPONENTS */
     get getComponentId() {
         return (owner, component, version) => {
             return this.$store.getters.getComponentId(owner, component, version);
         }
     }
+
     get componentOwnerList() {
         return this.$store.getters.getComponentOwnerList(this.showPublicElements, this.search);
     }
+
     get ownerComponentList() {
         return (owner) => {
             return this.$store.getters.getOwnerComponentList(owner, this.search);
         }
     }
+
     get componentVersionList() {
         return (owner, component) => {
             return this.$store.getters.getComponentVersionList(owner, component, this.search);
         }
     }
-    get serviceOwnerList() {
-        return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
-    }
-    get ownerServiceList() {
-        return (owner) => {
-            return this.$store.getters.getOwnerServiceList(owner, this.search);
-        }
-    }
-    get selectedServiceIsInbound() {
-        return (serviceId) => {
-            return this.$store.getters.getServiceIsEntryPoint(serviceId);
-        }
-    }
-    get serviceVersionList() {
-        return (owner, service) => {
-            return this.$store.getters.getServiceVersionList(owner, service, this.search);
-        }
-    }
+
     get getIsComponentInUse() {
         return (owner, component, version) => {
             return this.$store.getters.getIsComponentInUse(this.getComponentId(owner, component, version));
         }
     }
+
     get getComponentUsedBy() {
         return (owner, component, version) => {
             return this.$store.getters.getComponentUsedBy(this.getComponentId(owner, component, version));
         }
     }
-    get getComponentOwner() {
-        return (componentId) => {
-            return this.$store.getters.getComponentOwner(componentId);
-        }
-    }
-    get getServiceName() {
-        return (serviceId) => {
-            return this.$store.getters.getServiceName(serviceId);
-        };
-    }
-    get getServiceVersion() {
-        return (serviceId) => {
-            return this.$store.getters.getServiceVersion(serviceId);
-        };
-    }
+
+
+    /** SERVICES */
+
     get getServiceId() {
         return (owner, service, version) => {
             return this.$store.getters.getServiceId(owner, service, version);
         }
     }
+
+    get serviceOwnerList() {
+        return this.$store.getters.getServiceOwnerList(this.showPublicElements, this.search);
+    }
+
+    get ownerServiceList() {
+        return (owner) => {
+            return this.$store.getters.getOwnerServiceList(owner, this.search);
+        }
+    }
+
+    get selectedServiceIsInbound() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceIsEntryPoint(serviceId);
+        }
+    }
+
+    get serviceVersionList() {
+        return (owner, service) => {
+            return this.$store.getters.getServiceVersionList(owner, service, this.search);
+        }
+    }
+
+    get getServiceName() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceName(serviceId);
+        };
+    }
+
+    get getServiceVersion() {
+        return (serviceId) => {
+            return this.$store.getters.getServiceVersion(serviceId);
+        };
+    }
+
     get getIsServiceInUse() {
         return (owner, service, version) => {
             return this.$store.getters.getIsServiceInUse(this.getServiceId(owner, service, version));
         };
     }
+
     get getServiceUsedBy() {
         return (owner, service, version) => {
             return this.$store.getters.getServiceUsedBy(this.getServiceId(owner, service, version));
         };
     }
-    get getServiceOwner() {
-        return (serviceId) => {
-            return this.$store.getters.getServiceOwner(serviceId);
-        };
-    }
+
+    /** RUNTIMES */
     get runtimeOwnerList() {
         return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
     }
+
     get ownerRuntimeList() {
         return (owner) => {
             return this.$store.getters.getOwnerRuntimeList(owner, this.search);
         }
     }
+
     get getRuntimeVersion() {
         return (runtimeId) => {
             return this.$store.getters.getRuntimeVersion(runtimeId);
         }
     }
+
     get getRuntimeId() {
         return (owner, runtime, version) => {
             return this.$store.getters.getRuntimeId(owner, runtime, version);
         }
     }
+
     get getIsRuntimeInUse() {
         return (owner, runtime, version) => {
             return this.$store.getters.getIsRuntimeInUse(this.getRuntimeId(owner, runtime, version));
         }
     }
+
     get getRuntimeUsedBy() {
         return (owner, runtime, version) => {
             return this.$store.getters.getRuntimeUsedBy(this.getRuntimeId(owner, runtime, version));
         }
     }
-    get getRuntimeOwner() {
-        return (runtimeId) => {
-            return this.$store.getters.getRuntimeOwner(runtimeId);
-        };
-    }
+
     get runtimeVersionList() {
         return (owner, runtime) => {
             return this.$store.getters.getRuntimeVersionList(owner, runtime, this.search);
         }
     }
+
+    /** GENERAL METHODS */
     deleteElement(elementType, elementId, elementName, elementVersion) {
         this.deleteIsVisible = true;
         this.modalElementType = elementType;
@@ -347,38 +364,49 @@ export default class Elements extends Vue {
         this.modalElementName = elementName;
         this.modalElementVersion = elementVersion;
     }
+
     deleteRuntime(owner, runtime, version) {
         this.deleteElement('runtime', this.getRuntimeId(owner, runtime, version), runtime, version);
     }
+
     deleteService(owner, service, version) {
         this.deleteElement('service', this.getServiceId(owner, service, version), service, version);
     }
+
     deleteComponent(owner, component, version) {
         this.deleteElement('component', this.getComponentId(owner, component, version), component, version);
     }
+
     showElementInfo(elementId, elementName, version) {
+        console.log('Vamos a asignar:', elementId, elementName, version);
         this.modalElementId = elementId;
         this.modalElementName = elementName;
         this.modalElementVersion = version;
     }
+
     showRuntimeInfo(owner, runtime, version) {
         this.runtimeInfoIsVisible = true;
         this.showElementInfo(this.getRuntimeId(owner, runtime, version), runtime, version);
     }
+
     showServiceInfo(owner, service, version) {
         this.serviceInfoIsVisible = true;
         this.showElementInfo(this.getServiceId(owner, service, version), service, version);
     }
+
     showComponentInfo(owner, component, version) {
         this.componentInfoIsVisible = true;
         this.showElementInfo(this.getComponentId(owner, component, version), component, version);
     }
+
     selectedService(serviceId) {
         this.$store.dispatch('selectedService', serviceId);
     }
+
     downloadManifest() {
         this.$store.dispatch('downloadManifest', this.selectedComponents.concat(this.selectedServices).concat(this.selectedRuntimes));
     }
+
     deleteSelected() {
         this.modalElementList = [];
         // id, tipo, elemento, version
@@ -386,16 +414,16 @@ export default class Elements extends Vue {
             this.modalElementList.push([
                 this.selectedComponents[index],
                 'component',
-                this.$store.getters.getComponentName(this.selectedComponents[index]),
-                this.$store.getters.getComponentVersion(this.selectedComponents[index])
+                this.$store.getters.getElementName(this.selectedComponents[index]),
+                this.$store.getters.getElementVersion(this.selectedComponents[index])
             ]);
         }
         for (let index in this.selectedServices) {
             this.modalElementList.push([
                 this.selectedServices[index],
                 'service',
-                this.$store.getters.getServiceName(this.selectedServices[index]),
-                this.$store.getters.getServiceVersion(this.selectedServices[index])
+                this.$store.getters.getElementName(this.selectedServices[index]),
+                this.$store.getters.getElementVersion(this.selectedServices[index])
             ]);
         }
 
@@ -403,8 +431,8 @@ export default class Elements extends Vue {
             this.modalElementList.push([
                 this.selectedRuntimes[index],
                 'runtime',
-                this.$store.getters.getRuntimeName(this.selectedRuntimes[index]),
-                this.$store.getters.getRuntimeVersion(this.selectedRuntimes[index])
+                this.$store.getters.getElementName(this.selectedRuntimes[index]),
+                this.$store.getters.getElementVersion(this.selectedRuntimes[index])
             ]);
         }
 

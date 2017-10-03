@@ -34,20 +34,55 @@ export class Deployment implements StampElement {
 
         this.name = name;
         this.serviceId = serviceId;
+        if (this.serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0') {
+            this.isEntrypoint = true;
+            this.metrics = new Deployment.EntryPointMetrics();
+        } else {
+            this.isEntrypoint = false;
+            this.metrics = new Deployment.CommonMetrics();
+        }
         this.resourcesConfig = resourcesConfig;
         this.parameters = parameters;
         this.roles = roles;
         this.links = links;
-        this.website = website;
 
-        if (this.serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0') {
-            this.isEntrypoint = true;
-            this.metrics = new Deployment.EntryPointMetrics();
+        this.website = website;
+    }
+
+    get state(): Deployment.State {
+        let res: Deployment.State = Deployment.State.UNKOWN;
+        let ok: number = 0;
+        let warning: number = 0;
+        let error: number = 0;
+        let unkwon: number = 0;
+        for (let rol in this.roles) {
+            switch (this.roles[rol].state) {
+                case Deployment.Rol.State.OK:
+                    ok++;
+                    break;
+                case Deployment.Rol.State.DANGER:
+                    error++;
+                    break;
+                case Deployment.Rol.State.WARNING:
+                    warning++;
+                    break;
+                default:
+                    unkwon++;
+            }
         }
-        else {
-            this.isEntrypoint = false;
-            this.metrics = new Deployment.CommonMetrics();
+
+
+        if (error > 0) {
+            res = Deployment.State.DANGER;
         }
+        else if (warning > 0) {
+            res = Deployment.State.WARNING;
+        }
+        else if (ok > 0) {
+            res = Deployment.State.OK;
+        }
+
+        return res;
     }
 
     addMetrics(m) {
@@ -59,6 +94,7 @@ export class Deployment implements StampElement {
 }
 
 export module Deployment {
+    export enum State { OK, DANGER, WARNING, UNKOWN };
 
     export abstract class Metrics {
         time: Array<Date>;
@@ -307,6 +343,37 @@ export module Deployment {
             }
         };
 
+        get state(): Rol.State {
+            let res: Rol.State = Rol.State.UNKOWN;
+            let connected: number = 0;
+            let disconnected: number = 0;
+            let unkwon: number = 0;
+            for (let instance in this.instanceList) {
+                switch (this.instanceList[instance].state) {
+                    case Rol.Instance.State.CONNECTED:
+                        connected++;
+                        break;
+                    case Rol.Instance.State.DISCONNECTED:
+                        disconnected++;
+                        break;
+                    default:
+                        unkwon++;
+                }
+            }
+
+            if (connected > 0 && disconnected === 0) {
+                res = Rol.State.OK;
+            }
+            else if (connected > 0 && disconnected > 0) {
+                res = Rol.State.WARNING;
+            }
+            else if (connected === 0 && disconnected > 0) {
+                res = Rol.State.DANGER;
+            }
+
+            return res;
+        }
+
         addMetrics(isEntrypoint, m) {
             if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
             if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
@@ -315,6 +382,7 @@ export module Deployment {
         }
     }
     export module Rol {
+        export enum State { OK, DANGER, WARNING, UNKOWN };
 
         export class Instance {
 
@@ -334,17 +402,13 @@ export module Deployment {
                 this.arrangement = arrangement;
                 this.volumes = volumes;
                 this.ports = ports;
+                this.state = Instance.State.UNKOWN;
             }
             setState(connected: boolean) {
-                switch (connected) {
-                    case true:
-                        this.state = Instance.State.CONNECTED;
-                        break;
-                    case false:
-                        this.state = Instance.State.DISCONNECTED;
-                        break;
-                    default:
-                        this.state = Instance.State.ON_PROGRESS;
+                if (connected) {
+                    this.state = Instance.State.CONNECTED;
+                } else {
+                    this.state = Instance.State.DISCONNECTED;
                 }
             }
 
@@ -357,7 +421,7 @@ export module Deployment {
 
         }
         export module Instance {
-            export enum State { CONNECTED, DISCONNECTED, ON_PROGRESS };
+            export enum State { CONNECTED, DISCONNECTED, UNKOWN };
 
             export class Arrangement {
                 minInstances: number;

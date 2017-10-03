@@ -94,7 +94,7 @@ export default class Card extends Vue {
 
 
     mounted() {
-        this.$watch('clear', function (value) {
+        this.$watch('clear', function(value) {
             if (value === true) {
                 // Limpiamos el estado temporal
                 this.localNumInstances = -1;
@@ -104,17 +104,18 @@ export default class Card extends Vue {
     }
 
     get state(): string {
+        let res: string = 'fa ';
         switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
-            case Deployment.Rol.Instance.State.CONNECTED:
-                return 'fa fa-check-circle';
-            case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'fa fa-exclamation-circle';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'fa fa-exclamation-triangle';
+            case Deployment.State.OK:
+                res += 'fa-check-circle';
+            case Deployment.State.DANGER:
+                res += 'fa-exclamation-circle';
+            case Deployment.State.WARNING:
+                res += 'fa-exclamation-triangle';
             default:
-                console.error('RolCard received a non-covered instance state');
-                return '';
+                res += 'fa-spinner';
         }
+        return res;
     }
     get numInstances(): number {
         // Miramos el número de instáncias local. ¿Está inicializado?

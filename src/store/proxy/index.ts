@@ -88,6 +88,7 @@ export class ProxyConnection extends EventEmitter {
             });
         });
     }
+
     getDeploymentList() {
         return this.admission.findDeployments().then((deploymentList) => {
             for (let deploymentId in deploymentList) {
@@ -96,14 +97,41 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-
     getRegisteredElements() {
         return this.admission.findStorage().then((registeredElements) => {
-            let promiseList: Array<Promise<any>> = [];
             for (let i = 0; i < registeredElements.length; i++) {
-                promiseList.push(this.getElementInfo(registeredElements[i]));
+                switch (utils.getElementType(registeredElements[i])) {
+                    case utils.ElementType.runtime:
+                        this.emit(
+                            this.onAddRuntime,
+                            registeredElements[i],
+                            undefined
+                        );
+                        break;
+                    case utils.ElementType.service:
+                        this.emit(
+                            this.onAddService,
+                            registeredElements[i],
+                            undefined
+                        );
+                        break;
+                    case utils.ElementType.component:
+                        this.emit(this.onAddComponent,
+                            registeredElements[i],
+                            undefined
+                        );
+                        break;
+                    case utils.ElementType.resource:
+                        this.emit(
+                            this.onAddResource,
+                            registeredElements[i],
+                            undefined
+                        );
+                        break;
+                    default:
+                        console.error('Case not covered: ', registeredElements[i]);
+                }
             }
-            return Promise.all(promiseList);
         });
     }
 
@@ -115,7 +143,7 @@ export class ProxyConnection extends EventEmitter {
 
     getElementInfo(uri: string) {
         return this.admission.getStorageManifest(uri).then((element) => {
-            switch (utils.getElementTipe(uri)) {
+            switch (utils.getElementType(uri)) {
                 case utils.ElementType.runtime:
                     this.emit(
                         this.onAddRuntime,
