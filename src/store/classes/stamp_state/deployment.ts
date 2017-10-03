@@ -180,9 +180,7 @@ export module Deployment {
                         borderColor: '#1fc8db',
                         fill: false,
                         data: this.http_requests_per_second
-                    }
-                    /*
-                    ,
+                    },
                     {
                         label: 'http_errors_per_second',
                         backgroundColor: '#fce473',
@@ -225,7 +223,6 @@ export module Deployment {
                         fill: false,
                         data: this.ws_size_out_per_second
                     }
-                    */
                 ]
             };
         }
