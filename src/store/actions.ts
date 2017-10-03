@@ -11,17 +11,17 @@ export default {
         commit('setMenu', menu);
     },
     login({ commit, dispatch, getters }, { username, password }) {
-        let myUser;
         connection.login(username, password).then((user) => {
             commit('loginstate', 'authenticated');
-            myUser = user;
+            return  user;
+        }).then((user) => {
             // Obtenemos la lista de deployments
             connection.getDeploymentList();
-        }).then(() => {
             // Obtenemos la lista de elementos registrados en el stamp
             connection.getRegisteredElements();
-        }).then(() => {
-            commit('login', myUser);
+            return user;
+        }).then((user) => {
+            commit('login', user);
         }).catch((error) => {
             console.error('Error authenticating the user', error);
             commit('loginstate', 'error');
