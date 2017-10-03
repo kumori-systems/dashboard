@@ -11,6 +11,7 @@ export default {
         commit('setMenu', menu);
     },
     login({ commit, dispatch, getters }, { username, password }) {
+        
         connection.login(username, password).then((user) => {
             commit('loginstate', 'authenticated');
             return  user;
@@ -78,6 +79,7 @@ export default {
         });
 
     },
+
     /**
      * Si no tenemos información a cerca del elemento en el estado, la pedimos
      * @param context 

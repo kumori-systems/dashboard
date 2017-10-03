@@ -37,15 +37,21 @@ export default class ComponentInfoModal extends Vue {
     }
 
     get componentName() {
-        return getElementName(this.componentId) || '';
+        let res: string = '';
+        if (this.componentId) res = getElementName(this.componentId)
+        return res;
     }
 
     get componentVersion() {
-        return getElementVersion(this.componentId) || '';
+        let res: string = '';
+        if (this.componentId) res = getElementVersion(this.componentId);
+        return res;
     }
 
     get componentOwner() {
-        return getElementOwner(this.componentId) || '';
+        let res: string = '';
+        if (this.componentId) res = getElementOwner(this.componentId);
+        return res;
     }
 
     get componentProChannels() {

@@ -437,9 +437,9 @@ export default {
 
   getComponentRuntime: function (state) {
     return (componentId) => {
-      if ((<Component>state.componentList[componentId]))
+      if (state.componentList[componentId])
         return (<Component>state.componentList[componentId]).runtime;
-      return '';
+      return null;
     };
   },
 
@@ -726,7 +726,7 @@ export default {
     return (runtimeId) => {
       let res = [];
       for (let componentId in state.componentList) {
-        if ((<Component>state.componentList[componentId]).runtime === runtimeId)
+        if (state.componentList[componentId] && (<Component>state.componentList[componentId]).runtime === runtimeId)
           res.push(
             getElementName(componentId)
             + getElementVersion(componentId)

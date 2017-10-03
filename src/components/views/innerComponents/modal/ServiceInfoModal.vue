@@ -44,21 +44,27 @@ export default class ServiceInfoModal extends Vue {
     get serviceVersion() {
         return getElementVersion(this.serviceId) || '';
     }
+
     get serviceOwner() {
         return getElementOwner(this.serviceId) || '';
     }
+
     get serviceParameters() {
         return this.$store.getters.getServiceParameters(this.serviceId);
     }
+
     get serviceProChannels() {
         return this.$store.getters.getServiceProChannels(this.serviceId);
     }
+
     get serviceReqChannels() {
         return this.$store.getters.getServiceReqChannels(this.serviceId);
     }
+
     get serviceResources() {
         return this.$store.getters.getServiceResources(this.serviceId);
     }
+
     get serviceRoles() {
         return this.$store.getters.getServiceRoles(this.serviceId);
     }

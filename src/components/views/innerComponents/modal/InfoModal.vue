@@ -4,7 +4,7 @@
             {{elementName}} {{elementVersion}} info
         </div>
         <div slot="body">
-           <slot name="info-body"></slot>
+            <slot name="info-body"></slot>
         </div>
     </modal>
 </template>
@@ -23,7 +23,17 @@ import Modal from './Modal.vue';
         elementId: { required: true, type: String },
         elementName: { required: true, type: String },
         elementVersion: { required: true, type: String }
+    },
+    watch: {
+        // whenever elementId changes, this function will run
+        elementId: function(newValue) {
+            if (newValue) {
+                this.$store.dispatch('getElementInfo', { 'uri': newValue });
+            }
+
+        }
     }
+
 })
 export default class InfoModal extends Vue {
     visible: boolean = this.visible;
@@ -36,6 +46,7 @@ export default class InfoModal extends Vue {
         this.$store.dispatch('downloadManifest', this.elementId);
         this.close();
     };
+
     primaryButtonClass: string = 'is-info';
 
     close() {

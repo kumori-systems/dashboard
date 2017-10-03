@@ -316,6 +316,12 @@ export default class Elements extends Vue {
     }
 
     /** RUNTIMES */
+    get getRuntimeId() {
+        return (owner, runtime, version) => {
+            return this.$store.getters.getRuntimeId(owner, runtime, version);
+        }
+    }
+
     get runtimeOwnerList() {
         return this.$store.getters.getRuntimeOwnerList(this.showPublicElements, this.search);
     }
@@ -329,12 +335,6 @@ export default class Elements extends Vue {
     get getRuntimeVersion() {
         return (runtimeId) => {
             return this.$store.getters.getRuntimeVersion(runtimeId);
-        }
-    }
-
-    get getRuntimeId() {
-        return (owner, runtime, version) => {
-            return this.$store.getters.getRuntimeId(owner, runtime, version);
         }
     }
 
@@ -378,7 +378,6 @@ export default class Elements extends Vue {
     }
 
     showElementInfo(elementId, elementName, version) {
-        console.log('Vamos a asignar:', elementId, elementName, version);
         this.modalElementId = elementId;
         this.modalElementName = elementName;
         this.modalElementVersion = version;
