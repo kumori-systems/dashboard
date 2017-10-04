@@ -10,7 +10,7 @@
                             <option disabled v-for="domain in usedDomainList" v-bind:key="domain">{{domain}}</option>
                         </select>
                     </span>
-    
+
                 </th>
                 <th>
                     <checkbox-input v-bind:disabled="true" v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
@@ -32,7 +32,7 @@
             </tr>
             <tr>
                 <th>
-                    <checkbox-input  v-bind:disabled="true" v-model="requireClientCertificates"> Require client certificates</checkbox-input>
+                    <checkbox-input v-bind:disabled="true" v-model="requireClientCertificates"> Require client certificates</checkbox-input>
                 </th>
             </tr>
             <tr>
@@ -59,7 +59,7 @@
                     </table>
                 </th>
             </tr>
-    
+
         </table>
     </div>
 </template>
@@ -67,7 +67,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement } from '../../../../store/classes';
+import { FabElement, Deployment } from '../../../../store/classes';
 import CheckboxInput from '../input/CheckboxInput.vue'
 import NumberInput from '../input/NumberInput.vue';
 
@@ -105,15 +105,50 @@ export default class NewHTTPEntrypoint extends Vue {
     }
 
     createNewDeployment() {
-        this.$store.dispatch('createNewHTTPEntrypoint', {
-            'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
-            'domain': this.$store.getters.getWebdomainResource(this.selectedDomain),
-            'certificate': this.selectedCertificate,
-            'accept-tls': this.acceptTLSSSL,
-            'require-client-certificates': this.requireClientCertificates,
-            'instances': this.instances,
-            'resilience': this.resilience
-        });
+        if (this.usePlatformGeneratedDomain)
+            console.warn('use platform generated domain still not available');
+
+
+        let serviceConfig = {
+            'server_cert': this.certificateList.length > 0 ? this.certificateList : null,
+            'vhost': this.selectedDomain
+        }
+        let config = {
+            'TLS': this.acceptTLSSSL,
+            'clientcert': this.requireClientCertificates
+        };
+
+        let instanceList = {};
+            for (let counter = 0; counter < this.instances; counter++) {
+                instanceList[counter] = new Deployment.Rol.Instance(null, null, null, null);
+            }
+
+        let roles = {}
+        roles['sep'] = new Deployment.Rol(
+            null,// configuration
+            1, //cpu
+            1, //memory
+            0, //ioperf
+            false,//iopsensitive
+            1,//bandwidth
+            1,//resilience
+            instanceList
+        );
+
+        console.warn('Es posible que la configuración del servicio(entrypoint) no se esté propagando correctamente');
+        this.$store.dispatch('createNewDeployment',
+            new Deployment(
+                null, //uri
+                'http', //name
+                'eslap://eslap.cloud/services/http/inbound/1_0_0', //serviceId
+                serviceConfig, //resourcesConfig
+                config, //parameters
+                roles, //roles
+                [], //links
+                [] //website
+            )
+        );
+
         this.$router.go(-1);
     }
 }

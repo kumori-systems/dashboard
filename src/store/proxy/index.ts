@@ -1,4 +1,4 @@
-import { RegistrationResult, ScalingDeploymentModification, FileStream, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
+import { RegistrationResult, ScalingDeploymentModification, FileStream, EcloudEventName, AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
 import { AcsClient as EcloudAcsClient } from 'acs-client';
 
 import { EventEmitter, Listener } from 'typed-event-emitter';
@@ -50,6 +50,14 @@ export class ProxyConnection extends EventEmitter {
         this.onRemoveResource = this.registerEvent<(resourceId) => any>();
         this.onAddMetrics = this.registerEvent<(value) => any>();
     }
+
+    /* GENERIC */
+
+    /**
+     * Login authentifies the user and redirects all events received from the stamp.
+     * @param username User's name
+     * @param password User's password
+     */
     login(username: string, password: string) {
         this.acs = new EcloudAcsClient(ACS_URI);
         return this.acs.login(username, password).then(({ accessToken, user }) => {
@@ -63,19 +71,83 @@ export class ProxyConnection extends EventEmitter {
             this.admission.onEcloudEvent((event: EcloudEvent) => {
                 switch (event.type) {
                     case EcloudEventType.service:
-                        console.warn('Event under development: Service event received: ', event.strName, event);
+                        switch (event.name) {
+                            case EcloudEventName.deployed:
+                            case EcloudEventName.deploying:
+                            case EcloudEventName.disconnected:
+                            case EcloudEventName.link:
+                            case EcloudEventName.node:
+                            case EcloudEventName.realocate:
+                            case EcloudEventName.reconfig:
+                            case EcloudEventName.restart:
+                            case EcloudEventName.scale:
+                            case EcloudEventName.service:
+                            case EcloudEventName.status:
+                            case EcloudEventName.undeployed:
+                            case EcloudEventName.undeploying:
+                            case EcloudEventName.unlink:
+                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                break;
+                            default:
+                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
+                        }
                         break;
                     case EcloudEventType.node:
-                        console.warn('Event under development: Node event received: ', event.strName, event);
+                        switch (event.name) {
+                            case EcloudEventName.deployed:
+                            // this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+                            case EcloudEventName.deploying:
+                            case EcloudEventName.disconnected:
+                            case EcloudEventName.link:
+                            case EcloudEventName.node:
+                            case EcloudEventName.realocate:
+                            case EcloudEventName.reconfig:
+                            case EcloudEventName.restart:
+                            case EcloudEventName.scale:
+                            case EcloudEventName.service:
+                            case EcloudEventName.status:
+                            case EcloudEventName.undeployed:
+                            case EcloudEventName.undeploying:
+                            case EcloudEventName.unlink:
+                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                break;
+                            default:
+                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
+                        }
                         break;
                     case EcloudEventType.instance:
-                        console.warn('Event under development: Instance event received: ', event.strName, event);
+                        switch (event.name) {
+                            case EcloudEventName.deployed:
+                            case EcloudEventName.deploying:
+                            case EcloudEventName.disconnected:
+                            case EcloudEventName.link:
+                            case EcloudEventName.node:
+                            case EcloudEventName.realocate:
+                            case EcloudEventName.reconfig:
+                            case EcloudEventName.restart:
+                            case EcloudEventName.scale:
+                            case EcloudEventName.service:
+                            case EcloudEventName.status:
+                            case EcloudEventName.undeployed:
+                            case EcloudEventName.undeploying:
+                            case EcloudEventName.unlink:
+                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                break;
+                            default:
+                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
+                        }
                         break;
                     case EcloudEventType.metrics:
-                        this.emit(this.onAddMetrics, utils.transformEcloudEventDataToMetrics(event));
+                        switch (event.name) {
+                            case EcloudEventName.service:
+                                this.emit(this.onAddMetrics, utils.transformEcloudEventDataToMetrics(event));
+                                break;
+                            default:
+                                console.error('Not espected ecloud event name: %s/%s', event.strType, event.strName, event);
+                        }
                         break;
                     default:
-                        console.error('Not espected ecloud event type: ' + event.strType + '/' + event.strName);
+                        console.error('Not espected ecloud event type: %s', event.strType, event);
                 }
             });
 
@@ -89,14 +161,9 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    getDeploymentList() {
-        return this.admission.findDeployments().then((deploymentList) => {
-            for (let deploymentId in deploymentList) {
-                this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
-            }
-        });
-    }
-
+    /**
+     * Obtains all registered elements in th estamp
+     */
     getRegisteredElements() {
         return this.admission.findStorage().then((registeredElements) => {
             for (let i = 0; i < registeredElements.length; i++) {
@@ -135,12 +202,10 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    undeployDeployment(deploymentURN: string) {
-        return this.admission.undeploy(deploymentURN).then((value) => {
-            this.emit(this.onRemoveDeploymemt, deploymentURN);
-        });
-    }
-
+    /**
+     * Obtains detailed info from a element.
+     * @param uri 
+     */
     getElementInfo(uri: string) {
         return this.admission.getStorageManifest(uri).then((element) => {
             switch (utils.getElementType(uri)) {
@@ -176,80 +241,17 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    createNewHTTPEntrypoint(params) {
-        return this.admission.deploy(
-            new FileStream(new Blob(
-                [JSON.stringify(
-                    utils.transformEntrypointToManifest(
-                        params.usePlatformGeneratedDomain,
-                        'http',
-                        params.certificate,
-                        params.domain,
-                        params['accept-tls'],
-                        params['require-client-certificates'],
-                        params.instances,
-                        params.resilence
-                    )
-                )]
-            ))
-        );
-    }
-
-    addDeployment(params) {
-        return this.admission.deploy(
-            new FileStream(
-                new Blob([
-                    JSON.stringify(
-                        utils.transformDeploymentToManifest(
-                            params.name,
-                            params.website,
-                            params.service,
-                            params.serviceConfig,
-                            params.config,
-                            params.roles
-                        )
-                    )
-                ])
-            )
-        ).then((deploymentList) => {
-            for (let deploymentId in deploymentList) {
-                this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
-            }
-        });
-    }
-
-    aplyChangesToDeployment(deploymentId: string, rolNumInstances: { [rolId: string]: number }, killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
-        console.error('The modification of a deploymet is under development');
-        /*
-        if (rolNumInstances) {
-            let sdm = new ScalingDeploymentModification();
-            sdm.deploymentURN = deploymentId;
-            sdm.scaling = rolNumInstances;
-            this.admission.modifyDeployment(sdm).then((value) => {
-                this.emit(this.onModifyDeployment, value);
-            }).catch((error) => {
-                console.error('Error trying to make changes to a deployment', error);
-            });
-        }
-
-        if (killInstances) {
-            console.info('The functionality to kill an instance is under development');
-        }
-        */
+    /**
+     * Adds a new element to the stamp. Elements can be services or resources.
+     * @param file 
+     */
+    addNewElement(file: File) {
+        this.sendBundle(file);
     }
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
         console.error('Delete Element is under development');
-        /*
-        this.admission.removeStorage(elementId).then((value) => {
-            console.info('La llamada a admission removeStorage nos ha devuelto', value);
-        }).then((value) => {
-            console.info('Element suceffully deleted', elementId);
-        }).catch((error) => {
-            console.error('Error creating a service', error);
-        });
-        */
     }
 
     // @param elementId: Elemento o lista de elementos
@@ -267,6 +269,41 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
+    private sendBundle(file: File) {
+        return this.admission.sendBundle(new FileStream(file))
+            .catch((error) => {
+                console.error('Error uploading a bundle', error);
+            });
+    }
+
+    /* DEPLOYMENTS */
+    getDeploymentList() {
+        return this.admission.findDeployments().then((deploymentList) => {
+            for (let deploymentId in deploymentList) {
+                this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+            }
+        });
+    }
+
+    undeployDeployment(deploymentURN: string) {
+        return this.admission.undeploy(deploymentURN).then((value) => {
+            this.emit(this.onRemoveDeploymemt, deploymentURN);
+        });
+    }
+
+    addDeployment(deployment: Deployment) {
+        return this.admission.deploy(
+            new FileStream(
+                new Blob([JSON.stringify(utils.transformDeploymentToManifest(deployment))])
+            )
+        );
+    }
+
+    aplyChangesToDeployment(deploymentId: string, rolNumInstances: { [rolId: string]: number }, killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
+        console.error('The modification of a deploymet is under development');
+    }
+
+    /* RESOURCES */
     addWebdomain(webdomain: string) {
         const manifest = utils.transformWebdomainToManifest(webdomain);
         let zip = new JSZip();
@@ -304,50 +341,6 @@ export class ProxyConnection extends EventEmitter {
 
     addDataVolume(params) {
         console.error('Datavolume creation is under development');
-        /*
-        const manifest = utils.transformDataVolumeinToManifest(params);
-        let zip = new JSZip();
-        let content: string = JSON.stringify(manifest) + '\n';
-        zip.file('Manifest.json', content);
-        // var img = zip.folder("images");
-        // img.file("smile.gif", imgData, { base64: true });
-        // api: https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
-        // type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
-
-        let instance = this;
-        zip.generateAsync({ type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true })
-            .then((content) => {
-                let file = new File([content], 'Bundle.zip', {
-                    type: 'application/zip'
-                });
-                instance.sendBundle(file).then((value) => {
-                    let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-                    let res = utils.transformManifestToResource({
-                        spec: 'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
-                        name: uri,
-                        parameters: {
-                            size: '10',
-                            prefix: 'acs-volumes'
-                        }
-                    });
-                    this.emit(this.onAddResource, uri, res);
-                }).catch((error) => {
-                    console.error('Error adding a volume', error);
-                });
-            }).catch((error) => {
-                console.error('Error creating a bundle for a volume manifest', error);
-            });
-            */
     }
 
-    addNewElement(file: File) {
-        this.sendBundle(file);
-    }
-
-    private sendBundle(file: File) {
-        return this.admission.sendBundle(new FileStream(file))
-            .catch((error) => {
-                console.error('Error uploading a bundle', error);
-            });
-    }
 };

@@ -7,14 +7,27 @@ import { Notification, createNotification, notificationType } from '../component
 
 const connection: ProxyConnection = new ProxyConnection();
 export default {
+    /* MENU */
     setMenu({ commit }, menu) {
         commit('setMenu', menu);
     },
+
+    toggleMenuItemExpanded({ commit }, { menuItem }) {
+        if (menuItem.children)
+            commit('toggleMenuItemExpanded', menuItem);
+    },
+
+    /* FAB BUTTON */
+    setFabElements({ commit }, { fabElementsList }) {
+        commit('setFabElements', { fabElementsList });
+    },
+
+    /* GENERIC */
     login({ commit, dispatch, getters }, { username, password }) {
-        
+
         connection.login(username, password).then((user) => {
             commit('loginstate', 'authenticated');
-            return  user;
+            return user;
         }).then((user) => {
             // Obtenemos la lista de deployments
             connection.getDeploymentList();
@@ -80,6 +93,18 @@ export default {
 
     },
 
+    addNewElement(context, params) {
+        connection.addNewElement(params);
+    },
+    
+    deleteElement(context, elementId) {
+        connection.deleteElement(elementId);
+    },
+
+    downloadManifest(context, elementId) {
+        connection.downloadManifest(elementId);
+    },
+
     /**
      * Si no tenemos información a cerca del elemento en el estado, la pedimos
      * @param context 
@@ -107,47 +132,36 @@ export default {
         if (!res)
             connection.getElementInfo(uri);
     },
-    setFabElements({ commit }, { fabElementsList }) {
-        commit('setFabElements', { fabElementsList });
-    },
-    toggleMenuItemExpanded({ commit }, { menuItem }) {
-        if (menuItem.children)
-            commit('toggleMenuItemExpanded', menuItem);
-    },
+
+    /* DEPLOYMENT */
     undeployDeployment({ commit }, { deploymentId }) {
         connection.undeployDeployment(deploymentId).catch((error) => {
             console.error('The deployment ' + deploymentId + ' could not be undeployed: ' + error);
         });
     },
+
     aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances, killInstances }) {
         connection.aplyChangesToDeployment(deploymentId, rolNumInstances, killInstances);
     },
-    createNewHTTPEntrypoint(context, params) {
-        connection.createNewHTTPEntrypoint(params).catch((error) => {
-            console.error('The entrypoint couldn\'t be deployed: ' + error);
-        });
-    },
+
     createNewDeployment(context, deployment) {
         connection.addDeployment(deployment).catch((error) => {
             console.error('Error deploying a service', error);
         });
     },
-    deleteElement(context, elementId) {
-        connection.deleteElement(elementId);
-    },
+
+    /* ELEMENTS TO NEW SERVICE */
     selectedService({ commit }, serviceId) {
         commit('selectedService', serviceId);
     },
-    downloadManifest(context, elementId) {
-        connection.downloadManifest(elementId);
-    },
+    
+    /* DEBERÍA DESAPARECER: addNewElement */
     addWebDomain({ getters }, webdomain) {
         connection.addWebdomain(webdomain);
     },
+
+    /* DEBERÍA DESAPARECER: addNewElement */
     addDataVolume(context, params) {
         connection.addDataVolume(params);
-    },
-    addNewElement(context, params) {
-        connection.addNewElement(params);
     }
 };

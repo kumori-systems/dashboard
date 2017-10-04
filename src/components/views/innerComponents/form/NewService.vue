@@ -9,14 +9,14 @@
                             <option disabled value="">Please select one</option>
                             <option v-for="(service, index) in serviceList" v-bind:key="index" v-bind:value="service">{{service.name}}</option>
                         </select>
-    
+
                     </div>
                 </th>
                 <th>
                     <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
                 </th>
             </tr>
-    
+
             <tr v-if="selectedService && selectedService!==null" class="tile is-3">
                 <th>
                     <span>NAME</span>
@@ -48,7 +48,7 @@
                                         <number-input v-bind:value="rolNet[index]" v-bind:numElement="index" v-bind:property="'NET'" v-on:input="updateInputValue"></number-input>
                                     </th>
                                 </tr>
-    
+
                                 <tr>
                                     <th>Instances</th>
                                     <th>
@@ -298,16 +298,18 @@ export default class NewService extends Vue {
             );
         }
 
-        let website: Array<string> = [];
+        console.warn('Es posible que la configuración del servicio no se esté propagando correctamente');
         this.$store.dispatch('createNewDeployment',
-            {
-                'name': this.deploymentName,
-                'service': this.selectedService.id,
-                'config': config,
-                'serviceConfig': this.serviceConfig,
-                'roles': roles,
-                'domain': website
-            }
+            new Deployment(
+                null, //uri
+                this.deploymentName, //name
+                this.selectedService.id, //serviceId
+                this.serviceConfig as any as { [resource: string]: any; }, //resourcesConfig
+                config, //parameters
+                roles, //roles
+                [], //links
+                [] //website
+            )
         );
         this.$router.go(-1);
     }

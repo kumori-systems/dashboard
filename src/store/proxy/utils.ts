@@ -336,6 +336,29 @@ export function getElementType(uri: string): ElementType {
     }
     return res;
 }
+export enum ResourceType { volume, cert, domain }
+
+export function getResourceType(uri: string): ResourceType {
+    let res: ResourceType;
+    let splitted = uri.split('/');
+    let i = 4;
+    if (splitted[2] === 'temporary') { i = i + 2; }
+
+    // Obtenemos el tipo. En caso de que sea temprary, el tipo estará 2 huecos desplazado
+    switch (splitted[i]) {
+        case 'volume':
+            res = ResourceType.volume;
+        case 'cert':
+            res = ResourceType.cert;
+            break;
+        case 'vhost':
+            res = ResourceType.domain;
+            break;
+        default:
+            console.info('Resource type not covered', uri);
+    }
+    return res;
+}
 
 export function getElementOwner(uri: string): string {
     return uri.split('/')[2];
@@ -392,30 +415,29 @@ export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolea
     };
 }
 
-export function transformDeploymentToManifest(deploymentName: string, domain: string, service: string, serviceConfig: any, config: any, roles: any) {
-
+export function transformDeploymentToManifest(deployment: Deployment) {
     let manifestRoles = {};
 
-    for (let rolId in roles) {
+    for (let rolId in deployment.roles) {
         manifestRoles[rolId] = {};
         manifestRoles[rolId].resources = {};
-        manifestRoles[rolId].resources['__instances'] = (<Deployment.Rol>roles[rolId]).instanceNumber;
-        manifestRoles[rolId].resources['__cpu'] = (<Deployment.Rol>roles[rolId]).cpu;
-        manifestRoles[rolId].resources['__memory'] = (<Deployment.Rol>roles[rolId]).memory;
-        manifestRoles[rolId].resources['__ioperf'] = (<Deployment.Rol>roles[rolId]).ioperf;
-        manifestRoles[rolId].resources['__iopsintensive'] = (<Deployment.Rol>roles[rolId]).iopsintensive;
-        manifestRoles[rolId].resources['__bandwidth'] = (<Deployment.Rol>roles[rolId]).bandwidth;
-        manifestRoles[rolId].resources['__resilience'] = (<Deployment.Rol>roles[rolId]).resilience;
+        manifestRoles[rolId].resources['__instances'] = (<Deployment.Rol>deployment.roles[rolId]).instanceNumber;
+        manifestRoles[rolId].resources['__cpu'] = (<Deployment.Rol>deployment.roles[rolId]).cpu;
+        manifestRoles[rolId].resources['__memory'] = (<Deployment.Rol>deployment.roles[rolId]).memory;
+        manifestRoles[rolId].resources['__ioperf'] = (<Deployment.Rol>deployment.roles[rolId]).ioperf;
+        manifestRoles[rolId].resources['__iopsintensive'] = (<Deployment.Rol>deployment.roles[rolId]).iopsintensive;
+        manifestRoles[rolId].resources['__bandwidth'] = (<Deployment.Rol>deployment.roles[rolId]).bandwidth;
+        manifestRoles[rolId].resources['__resilience'] = (<Deployment.Rol>deployment.roles[rolId]).resilience;
     }
 
     return {
         'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
-        'servicename': service,
-        'name': deploymentName,
+        'servicename': deployment.serviceId,
+        'name': deployment.name,
         'interconnection': true,
         'configuration': {
-            'resources': {},
-            'parameters': {}
+            'resources': deployment.resourcesConfig,
+            'parameters': deployment.parameters
         },
         'roles': manifestRoles
     };
