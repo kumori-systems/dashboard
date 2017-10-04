@@ -383,38 +383,6 @@ export function isServiceEntrypoint(uri: string): boolean {
     return entrypoints.indexOf(uri) === -1;
 }
 
-export function transformEntrypointToManifest(usePlatformGeneratedDomain: boolean, name: string, certificate: string, domain: string, acceptTls: boolean, requireClientCertificates: boolean, instances: number, resilience: number) {
-    return {
-        'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
-        'servicename': 'eslap://eslap.cloud/services/http/inbound/1_0_0',
-        'name': name,
-        'interconnection': true,
-        'configuration': {
-            'resources': {
-                'server_cert': certificate.length > 0 ? certificate : null,
-                'vhost': domain
-            },
-            'parameters': {
-                'TLS': acceptTls,
-                'clientcert': requireClientCertificates
-            }
-        },
-        'roles': {
-            'sep': {
-                'resources': {
-                    '__instances': instances,
-                    '__cpu': 1,
-                    '__memory': 1,
-                    '__ioperf': 1,
-                    '__iopsintensive': false,
-                    '__bandwidth': 100,
-                    '__resilience': resilience
-                }
-            }
-        }
-    };
-}
-
 export function transformDeploymentToManifest(deployment: Deployment) {
     let manifestRoles = {};
 
