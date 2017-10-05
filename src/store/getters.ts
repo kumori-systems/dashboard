@@ -1,4 +1,4 @@
-import { Deployment, Runtime, Component, Service, Webdomain, Link, Resource, FabElement } from './classes';
+import { Deployment, Runtime, Component, Service, Webdomain, Link, Resource, FabElement, Channel } from './classes';
 import urlencode from 'urlencode';
 import { getElementOwner, getElementName, getElementVersion, isServiceEntrypoint, getElementType, ElementType, getResourceType, ResourceType } from './proxy/utils';
 export default {
@@ -186,17 +186,17 @@ export default {
 
   getDeploymentWebsite: function (state): Function {
     return function (deploymentId: string): Array<string> {
-      let website: Array<string> = (<Deployment>state.deploymentList[deploymentId]).website;
-      // Si en este punto es null, significa que no es un entrypoint y tenemos que buscar en los links aquel que esté
-      // lincado y sea un entrypoint (tenga un website != null)
-      if (!website || website === null || website === []) {
+      let res: Array<string> = [];
+      if ((<Deployment>state.deploymentList[deploymentId]).isEntrypoint) {
+        res = (<Deployment>state.deploymentList[deploymentId]).website;
+      } else {
         for (let linkIndex in (<Deployment>state.deploymentList[deploymentId]).links) {
           if ((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).isEntrypoint) {
-            website = website.concat((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).website);
+            res = res.concat((<Deployment>state.deploymentList[(<Deployment>state.deploymentList[deploymentId]).links[linkIndex].deploymentTwo]).website);
           }
         }
       }
-      return website;
+      return res;
     };
   },
 
@@ -290,7 +290,7 @@ export default {
     };
   },
 
-  getDeploymentRolComponentURN: function (state) {
+  getDeploymentRolComponentURI: function (state) {
     return function (deploymentId: string, rolId: string) {
       let res: string = null;
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
@@ -392,29 +392,58 @@ export default {
     };
   },
 
-  getDeploymentRolReqConnectedTo: function (state): Function {
-    return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
+
+  getDeploymentRolConnections: function (state): Function {
+    return function (deploymentId: string, rolId: string): Array<Service.Connector> {
+      let res: Array<Service.Connector> = [];
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (!state.serviceList[serviceId]) return [];
-      let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
-      if (!state.componentList[componentId]) return [];
-      let res = [];
-      for (let connectionIndex in (<Component>state.componentList[componentId]).reqChannels) {
-        res.push([connectionIndex, (<Component>state.componentList[componentId]).reqChannels[connectionIndex]]);
+      if (state.serviceList[serviceId]) {
+        for (let connector in (<Service>state.serviceList[serviceId]).connectors) {
+          if (
+            (<Service>state.serviceList[serviceId]).connectors[connector].depended[0].role === rolId
+            || (<Service>state.serviceList[serviceId]).connectors[connector].provided[0].role === rolId
+          ) {
+            res.push((<Service>state.serviceList[serviceId]).connectors[connector]);
+          }
+        }
       }
+
       return res;
     };
   },
 
-  getDeploymentRolProConnectedTo: function (state): Function {
-    return function (deploymentId: string, rolId: string): Array<[string, Service.Rol.Channel]> {
+  /* DEPRECATED */
+  getDeploymentRolReqChannels: function (state): Function {
+    console.warn('getDeploymentRolReqChannels is a deprecated function. Take the connections instead.');
+    return function (deploymentId: string, rolId: string): { [channelId: string]: Channel } {
+      let res: { [channelId: string]: Channel } = {};
+      let reqChannels: { [channelId: string]: Channel } = {};
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (!state.serviceList[serviceId]) return [];
-      let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
-      if (!state.componentList[componentId]) return [];
-      let res = [];
-      for (let connectionIndex in (<Component>state.componentList[componentId]).proChannels) {
-        res.push([connectionIndex, (<Component>state.componentList[componentId]).proChannels[connectionIndex]]);
+      if (state.serviceList[serviceId]) { // if service exists
+        let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+        if (state.componentList[componentId]) { // if component exists
+          reqChannels = (<Component>state.componentList[componentId]).reqChannels;
+        }
+      }
+
+      // Por cada canal, buscamos todas las conexiones que pueda tener
+
+      return res;
+    };
+  },
+
+  /* DEPRECATED */
+  getDeploymentRolProChannels: function (state): Function {
+    console.warn('getDeploymentRolProChannels is a deprecated function. Take the connections instead.');
+    return function (deploymentId: string, rolId: string): { [channelId: string]: Channel } {
+      let res: { [channelId: string]: Channel } = {};
+      let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+      if (state.serviceList[serviceId]) { // if service exists
+        let componentId = (<Service>state.serviceList[serviceId]).roles[rolId].component;
+        if (state.componentList[componentId]) { // if component exists
+          res = (<Component>state.componentList[componentId]).proChannels;
+
+        }
       }
       return res;
     };
@@ -476,6 +505,11 @@ export default {
   },
 
   /* COMPONENTS */
+  getComponentInfo: function (state) {
+    return (componentId) => {
+      return state.componentList[componentId];
+    };
+  },
   getComponentId: function (state, getters) {
     return (owner, component, version) => {
       for (let componentId in state.componentList) {
@@ -953,7 +987,7 @@ export default {
         return (<Webdomain>state.resourceList[resourceId]).state;
     };
   },
-  
+
   getServiceUsingDomain: function (state, getters) {
     return (webdomain): string => {
       // Miramos qué entrypoint lo está utilizando

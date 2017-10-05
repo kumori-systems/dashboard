@@ -2,8 +2,8 @@
     <div id="rol-card" class="card">
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
-            <span class="title">{{rolId}}</span>
-            <span class="box is-unselectable">{{numInstances}}</span>
+            <span class="title">{{ rolId }}</span>
+            <span class="box is-unselectable">{{ numInstances }}</span>
             <div>
                 <div class="tile is-vertical">
                     <button class="button is-primary" v-on:click="numInstances = 1" disabled>
@@ -18,31 +18,27 @@
         <div class="card-body tile inner-content">
             <div class="tile">
                 <div class="inner-content">
-                    <p>Component: {{componentURN}}</p>
-                    <p>Runtime: {{rolRuntime}}</p>
+                    <p>Component: {{ componentURI }}</p>
+                    <p>Runtime: {{ rolRuntime }}</p>
                     <p>
-                        {{memNumber}} MEM {{cpuNumber}} CPU {{netNumber}} NET
+                        {{ memNumber }} MEM {{ cpuNumber }} CPU {{ netNumber }} NET
                     </p>
                     <p v-if="dataVolumesList.length>0">
                         Data Volumes:
                         <div class="inner-content" v-for="(dataVolume, index) in dataVolumesList" v-bind:key="index">
-                            <i class="fa fa-hdd-o" aria-hidden="true"></i> {{dataVolume}}
+                            <i class="fa fa-hdd-o" aria-hidden="true"></i> {{ dataVolume }}
                         </div>
                     </p>
-                    <div v-if="rolReqConnectedTo.length > 0 || rolProConnectedTo.length > 0">
-                        Connected to: unavailable
+                    <div>
                         <div class="left-padding">
-                            <div v-for="(connection, index) in rolProConnectedTo" v-bind:key="index">
-                                <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
-                                    {{connection[0]}} -> {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
-                                </div>
+                            Channels connected to 
+
+                            <div v-for="(connection, connectionIndex) in rolConnections" v-bind:key="connectionIndex">
+                              {{ connection.provided }} -> {{ connection.depended }}
                             </div>
-                            <div v-for="(connection, index) in rolReqConnectedTo" v-bind:key="index">
-                                <div v-for="(connectedTo, index) in connection[1].connectedTo" v-bind:key="index">
-                                    {{connection[0]}} &#60;- {{connectedTo.rolName || 'this'}} ({{connectedTo.channelName}})
-                                </div>
-                            </div>
+                           
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -69,7 +65,7 @@ import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import InstanceCard from './InstanceCard.vue';
 import Chart from '../chart/Chart.js';
 import ChartOptions from '../chart/ChartOptions.js';
-import { Deployment, Service } from '../../../../store/classes';
+import { Deployment, Service, Channel } from '../../../../store/classes';
 import Moment from 'moment';
 
 @Component({
@@ -132,8 +128,11 @@ export default class Card extends Vue {
         }
     }
 
-    get componentURN() {
-        return this.$store.getters.getDeploymentRolComponentURN(this.deploymentId, this.rolId);
+    get componentURI() {
+        let cURI = this.$store.getters.getDeploymentRolComponentURI(this.deploymentId, this.rolId);
+        if (cURI !== null && this.$store.getters.getComponentInfo(cURI) === undefined) // If we've got not info for this component we ask for it
+            this.$store.dispatch('getElementInfo', { uri: cURI });
+        return cURI;
     }
     get rolRuntime() {
         return this.$store.getters.getDeploymentRolRuntime(this.deploymentId, this.rolId);
@@ -162,12 +161,8 @@ export default class Card extends Vue {
         return this.$store.getters.getDeploymentRolVolumeList(this.deploymentId, this.rolId);
     }
 
-    get rolReqConnectedTo(): Array<Service.Rol.Channel> {
-        return this.$store.getters.getDeploymentRolReqConnectedTo(this.deploymentId, this.rolId);
-    }
-
-    get rolProConnectedTo(): Array<Service.Rol.Channel> {
-        return this.$store.getters.getDeploymentRolProConnectedTo(this.deploymentId, this.rolId);
+    get rolConnections(): Array<Service.Connector> {
+        return this.$store.getters.getDeploymentRolConnections(this.deploymentId, this.rolId);
     }
     /**
      * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo

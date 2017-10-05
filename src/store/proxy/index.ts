@@ -73,47 +73,32 @@ export class ProxyConnection extends EventEmitter {
                     case EcloudEventType.service:
                         switch (event.name) {
                             case EcloudEventName.deployed:
-                            case EcloudEventName.deploying:
-                            case EcloudEventName.disconnected:
+                                console.log('El evento de deploy contiene', event);
+                                // this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+                                break;
                             case EcloudEventName.link:
-                            case EcloudEventName.node:
-                            case EcloudEventName.realocate:
-                            case EcloudEventName.reconfig:
-                            case EcloudEventName.restart:
                             case EcloudEventName.scale:
-                            case EcloudEventName.service:
                             case EcloudEventName.status:
                             case EcloudEventName.undeployed:
-                            case EcloudEventName.undeploying:
                             case EcloudEventName.unlink:
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
                                 break;
+                            case EcloudEventName.undeploying:
+                            case EcloudEventName.deploying:
+                                // Casos que hay que ignorar sin sacar error
+                                break;
+                            case EcloudEventName.node:
+                            case EcloudEventName.service:
+                            case EcloudEventName.disconnected:
+                            case EcloudEventName.restart:
+                            case EcloudEventName.reconfig:
+                            case EcloudEventName.realocate:
                             default:
-                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
+                                console.error('Not espected ecloud event name: ' + event.strType + '/' + event.strName);
                         }
                         break;
                     case EcloudEventType.node:
-                        switch (event.name) {
-                            case EcloudEventName.deployed:
-                            // this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
-                            case EcloudEventName.deploying:
-                            case EcloudEventName.disconnected:
-                            case EcloudEventName.link:
-                            case EcloudEventName.node:
-                            case EcloudEventName.realocate:
-                            case EcloudEventName.reconfig:
-                            case EcloudEventName.restart:
-                            case EcloudEventName.scale:
-                            case EcloudEventName.service:
-                            case EcloudEventName.status:
-                            case EcloudEventName.undeployed:
-                            case EcloudEventName.undeploying:
-                            case EcloudEventName.unlink:
-                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
-                                break;
-                            default:
-                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
-                        }
+                        console.error('Not espected ecloud event type: ' + event.strType + '/' + event.strName);
                         break;
                     case EcloudEventType.instance:
                         switch (event.name) {
@@ -134,7 +119,7 @@ export class ProxyConnection extends EventEmitter {
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
                                 break;
                             default:
-                                console.error('Not espected ecloud event name: ' + event.strName + '/' + event.strName);
+                                console.error('Not espected ecloud event name: ' + event.strType + '/' + event.strName);
                         }
                         break;
                     case EcloudEventType.metrics:

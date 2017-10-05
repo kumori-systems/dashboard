@@ -3,11 +3,11 @@
         <div class="tile is-vertical">
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
-                <span class="title">{{instanceId}}</span>
+                <span class="title">{{ instanceId }}</span>
                 <div class="tile is-parent">
-                    <div>{{instanceMem}} MEM</div>
-                    <div>{{instanceCPU}} CPU</div>
-                    <div>{{instanceNet}} NET</div>
+                    <div>{{ instanceMem }} MEM</div>
+                    <div>{{ instanceCPU }} CPU</div>
+                    <div>{{ instanceNet }} NET</div>
                     <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                 </div>
             </div>

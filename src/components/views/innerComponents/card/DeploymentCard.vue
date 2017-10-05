@@ -19,7 +19,7 @@
                         <i class="fa-circle fa"></i>
                         <div>
                             <strong>{{rol| truncateLeft(30)}}</strong>
-                            <div class="rol-component">{{ rolComponentURN(rol) || 'unavailable' | truncateLeft(50) }}</div>
+                            <div class="rol-component">{{ rolComponentURI(rol) || 'unavailable' | truncateLeft(50) }}</div>
                         </div>
                         <div class="box is-unselectable">
                             {{ rolNumInstances(rol) }}
@@ -153,9 +153,9 @@ export default class Card extends Vue {
         return this.$store.getters.getDeploymentRoles(this.deploymentId);
     }
 
-    get rolComponentURN(): Function {
+    get rolComponentURI(): Function {
         return function(rolId): string {
-            return this.$store.getters.getDeploymentRolComponentURN(this.deploymentId, rolId);
+            return this.$store.getters.getDeploymentRolComponentURI(this.deploymentId, rolId);
         }
     }
 

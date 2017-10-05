@@ -1,4 +1,5 @@
 import StampElement from './stampelement';
+import { isServiceEntrypoint, getElementVersion, getElementOwner } from '../../proxy/utils';
 export class Link {
     deploymentOne: string;
     channelOne: string;
@@ -12,33 +13,27 @@ export class Link {
     }
 }
 
-export class Deployment implements StampElement {
-    uri: string;
+export class Deployment {
+    readonly uri: string;
     owner: string;
-    version: string;
     name: string; // nombre amistoso para el usuario
     serviceId: string; // servicio que define el despliegue
     resourcesConfig: { [resource: string]: any }; // encaja cómo llama el servicio a las resources con la definición real de las resources
     parameters: any;
     roles: { [rolName: string]: Deployment.Rol };
-    website: Array<string>;
+    website: Array<string> = [];
     links: Array<Link>;
     metrics: Deployment.Metrics;
     isEntrypoint: boolean;
     constructor(uri: string, name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, links: Array<Link>, website: Array<string>) {
         this.uri = uri;
-
-        let splitted: Array<string> = this.uri.split('/');
-        this.owner = splitted[2];
-        this.version = splitted[splitted.length - 1];
-
+        this.owner = getElementOwner(uri);
         this.name = name;
         this.serviceId = serviceId;
-        if (this.serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0') {
-            this.isEntrypoint = true;
+        this.isEntrypoint = isServiceEntrypoint(this.serviceId);
+        if (this.isEntrypoint) {
             this.metrics = new Deployment.EntryPointMetrics();
         } else {
-            this.isEntrypoint = false;
             this.metrics = new Deployment.CommonMetrics();
         }
         this.resourcesConfig = resourcesConfig;

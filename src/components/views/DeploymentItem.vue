@@ -49,7 +49,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Moment from 'moment';
 
-import { FabElement, Deployment, Service } from '../../store/classes';
+import { FabElement, Deployment, Service, Channel } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
 import ChartOptions from './innerComponents/chart/ChartOptions.js';
@@ -126,12 +126,12 @@ export default class DeploymentItem extends Vue {
         return null;
     }
 
-    get serviceProvideChannels(): Array<Service.Rol.Channel> {
+    get serviceProvideChannels(): Array<Channel> {
         this.serviceInfo;
         return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
     }
 
-    get serviceRequireChannels(): Array<Service.Rol.Channel> {
+    get serviceRequireChannels(): Array<Channel> {
         this.serviceInfo;
         return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
     }
