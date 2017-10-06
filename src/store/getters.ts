@@ -23,10 +23,6 @@ export default {
     return state.alerts.length;
   },
 
-  /* SIDEBAR */
-  sidebar: function (state) {
-    return state.sidebar;
-  },
   /* FAB BUTTON*/
   getFabElements: function (state): Array<FabElement> {
     return state.fabElements;
@@ -824,16 +820,15 @@ export default {
   /**
    * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
    */
-  /*
+
   getNoEPServiceList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
-      if ((<Service>state.serviceList[serviceId]) && !getters.getServiceIsEntryPoint(serviceId))
-        res.push({ id: serviceId, name: (<Service>state.serviceList[serviceId]).name });
+      if (!getters.getServiceIsEntryPoint(serviceId))
+        res.push(serviceId);
     }
     return res;
   },
-  */
 
   /* RESOURCES: RUNTIME */
   getRuntimeId: function (state, getters) {
