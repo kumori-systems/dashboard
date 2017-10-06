@@ -67,6 +67,7 @@
                         </table>
                     </th>
                 </tr>
+
                 <tr v-if="serviceProChannelList.length>0 || serviceReqChannelList.length>0">
                     <th> CHANNELS</th>
                 </tr>
@@ -74,13 +75,13 @@
                     <th>
                         <table class="tile is-6">
                             <tr class="tile is-12">
-                                <th class="tile is-2"> {{channel}}</th>
+                                <th class="tile is-2"> {{ channel }}</th>
                                 <th>-&gt;</th>
                                 <th>
                                     <div class="select">
                                         <select v-model="selectedRequiredChannel[index]">
                                             <option disabled value="">Please select one</option>
-                                            <option v-for="(requiredChannel, index) in totalRequiredDeploymentChannels" v-bind:key="index">{{requiredChannel}}</option>
+                                            <option v-for="(requiredChannel, index) in totalRequiredDeploymentChannels(channel)" v-bind:key="index">{{requiredChannel}}</option>
                                         </select>
                                     </div>
                                 </th>
@@ -92,13 +93,13 @@
                     <th>
                         <table class="tile is-6">
                             <tr class="tile is-12">
-                                <th class="tile is-2"> {{channel}} </th>
+                                <th class="tile is-2"> {{ channel }} </th>
                                 <th>&lt;-</th>
                                 <th>
                                     <div class="select">
                                         <select v-model="selectedProvidedChannel[index]">
                                             <option disabled value="">Please select one</option>
-                                            <option v-for="(providedChannel, index) in totalProvidedDeploymentChannels" v-bind:key="index">{{providedChannel}}</option>
+                                            <option v-for="(providedChannel, index) in totalProvidedDeploymentChannels(channel)" v-bind:key="index">{{providedChannel}}</option>
                                         </select>
                                     </div>
                                 </th>
@@ -106,6 +107,7 @@
                         </table>
                     </th>
                 </tr>
+
                 <table v-if="serviceResourcesList.length > 0">
                     <tr>
                         <th>RESOURCES CONFIGURATION</th>
@@ -237,11 +239,12 @@ export default class NewService extends Vue {
     }
 
     get totalProvidedDeploymentChannels() {
-        return this.$store.getters.getTotalProvidedDeploymentChannels;
+        return (channel)=>{return this.$store.getters.getTotalProvidedDeploymentChannels(this.selectedService, channel);};
     }
 
     get totalRequiredDeploymentChannels() {
-        return this.$store.getters.getTotalRequiredDeploymentChannels;
+        return (channel)=>{return this.$store.getters.getTotalRequiredDeploymentChannels(this.selectedService, channel);};
+        
     }
 
     get totalResourceConfig() {

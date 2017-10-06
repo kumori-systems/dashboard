@@ -93,7 +93,7 @@
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>
                                                     </router-link>
-                                                    <router-link v-else v-bind:to="'newService'">
+                                                    <router-link v-else v-bind:to="'newDeployment'">
                                                         <button class="button is-primary" v-on:click="selectedService(getServiceId(owner, service, version))">
                                                             <i class="fa fa-play" aria-hidden="true"></i>
                                                         </button>

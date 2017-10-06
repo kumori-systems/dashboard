@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import { Overview, DeploymentItem, Elements, Domains, DataVolumes, AlarmsAndLogs, Help } from '../components';
 import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
-import NewService from '../components/views/innerComponents/form/NewService.vue';
+import NewDeployment from '../components/views/innerComponents/form/NewDeployment.vue';
 import NewServiceAdvanced from '../components/views/innerComponents/form/NewServiceAdvanced.vue';
 import NewVolume from '../components/views/innerComponents/form/NewVolume.vue';
 import NewDomain from '../components/views/innerComponents/form/NewDomain.vue';
@@ -61,10 +61,10 @@ export default new Router({
       component: NewHTTPEntrypoint
     },
     {
-      name: 'New service',
-      path: '/newService',
+      name: 'New deployment',
+      path: '/newDeployment',
       meta: { expanded: false },
-      component: NewService
+      component: NewDeployment
     },
     {
       name: 'New domain',
