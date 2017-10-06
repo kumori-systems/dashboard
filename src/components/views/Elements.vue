@@ -168,6 +168,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
 import { FabElement } from '../../store/classes';
+import { isServiceEntrypoint } from '../../store/proxy/utils';
 import CheckboxInput from './innerComponents/input/CheckboxInput.vue';
 import DeleteModal from './innerComponents/modal/DeleteModal.vue';
 import DeleteGroupModal from './innerComponents/modal/DeleteGroupModal.vue';
@@ -281,7 +282,7 @@ export default class Elements extends Vue {
 
     get selectedServiceIsInbound() {
         return (serviceId) => {
-            return this.$store.getters.getServiceIsEntryPoint(serviceId);
+            return isServiceEntrypoint(serviceId);
         }
     }
 

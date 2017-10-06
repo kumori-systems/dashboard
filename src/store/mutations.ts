@@ -114,7 +114,6 @@ export default {
   },
 
   selectedService(state, serviceId) {
-    if (serviceId && state.serviceList[serviceId])
       state.selectedService = serviceId;
   }
 };

@@ -150,6 +150,7 @@ export default {
   },
 
   getServiceIsEntryPoint: function (state, getters) {
+    console.warn('@deprecated getServiceIsEntryPoint. Use utils instead');
     return (uri: string) => { return isServiceEntrypoint(uri); };
   },
 
@@ -821,10 +822,9 @@ export default {
    * Devolvemos el nombre de aquellos servicios que no sean Entrypoint
    */
 
-  getNoEPServiceList: function (state, getters): Array<string> {
+  getServiceList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
-      if (!getters.getServiceIsEntryPoint(serviceId))
         res.push(serviceId);
     }
     return res;
