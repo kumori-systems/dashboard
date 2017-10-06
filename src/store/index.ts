@@ -12,7 +12,6 @@ export default new Vuex.Store({
     'state': {
         'user': {
             'id': undefined,
-            'domain': undefined,
             'name': undefined,
             'state': undefined
         },

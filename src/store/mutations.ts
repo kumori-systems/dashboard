@@ -2,7 +2,6 @@ import Vue from 'vue';
 import { Deployment } from './classes';
 export default {
   login(state, {id, name}) {
-    console.warn('User\'s domain is required for a few operations');
     state.user.id = id;
     state.user.name = name;
   },
