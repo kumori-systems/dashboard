@@ -5,7 +5,7 @@ import { EventEmitter, Listener } from 'typed-event-emitter';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
 import * as utils from './utils';
-import { Deployment } from '../classes';
+import { Deployment, Service, Component, Runtime, Resource } from '../classes';
 
 import { ADMISSION_URI, ACS_URI } from '../../../static/config.js';
 
@@ -21,6 +21,7 @@ export class ProxyConnection extends EventEmitter {
     // Eventos
     public onLogin: Function;
     public onAddDeployment: Function;
+    public onAddInstance: Function;
     public onModifyDeployment: Function;
     public onRemoveDeploymemt: Function;
     public onAddService: Function;
@@ -37,17 +38,18 @@ export class ProxyConnection extends EventEmitter {
     constructor() {
         super();
         this.onLogin = this.registerEvent<Function>();
-        this.onAddDeployment = this.registerEvent<(deploymentId, deployment) => any>();
+        this.onAddDeployment = this.registerEvent<(deploymentId: string, deployment: Deployment) => any>();
+        this.onAddInstance = this.registerEvent<(deploymentId: string, rolId: string, instanceId: string, instance: Deployment.Rol.Instance) => any>();
         this.onModifyDeployment = this.registerEvent<(value) => any>();
-        this.onRemoveDeploymemt = this.registerEvent<(deploymentId) => any>();
-        this.onAddService = this.registerEvent<(serviceId, service) => any>();
+        this.onRemoveDeploymemt = this.registerEvent<(deploymentId: string) => any>();
+        this.onAddService = this.registerEvent<(serviceId: string, service: Service) => any>();
         this.onRemoveService = this.registerEvent<Function>();
-        this.onAddComponent = this.registerEvent<(componentId, component) => any>();
+        this.onAddComponent = this.registerEvent<(componentId: string, component: Component) => any>();
         this.onRemoveComponent = this.registerEvent<Function>();
-        this.onAddRuntime = this.registerEvent<(runtimeId, runtime) => any>();
+        this.onAddRuntime = this.registerEvent<(runtimeId: string, runtime: Runtime) => any>();
         this.onRemoveRuntime = this.registerEvent<Function>();
-        this.onAddResource = this.registerEvent<(resourceId, resource) => any>();
-        this.onRemoveResource = this.registerEvent<(resourceId) => any>();
+        this.onAddResource = this.registerEvent<(resourceId: string, resource: Resource) => any>();
+        this.onRemoveResource = this.registerEvent<(resourceId: string) => any>();
         this.onAddMetrics = this.registerEvent<(value) => any>();
     }
 
@@ -69,13 +71,62 @@ export class ProxyConnection extends EventEmitter {
             });
 
             this.admission.onEcloudEvent((event: EcloudEvent) => {
+                const startTime = performance.now();
                 switch (event.type) {
                     case EcloudEventType.service:
                         switch (event.name) {
-                            case EcloudEventName.deployed:
-                                console.log('El evento de deploy contiene', event);
-                                // this.emit(this.onAddDeployment, deploymentId, utils.transformEcloudDeploymentToDeployment(deploymentList[deploymentId]));
+                            case EcloudEventName.deploying:
+                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                this.emit(
+                                    this.onAddDeployment, // Metodo
+                                    event.entity['service'], // DeploymentID
+                                    new Deployment(
+                                        event.entity['service'], // uri
+                                        null, // name
+                                        event.entity['serviceApp'],
+                                        null, // resourcesConfig
+                                        null, // parameters
+                                        null, // roles
+                                        null, // links
+                                        null // website
+                                    ) // Deployment
+                                );
                                 break;
+                            case EcloudEventName.deployed:
+                                console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                let roles: { [rolId: string]: Deployment.Rol } = {};
+                                for (let instance in event.data.instances) {
+                                    roles[event.data.instances[instance].role] = new Deployment.Rol(
+                                        null, // configuration
+                                        null, // cpu
+                                        null, // memory
+                                        null, // ioperf
+                                        null, // iopsintensive
+                                        null, // bandwidth
+                                        null, // resilience
+                                        {
+                                            [instance]: undefined
+                                        } // instanceList
+                                    );
+                                }
+                                this.emit(
+                                    this.onAddDeployment, // Metodo
+                                    event.entity['service'], // DeploymentID
+                                    new Deployment(
+                                        event.entity['service'], // uri
+                                        null, // name
+                                        event.entity['serviceApp'],
+                                        null, // resourcesConfig
+                                        null, // parameters
+                                        roles, // roles
+                                        null, // links
+                                        null // website
+                                    ) // Deployment
+                                );
+                                break;
+                            case EcloudEventName.undeploying:
+                            // this.emit(this.onRemoveDeploymemt, event.entity['service']);
+                            // break;
                             case EcloudEventName.link:
                             case EcloudEventName.scale:
                             case EcloudEventName.status:
@@ -83,16 +134,6 @@ export class ProxyConnection extends EventEmitter {
                             case EcloudEventName.unlink:
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
                                 break;
-                            case EcloudEventName.undeploying:
-                            case EcloudEventName.deploying:
-                                // Casos que hay que ignorar sin sacar error
-                                break;
-                            case EcloudEventName.node:
-                            case EcloudEventName.service:
-                            case EcloudEventName.disconnected:
-                            case EcloudEventName.restart:
-                            case EcloudEventName.reconfig:
-                            case EcloudEventName.realocate:
                             default:
                                 console.error('Not espected ecloud event name: ' + event.strType + '/' + event.strName);
                         }
@@ -102,21 +143,29 @@ export class ProxyConnection extends EventEmitter {
                         break;
                     case EcloudEventType.instance:
                         switch (event.name) {
-                            case EcloudEventName.deployed:
-                            case EcloudEventName.deploying:
-                            case EcloudEventName.disconnected:
-                            case EcloudEventName.link:
-                            case EcloudEventName.node:
-                            case EcloudEventName.realocate:
-                            case EcloudEventName.reconfig:
-                            case EcloudEventName.restart:
-                            case EcloudEventName.scale:
-                            case EcloudEventName.service:
                             case EcloudEventName.status:
-                            case EcloudEventName.undeployed:
-                            case EcloudEventName.undeploying:
-                            case EcloudEventName.unlink:
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
+                                let inst = new Deployment.Rol.Instance(
+                                    event.entity['instance'], // cnid
+                                    null, // publicIp
+                                    null, // privateIp
+                                    null // arrangement
+                                ); // Instance
+                                let connected: boolean = false;
+                                if (event.data.status === 'connected') connected = true;
+                                inst.setState(connected);
+                                this.emit(
+                                    this.onAddInstance, // Metodo
+                                    event.entity['service'], // DeploymentID
+                                    event.entity['role'], // roleId
+                                    event.entity['instance'], // instanceId
+                                    inst
+                                );
+                                break;
+                            case EcloudEventName.realocate:
+                            case EcloudEventName.restart:
+                            case EcloudEventName.reconfig:
+                                // Casos que hay que ignorar sin sacar error
                                 break;
                             default:
                                 console.error('Not espected ecloud event name: ' + event.strType + '/' + event.strName);
@@ -134,6 +183,9 @@ export class ProxyConnection extends EventEmitter {
                     default:
                         console.error('Not espected ecloud event type: %s', event.strType, event);
                 }
+
+                const duration = performance.now() - startTime;
+                console.log('La duración del handler del evento ha sido: %d', duration, event);
             });
 
             this.admission.onError((error: any) => {
@@ -226,11 +278,7 @@ export class ProxyConnection extends EventEmitter {
         });
     }
 
-    /**
-     * Adds a new element to the stamp. Elements can be services or resources.
-     * @param file 
-     */
-    addNewElement(file: File) {
+    addNewBundle(file: File) {
         this.sendBundle(file);
     }
 
@@ -277,20 +325,18 @@ export class ProxyConnection extends EventEmitter {
     }
 
     addDeployment(deployment: Deployment) {
-        return this.admission.deploy(
-            new FileStream(
-                new Blob([JSON.stringify(utils.transformDeploymentToManifest(deployment))])
-            )
-        );
+        return this.admission.deploy(new FileStream(
+            new Blob([JSON.stringify(utils.transformDeploymentToManifest(deployment))])
+        ));
     }
 
     aplyChangesToDeployment(deploymentId: string, rolNumInstances: { [rolId: string]: number }, killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
-        console.error('The modification of a deploymet is under development');
+        console.warn('The modification of a deploymet is under development');
     }
 
     /* RESOURCES */
-    addWebdomain(webdomain: string) {
-        const manifest = utils.transformWebdomainToManifest(webdomain);
+    addDomain(webdomain: string) {
+        const manifest = utils.transformDomainToManifest(webdomain);
         let zip = new JSZip();
         let content: string = JSON.stringify(manifest) + '\n';
         zip.file('Manifest.json', content);
@@ -309,10 +355,10 @@ export class ProxyConnection extends EventEmitter {
                 instance.sendBundle(file).then((value) => {
                     let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
                     let res = utils.transformManifestToResource({
-                        spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-                        name: uri,
-                        parameters: {
-                            vhost: webdomain
+                        'spec': 'eslap://eslap.cloud/resource/vhost/1_0_0',
+                        'name': uri,
+                        'parameters': {
+                            'vhost': webdomain
                         }
                     });
                     this.emit(this.onAddResource, uri, res);

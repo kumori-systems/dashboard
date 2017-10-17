@@ -1,5 +1,5 @@
 import { Deployment as EcloudDeployment, AdmissionEvent as EcloudEvent, EcloudEventType } from 'admission-client';
-import { Deployment, Link, Service, Resource, Component, Runtime, Cert, DataVolume, Webdomain, Channel } from '../classes';
+import { Deployment, Link, Service, Resource, Component, Runtime, Cert, DataVolume, Domain, Channel } from '../classes';
 export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDeployment) {
     let roles: { [rolId: string]: Deployment.Rol } = {};
     let instances: { [instanceId: string]: Deployment.Rol.Instance };
@@ -61,7 +61,7 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
 
     return new Deployment(
         ecloudDeployment.urn,
-        (<any>ecloudDeployment).name || ecloudDeployment.service.split('/')[4] + ecloudDeployment.service.split('/')[5], // name: string
+        (<any>ecloudDeployment).name, // name: string
         ecloudDeployment.service, // serviceId: string
         resourcesConfig, // resourcesConfig: { [resource: string]: any }
         parameters, // parameters: any
@@ -210,12 +210,12 @@ export function transformManifestToComponent(manifest: {
 }
 export function transformManifestToResource(manifest: { spec: string, name: string, parameters: any }): Resource {
     let res: Resource = null;
-    switch (this.getResourceType(manifest.spec)) {
+    switch (getResourceType(manifest.spec)) {
         case ResourceType.domain:
-            res = new Webdomain(
+            res = new Domain(
                 manifest.name,
                 manifest.parameters.vhost,
-                Webdomain.State.VALIDATED
+                Domain.State.VALIDATED
             );
             break;
         case ResourceType.cert:
@@ -294,32 +294,38 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
             }
         }
     } = {};
-    let deploymentId = ecloudEvent.data.deploymentUrn;
-    res[deploymentId] = { 'data': {}, 'roles': {} };
-    let timestamp = ecloudEvent.timestamp;
-    for (let rolId in ecloudEvent.data.roles) {
-        res[deploymentId].roles[rolId] = { 'data': {}, 'instances': {} };
+    const startTime = performance.now();
+    // Inicializamos el deployment
+    res[ecloudEvent.data.deploymentUrn] = { 'data': {}, 'roles': {} };
 
-        // Obtenemos los datos de las instáncias
-        for (let instanceId in ecloudEvent.data.roles[rolId].instances) {
-            res[deploymentId].roles[rolId].instances[instanceId] = {};
-            for (let property in ecloudEvent.data.roles[rolId].instances[instanceId]) {
-                res[deploymentId].roles[rolId].instances[instanceId][property] = ecloudEvent.data.roles[rolId].instances[instanceId][property].mean;
-            }
-            res[deploymentId].roles[rolId].instances[instanceId]['timestamp'] = timestamp;
-        }
+    // Obtenemos los datos de los deployment
+    for (let property in ecloudEvent.data.data) {
+        res[ecloudEvent.data.deploymentUrn].data[property] = ecloudEvent.data.data[property].mean;
+    }
+    res[ecloudEvent.data.deploymentUrn].data['timestamp'] = ecloudEvent.timestamp;
+
+    // Inicializamos los roles
+    for (let rolId in ecloudEvent.data.roles) {
+        res[ecloudEvent.data.deploymentUrn].roles[rolId] = { 'data': {}, 'instances': {} };
 
         // Obtenemos los datos de los roles
         for (let property in ecloudEvent.data.roles[rolId].data) {
-            res[deploymentId].roles[rolId].data[property] = ecloudEvent.data.roles[rolId].data[property].mean;
+            res[ecloudEvent.data.deploymentUrn].roles[rolId].data[property] = ecloudEvent.data.roles[rolId].data[property].mean;
         }
-        res[deploymentId].roles[rolId].data['timestamp'] = timestamp;
+        res[ecloudEvent.data.deploymentUrn].roles[rolId].data['timestamp'] = ecloudEvent.timestamp;
+
+        // Obtenemos los datos de las instáncias
+        for (let instanceId in ecloudEvent.data.roles[rolId].instances) {
+            res[ecloudEvent.data.deploymentUrn].roles[rolId].instances[instanceId] = {};
+            for (let property in ecloudEvent.data.roles[rolId].instances[instanceId]) {
+                res[ecloudEvent.data.deploymentUrn].roles[rolId].instances[instanceId][property] = ecloudEvent.data.roles[rolId].instances[instanceId][property].mean;
+            }
+            res[ecloudEvent.data.deploymentUrn].roles[rolId].instances[instanceId]['timestamp'] = ecloudEvent.timestamp;
+        }
     }
-    // Obtenemos los datos de los deployment
-    for (let property in ecloudEvent.data.data) {
-        res[deploymentId].data[property] = ecloudEvent.data.data[property].mean;
-    }
-    res[deploymentId].data['timestamp'] = timestamp;
+
+    const duration = performance.now() - startTime;
+    console.log('transformEcloudEventDataToMetrics duration %d', duration);
 
     return res;
 }
@@ -367,8 +373,11 @@ export function getResourceType(uri: string): ResourceType {
 
     // Obtenemos el tipo. En caso de que sea temprary, el tipo estará 2 huecos desplazado
     switch (splitted[i]) {
+        case 'volumes':
+            console.warn('deprecated type of resource \'volumes\'');
         case 'volume':
             res = ResourceType.volume;
+            break;
         case 'cert':
             res = ResourceType.cert;
             break;
@@ -376,7 +385,7 @@ export function getResourceType(uri: string): ResourceType {
             res = ResourceType.domain;
             break;
         default:
-            console.info('Resource type not covered', uri);
+            console.error('Resource type not covered', uri);
     }
     return res;
 }
@@ -419,10 +428,11 @@ export function transformDeploymentToManifest(deployment: Deployment) {
         manifestRoles[rolId].resources['__resilience'] = (<Deployment.Rol>deployment.roles[rolId]).resilience;
     }
 
+    console.warn('No name can be added to a deployment on it\'s creation');
     return {
         'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
         'servicename': deployment.serviceId,
-        'name': deployment.name,
+        // 'name': deployment.name,
         'interconnection': true,
         'configuration': {
             'resources': deployment.resourcesConfig,
@@ -431,13 +441,13 @@ export function transformDeploymentToManifest(deployment: Deployment) {
         'roles': manifestRoles
     };
 }
-export function transformWebdomainToManifest(webdomain: string) {
+export function transformDomainToManifest(domain: string) {
     console.error('Creado nombre de resource con posibles colisiones: eslap://dashboard/resources/vhost/*');
     return {
         spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-        name: 'eslap://dashboard/resources/vhost/' + webdomain,
+        name: 'eslap://dashboard/resources/vhost/' + domain,
         parameters: {
-            vhost: webdomain
+            vhost: domain
         }
     };
 }

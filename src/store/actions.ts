@@ -1,5 +1,5 @@
 import { ProxyConnection } from './proxy/index';
-import { getElementType, ElementType } from './proxy/utils';
+import { getElementType, ElementType, getResourceType, ResourceType, transformEcloudEventDataToMetrics } from './proxy/utils';
 import { DeploymentItem } from './../components';
 import { Deployment, Component, Service, Runtime, Resource } from './classes';
 import urlencode from 'urlencode';
@@ -51,6 +51,15 @@ export default {
             });
         });
 
+        connection.onAddInstance((deploymentId: string, roleId: string, instanceId: string, instance: Deployment.Rol.Instance) => {
+            commit('addInstance', {
+                'deploymentId': deploymentId,
+                'roleId': roleId,
+                'instanceId': instanceId,
+                'instance': instance
+            });
+        });
+
         connection.onModifyDeployment((value) => {
             console.warn('Received event onModifyDeployment, which is still under development');
         });
@@ -79,9 +88,25 @@ export default {
         });
 
         connection.onAddResource((resourceId: string, resource: Resource) => {
+            // Obtenemos el tipo de resource del que estamos hablando
+            let type: ResourceType = getResourceType(resourceId);
+            let commitString: string;
+            switch (type) {
+                case ResourceType.cert:
+                    commitString = 'addCert';
+                    break;
+                case ResourceType.domain:
+                    commitString = 'addDomain';
+                    break;
+                case ResourceType.volume:
+                    commitString = 'addVolume';
+                    break;
+                default:
+                    console.error('Not expected resource type %s', type);
+            }
             let val: { [id: string]: Resource } = {};
             val[resourceId] = resource;
-            commit('addResource', val);
+            commit(commitString, val);
         });
         connection.onRemoveResource((resourceId: string) => {
             commit('removeResource', resourceId);
@@ -93,10 +118,13 @@ export default {
 
     },
 
-    addNewElement(context, params) {
-        connection.addNewElement(params);
+    addNewDomain(context, params) {
+        connection.addDomain(params);
     },
-    
+    addNewBundle(context, params) {
+        connection.addNewBundle(params);
+    },
+
     deleteElement(context, elementId) {
         connection.deleteElement(elementId);
     },
@@ -124,7 +152,21 @@ export default {
                 res = context.state.componentList[uri];
                 break;
             case ElementType.resource:
-                res = context.state.resourceList[uri];
+                let resourceType = getResourceType(uri);
+                switch (resourceType) {
+                    case ResourceType.cert:
+                        res = context.state.certList[uri];
+                        break;
+                    case ResourceType.domain:
+                        res = context.state.domainList[uri];
+                        break;
+                    case ResourceType.volume:
+                        res = context.state.volumeList[uri];
+                        break;
+                    default:
+                        console.error('ResourceType not covered %s', resourceType);
+                }
+
                 break;
             default:
                 console.error('Element type not covered %s', type);
@@ -144,7 +186,7 @@ export default {
         connection.aplyChangesToDeployment(deploymentId, rolNumInstances, killInstances);
     },
 
-    createNewDeployment(context, deployment) {
+    createNewDeployment({ commit }, deployment) {
         connection.addDeployment(deployment).catch((error) => {
             console.error('Error deploying a service', error);
         });
@@ -154,11 +196,7 @@ export default {
     selectedService({ commit }, serviceId) {
         commit('selectedService', serviceId);
     },
-    
-    /* DEBERÍA DESAPARECER: addNewElement */
-    addWebDomain({ getters }, webdomain) {
-        connection.addWebdomain(webdomain);
-    },
+
 
     /* DEBERÍA DESAPARECER: addNewElement */
     addDataVolume(context, params) {

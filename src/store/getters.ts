@@ -1,4 +1,4 @@
-import { Deployment, Runtime, Component, Service, Webdomain, Link, Resource, FabElement, Channel } from './classes';
+import { Deployment, Runtime, Component, Service, Domain, Link, Resource, FabElement, Channel, Metric } from './classes';
 import urlencode from 'urlencode';
 import { getElementOwner, getElementName, getElementVersion, isServiceEntrypoint, getElementType, ElementType, getResourceType, ResourceType } from './proxy/utils';
 export default {
@@ -51,30 +51,82 @@ export default {
   },
 
   getTotalRequiredDeploymentChannels: function (state, getters) {
-    // Recorremos los deployments y añadimos todos los identificadores de los canales provided
-    let res = [];
+    return (serviceId: string, channelId: string) => {
+      console.log('Entramos en getTotalReqChannels');
+      // Obtenemos el canal y miramos de qué tipo es
+      let type: string = (<Service>state.serviceList[serviceId]).proChannels[channelId].type;
+      let typeSearched: string;
+      switch (type) {
+        case 'eslap://eslap.cloud/endpoint/request/1_0_0':
+          console.warn('deprecated channel URI \'endpoint\'');
+        case 'eslap://eslap.cloud/channel/request/1_0_0':
+          typeSearched = 'eslap://eslap.cloud/channel/reply/1_0_0';
+          break;
 
-    for (let deploymentId in state.deploymentList) {
-      // Obtenemos el servicio del deployment
-      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (state.serviceList[serviceId]) // if service exists
-        for (let requiredChannelId in (<Service>state.serviceList[serviceId]).reqChannels)
-          res.push(getters.getDeploymentName(deploymentId) + ' + ' + requiredChannelId);
-    }
-    return res;
+        case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
+          console.warn('deprecated channel URI \'endpoint\'');
+        case 'eslap://eslap.cloud/channel/reply/1_0_0':
+          typeSearched = 'eslap://eslap.cloud/channel/request/1_0_0';
+          break;
+
+        default:
+          console.error('Not expected channel type %s on  %s:%s', type, serviceId, channelId);
+      }
+      let res = [];
+      for (let deploymentId in state.deploymentList) {
+        if (!(<Deployment>state.deploymentList[deploymentId]).isEntrypoint || (<Deployment>state.deploymentList[deploymentId]).links.length === 0) { // Si es un entrypoint y ya está en uso no lo listamos
+          let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+          if (state.serviceList[serviceId]) { // if service exists
+            for (let requiredChannelId in (<Service>state.serviceList[serviceId]).reqChannels) { // Recorremos los canales required del servicio
+              if ((<Service>state.serviceList[serviceId]).reqChannels[requiredChannelId].type.split('/')[4] === typeSearched.split('/')[4]) { // Si encaja con el tipo de canal que buscamos
+                res.push(getters.getDeploymentName(deploymentId) + ' + ' + requiredChannelId); // Lo añadimos
+              }
+            }
+          }
+        }
+      }
+      return res;
+    };
   },
 
   getTotalProvidedDeploymentChannels: function (state, getters) {
-    // Recorremos los deployments y añadimos todos los identificadores de los canales provided
-    let res = [];
-    for (let deploymentId in state.deploymentList) {
-      // Obtenemos el servicio del deployment
-      let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
-      if (state.serviceList[serviceId] !== undefined && state.serviceList[serviceId] !== null)
-        for (let providedChannelId in (<Service>state.serviceList[serviceId]).proChannels)
-          res.push(getters.getDeploymentName(deploymentId) + ' + ' + providedChannelId);
-    }
-    return res;
+    return (serviceId: string, channelId: string) => {
+      let type: string = (<Service>state.serviceList[serviceId]).reqChannels[channelId].type;
+      let typeSearched: string;
+      switch (type) {
+        case 'eslap://eslap.cloud/endpoint/request/1_0_0':
+          // this line +21 split should be removed after fixing this
+          console.warn('deprecated channel URI \'endpoint\'');
+        case 'eslap://eslap.cloud/channel/request/1_0_0':
+          typeSearched = 'eslap://eslap.cloud/channel/reply/1_0_0';
+          break;
+
+        case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
+          // this line +15 split should be removed after fixing this
+          console.warn('deprecated channel URI \'endpoint\'');
+        case 'eslap://eslap.cloud/channel/reply/1_0_0':
+          typeSearched = 'eslap://eslap.cloud/channel/request/1_0_0';
+          break;
+
+        default:
+          console.error('Not expected channel type %s on  %s:%s', type, serviceId, channelId);
+      }
+
+      let res = [];
+      for (let deploymentId in state.deploymentList) {
+        if (!(<Deployment>state.deploymentList[deploymentId]).isEntrypoint || (<Deployment>state.deploymentList[deploymentId]).links.length === 0) { // Si es un entrypoint y ya está en uso no lo listamos
+          let serviceId: string = (<Deployment>state.deploymentList[deploymentId]).serviceId;
+          if (state.serviceList[serviceId]) { // if service exists
+            for (let providedChannelId in (<Service>state.serviceList[serviceId]).proChannels) { // Recorremos los canales required del servicio
+              if ((<Service>state.serviceList[serviceId]).proChannels[providedChannelId].type.split('/')[4] === typeSearched.split('/')[4]) { // Si encaja con el tipo de canal que buscamos
+                res.push(getters.getDeploymentName(deploymentId) + ' + ' + providedChannelId); // Lo añadimos
+              }
+            }
+          }
+        }
+      }
+      return res;
+    };
   },
 
   /* Creo que no se utiliza */
@@ -105,6 +157,49 @@ export default {
       return res;
     };
   },
+
+  /* METRICS */
+  metricList: function (state): Metric[] {
+    return state.metricList;
+  },
+
+  /**
+   * Devuelve una lista de tuplas.
+   * La tupla contiene;
+   *  - Métricas del deployment
+   *  - Mapa para identificar métricas en roles e instáncias.
+   */
+  deploymentMetricList: function (state): Function {
+    return (deploymentId: string): [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] => {
+      let res: [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] = [];
+      let timestamp: Date;
+      let metric: {
+        [deploymentId: string]: {
+          'data': Metric,
+          'roles': {
+            [rolId: string]: {
+              'data': Metric,
+              'instances': {
+                [instanceId: string]: Metric,
+              }
+            }
+          }
+        }
+      };
+
+      for (let index in state.metricList) {
+
+        [timestamp, metric] = state.metricList[index];
+        if (metric[deploymentId]) { // As we are constanly getting metrics, it's possible we still not got this deployment metric in this group of metrics
+          res.push([metric[deploymentId].data, metric[deploymentId].roles]);
+        }
+
+      }
+      console.log('Obtenemos las métricas de %s son ', deploymentId, res);
+      return res;
+    };
+  },
+
 
   /* DEPLOYMENTS */
   getDeploymentList: function (state): Array<string> {
@@ -150,19 +245,16 @@ export default {
   },
 
   getServiceIsEntryPoint: function (state, getters) {
-    console.warn('@deprecated getServiceIsEntryPoint. Use utils instead');
+    console.warn('deprecated getServiceIsEntryPoint. Use utils instead');
     return (uri: string) => { return isServiceEntrypoint(uri); };
   },
 
   getDeploymentState: function (state, getters): Function {
     return function (deploymentId: string): Deployment.State {
-      return (<Deployment>state.deploymentList[deploymentId]).state;
-    };
-  },
-
-  getDeploymentChartData: function (state, getters): Function {
-    return function (deploymentId: string): Object {
-      return (<Deployment>state.deploymentList[deploymentId]).metrics.getFormattedMetrics();
+      let res: Deployment.State = Deployment.State.UNKOWN;
+      if (state.deploymentList[deploymentId])
+        res = (<Deployment>state.deploymentList[deploymentId]).state;
+      return res;
     };
   },
 
@@ -248,18 +340,20 @@ export default {
   getDeploymentVolumes: function (state): Function {
     return function (deploymentId: string): Array<string> {
       let res: Array<string> = [];
+      /* // TODO: This is not properly working
       let serviceId = (<Deployment>state.deploymentList[deploymentId]).serviceId;
       if (state.serviceList[serviceId]) { // if service exists
         let serviceResources = (<Service>state.serviceList[serviceId]).resources;
         for (let serviceResourceIndex in serviceResources) {
           if (
-            state.resourceList[serviceResources[serviceResourceIndex]]
+            state.volumeList[serviceResources[serviceResourceIndex]]
             && getElementType(serviceResources[serviceResourceIndex]) === ElementType.resource
             && getResourceType(serviceResources[serviceResourceIndex]) === ResourceType.volume
           )
             res.push(serviceResources[serviceResourceIndex]);
         }
       }
+      */
       return res;
     };
   },
@@ -316,26 +410,6 @@ export default {
       }
       return res;
 
-    };
-  },
-
-  getDeploymentRolChartData: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string): Object {
-      let res: Deployment.Metrics;
-      if (
-        !state.deploymentList[deploymentId]
-        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId]
-        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics
-      ) {
-        if (getters.getIsEntryPoint(deploymentId)) {
-          res = new Deployment.EntryPointMetrics();
-        } else {
-          res = new Deployment.CommonMetrics();
-        }
-      } else {
-        res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].metrics;
-      }
-      return res.getFormattedMetrics();
     };
   },
 
@@ -429,7 +503,6 @@ export default {
     };
   },
 
-  /* DEPRECATED */
   getDeploymentRolProChannels: function (state): Function {
     console.warn('getDeploymentRolProChannels is a deprecated function. Take the connections instead.');
     return function (deploymentId: string, rolId: string): { [channelId: string]: Channel } {
@@ -477,27 +550,6 @@ export default {
   getDeploymentRolInstanceNet: function (state, getters): Function {
     return function (deploymentId: string, rolId: string, InstanceId: string): number {
       return getters.getDeploymentRolNetNumber(deploymentId, rolId);
-    };
-  },
-
-  getDeploymentRolInstanceChartData: function (state, getters): Function {
-    return function (deploymentId: string, rolId: string, instanceId: string) {
-      let res: Deployment.Metrics;
-      if (
-        !state.deploymentList[deploymentId]
-        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId]
-        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId]
-        || !(<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics
-      ) {
-        if (getters.getIsEntryPoint(deploymentId)) {
-          res = new Deployment.EntryPointMetrics();
-        } else {
-          res = new Deployment.CommonMetrics();
-        }
-      } else {
-        res = (<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].metrics;
-      }
-      return res.getFormattedMetrics();
     };
   },
 
@@ -725,10 +777,11 @@ export default {
   getServiceProChannels: function (state, getters) {
     return (serviceId: string) => {
       let res = [];
-      if ((<Service>state.serviceList[serviceId]))
+      if ((<Service>state.serviceList[serviceId])) { // if service exists
         for (let proChannel in (<Service>state.serviceList[serviceId]).proChannels) {
           res.push(proChannel);
         }
+      }
       return res;
     };
   },
@@ -736,10 +789,11 @@ export default {
   getServiceReqChannels: function (state, getters) {
     return (serviceId: string) => {
       let res = [];
-      if ((<Service>state.serviceList[serviceId]))
+      if ((<Service>state.serviceList[serviceId])) { // if service exists
         for (let reqChannel in (<Service>state.serviceList[serviceId]).reqChannels) {
           res.push(reqChannel);
         }
+      }
       return res;
     };
   },
@@ -825,7 +879,7 @@ export default {
   getServiceList: function (state, getters): Array<string> {
     let res = [];
     for (let serviceId in state.serviceList) {
-        res.push(serviceId);
+      res.push(serviceId);
     }
     return res;
   },
@@ -938,81 +992,9 @@ export default {
     };
   },
 
-  /* RESOURCE: WEB DOMAIN */
-  getWebDomainList: function (state): Array<string> {
-    let res: Array<string> = [];
-    for (let resourceId in state.resourceList) {
-      if (
-        state.resourceList[resourceId] // if resource exists
-        && getElementType(resourceId) === ElementType.resource
-        && getResourceType(resourceId) === ResourceType.domain
-      )
-        res.push((<Webdomain>state.resourceList[resourceId]).domain);
-    }
-    return res;
-  },
-
-  getUsedWebDomainList: function (state, getters) {
-    let usedWebdomain: Array<string> = [];
-    for (let deploymentId in state.deploymentList) {
-      usedWebdomain = usedWebdomain.concat((<Deployment>state.deploymentList[deploymentId]).website);
-    }
-    return usedWebdomain;
-  },
-
-  getWebdomainResource: function (state) {
-    return (webdomain: string) => {
-      console.error('deprecated function \'getWebdomainResource\' use \'getResourceFromWebdomain\' instead');
-    };
-  },
-
-  getResourceFromWebdomain: function (state) {
-    return (webdomain: string) => {
-      for (let resourceId in state.resourceList) {
-        if ((<Webdomain>state.resourceList[resourceId]).domain === webdomain)
-          return resourceId;
-      }
-    };
-  },
-
-  getWebdomainState: function (state, getters) {
-    return (webdomain) => {
-      let resourceId: string = getters.getWebdomainResource(webdomain);
-      if (resourceId)
-        return (<Webdomain>state.resourceList[resourceId]).state;
-    };
-  },
-
-  getServiceUsingDomain: function (state, getters) {
-    return (webdomain): string => {
-      // Miramos qué entrypoint lo está utilizando
-      for (let deploymentId in state.deploymentList) {
-        // Devolvemos el link conectado a su canal
-        if ((<Deployment>state.deploymentList[deploymentId]).isEntrypoint
-          && (<Deployment>state.deploymentList[deploymentId]).website.indexOf(webdomain) !== -1) {
-          // Recorremos el link en busca del servicio conectado
-          if ((<Deployment>state.deploymentList[deploymentId]).links.length > 0)
-            return (<Deployment>state.deploymentList[
-              (<Deployment>state.deploymentList[deploymentId]).links[0].deploymentTwo
-            ]).name;
-          return 'none';
-        }
-      }
-    };
-  },
-
-  getFreeWebDomainList: function (state, getters) {
-    // Buscamos los inbound
-    let allWebDomains: Array<string> = getters.getWebDomainList;
-    let usedWebdomains: Array<string> = getters.getUsedWebDomainList;
-
-    let freeWebdomains = [];
-    for (let domain in allWebDomains) {
-      if (usedWebdomains.indexOf(allWebDomains[domain]) === -1) {
-        freeWebdomains.push(allWebDomains[domain]);
-      }
-    }
-    return freeWebdomains;
+  /* RESOURCE: DOMAIN */
+  domainList: function (state) {
+    return state.domainList;
   },
 
   /* RESOURCE: DATA VOLUMES */

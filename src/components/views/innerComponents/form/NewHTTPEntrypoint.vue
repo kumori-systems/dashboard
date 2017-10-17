@@ -1,22 +1,31 @@
 <template>
     <div class="tile is-6">
         <table>
-            <tr>
+            <tr class="tile">
+                <th>
+                    <span>NAME</span>
+                </th>
+                <th>
+                    <input class="input" v-model="deploymentName" placeholder="EntryPoint name">
+                </th>
+                <th>
+                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="deploymentName.length<=0 || selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
+                </th>
+            </tr>
+            <tr class="tile">
+                <th>
+                    <span>DOMAIN</span>
+                </th>
                 <th>
                     <span class="select">
                         <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
                             <option disabled value="">Please select one</option>
-                            <option v-for="domain in freeDomainList" v-bind:key="domain">{{domain}}</option>
-                            <option disabled v-for="domain in usedDomainList" v-bind:key="domain">{{domain}}</option>
+                            <option v-for="(domain, domainId) in domainList" v-bind:key="domainId" v-if="domain && !domain.inUse()" v-bind:value="domainId">{{ domain.domain }}</option>
                         </select>
                     </span>
-
                 </th>
                 <th>
                     <checkbox-input v-bind:disabled="true" v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
-                </th>
-                <th>
-                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
                 </th>
             </tr>
             <tr>
@@ -86,20 +95,21 @@ export default class NewHTTPEntrypoint extends Vue {
     requireClientCertificates: boolean = false;
     instances: number = 1;
     resilience: number = 1;
+    deploymentName:string='';
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
 
-    get freeDomainList() {
-        return this.$store.getters.getFreeWebDomainList;
+    get domainList() {
+        let domainList = this.$store.getters.domainList;
+        for (let domainId in domainList) {
+            this.$store.dispatch('getElementInfo', { 'uri': domainId });
+        }
+        return domainList;
     }
-
-    get usedDomainList() {
-        return this.$store.getters.getUsedWebDomainList;
-    }
-
+    
     get certificateList() {
         return this.$store.getters.getCertificateList;
     }
@@ -119,9 +129,9 @@ export default class NewHTTPEntrypoint extends Vue {
         };
 
         let instanceList = {};
-            for (let counter = 0; counter < this.instances; counter++) {
-                instanceList[counter] = new Deployment.Rol.Instance(null, null, null, null);
-            }
+        for (let counter = 0; counter < this.instances; counter++) {
+            instanceList[counter] = new Deployment.Rol.Instance(null, null, null, null);
+        }
 
         let roles = {}
         roles['sep'] = new Deployment.Rol(
@@ -135,11 +145,10 @@ export default class NewHTTPEntrypoint extends Vue {
             instanceList
         );
 
-        console.warn('Es posible que la configuración del servicio(entrypoint) no se esté propagando correctamente');
         this.$store.dispatch('createNewDeployment',
             new Deployment(
                 null, //uri
-                'http', //name
+                this.deploymentName, //name
                 'eslap://eslap.cloud/services/http/inbound/1_0_0', //serviceId
                 serviceConfig, //resourcesConfig
                 config, //parameters

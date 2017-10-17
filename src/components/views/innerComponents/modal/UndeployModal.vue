@@ -36,10 +36,15 @@ export default class UndeployModal extends Vue {
 
     primaryButtonText: string = 'Undeploy';
     primaryButtonCallback: Function = () => {
-        this.$store.dispatch('undeployDeployment', { 'deploymentId': this.deploymentId });
+        this.undeploy();
         this.close();
     };
     primaryButtonClass: string = 'is-danger';
+
+
+    undeploy(){
+        this.$emit('undeploy', { 'deploymentId': this.deploymentId });
+    }
 
     close() {
         this.$emit('close');

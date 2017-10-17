@@ -1,7 +1,7 @@
 <template>
     <div class="tile is-4">
-        <input class="input" v-model="newWebDomain" placeholder="New domain">
-        <button class="button is-primary" v-on:click="addWebDomain">add</button>
+        <input class="input" v-model="newDomain" placeholder="New domain">
+        <button class="button is-primary" v-on:click="addDomain">add</button>
     </div>
 </template>
 <script lang="ts">
@@ -12,17 +12,16 @@ import { FabElement } from '../../../../store/classes';
     name: 'AddDomain'
 })
 export default class AddDomain extends Vue {
-    newWebDomain = null;
+    newDomain = null;
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
     }
-    addWebDomain() {
-        if (this.newWebDomain != null && this.newWebDomain.length > 0) {
-            this.$store.dispatch('addWebDomain', this.newWebDomain);
+    addDomain() {
+        if (this.newDomain != null && this.newDomain.length > 0) {
+            this.$store.dispatch('addNewDomain', this.newDomain);
             this.$router.go(-1);
         }
-
     }
 }
 </script>

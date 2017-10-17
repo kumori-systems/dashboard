@@ -85,7 +85,8 @@ export default class Card extends Vue {
     }
 
     get instanceChartData(): any {
-        return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+        // return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
+        return [];
     }
 
     /**

@@ -18,7 +18,7 @@
                     <div v-for="(rol, index) in roles" v-bind:key="index" class="tile">
                         <i class="fa-circle fa"></i>
                         <div>
-                            <strong>{{rol| truncateLeft(30)}}</strong>
+                            <strong>{{ rol| truncateLeft(30) }}</strong>
                             <div class="rol-component">{{ rolComponentURI(rol) || 'unavailable' | truncateLeft(50) }}</div>
                         </div>
                         <div class="box is-unselectable">
@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div v-else>
-                    <span>No roles found</span>
+                    none
                 </div>
             </div>
 
@@ -51,9 +51,9 @@
                     <div v-for="(link, index) in links" v-bind:key="index" class="tile">
                         <i class="fa fa-circle"></i>
                         <div>
-                            <strong>{{link.fromChannel}}</strong>
+                            <strong>{{ link.fromChannel }}</strong>
                             <div>
-                                Connnected to -> {{link.toDeployment}}
+                                Connnected to -> {{ link.toDeployment }}
                             </div>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                 <div v-if="volumes !== null && volumes.length>0">
                     <div v-for="(volume, index) in volumes" v-bind:key="index" class="tile">
                         <i class="fa fa-circle"></i>
-                        <div>{{volume}}</div>
+                        <div>{{ volume }}</div>
                     </div>
                 </div>
                 <span v-else>

@@ -1,8 +1,19 @@
 <template>
     <div>
         <table>
-            <tr class="tile is-3">
-                <th>SERVICE:</th>
+            <tr class="tile">
+                <th>
+                    <span>NAME</span>
+                </th>
+                <th>
+                    <input class="input" v-model="deploymentName" placeholder="Deployment name">
+                </th>
+                <th>
+                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
+                </th>
+            </tr>
+            <tr class="tile">
+                <th>SERVICE</th>
                 <th>
                     <div class="select">
                         <select v-model="selectedService">
@@ -12,20 +23,8 @@
 
                     </div>
                 </th>
-                <th>
-                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="!allSelected">Deploy</button>
-                </th>
             </tr>
             <table v-if="selectedService!=null">
-
-                <tr class="tile is-3">
-                    <th>
-                        <span>NAME</span>
-                    </th>
-                    <th>
-                        <input class="input" v-model="deploymentName" placeholder="Deployment name">
-                    </th>
-                </tr>
                 <tr v-if="serviceRolList.length > 0">
                     <th>ROLES</th>
                 </tr>
@@ -194,7 +193,22 @@ export default class NewService extends Vue {
         this.selectedService = this.$store.getters.getSelectedService;
     }
 
+    get deploymentList(): Array<string> {
+        return this.$store.getters.getDeploymentList;
+    }
+
+    get deployedServicesInfo(): boolean {
+        // Para poder hacer los cálculos de los channel, y poder recomendar únicamente aquellos que encajan
+        // es necesario obtener todos los servicios de aquellos deployment que están desplegados
+        for (let i in this.deploymentList) {
+            let serviceURI = this.$store.getters.getDeploymentService(this.deploymentList[i]);
+            this.$store.dispatch('getElementInfo', { 'uri': serviceURI });
+        }
+        return true;
+    }
+
     get serviceList() {
+        this.deployedServicesInfo;
         return this.$store.getters.getServiceList;
     }
 
@@ -239,12 +253,12 @@ export default class NewService extends Vue {
     }
 
     get totalProvidedDeploymentChannels() {
-        return (channel)=>{return this.$store.getters.getTotalProvidedDeploymentChannels(this.selectedService, channel);};
+        return (channel) => { return this.$store.getters.getTotalProvidedDeploymentChannels(this.selectedService, channel); };
     }
 
     get totalRequiredDeploymentChannels() {
-        return (channel)=>{return this.$store.getters.getTotalRequiredDeploymentChannels(this.selectedService, channel);};
-        
+        return (channel) => { return this.$store.getters.getTotalRequiredDeploymentChannels(this.selectedService, channel); };
+
     }
 
     get totalResourceConfig() {
@@ -308,14 +322,13 @@ export default class NewService extends Vue {
             );
         }
 
-        console.warn('Es posible que la configuración del servicio no se esté propagando correctamente');
         this.$store.dispatch('createNewDeployment',
             new Deployment(
                 null, //uri
                 this.deploymentName, //name
                 this.selectedService, //serviceId
-                this.serviceConfig as any as { [resource: string]: any; }, //resourcesConfig
-                config, //parameters
+                config, //resourcesConfig
+                JSON.parse(this.serviceConfig), //parameters
                 roles, //roles
                 [], //links
                 [] //website

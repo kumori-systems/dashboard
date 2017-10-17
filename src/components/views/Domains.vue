@@ -1,40 +1,32 @@
 <template>
     <div>
         <table class="table">
-            <tr v-for="usedWebdomain in usedWebDomainList" v-bind:key="usedWebdomain">
+
+            <tr v-for="(domain, domainId) in domainList" v-bind:key="domainId">
                 <th>
-                    <a v-bind:href="'http://'+usedWebdomain">
-                        {{usedWebdomain}}
+                    <a v-if="domain" v-bind:href="'http://'+domain.domain">
+                        {{ domain.domain }}
                     </a>
                 </th>
                 <th>
-                    <i class="fa fa-check-circle" aria-hidden="true" />
+                    <i v-if="domain" v-bind:class="domain.state" aria-hidden="true"></i>
                 </th>
                 <th>
-                    <span class="ON_PROGRESS">in use</span> by {{serviceUsingDomain(usedWebdomain)}}
+                    <span v-if="domain && domain.inUse > 0 ">
+                        <span class="WARNING">in use</span> by {{ domain.inUseBy }}
+                    </span>
+                    <span v-else>
+                        not in use
+                    </span>
                 </th>
                 <th>
-                    <button class="button is-danger">
-                        <i class="fa fa-trash" aria-hidden="true" v-on:click="deleteWebDomain(usedWebdomain)"></i>
-                    </button>
-                </th>
-            </tr>
-            <tr v-for="freeWebdomain in freeWebDomainList" v-bind:key="freeWebdomain">
-                <th>{{freeWebdomain}}</th>
-                <th>
-                    <i v-bind:class="getWebdomainState(freeWebdomain)" aria-hidden="true"></i>
-                </th>
-                <th>
-                    not in use
-                </th>
-                <th>
-                    <button class="button is-danger" v-on:click="deleteWebDomain(freeWebdomain)">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    <button class="button is-danger" v-on:click="deleteDomain(domainId)">
+                        <i v-if="domain" class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                 </th>
             </tr>
         </table>
-        <delete-modal v-bind:visible="deleteModalIsVisible" v-bind:elementType="modalElementType" v-bind:elementId="domainId" v-bind:elementName="modalElementName" v-bind:elementVersion="modalElementVersion" v-on:close="deleteModalIsVisible=false">
+        <delete-modal v-bind:visible="deleteModalIsVisible" v-bind:elementType="'domain'" v-bind:elementId="modalElementId" v-bind:elementName="modalElementName" v-bind:elementVersion="''" v-on:close="deleteModalIsVisible=false">
         </delete-modal>
     </div>
 </template>
@@ -42,67 +34,41 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Webdomain } from '../../store/classes';
+import { FabElement, Domain } from '../../store/classes';
 import DeleteModal from './innerComponents/modal/DeleteModal.vue';
+import { getElementName, getElementOwner, getElementType, getElementVersion } from '../../store/proxy/utils';
 @Component({
-    name: 'WebDomains',
+    name: 'Domains',
     components: {
         'delete-modal': DeleteModal,
     }
 })
-export default class WebDomains extends Vue {
+export default class Domains extends Vue {
     // Modal Arguments
     deleteModalIsVisible: boolean = false;
-    modalElementType: string = 'domain';
-    domainId: string = '';
+    modalElementId: string = '';
     modalElementName: string = '';
-    modalElementVersion: string = '';
 
     mounted() {
         let fabElementsList: Array<FabElement> = [];
         fabElementsList.push(new FabElement('Add new domain', '/newDomain'));
         this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+
     }
 
-    get usedWebDomainList() {
-        return this.$store.getters.getUsedWebDomainList;
-    }
-    get freeWebDomainList() {
-        return this.$store.getters.getFreeWebDomainList;
-    }
-    get getWebdomainState() {
-        return (webdomain) => {
-            switch (this.$store.getters.getWebdomainState(webdomain)) {
-                case Webdomain.State.VALIDATED:
-                    return 'fa fa-check-circle';
-                case Webdomain.State.ERRONEUS:
-                    return 'fa fa-exclamation-circle';
-                case Webdomain.State.ON_VALIDATION:
-                    return 'fa fa-exclamation-triangle';
-                default:
-                    console.error('Webdomains view received a non-covered webdomain state \'' + JSON.stringify(this.$store.getters.getWebdomainState(webdomain)) + '\' when asking for ' + webdomain + '\'s state');
-                    return '';
-            }
+    get domainList(): { [resourceId: string]: Domain } {
+        let domainList = this.$store.getters.domainList;
+        for (let domainId in domainList) {
+            this.$store.dispatch('getElementInfo', { 'uri': domainId });
         }
-    }
-    get webdomainId() {
-        return (webdomain): string => {
-            return this.$store.getters.getWebdomainResource(webdomain);
-        }
+        return domainList;
     }
 
-    get serviceUsingDomain() {
-        return (webdomain): string => {
-            return this.$store.getters.getServiceUsingDomain(webdomain);
-        };
-    }
-
-    deleteWebDomain(webdomain) {
+    deleteDomain(domainURI) {
+        console.log('Llamamos a deleteDomain');
+        this.modalElementId = domainURI;
+        this.modalElementName = domainURI;
         this.deleteModalIsVisible = true;
-        this.modalElementType = 'webdomain';
-        this.domainId = this.webdomainId(webdomain);
-        this.modalElementName = webdomain;
-        this.modalElementVersion = '';
     }
 
 }

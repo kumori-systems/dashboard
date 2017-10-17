@@ -3,7 +3,7 @@
         <i v-bind:class="state" aria-hidden="true"></i>
         <span class="title">{{deploymentName}}</span>
         <div>
-            <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
+            <button class="button is-danger is-medium" v-on:click="showUndeployModal">UNDEPLOY</button>
             <button v-bind:disabled="!haveChanges" class="button is-success is-medium " v-on:click="applyChanges">APPLY CHANGES</button>
             <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
         </div>
@@ -36,11 +36,11 @@
         <div>
             <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
         </div>
-        <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
+        <undeploy-modal v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false" v-on:undeploy="handleUndeploy">
             This action will
             <strong>UNDEPLOY</strong> {{deploymentName}} and you will
             <strong>loose all data</strong>
-        </undeploy>
+        </undeploy-modal>
     </div>
 </template>
 <script lang="ts">
@@ -49,18 +49,19 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Moment from 'moment';
 
-import { FabElement, Deployment, Service, Channel } from '../../store/classes';
+import { FabElement, Deployment, Service, Channel, Metric } from '../../store/classes';
 import RolCard from './innerComponents/card/RolCard.vue';
 import Chart from './innerComponents/chart/Chart.js';
 import ChartOptions from './innerComponents/chart/ChartOptions.js';
-import Undeploy from './innerComponents/modal/UndeployModal.vue';
+import { prepareData } from './innerComponents/chart/Utils.js';
+import UndeployModal from './innerComponents/modal/UndeployModal.vue';
 
 @Component({
     name: 'DeploymentItem',
     components: {
         'rol-card': RolCard,
         'chart': Chart,
-        'undeploy': Undeploy
+        'undeploy-modal': UndeployModal
     }
 })
 export default class DeploymentItem extends Vue {
@@ -95,6 +96,7 @@ export default class DeploymentItem extends Vue {
     get deploymentId() {
         return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
     }
+
     get website(): string {
         return this.$store.getters.getDeploymentWebsite(this.deploymentId);
     }
@@ -107,8 +109,21 @@ export default class DeploymentItem extends Vue {
         return this.$store.getters.getIsEntryPoint(this.deploymentId);
     }
 
-    get deploymentChartData(): any {
-        return this.$store.getters.getDeploymentChartData(this.deploymentId);
+    get deploymentMetrics(): [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] {
+        return this.$store.getters.deploymentMetricList(this.deploymentId);
+    }
+
+    get deploymentChartData(): {
+        'labels': string[],
+        'datasets': any[]
+    } {
+        let res: Metric[] = [];
+        for (let i in this.deploymentMetrics) {
+            res.push(this.deploymentMetrics[i][0]);
+        }
+        let aux = prepareData(res);
+        console.log('Los datos que vamos a pintar en el chart son:', aux);
+        return aux;
     }
 
     get deploymentRoles(): Array<string> {
@@ -120,8 +135,8 @@ export default class DeploymentItem extends Vue {
         return this.$store.getters.getDeploymentService(this.deploymentId);
     }
 
-    get serviceInfo(){
-        if(this.$store.getters.getServiceInfo(this.deploymentService) === undefined)
+    get serviceInfo() {
+        if (this.$store.getters.getServiceInfo(this.deploymentService) === undefined)
             this.$store.dispatch('getElementInfo', { uri: this.deploymentService });
         return null;
     }
@@ -157,10 +172,15 @@ export default class DeploymentItem extends Vue {
         this.haveChanges = false;
     }
 
-    undeploy(): void {
+    showUndeployModal(): void {
         const deploymentId = this.deploymentId;
         this.modalOkCallback = function() { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
         this.showModal = true;
+    }
+
+    handleUndeploy(payload): void {
+        this.$store.dispatch('undeployDeployment', payload);
+        this.$router.go(-1);
     }
 
     handleKillInstanceChange(payload) {

@@ -59,7 +59,10 @@ export default new Vuex.Store({
         'serviceList': {},
         'componentList': {},
         'runtimeList': {},
-        'resourceList': {},
+        'domainList': {},
+        'volumeList': {},
+        'certList': {},
+        'metricList': [],
         'fabElements': {},
         'selectedService': null // Identifies the selected service from elements to add Service
     },

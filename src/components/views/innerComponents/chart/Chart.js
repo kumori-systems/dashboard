@@ -1,9 +1,14 @@
 import { Line, mixins } from 'vue-chartjs';
+const { reactiveProp } = mixins;
 
-export default Line.extend({
+/**
+ * http://vue-chartjs.org/#/home?id=reactive-data
+ */
+export default {
+  extends: Line,
+  mixins: [reactiveProp],
   props: ['options'],
-  mixins: [mixins.reactiveProp],
-  mounted: function () {
+  mounted() {
     this.renderChart(this.chartData, this.options);
   }
-});
+};

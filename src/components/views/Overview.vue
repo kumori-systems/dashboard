@@ -4,10 +4,18 @@
         <div v-else-if="deploymentList.length > 0">
             <checkbox-input v-model="hideEntrypoints"> Hide HTTP entrypoints</checkbox-input>
             <div class="tile is-vertical is-ancestor">
-                <div class="tile is-parent" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0">
+
+                <!--
+                    <div class="tile is-parent" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0">
+                        <deployment-card class="deployment-card" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
+                        <deployment-card class="deployment-card" v-bind:deploymentId="deploymentList[index+1]" v-if="deploymentList[index+1] && !shouldHide(deployment)"></deployment-card>
+                    </div>
+                    -->
+
+                <div class="tile is-parent" v-for="(deployment, index) in deploymentList" v-bind:key="index">
                     <deployment-card class="deployment-card" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
-                    <deployment-card class="deployment-card" v-bind:deploymentId="deploymentList[index+1]" v-if="deploymentList[index+1] && !shouldHide(deployment)"></deployment-card>
                 </div>
+
             </div>
         </div>
         <div v-else>
@@ -48,12 +56,13 @@ export default class Overview extends Vue {
         }
         return true;
     }
+
     get deploymentList(): Array<string> {
         return this.$store.getters.getDeploymentList;
     }
 
     get shouldHide(): Function {
-        return function (deploymentId): boolean {
+        return function(deploymentId): boolean {
             if (!this.hideEntrypoints) return false;
             return this.$store.getters.getIsEntryPoint(deploymentId);
         }
