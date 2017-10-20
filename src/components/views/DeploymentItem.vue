@@ -44,190 +44,241 @@
     </div>
 </template>
 <script lang="ts">
+import Vue from "vue";
+import Component from "vue-class-component";
+import Moment from "moment";
 
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import Moment from 'moment';
-
-import { FabElement, Deployment, Service, Channel, Metric } from '../../store/classes';
-import RolCard from './innerComponents/card/RolCard.vue';
-import Chart from './innerComponents/chart/Chart.js';
-import ChartOptions from './innerComponents/chart/ChartOptions.js';
-import { prepareData } from './innerComponents/chart/Utils.js';
-import UndeployModal from './innerComponents/modal/UndeployModal.vue';
+import {
+  FabElement,
+  Deployment,
+  Service,
+  Channel,
+  Metric
+} from "../../store/classes";
+import RolCard from "./innerComponents/card/RolCard.vue";
+import Chart from "./innerComponents/chart/Chart.js";
+import ChartOptions from "./innerComponents/chart/ChartOptions.js";
+import { prepareData } from "./innerComponents/chart/Utils.js";
+import UndeployModal from "./innerComponents/modal/UndeployModal.vue";
 
 @Component({
-    name: 'DeploymentItem',
-    components: {
-        'rol-card': RolCard,
-        'chart': Chart,
-        'undeploy-modal': UndeployModal
-    }
+  name: "DeploymentItem",
+  components: {
+    "rol-card": RolCard,
+    chart: Chart,
+    "undeploy-modal": UndeployModal
+  }
 })
 export default class DeploymentItem extends Vue {
-    rolNumInstances: { [rolId: string]: number } = {};
-    instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
-    haveChanges: boolean = false;
-    clear: boolean = false;
-    showModal: boolean = false;
-    modalOkCallback: Function = function() { };
-    chartOptions = ChartOptions;
+  rolNumInstances: { [rolId: string]: number } = {};
+  instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+  haveChanges: boolean = false;
+  clear: boolean = false;
+  showModal: boolean = false;
+  modalOkCallback: Function = function() {};
+  chartOptions = ChartOptions;
 
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+  mounted() {
+    let fabElementsList: Array<FabElement> = [];
+    this.$store.dispatch("setFabElements", {
+      fabElementsList: fabElementsList
+    });
+  }
+
+  get state(): string {
+    let res: string = "fa ";
+    switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+      case Deployment.State.OK:
+        res += "fa-check-circle";
+      case Deployment.State.DANGER:
+        res += "fa-exclamation-circle";
+      case Deployment.State.WARNING:
+        res += "fa-exclamation-triangle";
+      default:
+        res += "fa-question-circle";
+    }
+    return res;
+  }
+
+  get deploymentId() {
+    return this.$store.getters.getDeploymentIdFromDeploymentRoute(
+      this.$route.path
+    );
+  }
+
+  get website(): string {
+    return this.$store.getters.getDeploymentWebsite(this.deploymentId);
+  }
+
+  get deploymentName(): string {
+    return this.$store.getters.getDeploymentName(this.deploymentId);
+  }
+
+  get isEntrypoint() {
+    return this.$store.getters.getIsEntryPoint(this.deploymentId);
+  }
+
+  get deploymentMetrics() {
+    let metrics: [
+      Date,
+      {
+        data: Metric;
+        roles: {
+          [roleId: string]: {
+            data: Metric;
+            instances: { [instanceId: string]: Metric };
+          };
+        };
+      }
+    ][] = this.$store.getters.deploymentMetricList(this.deploymentId);
+
+    let res: {
+      data: Metric[];
+      roles: {
+        [roleId: string]: {
+          data: Metric;
+          instances: { [instanceId: string]: Metric };
+        };
+      };
+    } = {
+      data: [],
+      roles: {}
+    };
+    const startTime = performance.now();
+
+    for (let i in metrics) {
+      res["data"].push(metrics[i][1].data);
     }
 
-    get state(): string {
-        let res: string = 'fa ';
-        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case Deployment.State.OK:
-                res += 'fa-check-circle';
-            case Deployment.State.DANGER:
-                res += 'fa-exclamation-circle';
-            case Deployment.State.WARNING:
-                res += 'fa-exclamation-triangle';
-            default:
-                res += 'fa-question-circle';
-        }
-        return res;
-    }
+    if (metrics.length > 0) res.roles = metrics[0][1].roles;
 
-    get deploymentId() {
-        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
-    }
+    const duration = performance.now() - startTime;
+    console.log("El tiempo de procesado de las métricas en las vista es: %d", duration);
 
-    get website(): string {
-        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
-    }
+    return res;
+  }
 
-    get deploymentName(): string {
-        return this.$store.getters.getDeploymentName(this.deploymentId);
+  get deploymentChartData(): {
+    labels: string[];
+    datasets: any[];
+  } {
+    let res: Metric[] = [];
+    for (let i in this.deploymentMetrics) {
+      res.push(this.deploymentMetrics[i][0]);
     }
+    let aux = prepareData(res);
+    console.log("Los datos que vamos a pintar en el chart son:", aux);
+    return aux;
+  }
 
-    get isEntrypoint() {
-        return this.$store.getters.getIsEntryPoint(this.deploymentId);
-    }
+  get deploymentRoles(): Array<string> {
+    return this.$store.getters.getDeploymentRoles(this.deploymentId);
+  }
 
-    get deploymentMetrics(): [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] {
-        return this.$store.getters.deploymentMetricList(this.deploymentId);
-    }
+  /* Rol atributes */
+  get deploymentService(): string {
+    return this.$store.getters.getDeploymentService(this.deploymentId);
+  }
 
-    get deploymentChartData(): {
-        'labels': string[],
-        'datasets': any[]
-    } {
-        let res: Metric[] = [];
-        for (let i in this.deploymentMetrics) {
-            res.push(this.deploymentMetrics[i][0]);
-        }
-        let aux = prepareData(res);
-        console.log('Los datos que vamos a pintar en el chart son:', aux);
-        return aux;
-    }
+  get serviceInfo() {
+    if (
+      this.$store.getters.getServiceInfo(this.deploymentService) === undefined
+    )
+      this.$store.dispatch("getElementInfo", { uri: this.deploymentService });
+    return null;
+  }
 
-    get deploymentRoles(): Array<string> {
-        return this.$store.getters.getDeploymentRoles(this.deploymentId);
-    }
+  get serviceProvideChannels(): Array<Channel> {
+    this.serviceInfo;
+    return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
+  }
 
-    /* Rol atributes */
-    get deploymentService(): string {
-        return this.$store.getters.getDeploymentService(this.deploymentId);
-    }
+  get serviceRequireChannels(): Array<Channel> {
+    this.serviceInfo;
+    return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
+  }
 
-    get serviceInfo() {
-        if (this.$store.getters.getServiceInfo(this.deploymentService) === undefined)
-            this.$store.dispatch('getElementInfo', { uri: this.deploymentService });
-        return null;
-    }
+  applyChanges(): void {
+    this.haveChanges = false;
+    // Enviamos los valores que han cambiado
+    //  rolNumInstances
+    //  killInstances
+    this.$store.dispatch("aplyingChangesToDeployment", {
+      deploymentId: this.deploymentId,
+      rolNumInstances: this.rolNumInstances,
+      killInstances: this.instanceKill
+    });
 
-    get serviceProvideChannels(): Array<Channel> {
-        this.serviceInfo;
-        return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
-    }
+    this.cancelChanges(); // TODO: This won't be needed when the change functionaliti is available
+  }
 
-    get serviceRequireChannels(): Array<Channel> {
-        this.serviceInfo;
-        return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
-    }
+  cancelChanges(): void {
+    this.rolNumInstances = {};
+    this.instanceKill = {};
+    this.clear = true;
+    this.haveChanges = false;
+  }
 
-    applyChanges(): void {
-        this.haveChanges = false;
-        // Enviamos los valores que han cambiado
-        //  rolNumInstances
-        //  killInstances
-        this.$store.dispatch('aplyingChangesToDeployment', {
-            'deploymentId': this.deploymentId,
-            'rolNumInstances': this.rolNumInstances,
-            'killInstances': this.instanceKill
-        });
+  showUndeployModal(): void {
+    const deploymentId = this.deploymentId;
+    this.modalOkCallback = function() {
+      this.$store.dispatch("undeployDeployment", {
+        deploymentId: deploymentId
+      });
+    };
+    this.showModal = true;
+  }
 
-        this.cancelChanges(); // TODO: This won't be needed when the change functionaliti is available
-    }
+  handleUndeploy(payload): void {
+    this.$store.dispatch("undeployDeployment", payload);
+    this.$router.go(-1);
+  }
 
-    cancelChanges(): void {
-        this.rolNumInstances = {};
-        this.instanceKill = {};
-        this.clear = true;
-        this.haveChanges = false;
-    }
+  handleKillInstanceChange(payload) {
+    this.haveChanges = true;
+    let tempRol, tempInst, value;
+    [tempRol, tempInst, value] = payload;
+    if (this.instanceKill[tempRol] === undefined)
+      this.instanceKill[tempRol] = {};
+    this.instanceKill[tempRol][tempInst] = value;
+  }
 
-    showUndeployModal(): void {
-        const deploymentId = this.deploymentId;
-        this.modalOkCallback = function() { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
-        this.showModal = true;
-    }
-
-    handleUndeploy(payload): void {
-        this.$store.dispatch('undeployDeployment', payload);
-        this.$router.go(-1);
-    }
-
-    handleKillInstanceChange(payload) {
-        this.haveChanges = true;
-        let tempRol, tempInst, value;
-        [tempRol, tempInst, value] = payload;
-        if (this.instanceKill[tempRol] === undefined)
-            this.instanceKill[tempRol] = {};
-        this.instanceKill[tempRol][tempInst] = value;
-    }
-
-    handleNumInstancesChange(payload) {
-        this.haveChanges = true;
-        let tempRol, value;
-        [tempRol, value] = payload;
-        this.rolNumInstances[tempRol] = value;
-    }
+  handleNumInstancesChange(payload) {
+    this.haveChanges = true;
+    let tempRol, value;
+    [tempRol, value] = payload;
+    this.rolNumInstances[tempRol] = value;
+  }
 }
 </script>
 <style lang="scss" scoped>
-$color_green:#93c47d;
-$color_yellow:#f5d164;
-$color_red:#ff6666;
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
 $icon_size: 40px;
 
 #deployment-item-view {
-    min-width: 84em;
+  min-width: 84em;
 }
 
 .deployment-chart {
-    width: 800px;
-    height: 250px;
-    margin-right: 40px;
+  width: 800px;
+  height: 250px;
+  margin-right: 40px;
 }
 
 .fa-check-circle {
-    color: $color_green;
-    font-size: $icon_size;
+  color: $color_green;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-    color: $color_yellow;
-    font-size: $icon_size;
+  color: $color_yellow;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-    color: $color_red;
-    font-size: $icon_size;
+  color: $color_red;
+  font-size: $icon_size;
 }
 </style>

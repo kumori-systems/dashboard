@@ -115,20 +115,12 @@ export default {
   },
 
   addMetrics(state, metricBundle: { [deploymentId: string]: { 'data': Metric, 'roles': { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric } } } } }) {
-    // If the timestamp is already in the metricList [timestamp, timestamp + 44 seconds]
-    let res: [string, { [deploymentId: string]: { 'data': Metric, 'roles': { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric } } } } }];
     for (let deploymentId in metricBundle) { // This will only happen once
-      if (
-        state.metricList.length > 0
-        &&
-        // from -> 'a few seconds ago' -> 0 to 44 seconds. https://momentjs.com/docs/#/durations/
-        moment((<typeof res[]>state.metricList)[state.metricList.length - 1][0]).from(moment(metricBundle[deploymentId].data.timestamp)) === 'a few seconds ago'
-      ) {
-        (<typeof res[]>state.metricList)[state.metricList.length - 1][1] = { ...(<typeof res[]>state.metricList)[state.metricList.length - 1][1], ...metricBundle };
-      }
-      else {
-        (<typeof res[]>state.metricList).push([metricBundle[deploymentId].data.timestamp, metricBundle]);
-      }
+      (<Deployment>state.deploymentList[deploymentId])
+        .metrics.push([
+          metricBundle[deploymentId].data.timestamp,
+          metricBundle[deploymentId]
+        ]);
     }
   },
 

@@ -159,9 +159,6 @@ export default {
   },
 
   /* METRICS */
-  metricList: function (state): Metric[] {
-    return state.metricList;
-  },
 
   /**
    * Devuelve una lista de tuplas.
@@ -170,33 +167,8 @@ export default {
    *  - Mapa para identificar métricas en roles e instáncias.
    */
   deploymentMetricList: function (state): Function {
-    return (deploymentId: string): [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] => {
-      let res: [Metric, { [rolId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric, } } }][] = [];
-      let timestamp: Date;
-      let metric: {
-        [deploymentId: string]: {
-          'data': Metric,
-          'roles': {
-            [rolId: string]: {
-              'data': Metric,
-              'instances': {
-                [instanceId: string]: Metric,
-              }
-            }
-          }
-        }
-      };
-
-      for (let index in state.metricList) {
-
-        [timestamp, metric] = state.metricList[index];
-        if (metric[deploymentId]) { // As we are constanly getting metrics, it's possible we still not got this deployment metric in this group of metrics
-          res.push([metric[deploymentId].data, metric[deploymentId].roles]);
-        }
-
-      }
-      console.log('Obtenemos las métricas de %s son ', deploymentId, res);
-      return res;
+    return (deploymentId: string): [Date, { 'data': Metric, 'roles': { [roleId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric } } } }][] => {
+      return (<Deployment>state.deploymentList[deploymentId]).metrics;
     };
   },
 
