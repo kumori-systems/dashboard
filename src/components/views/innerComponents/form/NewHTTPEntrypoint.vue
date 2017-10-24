@@ -158,7 +158,7 @@ export default class NewHTTPEntrypoint extends Vue {
             )
         );
 
-        this.$router.go(-1);
+        this.$router.push('/');
     }
 }
 </script>

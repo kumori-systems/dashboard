@@ -20,7 +20,7 @@ export default class AddDomain extends Vue {
     addDomain() {
         if (this.newDomain != null && this.newDomain.length > 0) {
             this.$store.dispatch('addNewDomain', this.newDomain);
-            this.$router.go(-1);
+            this.$router.push('/domains');
         }
     }
 }

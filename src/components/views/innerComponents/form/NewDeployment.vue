@@ -67,7 +67,7 @@
                     </th>
                 </tr>
 
-                <tr v-if="serviceProChannelList.length>0 || serviceReqChannelList.length>0">
+                <tr v-if="serviceProChannelList.length > 0 || serviceReqChannelList.length > 0">
                     <th> CHANNELS</th>
                 </tr>
                 <tr v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
@@ -122,7 +122,7 @@
                                         <div class="select">
                                             <select v-model="selectedResourceConfig[index]" v-bind:disabled="resourceConfig[index]!==undefined && resourceConfig[index].length >0">
                                                 <option disabled value="">Please select one</option>
-                                                <option v-for="(resourceConfig, index) in totalResourceConfig(resource)" v-bind:key="index">{{resourceConfig}}</option>
+                                                <option v-for="(resourceConfig, index) in totalResourceConfig(resource)" v-bind:key="index">{{ resourceConfig }}</option>
                                             </select>
                                         </div>
                                     </th>
@@ -334,7 +334,7 @@ export default class NewService extends Vue {
                 [] //website
             )
         );
-        this.$router.go(-1);
+        this.$router.push('/');
     }
 
     updateInputValue(emitedArguments) {
