@@ -100,6 +100,7 @@
     "vue-bulma-tooltip": "^1.0.3",
     "vue-chartjs": "^2.6.5",
     "vue-class-component": "^5.0.0",
+    "vue-fab": "^2.1.1",
     "vue-loader": "^11.1.4",
     "vue-nprogress": "^0.1.5",
     "vue-router": "^2.2.0",

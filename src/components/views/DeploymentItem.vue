@@ -34,7 +34,7 @@
             </div>
         </div>
         <div>
-            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
+            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:rolMetrics="rolMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
         </div>
         <undeploy-modal v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false" v-on:undeploy="handleUndeploy">
             This action will
@@ -139,36 +139,31 @@ export default class DeploymentItem extends Vue {
           data: Metric;
           instances: { [instanceId: string]: Metric };
         };
-      };
+      }[];
     } = {
       data: [],
-      roles: {}
+      roles: []
     };
-    const startTime = performance.now();
 
     for (let i in metrics) {
-      res["data"].push(metrics[i][1].data);
+      res.data.push(metrics[i][1].data);
+      res.roles.push(metrics[i][1].roles);
     }
-
-    if (metrics.length > 0) res.roles = metrics[0][1].roles;
-
-    const duration = performance.now() - startTime;
-    console.log("El tiempo de procesado de las métricas en las vista es: %d", duration);
-
+    // console.debug("Las métricas recien salidas del estado contienen:", res);
     return res;
   }
 
-  get deploymentChartData(): {
-    labels: string[];
-    datasets: any[];
-  } {
-    let res: Metric[] = [];
-    for (let i in this.deploymentMetrics) {
-      res.push(this.deploymentMetrics[i][0]);
-    }
-    let aux = prepareData(res);
-    console.log("Los datos que vamos a pintar en el chart son:", aux);
-    return aux;
+  get deploymentChartData(): { labels: string[]; datasets: any[] } {
+    return prepareData(this.deploymentMetrics.data);
+  }
+
+  get rolMetrics(): {
+    [roleId: string]: {
+      data: Metric;
+      instances: { [instanceId: string]: Metric };
+    };
+  }[] {
+    return this.deploymentMetrics.roles;
   }
 
   get deploymentRoles(): Array<string> {

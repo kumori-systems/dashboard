@@ -325,7 +325,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     }
 
     const duration = performance.now() - startTime;
-    console.log('transformEcloudEventDataToMetrics duration %d', duration);
+    console.debug('transformEcloudEventDataToMetrics duration %d', duration);
 
     return res;
 }
@@ -344,9 +344,9 @@ export function getElementType(uri: string): ElementType {
 
     // Obtenemos el tipo. En caso de que sea temprary, el tipo estará 2 huecos desplazado
     switch (splitted[i]) {
-        case 'runtimes':
-            console.warn('deprecated element type \'runtimes\'');
         case 'runtime':
+            console.warn('deprecated element type \'runtime\'');
+        case 'runtimes':
             res = ElementType.runtime;
             break;
         case 'services':

@@ -25,12 +25,11 @@ export default {
 
     for (let deploymentId in deploymentMap) {
       Vue.set(state.deploymentList, deploymentId, deploymentMap[deploymentId]);
-      if (
-        (<Deployment>deploymentMap[deploymentId]).roles !== null
-      )
+      if ((<Deployment>deploymentMap[deploymentId]).roles !== null) {
         // Sobreescribimos los roles (pese a que ya se los hemos pasado), para que guarde correctamente la referéncia
         for (let rolId in (<Deployment>deploymentMap[deploymentId]).roles) {
           Vue.set((<Deployment>state.deploymentList[deploymentId]).roles, rolId, deploymentMap[deploymentId].roles[rolId]);
+          
           Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'memory', (<Deployment>deploymentMap[deploymentId]).roles[rolId].memory);
           Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'cpu', (<Deployment>deploymentMap[deploymentId]).roles[rolId].cpu);
           Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId], 'bandwidth', (<Deployment>deploymentMap[deploymentId]).roles[rolId].bandwidth);
@@ -45,6 +44,8 @@ export default {
             }
           }
         }
+      }
+
     }
     state.deploymentList = { ...state.deploymentList, ...deploymentMap };
   },

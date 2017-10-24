@@ -34,6 +34,8 @@ export class ProxyConnection extends EventEmitter {
     public onRemoveResource: Function;
     public onAddMetrics: Function;
 
+    private requestedElements: string[];
+
     // Constructor
     constructor() {
         super();
@@ -51,6 +53,7 @@ export class ProxyConnection extends EventEmitter {
         this.onAddResource = this.registerEvent<(resourceId: string, resource: Resource) => any>();
         this.onRemoveResource = this.registerEvent<(resourceId: string) => any>();
         this.onAddMetrics = this.registerEvent<(value) => any>();
+        this.requestedElements = [];
     }
 
     /* GENERIC */
@@ -125,8 +128,8 @@ export class ProxyConnection extends EventEmitter {
                                 );
                                 break;
                             case EcloudEventName.undeploying:
-                            // this.emit(this.onRemoveDeploymemt, event.entity['service']);
-                            // break;
+                                this.emit(this.onRemoveDeploymemt, event.entity['service']);
+                                break;
                             case EcloudEventName.link:
                             case EcloudEventName.scale:
                             case EcloudEventName.status:
@@ -185,7 +188,7 @@ export class ProxyConnection extends EventEmitter {
                 }
 
                 const duration = performance.now() - startTime;
-                console.log('La duración del handler del evento ha sido: %d', duration, event);
+                console.debug('La duración del handler del evento ha sido: %d', duration, event);
             });
 
             this.admission.onError((error: any) => {
@@ -233,7 +236,7 @@ export class ProxyConnection extends EventEmitter {
                         );
                         break;
                     default:
-                        console.error('Case not covered: ', registeredElements[i]);
+                        console.error('Unkown element: ', registeredElements[i]);
                 }
             }
         });
@@ -244,38 +247,41 @@ export class ProxyConnection extends EventEmitter {
      * @param uri 
      */
     getElementInfo(uri: string) {
-        return this.admission.getStorageManifest(uri).then((element) => {
-            switch (utils.getElementType(uri)) {
-                case utils.ElementType.runtime:
-                    this.emit(
-                        this.onAddRuntime,
-                        uri,
-                        utils.transformManifestToRuntime(element));
-                    break;
-                case utils.ElementType.service:
-                    this.emit(
-                        this.onAddService,
-                        uri,
-                        utils.transformManifestToService(element));
-                    break;
-                case utils.ElementType.component:
-                    this.emit(this.onAddComponent,
-                        uri,
-                        utils.transformManifestToComponent(element));
-                    break;
-                case utils.ElementType.resource:
-                    this.emit(
-                        this.onAddResource,
-                        uri,
-                        utils.transformManifestToResource(element)
-                    );
-                    break;
-                default:
-                    console.error('Case not covered', uri, element);
-            }
-        }).catch((error) => {
-            console.error('Error getting element info', error);
-        });
+        if (this.requestedElements.indexOf(uri) === -1) {
+            this.requestedElements.push(uri);
+            return this.admission.getStorageManifest(uri).then((element) => {
+                switch (utils.getElementType(uri)) {
+                    case utils.ElementType.runtime:
+                        this.emit(
+                            this.onAddRuntime,
+                            uri,
+                            utils.transformManifestToRuntime(element));
+                        break;
+                    case utils.ElementType.service:
+                        this.emit(
+                            this.onAddService,
+                            uri,
+                            utils.transformManifestToService(element));
+                        break;
+                    case utils.ElementType.component:
+                        this.emit(this.onAddComponent,
+                            uri,
+                            utils.transformManifestToComponent(element));
+                        break;
+                    case utils.ElementType.resource:
+                        this.emit(
+                            this.onAddResource,
+                            uri,
+                            utils.transformManifestToResource(element)
+                        );
+                        break;
+                    default:
+                        console.error('Case not covered', uri, element);
+                }
+            }).catch((error) => {
+                console.error('Error getting element info', error);
+            });
+        }
     }
 
     addNewBundle(file: File) {

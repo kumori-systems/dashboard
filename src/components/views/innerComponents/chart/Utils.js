@@ -1,22 +1,23 @@
 import * as moment from 'moment';
+
+const color = {
+    cpu:'#ff0400',
+    memory:'#ffec00',
+    bandwith_input:'#00ecff',
+    bandwith_output:'#1300ff'
+};
 export function prepareData(data) {
     var res = {
         labels: [],
         datasets: []
     };
 
-    const startTime = performance.now();
-
-   // console.debug('Los datos que estamos recibiendo para pintar son: ', data);
     for (let index in data) {
-        // console.debug('La iteración del elemento: ', index);
         for (let prop in data[index]) {
-            // console.debug('La iteración de la propiedad:', prop);
             if (prop === 'timestamp')
                 res.labels.push(moment(data[index].timestamp));
             else {
                 // Recorremos el dataset buscando la posición de uno ya existente. Si existe guardamos su pos
-                // console.debug('El dataset que intentamos recorrer contiene: ', res.datasets);
                 let position = res.datasets.findIndex((p) => {
                     // console.debug('Dentro del find, p vale', p);
                     if (p['label'] === prop) return p;
@@ -27,23 +28,23 @@ export function prepareData(data) {
                     res.datasets[position].data.push(data[index][prop]);
                 }
                 else { // Si no existe, hacemos un nuevo push
-                    // console.debug('Creamos una nueva propiedad %s, con valor %d', prop, data[index][prop]);
                     res.datasets.push(
                         {
                             'label': prop,
-                            'backgroundColor': '#1fc8db',
-                            'borderColor': '#1fc8db',
+                            'backgroundColor': color[prop] || '#000000',
+                            'borderColor': color[prop] || '#000000',
                             'fill': false,
                             'data': [data[index][prop]]
                         }
                     );
-                    // console.debug('Tras añadir la propiedad, res vale:', res);
                 }
             }
         }
     }
-    // console.debug('Los datos procesados son:', res);
-    const duration = performance.now() - startTime;
-    console.log("El tiempo de procesado de las métricas en chart utils es: %d", duration);
+
+    while (res.labels.length < 60) {
+        res.labels.push(moment(res.labels[res.labels.length-1]).add(1,'m'));
+    }
+
     return res;
 }

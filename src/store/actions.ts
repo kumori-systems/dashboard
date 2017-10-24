@@ -12,11 +12,6 @@ export default {
         commit('setMenu', menu);
     },
 
-    toggleMenuItemExpanded({ commit }, { menuItem }) {
-        if (menuItem.children)
-            commit('toggleMenuItemExpanded', menuItem);
-    },
-
     /* FAB BUTTON */
     setFabElements({ commit }, { fabElementsList }) {
         commit('setFabElements', { fabElementsList });
@@ -45,10 +40,6 @@ export default {
             let val: { [id: string]: Deployment } = {};
             val[deploymentId] = deployment;
             commit('addDeployment', val);
-            commit('addDeploymentMenuItem', {
-                'name': deployment.name,
-                'path': '/deployment/' + urlencode(deploymentId)
-            });
         });
 
         connection.onAddInstance((deploymentId: string, roleId: string, instanceId: string, instance: Deployment.Rol.Instance) => {
@@ -65,7 +56,6 @@ export default {
         });
 
         connection.onRemoveDeploymemt((deploymentId) => {
-            commit('removeDeploymentMenuItem', '/deployment/' + urlencode(deploymentId));
             commit('removeDeployment', deploymentId);
         });
 
@@ -108,6 +98,7 @@ export default {
             val[resourceId] = resource;
             commit(commitString, val);
         });
+
         connection.onRemoveResource((resourceId: string) => {
             commit('removeResource', resourceId);
         });
@@ -121,6 +112,7 @@ export default {
     addNewDomain(context, params) {
         connection.addDomain(params);
     },
+    
     addNewBundle(context, params) {
         connection.addNewBundle(params);
     },
@@ -166,7 +158,6 @@ export default {
                     default:
                         console.error('ResourceType not covered %s', resourceType);
                 }
-
                 break;
             default:
                 console.error('Element type not covered %s', type);
@@ -196,7 +187,6 @@ export default {
     selectedService({ commit }, serviceId) {
         commit('selectedService', serviceId);
     },
-
 
     /* DEBERÍA DESAPARECER: addNewElement */
     addDataVolume(context, params) {

@@ -174,6 +174,9 @@ export default {
 
 
   /* DEPLOYMENTS */
+  deployments: function (state) {
+    return state.deploymentList;
+  },
   getDeploymentList: function (state): Array<string> {
     let res: Array<string> = [];
     for (let deploymentId in state.deploymentList) {

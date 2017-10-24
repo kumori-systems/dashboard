@@ -1,32 +1,90 @@
 <template>
-    <div>
-        <collapse class="tile fab" v-if="fabElements.length > 0">
-            <collapse-item>
-                <router-link v-for="(element, index) in fabElements" v-bind:key="index" v-bind:to="element.to">
-                    <div>
-                        {{ element.name }}
-                    </div>
-                </router-link>
-            </collapse-item>
-        </collapse>
-    </div>
+    <fab v-if="elements[route]"
+   v-bind:position="position"
+   v-bind:bg-color="elements[route].bgColor"
+   v-bind:actions="elements[route].fabActions"
+   v-on:addentrypoint="addEntrypoint"
+   v-on:addservicedeployment="addServiceDeployment"
+   v-on:uploadbundle="uploadBundle"
+   v-on:adddomain="addDomain"
+   ></fab> 
 </template>
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Collapse, Item as CollapseItem } from './fab-base';
-import { FabElement } from '../../../store/classes';
+import Vue from "vue";
+import Component from "vue-class-component";
+import fab from "vue-fab";
+import { FabElement } from "../../../store/classes";
 
 @Component({
-    name: 'FAB',
-    components: {
-        'collapse': Collapse,
-        'collapse-item': CollapseItem
-    }
+  name: "FAB",
+  components: {
+    fab: fab
+  }
 })
 export default class FAB extends Vue {
-    get fabElements(): Array<FabElement> {
-        return this.$store.getters.getFabElements;
+  // bgColor: string = "#c91432";
+  position: string = "bottom-right";
+
+  elements = {
+    "/": {
+      bgColor: "#C70039",
+      fabActions: [
+        {
+          name: "addentrypoint",
+          icon: "input",
+          tooltip: "Add entrypoint"
+        },
+        {
+          name: "addservicedeployment",
+          icon: "widgets",
+          tooltip: "Add service deployment"
+        }
+      ]
+    },
+    "/elements": {
+      bgColor: "#FFC300",
+      fabActions: [
+        {
+          name: "uploadbundle",
+          icon: "file_upload",
+          tooltip: "Upload bundle"
+        }
+      ]
+    },
+    "/domains": {
+      bgColor: "#FF1B00",
+      fabActions: [
+        {
+          name: "adddomain",
+          icon: "domain",
+          tooltip: "Add domain"
+        }
+      ]
     }
+  };
+
+  addEntrypoint() {
+    (<Vue>this).$router.push("/newHTTPEntrypoint");
+    console.log("addEntrypoint callback");
+  }
+
+  addServiceDeployment() {
+    (<Vue>this).$router.push("/newDeployment");
+    console.log("addServiceDeployment callback");
+  }
+
+  uploadBundle(){
+    (<Vue>this).$router.push("/newBundle");
+  }
+  addDomain(){
+    (<Vue>this).$router.push("/newDomain");
+  }
+
+  get route() {
+    return this.$route.path;
+  }
+  get fabElements(): Array<FabElement> {
+    return this.$store.getters.getFabElements;
+  }
 }
 </script>

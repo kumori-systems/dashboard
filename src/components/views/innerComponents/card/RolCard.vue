@@ -50,7 +50,8 @@
         </div>
         <collapse>
             <collapse-item title="Instances">
-                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
+                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance"
+                v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
                 </instance-card>
             </collapse-item>
         </collapse>
@@ -59,189 +60,246 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
-import InstanceCard from './InstanceCard.vue';
-import Chart from '../chart/Chart.js';
-import ChartOptions from '../chart/ChartOptions.js';
-import { Deployment, Service, Channel } from '../../../../store/classes';
-import Moment from 'moment';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { Collapse, Item as CollapseItem } from "vue-bulma-collapse";
+import InstanceCard from "./InstanceCard.vue";
+import Chart from "../chart/Chart.js";
+import { prepareData } from "../chart/Utils.js";
+import ChartOptions from "../chart/ChartOptions.js";
+import {
+  Deployment,
+  Service,
+  Channel,
+  Metric
+} from "../../../../store/classes";
 
 @Component({
-    name: 'rol-card',
-    props: {
-        deploymentId: { required: true, type: String },
-        rolId: { required: true, type: String },
-        clear: { required: true, type: Boolean } // Se utiliza para limpiar los cambios cuando se cancelan
-    },
-    components: {
-        'collapse': Collapse,
-        'collapse-item': CollapseItem,
-        'instance-card': InstanceCard,
-        'chart': Chart
-    }
+  name: "rol-card",
+  props: {
+    deploymentId: { required: true, type: String },
+    rolId: { required: true, type: String },
+    clear: { required: true, type: Boolean }, // Se utiliza para limpiar los cambios cuando se cancelan
+    rolMetrics: { required: true } // Role and Instance metrics
+  },
+  components: {
+    collapse: Collapse,
+    "collapse-item": CollapseItem,
+    "instance-card": InstanceCard,
+    chart: Chart
+  }
 })
 export default class Card extends Vue {
-    deploymentId: string = this.deploymentId;
-    rolId: string = this.rolId;
-    localNumInstances: number = -1;
-    chartOptions = ChartOptions;
+  deploymentId: string = this.deploymentId;
+  rolId: string = this.rolId;
+  localNumInstances: number = -1;
+  chartOptions = ChartOptions;
+  rolMetrics = this.rolMetrics;
 
+  mounted() {
+    this.$watch("clear", function(value) {
+      if (value === true) {
+        // Limpiamos el estado temporal
+        this.localNumInstances = -1;
+        this.$emit("clearedRol");
+      }
+    });
+  }
 
-    mounted() {
-        this.$watch('clear', function(value) {
-            if (value === true) {
-                // Limpiamos el estado temporal
-                this.localNumInstances = -1;
-                this.$emit('clearedRol');
-            }
-        });
-    }
+  get onRolMetricsUpdate() {
+    let res: {
+      data: Metric[];
+      instances: { [instanceId: string]: Metric }[];
+    } = {
+      data: [],
+      instances: []
+    };
 
-    get state(): string {
-        let res: string = 'fa ';
-        switch (this.$store.getters.getDeploymentRolState(this.deploymentId, this.rolId)) {
-            case Deployment.State.OK:
-                res += 'fa-check-circle';
-            case Deployment.State.DANGER:
-                res += 'fa-exclamation-circle';
-            case Deployment.State.WARNING:
-                res += 'fa-exclamation-triangle';
-            default:
-                res += 'fa-question-circle';
-        }
-        return res;
+    for (let i in this.rolMetrics) {
+      res.data.push(this.rolMetrics[i][this.rolId].data);
+      res.instances.push(this.rolMetrics[i][this.rolId].instances);
     }
-    get numInstances(): number {
-        // Miramos el número de instáncias local. ¿Está inicializado?
-        if (this.localNumInstances < 0) {
-            this.localNumInstances = this.$store.getters.getDeploymentRolNumInstances(this.deploymentId, this.rolId);
-        }
-        return this.localNumInstances;
-    }
+    return res;
+  }
+  get rolChartData() {
+    return prepareData(this.onRolMetricsUpdate.data);
+  }
+  get instanceMetrics() {
+    return this.onRolMetricsUpdate.instances;
+  }
 
-    set numInstances(x: number) {
-        if (this.localNumInstances !== 0 || x != -1) {
-            this.localNumInstances += x;
-            this.$emit('numInstancesChange', [this.rolId, this.localNumInstances]);
-        }
+  get state(): string {
+    let res: string = "fa ";
+    switch (this.$store.getters.getDeploymentRolState(
+      this.deploymentId,
+      this.rolId
+    )) {
+      case Deployment.State.OK:
+        res += "fa-check-circle";
+      case Deployment.State.DANGER:
+        res += "fa-exclamation-circle";
+      case Deployment.State.WARNING:
+        res += "fa-exclamation-triangle";
+      default:
+        res += "fa-question-circle";
     }
+    return res;
+  }
+  get numInstances(): number {
+    // Miramos el número de instáncias local. ¿Está inicializado?
+    if (this.localNumInstances < 0) {
+      this.localNumInstances = this.$store.getters.getDeploymentRolNumInstances(
+        this.deploymentId,
+        this.rolId
+      );
+    }
+    return this.localNumInstances;
+  }
 
-    get componentURI() {
-        let cURI = this.$store.getters.getDeploymentRolComponentURI(this.deploymentId, this.rolId);
-        if (cURI !== null && this.$store.getters.getComponentInfo(cURI) === undefined) // If we've got not info for this component we ask for it
-            this.$store.dispatch('getElementInfo', { uri: cURI });
-        return cURI;
+  set numInstances(x: number) {
+    if (this.localNumInstances !== 0 || x != -1) {
+      this.localNumInstances += x;
+      this.$emit("numInstancesChange", [this.rolId, this.localNumInstances]);
     }
-    get rolRuntime() {
-        return this.$store.getters.getDeploymentRolRuntime(this.deploymentId, this.rolId);
-    }
+  }
 
-    get rolChartData() {
-        // return this.$store.getters.getDeploymentRolChartData(this.deploymentId, this.rolId);
-        return [];
-    }
+  get componentURI() {
+    let cURI = this.$store.getters.getDeploymentRolComponentURI(
+      this.deploymentId,
+      this.rolId
+    );
+    if (
+      cURI !== null &&
+      this.$store.getters.getComponentInfo(cURI) === undefined
+    )
+      // If we've got not info for this component we ask for it
+      this.$store.dispatch("getElementInfo", { uri: cURI });
+    return cURI;
+  }
+  get rolRuntime() {
+    return this.$store.getters.getDeploymentRolRuntime(
+      this.deploymentId,
+      this.rolId
+    );
+  }
 
-    get rolInstances() {
-        return this.$store.getters.getDeploymentRolInstances(this.deploymentId, this.rolId);
-    }
+  get rolInstances() {
+    return this.$store.getters.getDeploymentRolInstances(
+      this.deploymentId,
+      this.rolId
+    );
+  }
 
-    get memNumber(): number {
-        return this.$store.getters.getDeploymentRolMemNumber(this.deploymentId, this.rolId);
-    }
+  get memNumber(): number {
+    return this.$store.getters.getDeploymentRolMemNumber(
+      this.deploymentId,
+      this.rolId
+    );
+  }
 
-    get cpuNumber(): number {
-        return this.$store.getters.getDeploymentRolCPUNumber(this.deploymentId, this.rolId);
-    }
+  get cpuNumber(): number {
+    return this.$store.getters.getDeploymentRolCPUNumber(
+      this.deploymentId,
+      this.rolId
+    );
+  }
 
-    get netNumber(): number {
-        return this.$store.getters.getDeploymentRolNetNumber(this.deploymentId, this.rolId);
-    }
-    get dataVolumesList() {
-        return this.$store.getters.getDeploymentRolVolumeList(this.deploymentId, this.rolId);
-    }
+  get netNumber(): number {
+    return this.$store.getters.getDeploymentRolNetNumber(
+      this.deploymentId,
+      this.rolId
+    );
+  }
+  get dataVolumesList() {
+    return this.$store.getters.getDeploymentRolVolumeList(
+      this.deploymentId,
+      this.rolId
+    );
+  }
 
-    get rolConnections(): Array<Service.Connector> {
-        return this.$store.getters.getDeploymentRolConnections(this.deploymentId, this.rolId);
-    }
-    /**
+  get rolConnections(): Array<Service.Connector> {
+    return this.$store.getters.getDeploymentRolConnections(
+      this.deploymentId,
+      this.rolId
+    );
+  }
+  /**
      * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo
      * al deployment para que lo almacene en un estado temporal
      */
-    handleKillInstanceChange(payload) {
-        this.$emit('killInstanceChange', [this.rolId, ...payload]);
-    }
+  handleKillInstanceChange(payload) {
+    this.$emit("killInstanceChange", [this.rolId, ...payload]);
+  }
 }
 </script>
 <style lang="scss" scoped>
-$color_green:#93c47d;
-$color_yellow:#f5d164;
-$color_red:#ff6666;
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
 $icon_size: 40px;
 $radius: 5px;
 #rol-card {
-    min-width: 80em;
+  min-width: 80em;
 }
 
 button {
-    height: 30px;
-    width: 40px;
+  height: 30px;
+  width: 40px;
 }
 
 button i {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .rol-chart {
-    width: 800px;
-    height: 250;
-    margin-right: 30px;
+  width: 800px;
+  height: 250;
+  margin-right: 30px;
 }
 
 .fa-check-circle {
-    color: $color_green;
-    font-size: $icon_size;
+  color: $color_green;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-    color: $color_yellow;
-    font-size: $icon_size;
+  color: $color_yellow;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-    color: $color_red;
-    font-size: $icon_size;
+  color: $color_red;
+  font-size: $icon_size;
 }
 
 .state {
-    padding: 10px;
+  padding: 10px;
 }
 
 .card {
-    margin: 10px;
-    padding: 2px;
-    border-radius: $radius;
+  margin: 10px;
+  padding: 2px;
+  border-radius: $radius;
 }
 
 .card-header {
-    border-radius: $radius;
+  border-radius: $radius;
 }
 
 .card-header .title {
-    padding-top: 10px;
-    padding-right: 5px;
+  padding-top: 10px;
+  padding-right: 5px;
 }
 
 .card-header .box {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .card-body {
-    padding: 10px;
+  padding: 10px;
 }
 
 a {
-    padding-left: 10px;
+  padding-left: 10px;
 }
 </style>

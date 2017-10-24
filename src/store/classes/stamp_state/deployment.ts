@@ -1,3 +1,4 @@
+import urlencode from 'urlencode';
 import StampElement from './stampelement';
 import { isServiceEntrypoint, getElementVersion, getElementOwner, getElementName } from '../../proxy/utils';
 import { Metric } from '../stamp_state/metric';
@@ -26,11 +27,13 @@ export class Deployment {
   links: Array<Link> = [];
   isEntrypoint: boolean = false;
   metrics: [Date, { 'data': Metric, 'roles': { [roleId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric } } } }][] = [];
+  path: string = null;
   constructor(uri: string, name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, links: Array<Link>, website: Array<string>) {
     if (uri) {
       this.uri = uri;
       this.owner = getElementOwner(uri);
     }
+    this.path = '/deployment/' + urlencode(uri);
 
     if (name && name !== null) this.name = name;
     if (serviceId && serviceId !== null) {
