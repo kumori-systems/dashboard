@@ -68,7 +68,7 @@ export default class CheckboxInput extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 i[disabled] {
     cursor: not-allowed;
 }

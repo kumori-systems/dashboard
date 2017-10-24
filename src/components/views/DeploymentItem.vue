@@ -43,7 +43,7 @@
         </undeploy-modal>
     </div>
 </template>
-<script lang="ts">
+<script lang="ts" scoped>
 import Vue from "vue";
 import Component from "vue-class-component";
 import Moment from "moment";

@@ -62,7 +62,7 @@ export default class Modal extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 #modal-close-button {
     position: absolute;
     top: 2vh;

@@ -9,7 +9,7 @@
 			<footer-bar></footer-bar>
 		</div>
 		<div v-else>
-			<div class="tile is-4 login">
+			<div class="tile is-vertical is-3 login">
 				<div class="box">
 					The access to this preview requires authentication
 					<div>
@@ -123,8 +123,11 @@ $state_icon_size: 50px;
 }
 
 .login {
-	position: absolute;
-	top: 40%;
-	left: 40%;
+	  padding: 70px 0;
+  
+	 
+   margin:auto;
+   width:50%;
+   
 }
 </style>

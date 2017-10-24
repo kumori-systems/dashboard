@@ -3,17 +3,8 @@
         <router-view v-if="route"></router-view>
         <div v-else-if="deploymentList.length > 0">
             <checkbox-input v-model="hideEntrypoints"> Hide HTTP entrypoints</checkbox-input>
-            
-
-                <!--
-                    <div class="tile is-parent" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0">
-                        <deployment-card class="deployment-card" v-bind:deploymentId="deployment" v-if="!shouldHide(deployment)"></deployment-card>
-                        <deployment-card class="deployment-card" v-bind:deploymentId="deploymentList[index+1]" v-if="deploymentList[index+1] && !shouldHide(deployment)"></deployment-card>
-                    </div>
-                    -->
-
-
-            <div class="columns is-desktop">
+            <div class="tile">
+            <div class="columns">
               <div class="column" >
                     <deployment-card  class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0 && !shouldHide(deployment)" v-bind:deploymentId="deployment"></deployment-card>
               </div>              
@@ -21,9 +12,7 @@
                     <deployment-card class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2!==0 && !shouldHide(deployment)" v-bind:deploymentId="deployment"></deployment-card>
               </div>
             </div>
-
-      
-            
+            </div>
         </div>
         <div v-else>
             <!-- No deployment found -->

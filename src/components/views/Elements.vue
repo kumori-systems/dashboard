@@ -440,7 +440,7 @@ export default class Elements extends Vue {
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 #showpublicelements {
     padding: 15px;
 }
