@@ -14,7 +14,7 @@
             </div>
         </div>
         <p>
-            <checkbox-input id="showpublicelements" v-model="showPublicElements"> Show public 3rd party elements</checkbox-input>
+            <checkbox-input id="showpublicelements" v-model="showPublicElements" v-bind:disabled="true"> Show public 3rd party elements</checkbox-input>
         </p>
 
         <collapse accordion is-fullwidth v-if="componentOwnerList.length>0 || serviceOwnerList.length>0 || runtimeOwnerList.length>0">
