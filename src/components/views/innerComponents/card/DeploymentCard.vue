@@ -1,5 +1,5 @@
 <template>
-    <div class="card" id="deployment-card">
+    <div class="card tile is-vertical is-5" id="deployment-card">
         <div class="card-header title" v-bind:class="state">
             <router-link v-bind:to="deploymentPath" class="tile title">
                 {{ name || 'unavailable' | truncateLeft(20) }}
