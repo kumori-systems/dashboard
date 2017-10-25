@@ -4,6 +4,9 @@
    v-bind:bg-color="elements[route].bgColor"
    v-bind:actions="elements[route].fabActions"
    v-bind:z-index="zindex"
+   v-bind:icon-size="iconsize"
+   v-bind:rippleShow="rippleShow"
+   v-bind:fixed-tooltip="fixedtooltip"
    v-on:addentrypoint="addEntrypoint"
    v-on:addservicedeployment="addServiceDeployment"
    v-on:uploadbundle="uploadBundle"
@@ -14,7 +17,6 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import fab from "vue-fab";
-import { FabElement } from "../../../store/classes";
 
 @Component({
   name: "FAB",
@@ -26,6 +28,9 @@ export default class FAB extends Vue {
   // bgColor: string = "#c91432";
   position: string = "top-right";
   zindex: number = 20;
+  iconsize: string = "small"; // small | medium | large
+  fixedtooltip: boolean = false;
+  rippleShow:boolean = true; // shadow
   elements = {
     "/": {
       bgColor: "#C70039",
@@ -84,8 +89,15 @@ export default class FAB extends Vue {
   get route() {
     return this.$route.path;
   }
-  get fabElements(): Array<FabElement> {
-    return this.$store.getters.getFabElements;
-  }
+
 }
 </script>
+<style lang="scss">
+
+.pointer,
+#top-right-action{
+  right: 20vw;
+  margin-top: -15px;
+}
+
+</style>
