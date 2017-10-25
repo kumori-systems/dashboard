@@ -294,7 +294,6 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
             }
         }
     } = {};
-    const startTime = performance.now();
     // Inicializamos el deployment
     res[ecloudEvent.data.deploymentUrn] = { 'data': {}, 'roles': {} };
 
@@ -323,9 +322,6 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
             res[ecloudEvent.data.deploymentUrn].roles[rolId].instances[instanceId]['timestamp'] = ecloudEvent.timestamp;
         }
     }
-
-    const duration = performance.now() - startTime;
-    console.debug('transformEcloudEventDataToMetrics duration %d', duration);
 
     return res;
 }

@@ -74,7 +74,6 @@ export class ProxyConnection extends EventEmitter {
             });
 
             this.admission.onEcloudEvent((event: EcloudEvent) => {
-                const startTime = performance.now();
                 switch (event.type) {
                     case EcloudEventType.service:
                         switch (event.name) {
@@ -186,9 +185,6 @@ export class ProxyConnection extends EventEmitter {
                     default:
                         console.error('Not espected ecloud event type: %s', event.strType, event);
                 }
-
-                const duration = performance.now() - startTime;
-                console.debug('La duración del handler del evento ha sido: %d', duration, event);
             });
 
             this.admission.onError((error: any) => {
