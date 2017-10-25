@@ -1,6 +1,6 @@
 <template>
     <div>
-        <router-view v-if="route"></router-view>
+        <router-view v-if="this.$route.name !== 'Overview'"></router-view>
         <div v-else-if="deploymentList.length > 0">
             <checkbox-input v-model="hideEntrypoints"> Hide HTTP entrypoints</checkbox-input>
             <div class="tile">
@@ -28,7 +28,7 @@ import Component from "vue-class-component";
 import DeploymentCard from "./innerComponents/card/DeploymentCard.vue";
 import CheckboxInput from "./innerComponents/input/CheckboxInput.vue";
 import { Collapse, Item as CollapseItem } from "vue-bulma-collapse";
-import { Deployment, FabElement } from "../../store/classes";
+import { Deployment } from "../../store/classes";
 
 @Component({
   name: "Overview",
@@ -41,23 +41,6 @@ import { Deployment, FabElement } from "../../store/classes";
 })
 export default class Overview extends Vue {
   hideEntrypoints: boolean = false;
-
-  get route(): boolean {
-    if (this.$route.name === "Overview") {
-      let fabElementsList: Array<FabElement> = [];
-      fabElementsList.push(
-        new FabElement("Add Entrypoint", "newHTTPEntrypoint")
-      );
-      fabElementsList.push(
-        new FabElement("Add Service Deployment", "newDeployment")
-      );
-      this.$store.dispatch("setFabElements", {
-        fabElementsList: fabElementsList
-      });
-      return false;
-    }
-    return true;
-  }
 
   get deploymentList(): Array<string> {
     return this.$store.getters.getDeploymentList;

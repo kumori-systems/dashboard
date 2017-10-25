@@ -22,7 +22,6 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import NumberInput from '../input/NumberInput.vue';
-import { FabElement } from '../../../../store/classes';
 
 @Component({
     name: 'newvolume',
@@ -35,19 +34,6 @@ export default class NewVolume extends Vue {
     chunkNum: number = 1;
     size: Array<number> = [0, 1];
     totalGB: number = 1;
-
-    mounted() {
-        this.$watch('chunkNum', function (value) {
-            this.size = new Array<number>(value + 1);
-            this.size[0] = 0;
-            for (let index = 1; index <= value; index++) {
-                this.size[index] = 1;
-            }
-        });
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-        let serviceId = this.$store.getters.getSelectedService;
-    }
 
     get chunkSize() {
         return (chunkIndex) => {

@@ -167,7 +167,6 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
-import { FabElement } from '../../store/classes';
 import { isServiceEntrypoint } from '../../store/proxy/utils';
 import CheckboxInput from './innerComponents/input/CheckboxInput.vue';
 import DeleteModal from './innerComponents/modal/DeleteModal.vue';
@@ -210,11 +209,6 @@ export default class Elements extends Vue {
     // id, tipo, elemento, version
     modalElementList: Array<[string, string, string, string]> = [];
 
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        fabElementsList.push(new FabElement('Upload bundle', 'newBundle'));
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-    }
     /** GENERAL */
     get user() {
         return this.$store.getters.getUser;

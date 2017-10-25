@@ -10,7 +10,6 @@ const throwTypeError = () => { throw new Error('TypeError: Type of prop checked 
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, Resource } from '../../../../store/classes';
 @Component({
     name: 'checkbox-input',
 

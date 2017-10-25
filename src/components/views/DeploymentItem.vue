@@ -48,13 +48,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import Moment from "moment";
 
-import {
-  FabElement,
-  Deployment,
-  Service,
-  Channel,
-  Metric
-} from "../../store/classes";
+import { Deployment, Service, Channel, Metric } from "../../store/classes";
 import RolCard from "./innerComponents/card/RolCard.vue";
 import Chart from "./innerComponents/chart/Chart.js";
 import ChartOptions from "./innerComponents/chart/ChartOptions.js";
@@ -77,13 +71,6 @@ export default class DeploymentItem extends Vue {
   showModal: boolean = false;
   modalOkCallback: Function = function() {};
   chartOptions = ChartOptions;
-
-  mounted() {
-    let fabElementsList: Array<FabElement> = [];
-    this.$store.dispatch("setFabElements", {
-      fabElementsList: fabElementsList
-    });
-  }
 
   get state(): string {
     let res: string = "fa ";

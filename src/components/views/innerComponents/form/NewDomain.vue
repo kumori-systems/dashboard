@@ -7,16 +7,13 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement } from '../../../../store/classes';
+
 @Component({
     name: 'AddDomain'
 })
 export default class AddDomain extends Vue {
     newDomain = null;
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-    }
+
     addDomain() {
         if (this.newDomain != null && this.newDomain.length > 0) {
             this.$store.dispatch('addNewDomain', this.newDomain);

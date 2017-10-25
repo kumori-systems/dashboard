@@ -34,7 +34,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Domain } from '../../store/classes';
+import { Domain } from '../../store/classes';
 import DeleteModal from './innerComponents/modal/DeleteModal.vue';
 import { getElementName, getElementOwner, getElementType, getElementVersion } from '../../store/proxy/utils';
 @Component({
@@ -48,13 +48,6 @@ export default class Domains extends Vue {
     deleteModalIsVisible: boolean = false;
     modalElementId: string = '';
     modalElementName: string = '';
-
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        fabElementsList.push(new FabElement('Add new domain', '/newDomain'));
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-
-    }
 
     get domainList(): { [resourceId: string]: Domain } {
         let domainList = this.$store.getters.domainList;

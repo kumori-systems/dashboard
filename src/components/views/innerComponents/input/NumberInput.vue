@@ -5,7 +5,6 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, Resource } from '../../../../store/classes';
 @Component({
     name: 'number-input',
     props: {

@@ -76,7 +76,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment } from '../../../../store/classes';
+import { Deployment } from '../../../../store/classes';
 import CheckboxInput from '../input/CheckboxInput.vue'
 import NumberInput from '../input/NumberInput.vue';
 
@@ -96,11 +96,6 @@ export default class NewHTTPEntrypoint extends Vue {
     instances: number = 1;
     resilience: number = 1;
     deploymentName:string='';
-
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-    }
 
     get domainList() {
         let domainList = this.$store.getters.domainList;

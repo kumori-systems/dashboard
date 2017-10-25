@@ -1,4 +1,4 @@
-import { Deployment, Runtime, Component, Service, Domain, Link, Resource, FabElement, Channel, Metric } from './classes';
+import { Deployment, Runtime, Component, Service, Domain, Link, Resource, Channel, Metric } from './classes';
 import urlencode from 'urlencode';
 import { getElementOwner, getElementName, getElementVersion, isServiceEntrypoint, getElementType, ElementType, getResourceType, ResourceType } from './proxy/utils';
 export default {
@@ -21,11 +21,6 @@ export default {
   /* TOOLBAR */
   getNumAlerts: function (state): number {
     return state.alerts.length;
-  },
-
-  /* FAB BUTTON*/
-  getFabElements: function (state): Array<FabElement> {
-    return state.fabElements;
   },
 
   /* MENU */

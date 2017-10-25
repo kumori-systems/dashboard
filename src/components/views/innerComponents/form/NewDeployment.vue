@@ -153,7 +153,7 @@
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement, Deployment, Resource } from '../../../../store/classes';
+import { Deployment } from '../../../../store/classes';
 import NumberInput from '../input/NumberInput.vue';
 
 @Component({
@@ -186,9 +186,6 @@ export default class NewService extends Vue {
     selectedResourceConfig: Array<string> = [];
 
     mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-
         // Si venimos desde la ventana elements con un servicio preseleccionado, lo ponemos
         this.selectedService = this.$store.getters.getSelectedService;
     }
