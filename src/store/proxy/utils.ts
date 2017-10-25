@@ -193,9 +193,9 @@ export function transformManifestToComponent(manifest: {
     let reqChannels: { [channelId: string]: Channel } = {};
     if (manifest.channels && manifest.channels.requires)
         for (let i = 0; i < manifest.channels.requires.length; i++) {
-            reqChannels[manifest.channels.provides[i].name] = new Channel(
-                manifest.channels.provides[i].type, // type
-                manifest.channels.provides[i].protocol // protocol
+            reqChannels[manifest.channels.requires[i].name] = new Channel(
+                manifest.channels.requires[i].type, // type
+                manifest.channels.requires[i].protocol // protocol
             );
         }
 
