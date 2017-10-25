@@ -23,7 +23,7 @@ import { FabElement } from "../../../store/classes";
 })
 export default class FAB extends Vue {
   // bgColor: string = "#c91432";
-  position: string = "bottom-right";
+  position: string = "top-right";
 
   elements = {
     "/": {
