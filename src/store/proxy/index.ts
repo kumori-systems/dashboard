@@ -278,6 +278,7 @@ export class ProxyConnection extends EventEmitter {
                     default:
                         console.error('Case not covered', uri, element);
                 }
+                this.requestedElements.splice(this.requestedElements.indexOf(uri));
             }).catch((error) => {
                 console.error('Error getting element info', error);
             });
