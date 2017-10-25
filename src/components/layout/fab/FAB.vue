@@ -3,6 +3,7 @@
    v-bind:position="position"
    v-bind:bg-color="elements[route].bgColor"
    v-bind:actions="elements[route].fabActions"
+   v-bind:z-index="zindex"
    v-on:addentrypoint="addEntrypoint"
    v-on:addservicedeployment="addServiceDeployment"
    v-on:uploadbundle="uploadBundle"
@@ -24,7 +25,7 @@ import { FabElement } from "../../../store/classes";
 export default class FAB extends Vue {
   // bgColor: string = "#c91432";
   position: string = "top-right";
-
+  zindex: number = 20;
   elements = {
     "/": {
       bgColor: "#C70039",
@@ -73,10 +74,10 @@ export default class FAB extends Vue {
     console.log("addServiceDeployment callback");
   }
 
-  uploadBundle(){
+  uploadBundle() {
     (<Vue>this).$router.push("/newBundle");
   }
-  addDomain(){
+  addDomain() {
     (<Vue>this).$router.push("/newDomain");
   }
 
