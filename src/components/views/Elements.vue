@@ -46,7 +46,7 @@
                                                     <button class="button is-info" v-on:click="showComponentInfo(owner, component, version)">
                                                         <i class="fa fa-info" aria-hidden="true" />
                                                     </button>
-                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteComponent(owner, component, version)">
+                                                    <button class="button is-danger" v-on:click="deleteComponent(owner, component, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </th>
@@ -99,7 +99,7 @@
                                                         </button>
                                                     </router-link>
 
-                                                    <button class="button is-danger" v-if="owner===user" v-on:click="deleteService(owner, service, version)">
+                                                    <button class="button is-danger" v-on:click="deleteService(owner, service, version)">
                                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </th>
@@ -139,7 +139,7 @@
                                                 <button class="button is-info" v-on:click="showRuntimeInfo(owner, runtime, version)">
                                                     <i class="fa fa-info" aria-hidden="true" />
                                                 </button>
-                                                <button class="button is-danger" v-if="owner===user" v-on:click="deleteRuntime(owner, runtime, version)">
+                                                <button class="button is-danger" v-on:click="deleteRuntime(owner, runtime, version)">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </button>
                                             </th>
@@ -210,10 +210,6 @@ export default class Elements extends Vue {
     modalElementList: Array<[string, string, string, string]> = [];
 
     /** GENERAL */
-    get user() {
-        return this.$store.getters.getUser;
-    }
-
     get someoneSelected() {
         if (this.selectedComponents.length > 0 || this.selectedServices.length > 0 || this.selectedRuntimes.length > 0)
             return true;
