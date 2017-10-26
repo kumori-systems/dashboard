@@ -17,7 +17,6 @@ export default class NewBundle extends Vue {
   fileList: FileList = null;
 
   onFileChange(e) {
-    console.log('Llamamos a onFileChange');
     this.fileList =
       (<HTMLInputElement>e.target).files ||
       (<DataTransfer>e.dataTransfer).files;
