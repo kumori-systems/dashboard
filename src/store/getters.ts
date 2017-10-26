@@ -57,7 +57,6 @@ export default {
         case 'eslap://eslap.cloud/channel/request/1_0_0':
           typeSearched = 'eslap://eslap.cloud/channel/reply/1_0_0';
           break;
-
         case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
           console.warn('deprecated channel URI \'endpoint\'');
         case 'eslap://eslap.cloud/channel/reply/1_0_0':
@@ -177,7 +176,7 @@ export default {
     for (let deploymentId in state.deploymentList) {
       res.push(deploymentId);
     }
-    return res;
+    return res.reverse();
   },
 
   /**
