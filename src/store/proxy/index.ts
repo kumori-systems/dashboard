@@ -99,6 +99,7 @@ export class ProxyConnection extends EventEmitter {
                                 let roles: { [rolId: string]: Deployment.Rol } = {};
                                 for (let instance in event.data.instances) {
                                     roles[event.data.instances[instance].role] = new Deployment.Rol(
+                                        null, // id
                                         null, // configuration
                                         null, // cpu
                                         null, // memory
@@ -148,6 +149,7 @@ export class ProxyConnection extends EventEmitter {
                             case EcloudEventName.status:
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
                                 let inst = new Deployment.Rol.Instance(
+                                    null,
                                     event.entity['instance'], // cnid
                                     null, // publicIp
                                     null, // privateIp

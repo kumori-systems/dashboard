@@ -1,5 +1,4 @@
 import { Deployment, Runtime, Component, Service, Domain, Link, Resource, Channel, Metric } from './classes';
-import urlencode from 'urlencode';
 import { getElementOwner, getElementName, getElementVersion, isServiceEntrypoint, getElementType, ElementType, getResourceType, ResourceType } from './proxy/utils';
 export default {
   /* USER */
@@ -171,10 +170,12 @@ export default {
   deployments: function (state) {
     return state.deploymentList;
   },
-  getDeploymentList: function (state): Array<string> {
-    let res: Array<string> = [];
-    for (let deploymentId in state.deploymentList) {
-      res.push(deploymentId);
+
+  /** Returns the deployments in an ordered way */
+  getDeploymentList: function (state, getters): Deployment[] {
+    let res: Deployment[] = [];
+    for (let deploymentId in getters.deployments) {
+      res.push(getters.deployments[deploymentId]);
     }
     return res.reverse();
   },
@@ -182,20 +183,15 @@ export default {
   /**
    * Used from menu items to find it's deployment
    */
-  getDeploymentIdFromDeploymentRoute: function (state): Function {
-    return function (deploymentRoute: string): string {
-      return urlencode.decode(deploymentRoute.split('/')[2]);
+  getDeploymentFromDeploymentRoute: function (state, getters): (path: string) => Deployment {
+    return function (deploymentPATH: string): Deployment {
+      return getters.getDeploymentList.find((d) => {
+        return d.path === deploymentPATH;
+      });
     };
   },
 
-  getDeploymentPath: function (state): Function {
-    return function (deploymentId: String): string {
-      // Obtenemos la vista que contiene los deployment == OVERVIEW
-      return '/deployment/' + urlencode(deploymentId);
-    };
-  },
-
-  getDeploymentName: function (state): Function {
+  getDeploymentName: function (state): (id: string) => string {
     return function (deploymentId: string): string {
       return (<Deployment>state.deploymentList[deploymentId]).name;
     };
@@ -214,8 +210,10 @@ export default {
   },
 
   getServiceIsEntryPoint: function (state, getters) {
-    console.warn('deprecated getServiceIsEntryPoint. Use utils instead');
-    return (uri: string) => { return isServiceEntrypoint(uri); };
+    return (uri: string) => {
+      console.warn('deprecated getServiceIsEntryPoint. Use utils instead');
+      return isServiceEntrypoint(uri);
+    };
   },
 
   getDeploymentState: function (state, getters): Function {
@@ -523,11 +521,18 @@ export default {
   },
 
   /* COMPONENTS */
+  component: function (state) {
+    return (componentId: string) => {
+      return state.componentList[componentId];
+    };
+  },
+
   getComponentInfo: function (state) {
     return (componentId) => {
       return state.componentList[componentId];
     };
   },
+  
   getComponentId: function (state, getters) {
     return (owner, component, version) => {
       for (let componentId in state.componentList) {
@@ -667,6 +672,11 @@ export default {
   },
 
   /* SERVICES */
+  service: function (state) {
+    return (serviceId) => {
+      return state.serviceList[serviceId];
+    };
+  },
   getServiceId: function (state, getters) {
     return (owner, service, version) => {
       let myServiceId;

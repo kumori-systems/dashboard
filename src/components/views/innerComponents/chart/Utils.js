@@ -3,8 +3,8 @@ import * as moment from 'moment';
 const color = {
     cpu:'#ff0400',
     memory:'#ffec00',
-    bandwith_input:'#00ecff',
-    bandwith_output:'#1300ff'
+    bandwidth_input:'#00ecff',
+    bandwidth_output:'#1300ff'
 };
 export function prepareData(data) {
     var res = {

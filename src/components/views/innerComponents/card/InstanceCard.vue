@@ -3,11 +3,11 @@
         <div class="tile is-vertical">
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
-                <span class="title">{{ instanceId }}</span>
+                <span class="title">{{ instance.id }}</span>
                 <div class="tile is-parent">
-                    <div>{{ instanceMem }} MEM</div>
-                    <div>{{ instanceCPU }} CPU</div>
-                    <div>{{ instanceNet }} NET</div>
+                    <div>{{ instance.memory }} MEM</div>
+                    <div>{{ instance.cpu }} CPU</div>
+                    <div>{{ instance.bandwidth }} NET</div>
                     <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                 </div>
             </div>
@@ -32,9 +32,7 @@ import Checkbox from "../input/CheckboxInput.vue";
 @Component({
   name: "instance-card",
   props: {
-    deploymentId: { required: true, type: String },
-    rolId: { required: true, type: String },
-    instanceId: { required: true, type: String },
+    instance: { required: true },
     clear: { required: true, type: Boolean }, // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
     instanceMetrics: { required: true }
   },
@@ -46,9 +44,7 @@ import Checkbox from "../input/CheckboxInput.vue";
   }
 })
 export default class Card extends Vue {
-  deploymentId: string = this.deploymentId;
-  rolId: string = this.rolId;
-  instanceId: string = this.instanceId;
+  instance: Deployment.Rol.Instance = this.instance;
   killInstance: boolean = false;
   chartOptions = ChartOptions;
   instanceMetrics = this.instanceMetrics;
@@ -68,21 +64,18 @@ export default class Card extends Vue {
       data: []
     };
     for (let i in this.instanceMetrics) {
-      res.data.push(this.instanceMetrics[i][this.instanceId]);
+      res.data.push(this.instanceMetrics[i][this.instance.id]);
     }
     return res;
   }
+
   get instanceChartData() {
     return prepareData(this.onInstanceMetricsUpdate.data);
   }
 
   get state(): string {
     let res: string = "fa ";
-    switch (this.$store.getters.getDeploymentRolInstanceState(
-      this.deploymentId,
-      this.rolId,
-      this.instanceId
-    )) {
+    switch (this.instance.state) {
       case Deployment.Rol.Instance.State.CONNECTED:
         res += "fa-check-circle";
       case Deployment.Rol.Instance.State.DISCONNECTED:
@@ -93,36 +86,12 @@ export default class Card extends Vue {
     return res;
   }
 
-  get instanceMem(): number {
-    return this.$store.getters.getDeploymentRolInstanceMem(
-      this.deploymentId,
-      this.rolId,
-      this.instanceId
-    );
-  }
-
-  get instanceCPU(): number {
-    return this.$store.getters.getDeploymentRolInstanceCPU(
-      this.deploymentId,
-      this.rolId,
-      this.instanceId
-    );
-  }
-
-  get instanceNet(): number {
-    return this.$store.getters.getDeploymentRolInstanceNet(
-      this.deploymentId,
-      this.rolId,
-      this.instanceId
-    );
-  }
-
   /**
      * Éste método se utiliza para enviar una notificación al componente superior para que lea que
      * se ha cambiado el valor de 'kill instance'
      */
   killInstanceChange() {
-    this.$emit("killInstanceChange", [this.instanceId, this.killInstance]);
+    this.$emit("killInstanceChange", [this.instance.id, this.killInstance]);
   }
 }
 </script>
@@ -174,4 +143,3 @@ a {
   padding-left: 10px;
 }
 </style>
-

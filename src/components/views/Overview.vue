@@ -6,10 +6,10 @@
             <div class="tile">
             <div class="columns">
               <div class="column" >
-                    <deployment-card  class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0 && !shouldHide(deployment)" v-bind:deploymentId="deployment"></deployment-card>
+                    <deployment-card  class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0 && (!deployment.isEntrypoint || hideEntrypoints)" v-bind:deployment="deployment"></deployment-card>
               </div>              
               <div class="column" >
-                    <deployment-card class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2!==0 && !shouldHide(deployment)" v-bind:deploymentId="deployment"></deployment-card>
+                    <deployment-card class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2!==0 && (!deployment.isEntrypoint || hideEntrypoints)" v-bind:deployment="deployment"></deployment-card>
               </div>
             </div>
             </div>
@@ -44,13 +44,6 @@ export default class Overview extends Vue {
 
   get deploymentList(): Array<string> {
     return this.$store.getters.getDeploymentList;
-  }
-
-  get shouldHide(): Function {
-    return function(deploymentId): boolean {
-      if (!this.hideEntrypoints) return false;
-      return this.$store.getters.getIsEntryPoint(deploymentId);
-    };
   }
 }
 </script>

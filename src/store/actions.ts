@@ -2,7 +2,6 @@ import { ProxyConnection } from './proxy/index';
 import { getElementType, ElementType, getResourceType, ResourceType, transformEcloudEventDataToMetrics } from './proxy/utils';
 import { DeploymentItem } from './../components';
 import { Deployment, Component, Service, Runtime, Resource } from './classes';
-import urlencode from 'urlencode';
 import { Notification, createNotification, notificationType } from '../components/views/innerComponents/notification';
 
 const connection: ProxyConnection = new ProxyConnection();

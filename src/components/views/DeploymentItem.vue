@@ -1,7 +1,7 @@
 <template>
     <div id="deployment-item-view">
         <i v-bind:class="state" aria-hidden="true"></i>
-        <span class="title">{{deploymentName}}</span>
+        <span class="title">{{deployment.name}}</span>
         <div>
             <button class="button is-danger is-medium" v-on:click="showUndeployModal">UNDEPLOY</button>
             <button v-bind:disabled="!haveChanges" class="button is-success is-medium " v-on:click="applyChanges">APPLY CHANGES</button>
@@ -10,13 +10,11 @@
         <div class="is-parent tile">
             <div class="tile">
                 <div>
-                    <p>Service: {{deploymentService}}</p>
-                    <p v-if="website!=null">
+                    <p>Service: {{deployment.serviceId}}</p>
+                    <p v-if="deployment.website.length > 0">
                         Websites:
-                        <p class="inner-content" v-for="(web, index) in website" v-bind:key="index">
-                            <a v-bind:href=" 'http://'+web ">
-                                {{web}}
-                            </a>
+                        <p class="inner-content" v-for="(web, index) in deployment.website" v-bind:key="index">
+                            <a v-bind:href=" 'http://' + web ">{{web}}</a>
                         </p>
                     </p>
                     <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0"> Connected to:
@@ -34,11 +32,11 @@
             </div>
         </div>
         <div>
-            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:rolMetrics="rolMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
+            <rol-card v-for="(rolContent, rolId) in deployment.roles" v-bind:key="rolId" v-bind:service="service" v-bind:rol="rolContent" v-bind:rolMetrics="rolMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
         </div>
-        <undeploy-modal v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false" v-on:undeploy="handleUndeploy">
+        <undeploy-modal v-bind:visible="showModal" v-bind:deploymentId="deployment.uri" v-bind:deploymentName="deployment.name" v-on:close="showModal=false" v-on:undeploy="handleUndeploy">
             This action will
-            <strong>UNDEPLOY</strong> {{deploymentName}} and you will
+            <strong>UNDEPLOY</strong> {{deployment.name}} and you will
             <strong>loose all data</strong>
         </undeploy-modal>
     </div>
@@ -74,7 +72,7 @@ export default class DeploymentItem extends Vue {
 
   get state(): string {
     let res: string = "fa ";
-    switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
+    switch (this.deployment.state) {
       case Deployment.State.OK:
         res += "fa-check-circle";
       case Deployment.State.DANGER:
@@ -87,22 +85,10 @@ export default class DeploymentItem extends Vue {
     return res;
   }
 
-  get deploymentId() {
-    return this.$store.getters.getDeploymentIdFromDeploymentRoute(
+  get deployment(): Deployment {
+    return this.$store.getters.getDeploymentFromDeploymentRoute(
       this.$route.path
     );
-  }
-
-  get website(): string {
-    return this.$store.getters.getDeploymentWebsite(this.deploymentId);
-  }
-
-  get deploymentName(): string {
-    return this.$store.getters.getDeploymentName(this.deploymentId);
-  }
-
-  get isEntrypoint() {
-    return this.$store.getters.getIsEntryPoint(this.deploymentId);
   }
 
   get deploymentMetrics() {
@@ -117,7 +103,7 @@ export default class DeploymentItem extends Vue {
           };
         };
       }
-    ][] = this.$store.getters.deploymentMetricList(this.deploymentId);
+    ][] = this.$store.getters.deploymentMetricList(this.deployment.uri);
 
     let res: {
       data: Metric[];
@@ -153,31 +139,22 @@ export default class DeploymentItem extends Vue {
     return this.deploymentMetrics.roles;
   }
 
-  get deploymentRoles(): Array<string> {
-    return this.$store.getters.getDeploymentRoles(this.deploymentId);
-  }
-
-  /* Rol atributes */
-  get deploymentService(): string {
-    return this.$store.getters.getDeploymentService(this.deploymentId);
-  }
-
-  get serviceInfo() {
-    if (
-      this.$store.getters.getServiceInfo(this.deploymentService) === undefined
-    )
-      this.$store.dispatch("getElementInfo", { uri: this.deploymentService });
-    return null;
+  get service() {
+    let ser:Service = this.$store.getters.service(this.deployment.serviceId);
+    if (!ser){
+      this.$store.dispatch("getElementInfo", {uri: this.deployment.serviceId});
+    }
+    return ser;
   }
 
   get serviceProvideChannels(): Array<Channel> {
-    this.serviceInfo;
-    return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
+    return this.$store.getters.getDeploymentProvideChannels(this.deployment.uri);
   }
 
   get serviceRequireChannels(): Array<Channel> {
-    this.serviceInfo;
-    return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
+    return this.$store.getters.getDeploymentRequireChannels(
+      this.deployment.uri
+    );
   }
 
   applyChanges(): void {
@@ -186,7 +163,7 @@ export default class DeploymentItem extends Vue {
     //  rolNumInstances
     //  killInstances
     this.$store.dispatch("aplyingChangesToDeployment", {
-      deploymentId: this.deploymentId,
+      deploymentId: this.deployment.uri,
       rolNumInstances: this.rolNumInstances,
       killInstances: this.instanceKill
     });
@@ -202,7 +179,7 @@ export default class DeploymentItem extends Vue {
   }
 
   showUndeployModal(): void {
-    const deploymentId = this.deploymentId;
+    const deploymentId = this.deployment.uri;
     this.modalOkCallback = function() {
       this.$store.dispatch("undeployDeployment", {
         deploymentId: deploymentId

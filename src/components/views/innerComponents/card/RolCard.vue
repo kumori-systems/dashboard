@@ -2,14 +2,14 @@
     <div id="rol-card" class="card">
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
-            <span class="title">{{ rolId }}</span>
-            <span class="box is-unselectable">{{ numInstances }}</span>
+            <span class="title">{{ rol.id }}</span>
+            <span class="box is-unselectable">{{ rol.instanceNumber }}</span>
             <div>
                 <div class="tile is-vertical">
-                    <button class="button is-primary" v-on:click="numInstances = 1" disabled>
+                    <button class="button is-primary" v-on:click="localNumInstances += 1" disabled>
                         <i class="fa fa-angle-up"></i>
                     </button>
-                    <button class="button is-primary is-outlined" v-on:click="numInstances = -1" disabled>
+                    <button class="button is-primary is-outlined" v-on:click="localNumInstances += -1" disabled>
                         <i class="fa fa-angle-down"></i>
                     </button>
                 </div>
@@ -18,25 +18,35 @@
         <div class="card-body tile inner-content">
             <div class="tile">
                 <div class="inner-content">
-                    <p>Component: {{ componentURI }}</p>
-                    <p>Runtime: {{ rolRuntime }}</p>
+                    <p v-if="component">Component: {{ component.uri }}</p>
+                    <p v-else>Component: retrieving info..</p>
+                    <p v-if="component">Runtime: {{ component.runtime }}</p>
+                    <p v-else>Runtime: retrieving info..</p>
                     <p>
-                        {{ memNumber }} MEM {{ cpuNumber }} CPU {{ netNumber }} NET
+                        {{ rol.memory }} MEM {{ rol.cpu }} CPU {{ rol.bandwidth }} NET
                     </p>
-                    <p v-if="dataVolumesList.length>0">
+                    <!--
+                      Volumes not correctly working
+                    <p v-if="service.roles[rol.id].data.length>0">
                         Data Volumes:
                         <div class="inner-content" v-for="(dataVolume, index) in dataVolumesList" v-bind:key="index">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> {{ dataVolume }}
                         </div>
                     </p>
+                    -->
                     <div>
                         <div class="left-padding">
-                            Channels connected to 
-
+                          <div v-if="service">
+                            Channels: {{ rol.id | roleChannels(service.connectors) }}
+                            <!--
                             <div v-for="(connection, connectionIndex) in rolConnections" v-bind:key="connectionIndex">
                               {{ connection.provided }} -> {{ connection.depended }}
                             </div>
-                           
+                            -->
+                          </div>
+                          <div v-else>
+                            Channels: retrieving info..
+                          </div>
                         </div>
                         
                     </div>
@@ -50,7 +60,7 @@
         </div>
         <collapse>
             <collapse-item title="Instances">
-                <instance-card v-for="instance in rolInstances" v-bind:key="instance.name" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-bind:instanceId="instance"
+                <instance-card v-for="(instanceContent, instanceIndex) in rol.instanceList" v-bind:key="instanceIndex" v-bind:instance="instanceContent"
                 v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
                 </instance-card>
             </collapse-item>
@@ -77,8 +87,8 @@ import {
 @Component({
   name: "rol-card",
   props: {
-    deploymentId: { required: true, type: String },
-    rolId: { required: true, type: String },
+    rol: { required: true },
+    service: { required: true },
     clear: { required: true, type: Boolean }, // Se utiliza para limpiar los cambios cuando se cancelan
     rolMetrics: { required: true } // Role and Instance metrics
   },
@@ -87,14 +97,24 @@ import {
     "collapse-item": CollapseItem,
     "instance-card": InstanceCard,
     chart: Chart
+  },
+  filters:{
+    roleChannels: function(rolId:string, connectors:Service.Connector[]) {
+      if(connectors)
+      return connectors.filter((conn)=>{
+        return conn.depended.find((dep)=>{return dep.role === rolId;})
+        ||conn.provided.find((pro)=>{return pro.role === rolId;})
+      })
+      return '';
+    },
   }
 })
-export default class Card extends Vue {
-  deploymentId: string = this.deploymentId;
-  rolId: string = this.rolId;
+export default class RolCard extends Vue {
+  rol: Deployment.Rol = this.rol;
   localNumInstances: number = -1;
   chartOptions = ChartOptions;
   rolMetrics = this.rolMetrics;
+  service: Service = this.service;
 
   mounted() {
     this.$watch("clear", function(value) {
@@ -116,119 +136,55 @@ export default class Card extends Vue {
     };
 
     for (let i in this.rolMetrics) {
-      res.data.push(this.rolMetrics[i][this.rolId].data);
-      res.instances.push(this.rolMetrics[i][this.rolId].instances);
+      res.data.push(this.rolMetrics[i][this.rol.id].data);
+      res.instances.push(this.rolMetrics[i][this.rol.id].instances);
     }
     return res;
   }
+
   get rolChartData() {
     return prepareData(this.onRolMetricsUpdate.data);
   }
+
   get instanceMetrics() {
     return this.onRolMetricsUpdate.instances;
   }
 
   get state(): string {
     let res: string = "fa ";
-    switch (this.$store.getters.getDeploymentRolState(
-      this.deploymentId,
-      this.rolId
-    )) {
-      case Deployment.State.OK:
+    switch (this.rol.state) {
+      case Deployment.Rol.State.OK:
         res += "fa-check-circle";
-      case Deployment.State.DANGER:
+      case Deployment.Rol.State.DANGER:
         res += "fa-exclamation-circle";
-      case Deployment.State.WARNING:
+      case Deployment.Rol.State.WARNING:
         res += "fa-exclamation-triangle";
       default:
         res += "fa-question-circle";
     }
     return res;
   }
-  get numInstances(): number {
-    // Miramos el número de instáncias local. ¿Está inicializado?
-    if (this.localNumInstances < 0) {
-      this.localNumInstances = this.$store.getters.getDeploymentRolNumInstances(
-        this.deploymentId,
-        this.rolId
+  get component() {
+    let res;
+    if (this.service) {
+      res = this.$store.getters.component(
+        this.service.roles[this.rol.id].component
       );
+      if (!res) {
+        this.$store.dispatch("getElementInfo", {
+          uri: this.service.roles[this.rol.id].component
+        });
+      }
     }
-    return this.localNumInstances;
+    return res;
   }
 
-  set numInstances(x: number) {
-    if (this.localNumInstances !== 0 || x != -1) {
-      this.localNumInstances += x;
-      this.$emit("numInstancesChange", [this.rolId, this.localNumInstances]);
-    }
-  }
-
-  get componentURI() {
-    let cURI = this.$store.getters.getDeploymentRolComponentURI(
-      this.deploymentId,
-      this.rolId
-    );
-    if (
-      cURI !== null &&
-      this.$store.getters.getComponentInfo(cURI) === undefined
-    )
-      // If we've got not info for this component we ask for it
-      this.$store.dispatch("getElementInfo", { uri: cURI });
-    return cURI;
-  }
-  get rolRuntime() {
-    return this.$store.getters.getDeploymentRolRuntime(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-
-  get rolInstances() {
-    return this.$store.getters.getDeploymentRolInstances(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-
-  get memNumber(): number {
-    return this.$store.getters.getDeploymentRolMemNumber(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-
-  get cpuNumber(): number {
-    return this.$store.getters.getDeploymentRolCPUNumber(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-
-  get netNumber(): number {
-    return this.$store.getters.getDeploymentRolNetNumber(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-  get dataVolumesList() {
-    return this.$store.getters.getDeploymentRolVolumeList(
-      this.deploymentId,
-      this.rolId
-    );
-  }
-
-  get rolConnections(): Array<Service.Connector> {
-    return this.$store.getters.getDeploymentRolConnections(
-      this.deploymentId,
-      this.rolId
-    );
-  }
   /**
-     * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo
-     * al deployment para que lo almacene en un estado temporal
-     */
+   * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo
+   * al deployment para que lo almacene en un estado temporal
+  */
   handleKillInstanceChange(payload) {
-    this.$emit("killInstanceChange", [this.rolId, ...payload]);
+    this.$emit("killInstanceChange", [this.rol.id, ...payload]);
   }
 }
 </script>

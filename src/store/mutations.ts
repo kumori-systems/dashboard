@@ -38,9 +38,9 @@ export default {
             if ((<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId]) {
               Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList, instanceId, (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId]);
 
-              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'memory', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.memory);
-              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'cpu', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.cpu);
-              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId].arrangement, 'bandwith', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].arrangement.bandwith);
+              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId], 'memory', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].memory);
+              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId], 'cpu', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].cpu);
+              Vue.set((<Deployment>state.deploymentList[deploymentId]).roles[rolId].instanceList[instanceId], 'bandwidth', (<Deployment>deploymentMap[deploymentId]).roles[rolId].instanceList[instanceId].bandwidth);
             }
           }
         }

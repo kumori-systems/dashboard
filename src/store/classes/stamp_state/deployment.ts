@@ -1,7 +1,7 @@
 import urlencode from 'urlencode';
-import StampElement from './stampelement';
 import { isServiceEntrypoint, getElementVersion, getElementOwner, getElementName } from '../../proxy/utils';
 import { Metric } from '../stamp_state/metric';
+
 export class Link {
   deploymentOne: string;
   channelOne: string;
@@ -92,6 +92,7 @@ export module Deployment {
   export enum State { OK, DANGER, WARNING, UNKOWN };
 
   export class Rol {
+    readonly id: string;
     configuration: any;
     cpu: number;
     memory: number;
@@ -101,7 +102,8 @@ export module Deployment {
     resilience: number;
     instanceList: { [instanceId: string]: Rol.Instance };
     instanceNumber: number;
-    constructor(configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+    constructor(id: string, configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+      this.id = id;
       this.configuration = configuration;
       this.cpu = cpu;
       this.memory = memory;
@@ -135,7 +137,6 @@ export module Deployment {
           }
         }
       }
-
       if (connected > 0 && disconnected === 0) {
         res = Rol.State.OK;
       }
@@ -145,7 +146,6 @@ export module Deployment {
       else if (connected === 0 && disconnected > 0) {
         res = Rol.State.DANGER;
       }
-
       return res;
     }
   }
@@ -154,22 +154,21 @@ export module Deployment {
     export enum State { OK, DANGER, WARNING, UNKOWN };
 
     export class Instance {
-
-      cnid: string;
-      publicIp: string;
-      privateIp: string;
-      arrangement: Instance.Arrangement;
-      volumes: { [key: string]: string; };
-      ports: { [key: string]: string; };
-      state: Instance.State;
-      constructor(cnid: string, publicIp: string, privateIp: string, arrangement: Instance.Arrangement, volumes?: { [key: string]: string; }, ports?: { [key: string]: string; }) {
-        this.cnid = cnid;
-        this.publicIp = publicIp;
-        this.privateIp = privateIp;
-        this.arrangement = arrangement;
-        this.volumes = volumes;
-        this.ports = ports;
-        this.state = Instance.State.UNKOWN;
+      readonly id: string;
+      cpu: number = 1;
+      memory: number = 1;
+      bandwidth: number = 1;
+      volumes: { [key: string]: string; } = {};
+      ports: { [key: string]: string; } = {};
+      state: Instance.State = Instance.State.UNKOWN;
+      constructor(id: string, cpu: number, memory: number, bandwidth: number, volumes?: { [key: string]: string; }, ports?: { [key: string]: string; }) {
+        if (!id) throw new Error('An instance cant be created without an id');
+        this.id = id;
+        if (cpu && cpu !== null && cpu > 0) this.cpu = cpu;
+        if (memory && memory !== null && memory > 0) this.memory = memory;
+        if (bandwidth && bandwidth !== null && bandwidth > 0) this.bandwidth = bandwidth;
+        if (volumes && volumes !== null) this.volumes = volumes;
+        if (ports && ports !== null) this.ports = ports;
       }
 
       setState(connected: boolean) {
@@ -183,23 +182,6 @@ export module Deployment {
 
     export module Instance {
       export enum State { CONNECTED, DISCONNECTED, UNKOWN };
-
-      export class Arrangement {
-        minInstances: number;
-        maxInstances: number;
-        cpu: number;
-        memory: number;
-        bandwith: number;
-        failureZones: number;
-        constructor(minInstances, maxInstances, cpu, memory, bandwith, failureZones) {
-          this.minInstances = minInstances;
-          this.maxInstances = maxInstances;
-          this.cpu = cpu;
-          this.memory = memory;
-          this.bandwith = bandwith;
-          this.failureZones = failureZones;
-        }
-      }
     }
   }
 }

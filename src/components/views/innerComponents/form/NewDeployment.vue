@@ -150,224 +150,248 @@
 </template>
 
 <script lang="ts">
-
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Deployment } from '../../../../store/classes';
-import NumberInput from '../input/NumberInput.vue';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { Deployment } from "../../../../store/classes";
+import NumberInput from "../input/NumberInput.vue";
 
 @Component({
-    name: 'new-service',
-    components: {
-        'number-input': NumberInput
-    },
-    watch: {
-        // whenever selectedService changes, this function will run
-        selectedService: function(newValue) {
-            if (newValue) {
-                this.$store.dispatch('getElementInfo', { 'uri': newValue });
-            }
-        }
+  name: "new-service",
+  components: {
+    "number-input": NumberInput
+  },
+  watch: {
+    // whenever selectedService changes, this function will run
+    selectedService: function(newValue) {
+      if (newValue) {
+        this.$store.dispatch("getElementInfo", { uri: newValue });
+      }
     }
-
+  }
 })
 export default class NewService extends Vue {
-    selectedService: string = null;
-    deploymentName: string = null;
-    rolMem: Array<number> = [];
-    rolCPU: Array<number> = [];
-    rolNet: Array<number> = [];
-    rolInstances: Array<number> = [];
-    rolResilence: Array<number> = [];
-    resourceConfig: Array<string> = [];
-    serviceConfig: string = null;
-    selectedRequiredChannel: Array<string> = [];
-    selectedProvidedChannel: Array<string> = [];
-    selectedResourceConfig: Array<string> = [];
+  selectedService: string = null;
+  deploymentName: string = null;
+  rolMem: Array<number> = [];
+  rolCPU: Array<number> = [];
+  rolNet: Array<number> = [];
+  rolInstances: Array<number> = [];
+  rolResilence: Array<number> = [];
+  resourceConfig: Array<string> = [];
+  serviceConfig: string = null;
+  selectedRequiredChannel: Array<string> = [];
+  selectedProvidedChannel: Array<string> = [];
+  selectedResourceConfig: Array<string> = [];
 
-    mounted() {
-        // Si venimos desde la ventana elements con un servicio preseleccionado, lo ponemos
-        this.selectedService = this.$store.getters.getSelectedService;
+  mounted() {
+    // Si venimos desde la ventana elements con un servicio preseleccionado, lo ponemos
+    this.selectedService = this.$store.getters.getSelectedService;
+  }
+
+  get deploymentList(): Array<string> {
+    return this.$store.getters.getDeploymentList;
+  }
+
+  get deployedServicesInfo(): boolean {
+    // Para poder hacer los cálculos de los channel, y poder recomendar únicamente aquellos que encajan
+    // es necesario obtener todos los servicios de aquellos deployment que están desplegados
+    for (let i in this.deploymentList) {
+      let serviceURI = this.$store.getters.getDeploymentService(
+        this.deploymentList[i]
+      );
+      this.$store.dispatch("getElementInfo", { uri: serviceURI });
+    }
+    return true;
+  }
+
+  get serviceList() {
+    this.deployedServicesInfo;
+    return this.$store.getters.getServiceList;
+  }
+
+  get serviceRolList(): Array<string> {
+    if (!this.selectedService || this.selectedService === null) return [];
+    let rolList: Array<string> = this.$store.getters.getServiceRoles(
+      this.selectedService
+    );
+    this.rolMem = new Array<number>(rolList.length);
+    this.rolCPU = new Array<number>(rolList.length);
+    this.rolNet = new Array<number>(rolList.length);
+    this.rolInstances = new Array<number>(rolList.length);
+    this.rolResilence = new Array<number>(rolList.length);
+    for (let i = 0; i < rolList.length; i++) {
+      this.rolMem[i] = 1;
+      this.rolCPU[i] = 1;
+      this.rolNet[i] = 1;
+      this.rolInstances[i] = 1;
+      this.rolResilence[i] = 1;
+    }
+    return rolList;
+  }
+
+  get serviceProChannelList(): Array<string> {
+    if (!this.selectedService || this.selectedService === null) return [];
+    let res = this.$store.getters.getServiceProChannels(this.selectedService);
+    this.selectedRequiredChannel = new Array<string>(res.length);
+    return res;
+  }
+  get serviceReqChannelList(): Array<string> {
+    if (!this.selectedService || this.selectedService === null) return [];
+    let res = this.$store.getters.getServiceReqChannels(this.selectedService);
+    this.selectedProvidedChannel = new Array<string>(res.length);
+    return res;
+  }
+
+  get serviceResourcesList(): Array<string> {
+    let resourceList = [];
+    if (this.selectedService && this.selectedService !== null)
+      resourceList = this.$store.getters.getServiceResources(
+        this.selectedService
+      );
+    this.resourceConfig = new Array<string>(resourceList.length);
+    return resourceList;
+  }
+
+  get totalProvidedDeploymentChannels() {
+    return channel => {
+      return this.$store.getters.getTotalProvidedDeploymentChannels(
+        this.selectedService,
+        channel
+      );
+    };
+  }
+
+  get totalRequiredDeploymentChannels() {
+    return channel => {
+      return this.$store.getters.getTotalRequiredDeploymentChannels(
+        this.selectedService,
+        channel
+      );
+    };
+  }
+
+  get totalResourceConfig() {
+    return resourceId => {
+      return this.$store.getters.getFreeResource(resourceId);
+    };
+  }
+
+  get allSelected() {
+    if (!this.selectedService || this.selectedService === null) return false;
+    if (this.deploymentName == null || this.deploymentName.length < 1)
+      return false;
+    for (let index in this.rolMem) {
+      if (this.rolMem[index] === undefined) return false;
+    }
+    for (let index in this.rolCPU) {
+      if (this.rolCPU[index] === undefined) return false;
+    }
+    for (let index in this.rolNet) {
+      if (this.rolNet[index] === undefined) return false;
+    }
+    for (let index in this.rolInstances) {
+      if (this.rolInstances[index] === undefined) return false;
+    }
+    for (let index in this.rolResilence) {
+      if (this.rolResilence[index] === undefined) return false;
+    }
+    for (let index in this.resourceConfig) {
+      if (this.resourceConfig[index] === undefined) return false;
+    }
+    for (let index in this.selectedRequiredChannel) {
+      if (this.selectedRequiredChannel[index] === undefined) return false;
+    }
+    for (let index in this.selectedProvidedChannel) {
+      if (this.selectedProvidedChannel[index] === undefined) return false;
+    }
+    return true;
+  }
+
+  createNewDeployment() {
+    let config = {};
+    for (let resourceIndex in this.serviceResourcesList) {
+      config[this.serviceResourcesList[resourceIndex]] = this.resourceConfig[
+        resourceIndex
+      ];
     }
 
-    get deploymentList(): Array<string> {
-        return this.$store.getters.getDeploymentList;
-    }
-
-    get deployedServicesInfo(): boolean {
-        // Para poder hacer los cálculos de los channel, y poder recomendar únicamente aquellos que encajan
-        // es necesario obtener todos los servicios de aquellos deployment que están desplegados
-        for (let i in this.deploymentList) {
-            let serviceURI = this.$store.getters.getDeploymentService(this.deploymentList[i]);
-            this.$store.dispatch('getElementInfo', { 'uri': serviceURI });
-        }
-        return true;
-    }
-
-    get serviceList() {
-        this.deployedServicesInfo;
-        return this.$store.getters.getServiceList;
-    }
-
-    get serviceRolList(): Array<string> {
-        if (!this.selectedService || this.selectedService === null) return [];
-        let rolList: Array<string> = this.$store.getters.getServiceRoles(this.selectedService);
-        this.rolMem = new Array<number>(rolList.length);
-        this.rolCPU = new Array<number>(rolList.length);
-        this.rolNet = new Array<number>(rolList.length);
-        this.rolInstances = new Array<number>(rolList.length);
-        this.rolResilence = new Array<number>(rolList.length);
-        for (let i = 0; i < rolList.length; i++) {
-            this.rolMem[i] = 1;
-            this.rolCPU[i] = 1;
-            this.rolNet[i] = 1;
-            this.rolInstances[i] = 1;
-            this.rolResilence[i] = 1;
-        }
-        return rolList;
-    }
-
-
-    get serviceProChannelList(): Array<string> {
-        if (!this.selectedService || this.selectedService === null) return [];
-        let res = this.$store.getters.getServiceProChannels(this.selectedService);
-        this.selectedRequiredChannel = new Array<string>(res.length);
-        return res;
-    }
-    get serviceReqChannelList(): Array<string> {
-        if (!this.selectedService || this.selectedService === null) return [];
-        let res = this.$store.getters.getServiceReqChannels(this.selectedService);
-        this.selectedProvidedChannel = new Array<string>(res.length);
-        return res;
-    }
-
-    get serviceResourcesList(): Array<string> {
-        let resourceList = []
-        if (this.selectedService && this.selectedService !== null)
-            resourceList = this.$store.getters.getServiceResources(this.selectedService);
-        this.resourceConfig = new Array<string>(resourceList.length);
-        return resourceList;
-    }
-
-    get totalProvidedDeploymentChannels() {
-        return (channel) => { return this.$store.getters.getTotalProvidedDeploymentChannels(this.selectedService, channel); };
-    }
-
-    get totalRequiredDeploymentChannels() {
-        return (channel) => { return this.$store.getters.getTotalRequiredDeploymentChannels(this.selectedService, channel); };
-
-    }
-
-    get totalResourceConfig() {
-        return (resourceId) => { return this.$store.getters.getFreeResource(resourceId); }
-    }
-
-    get allSelected() {
-        if (!this.selectedService || this.selectedService === null) return false;
-        if (this.deploymentName == null || this.deploymentName.length < 1) return false;
-        for (let index in this.rolMem) {
-            if (this.rolMem[index] === undefined) return false
-        }
-        for (let index in this.rolCPU) {
-            if (this.rolCPU[index] === undefined) return false
-        }
-        for (let index in this.rolNet) {
-            if (this.rolNet[index] === undefined) return false
-        }
-        for (let index in this.rolInstances) {
-            if (this.rolInstances[index] === undefined) return false
-        }
-        for (let index in this.rolResilence) {
-            if (this.rolResilence[index] === undefined) return false
-        }
-        for (let index in this.resourceConfig) {
-            if (this.resourceConfig[index] === undefined) return false
-        }
-        for (let index in this.selectedRequiredChannel) {
-            if (this.selectedRequiredChannel[index] === undefined) return false
-        }
-        for (let index in this.selectedProvidedChannel) {
-            if (this.selectedProvidedChannel[index] === undefined) return false
-        }
-        return true;
-    }
-
-    createNewDeployment() {
-        let config = {};
-        for (let resourceIndex in this.serviceResourcesList) {
-            config[this.serviceResourcesList[resourceIndex]] = this.resourceConfig[resourceIndex];
-        }
-
-        let roles = {};
-        let instances;
-        for (let rolIndex in this.serviceRolList) {
-
-            instances = {};
-            for (let counter = 0; counter < this.rolInstances[rolIndex]; counter++) {
-                instances[counter] = new Deployment.Rol.Instance(null, null, null, null);
-            }
-
-            roles[this.serviceRolList[rolIndex]] = new Deployment.Rol(
-                null,
-                this.rolCPU[rolIndex],
-                this.rolMem[rolIndex],
-                0, //ioperf
-                false,//iopsensitive
-                this.rolNet[rolIndex],
-                this.rolResilence[rolIndex],
-                instances
-            );
-        }
-
-        this.$store.dispatch('createNewDeployment',
-            new Deployment(
-                null, //uri
-                this.deploymentName, //name
-                this.selectedService, //serviceId
-                config, //resourcesConfig
-                JSON.parse(this.serviceConfig), //parameters
-                roles, //roles
-                [], //links
-                [] //website
-            )
+    let roles = {};
+    let instances;
+    for (let rolIndex in this.serviceRolList) {
+      instances = {};
+      for (let counter = 0; counter < this.rolInstances[rolIndex]; counter++) {
+        instances[counter] = new Deployment.Rol.Instance(
+          null,
+          null,
+          null,
+          null,
+          null
         );
-        this.$router.push('/');
+      }
+
+      roles[this.serviceRolList[rolIndex]] = new Deployment.Rol(
+        null,
+        null,
+        this.rolCPU[rolIndex],
+        this.rolMem[rolIndex],
+        0, //ioperf
+        false, //iopsensitive
+        this.rolNet[rolIndex],
+        this.rolResilence[rolIndex],
+        instances
+      );
     }
 
-    updateInputValue(emitedArguments) {
-        let numRol: number, propertyType: string, newValue: number;
-        [numRol, propertyType, newValue] = emitedArguments;
-        switch (propertyType) {
-            case 'CPU':
-                this.rolCPU[numRol] = newValue
-                break;
-            case 'MEM':
-                this.rolMem[numRol] = newValue
-                break;
-            case 'NET':
-                this.rolNet[numRol] = newValue
-                break;
-            case 'INS':
-                this.rolInstances[numRol] = newValue
-                break;
-            case 'RES':
-                this.rolResilence[numRol] = newValue
-                break;
-        }
+    this.$store.dispatch(
+      "createNewDeployment",
+      new Deployment(
+        null, //uri
+        this.deploymentName, //name
+        this.selectedService, //serviceId
+        config, //resourcesConfig
+        JSON.parse(this.serviceConfig), //parameters
+        roles, //roles
+        [], //links
+        [] //website
+      )
+    );
+    this.$router.push("/");
+  }
+
+  updateInputValue(emitedArguments) {
+    let numRol: number, propertyType: string, newValue: number;
+    [numRol, propertyType, newValue] = emitedArguments;
+    switch (propertyType) {
+      case "CPU":
+        this.rolCPU[numRol] = newValue;
+        break;
+      case "MEM":
+        this.rolMem[numRol] = newValue;
+        break;
+      case "NET":
+        this.rolNet[numRol] = newValue;
+        break;
+      case "INS":
+        this.rolInstances[numRol] = newValue;
+        break;
+      case "RES":
+        this.rolResilence[numRol] = newValue;
+        break;
     }
+  }
 }
 </script>
 <style lang="scss" scoped>
 table {
-    border-collapse: collapse;
+  border-collapse: collapse;
+  border-bottom-width: 0px;
+  tr,
+  th {
     border-bottom-width: 0px;
-    tr,
-    th {
-        border-bottom-width: 0px;
-    }
+  }
 }
 
 .input {
-    min-width: 5em;
+  min-width: 5em;
 }
 </style>

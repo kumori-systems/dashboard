@@ -8,24 +8,18 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
         instances = {};
         for (let instanceId in ecloudDeployment.roles[rolId].instances) {
             instances[instanceId] = new Deployment.Rol.Instance(
-                ecloudDeployment.roles[rolId].instances[instanceId].cnid,
-                ecloudDeployment.roles[rolId].instances[instanceId].publicIp,
-                ecloudDeployment.roles[rolId].instances[instanceId].privateIp,
-                new Deployment.Rol.Instance.Arrangement(
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.mininstances,
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.maxinstances,
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.cpu,
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.memory,
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.bandwith,
-                    ecloudDeployment.roles[rolId].instances[instanceId].arrangement.failureZones
-                ),
+                instanceId,
+                ecloudDeployment.roles[rolId].instances[instanceId].arrangement.cpu,
+                ecloudDeployment.roles[rolId].instances[instanceId].arrangement.memory,
+                ecloudDeployment.roles[rolId].instances[instanceId].arrangement.bandwith,
                 ecloudDeployment.roles[rolId].instances[instanceId].volumes,
                 ecloudDeployment.roles[rolId].instances[instanceId].ports
             );
         }
 
         // TODO ERROR001: Esto debería de resolverse en una actualización de la api
-        roles[rolId] = new Deployment.Rol(
+        roles[rolId] = new Deployment.Rol( 
+            rolId,
             ecloudDeployment.roles[rolId].configuration,
             1, // ecloudDeployment.roles[rolId].arrangement.cpu : number
             1, // ecloudDeployment.roles[rolId].arrangement.memory : number
@@ -133,7 +127,6 @@ export function transformManifestToService(manifest: {
             manifest.connectors[conn].depended as any as Array<{ endoint: string, role?: string }>
         ));
     }
-
 
     return new Service(
         manifest.name, // uri:string
