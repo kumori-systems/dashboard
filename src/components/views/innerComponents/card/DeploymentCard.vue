@@ -27,7 +27,7 @@
             </div>
             <div class="tile is-horizontal" v-if="deployment.website.length > 0">
                 <u>Websites:</u>
-                <div v-for="(web, index) in website" v-bind:key="index">
+                <div v-for="(web, index) in deployment.website" v-bind:key="index">
                   <a v-bind:href="'http://' + web">
                     {{ web | truncateLeft(50) }}
                   </a>
