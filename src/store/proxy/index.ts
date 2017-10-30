@@ -7,7 +7,7 @@ import FileSaver from 'file-saver';
 import * as utils from './utils';
 import { Deployment, Service, Component, Runtime, Resource } from '../classes';
 
-import { ADMISSION_URI, ACS_URI } from '../../../static/config.js';
+import { ADMISSION_URI, ACS_URI } from './config.js';
 
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá actuar acorde al evento que lea.
