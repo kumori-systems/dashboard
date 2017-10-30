@@ -71,12 +71,10 @@ export default class FAB extends Vue {
 
   addEntrypoint() {
     (<Vue>this).$router.push("/newHTTPEntrypoint");
-    console.log("addEntrypoint callback");
   }
 
   addServiceDeployment() {
     (<Vue>this).$router.push("/newDeployment");
-    console.log("addServiceDeployment callback");
   }
 
   uploadBundle() {
