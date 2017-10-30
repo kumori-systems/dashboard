@@ -1,62 +1,91 @@
 <template>
-    <div>
-        <div>
-            <span class="select">
-                <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
-                    <option disabled value="">Please select one</option>
-                    <option v-for="domain in domainList" v-bind:key="domain">{{domain}}</option>
-                </select>
-            </span>
-            <input class="checkbox" type="checkbox" id="usePlatformGeneratedDomain" v-model="usePlatformGeneratedDomain"></input>
-            <label for="usePlatformGeneratedDomain"> Use platform-generated domain</label>
-            <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
-        </div>
-        <div>
-            <div>
-                <input class="checkbox" type="checkbox" id="acceptTLSSSL" v-model="acceptTLSSSL"></input>
-                <label for="acceptTLSSSL"> Accept TLS/SSL</label>
-                <span class="select">
-                    <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
-                        <option disabled value="">Please select one</option>
-                        <option v-for="certificate in certificateList" v-bind:key="certificate">{{certificate}}</option>
-                    </select>
-                </span>
-            </div>
-            <div>
-                <input class="checkbox is-large" type="checkbox" id="requireClientCertificates" v-model="requireClientCertificates"></input>
-                <label for="requireClientCertificates"> Require Client Certificates</label>
-            </div>
-        </div>
-        <div class="tile">
-            <span class="name">Instances {{instances}}</span>
-            <div>
-                <div class="tile is-vertical">
-                    <button class="button is-small fa fa-angle-up" v-on:click="instances += 1"></button>
-                    <button class="button is-small fa fa-angle-down" v-on:click="instances>1? instances--:1"></button>
-                </div>
-            </div>
-        </div>
-        <div class="tile">
-            <span class="name">Resilence {{resilence}}</span>
-            <div>
-                <div class="tile is-vertical">
-                    <button class="button is-small fa fa-angle-up" v-on:click="resilence += 1"></button>
-                    <button class="button is-small fa fa-angle-down" v-on:click="resilence>1? resilence--:1"></button>
-                </div>
-            </div>
-        </div>
+    <div class="tile is-6">
+        <table>
+            <tr class="tile">
+                <th>
+                    <span>NAME</span>
+                </th>
+                <th>
+                    <input class="input" v-model="deploymentName" placeholder="EntryPoint name">
+                </th>
+                <th>
+                    <button class="button is-primary" v-on:click="createNewDeployment" v-bind:disabled="deploymentName.length<=0 || selectedDomain.length<1 && !usePlatformGeneratedDomain">Deploy</button>
+                </th>
+            </tr>
+            <tr class="tile">
+                <th>
+                    <span>DOMAIN</span>
+                </th>
+                <th>
+                    <span class="select">
+                        <select v-model="selectedDomain" v-bind:disabled="usePlatformGeneratedDomain">
+                            <option disabled value="">Please select one</option>
+                            <option v-for="(domain, domainId) in domainList" v-bind:key="domainId" v-if="domain && !domain.inUse()" v-bind:value="domainId">{{ domain.domain }}</option>
+                        </select>
+                    </span>
+                </th>
+                <th>
+                    <checkbox-input v-bind:disabled="true" v-model="usePlatformGeneratedDomain"> Use platform-generated domain</checkbox-input>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <checkbox-input v-bind:disabled="true" v-model="acceptTLSSSL"> Accept TLS/SSL</checkbox-input>
+                    <span class="select">
+                        <select v-model="selectedCertificate" v-bind:disabled="!acceptTLSSSL">
+                            <option disabled value="">Please select one</option>
+                            <option v-for="certificate in certificateList" v-bind:key="certificate">{{certificate}}</option>
+                        </select>
+                    </span>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <checkbox-input v-bind:disabled="true" v-model="requireClientCertificates"> Require client certificates</checkbox-input>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <table>
+                        <tr>
+                            <th>Instances</th>
+                            <th>
+                                <number-input class="tile is-3" v-model="instances"></number-input>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <table>
+                        <tr>
+                            <th>Resilence</th>
+                            <th>
+                                <number-input class="tile is-3" v-model="resilience"></number-input>
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+
+        </table>
     </div>
 </template>
 <script lang="ts">
-// TODO: No se pueden listar dominios que ya estén en uso
-// TODO: Los certificados los tenemos que obtener de otro documento distinto al stamp state
 
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { FabElement } from '../../../../store/classes';
+import { Deployment } from '../../../../store/classes';
+import CheckboxInput from '../input/CheckboxInput.vue'
+import NumberInput from '../input/NumberInput.vue';
 
 @Component({
-    name: 'new-httpentrypoint'
+    name: 'new-httpentrypoint',
+    components: {
+        'number-input': NumberInput,
+        'checkbox-input': CheckboxInput
+    }
 })
 export default class NewHTTPEntrypoint extends Vue {
     usePlatformGeneratedDomain: boolean = false;
@@ -65,39 +94,90 @@ export default class NewHTTPEntrypoint extends Vue {
     acceptTLSSSL: boolean = false;
     requireClientCertificates: boolean = false;
     instances: number = 1;
-    resilence: number = 1;
-
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
-    }
+    resilience: number = 1;
+    deploymentName:string='';
 
     get domainList() {
-        return this.$store.getters.getFreeWebDomainList;
+        let domainList = this.$store.getters.domainList;
+        for (let domainId in domainList) {
+            this.$store.dispatch('getElementInfo', { 'uri': domainId });
+        }
+        return domainList;
     }
+    
     get certificateList() {
         return this.$store.getters.getCertificateList;
     }
+
     createNewDeployment() {
-        this.usePlatformGeneratedDomain
-        this.$store.dispatch('createNewHTTPENtrypoint', {
-            'usePlatformGeneratedDomain': this.usePlatformGeneratedDomain,
-            'domain': this.selectedDomain,
-            'certificate': this.selectedCertificate,
-            'accept-tls': this.acceptTLSSSL,
-            'require-client-certificates': this.requireClientCertificates,
-            'instances': this.instances,
-            'resilence': this.resilence
-        });
+        if (this.usePlatformGeneratedDomain)
+            console.warn('use platform generated domain still not available');
+
+
+        let serviceConfig = {
+            'server_cert': this.certificateList.length > 0 ? this.certificateList : null,
+            'vhost': this.selectedDomain
+        }
+        let config = {
+            'TLS': this.acceptTLSSSL,
+            'clientcert': this.requireClientCertificates
+        };
+
+        let instanceList = {};
+        for (let counter = 0; counter < this.instances; counter++) {
+            instanceList[counter] = new Deployment.Rol.Instance(counter.toString(),null, null, null, null);
+        }
+
+        let roles = {}
+        roles['sep'] = new Deployment.Rol(
+            null, // id
+            null,// configuration
+            1, //cpu
+            1, //memory
+            0, //ioperf
+            false,//iopsensitive
+            1,//bandwidth
+            1,//resilience
+            instanceList
+        );
+
+        this.$store.dispatch('createNewDeployment',
+            new Deployment(
+                null, //uri
+                this.deploymentName, //name
+                'eslap://eslap.cloud/services/http/inbound/1_0_0', //serviceId
+                serviceConfig, //resourcesConfig
+                config, //parameters
+                roles, //roles
+                [], //links
+                [] //website
+            )
+        );
+
+        this.$router.push('/');
     }
 }
 </script>
-<style lang="scss">
-#acceptTLSSSL {
-    margin-top: 1em;
+<style lang="scss" scoped>
+.input {
+    min-width: 5em;
 }
 
-.name {
-    padding-top: 1em;
+#usePlatformGeneratedDomain {
+    margin-top: 0.5em;
+}
+
+#acceptTLSSSL {
+    margin-top: 0.5em;
+}
+
+
+table {
+    border-collapse: collapse;
+    border-bottom-width: 0px;
+    tr,
+    th {
+        border-bottom-width: 0px;
+    }
 }
 </style>

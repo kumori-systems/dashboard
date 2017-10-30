@@ -1,33 +1,50 @@
 import StampElement from './stampelement';
+import { getElementName, getElementOwner, getElementVersion } from '../../proxy/utils';
+export class Channel {
+    type: string = null;
+    protocol: string = null;
+    constructor(type: string, protocol: string) {
+        this.type = type;
+        this.protocol = protocol;
+    }
+}
+
 export class Service implements StampElement {
-    uri: string;
+    readonly uri: string;
     name: string;
     resources: { [resourceId: string]: string };
     parameters: any;
     roles: { [rolId: string]: Service.Rol };
-    proChannels: { [channelId: string]: Service.Rol.Channel }; // canal y sus conexiones
-    reqChannels: { [channelId: string]: Service.Rol.Channel }; // canal y sus conexiones
+    proChannels: { [channelId: string]: Channel }; // canal y sus conexiones
+    reqChannels: { [channelId: string]: Channel }; // canal y sus conexiones
     owner: string;
     version: string;
-    constructor(uri: string, resources: { [resourceId: string]: string }, parameters: any, roles: { [rolId: string]: Service.Rol }, proChannels: { [channelId: string]: Service.Rol.Channel }, reqChannels: { [channelId: string]: Service.Rol.Channel }) {
+    connectors: Array<Service.Connector>;
+    constructor(uri: string, resources: { [resourceId: string]: string }, parameters: any, roles: { [rolId: string]: Service.Rol }, proChannels: { [channelId: string]: Channel }, reqChannels: { [channelId: string]: Channel }, connectors: Array<Service.Connector>) {
         this.uri = uri;
-        let splitted: Array<string> = this.uri.split('/');
-        this.owner = splitted[2];
-        this.name = splitted[4];
-        for (let i = 5; i < splitted.length - 1; i++) {
-            this.name += '.' + splitted[i];
-        }
-        this.version = splitted[splitted.length - 1];
-
+        this.owner = getElementOwner(uri);
+        this.name = getElementName(uri);
+        this.version = getElementVersion(uri);
         this.resources = resources;
         this.parameters = parameters;
         this.roles = roles;
         this.proChannels = proChannels;
         this.reqChannels = reqChannels;
+        this.connectors = connectors;
     }
 }
 
 export module Service {
+    export class Connector {
+        type: string;
+        provided: Array<{ endoint: string, role?: string }>;
+        depended: Array<{ endoint: string, role?: string }>;
+        constructor(type: string, provided: Array<{ endoint: string, role?: string }>, depended: Array<{ endoint: string, role?: string }>) {
+            this.type = type;
+            this.provided = provided;
+            this.depended = depended;
+        }
+    }
     export class Rol {
         component: string;
         resources: { [resourceId: string]: string };
@@ -38,20 +55,4 @@ export module Service {
             this.parameters = parameters;
         }
     }
-    export module Rol {
-        export class Channel {
-            type: string;
-            protocol: string;
-            connectedTo: Array<{
-                channelName: string;
-                rolName?: string;
-            }>;
-            constructor(type: string, protocol: string, connectedTo: Array<{ channelName: string; rolName?: string; }>) {
-                this.type = type;
-                this.protocol = protocol;
-                this.connectedTo = connectedTo;
-            }
-        }
-    }
-
 }

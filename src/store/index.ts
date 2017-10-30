@@ -5,25 +5,26 @@ import mutations from './mutations';
 import getters from './getters';
 import actions from './actions';
 
-/* MENU */
-import menuItemList from './../menu';
-
 Vue.use(Vuex);
-
+import { Overview, DeploymentItem, AlarmsAndLogs, DataVolumes, Elements, Help, Domains } from '../components';
 export default new Vuex.Store({
     'strict': true, // Cuando se intenta mutar de una forma inadecuada lanza un error
     'state': {
-        'menuItemList': menuItemList,
+        'user': {
+            'id': undefined,
+            'name': undefined,
+            'state': undefined
+        },
+        'alerts': [],
         'deploymentList': {},
-        'linkList': [],
         'serviceList': {},
         'componentList': {},
         'runtimeList': {},
-        'resourceList': {},
+        'domainList': {},
+        'volumeList': {},
+        'certList': {},
         'fabElements': {},
-        'selectedService': null,
-        'user': null,
-        'authError': false
+        'selectedService': null // Identifies the selected service from elements to add Service
     },
     'getters': getters,
     'mutations': mutations,

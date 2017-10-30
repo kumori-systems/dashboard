@@ -7,11 +7,11 @@
         </div>
         <div class="tile is-4">
             <span>Number of Chunks:</span>
-            <inputnumber class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></inputnumber>
+            <number-input class="tile is-2" v-bind:value="chunkNum" v-on:input="updateInputValue"></number-input>
         </div>
         <div class="tile is-4" v-for="n in chunkNum" v-bind:key="n">
             <span>Chunk {{n}}:</span>
-            <inputnumber class="tile is-2"v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></inputnumber>
+            <number-input class="tile is-2" v-bind:value="chunkSize(n)" v-bind:numElement="n" v-on:input="updateInputValue"></number-input>
             <span>GB</span>
         </div>
         <div>Size: {{totalGB}}GB</div>
@@ -21,29 +21,19 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import InputNumber from '../input/InputNumber.vue';
+import NumberInput from '../input/NumberInput.vue';
 
 @Component({
-    name: 'addvolume',
+    name: 'newvolume',
     components: {
-        'inputnumber': InputNumber
+        'number-input': NumberInput
     }
 })
-export default class AddVolume extends Vue {
+export default class NewVolume extends Vue {
     prefix: string = '';
     chunkNum: number = 1;
     size: Array<number> = [0, 1];
     totalGB: number = 1;
-
-    mounted() {
-        this.$watch('chunkNum', function (value) {
-            this.size = new Array<number>(value + 1);
-            this.size[0] = 0;
-            for (let index = 1; index <= value; index++) {
-                this.size[index] = 1;
-            }
-        });
-    }
 
     get chunkSize() {
         return (chunkIndex) => {
@@ -65,6 +55,7 @@ export default class AddVolume extends Vue {
         };
         this.size = [0].concat(this.size); // Restauramos el 0 inicial
         this.$store.dispatch('addDataVolume', params);
+        this.$router.push('/dataVolumes');
     }
 
     updateInputValue(value) {

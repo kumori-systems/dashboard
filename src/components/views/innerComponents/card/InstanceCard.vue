@@ -3,146 +3,143 @@
         <div class="tile is-vertical">
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
-                <span class="title">{{instanceId}}</span>
-                <div>
-                    <span>{{instanceMem}} MEM</span>
-                    <span>{{instanceCPU}} CPU</span>
-                    <span>{{instanceNet}} NET</span>
-                    <span>
-                        <span>&#160;</span>
-                        <input type="checkbox" id="killInstance" v-on:click="killInstanceChange" v-model="killInstance">
-                        <label for="killInstance">kill instance</label>
-                    </span>
+                <span class="title">{{ instance.id }}</span>
+                <div class="tile is-parent">
+                    <div>{{ instance.memory }} MEM</div>
+                    <div>{{ instance.cpu }} CPU</div>
+                    <div>{{ instance.bandwidth }} NET</div>
+                    <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                 </div>
             </div>
         </div>
         <div>
             <div class="is-child is-pulled-right box instance-chart">
-                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                <chart v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart>
             </div>
         </div>
     </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import Moment from 'moment';
-import { Collapse, Item as CollapseItem } from 'vue-bulma-collapse';
-import Chart from '../chart/Chart';
-import ChartOptions from '../chart/ChartOptions';
-import { Deployment } from '../../../../store/classes';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { Collapse, Item as CollapseItem } from "vue-bulma-collapse";
+import Chart from "../chart/Chart";
+import ChartOptions from "../chart/ChartOptions";
+import { prepareData } from "../chart/Utils.js";
+import { Deployment, Metric } from "../../../../store/classes";
+import Checkbox from "../input/CheckboxInput.vue";
 
 @Component({
-    name: 'instance-card',
-    props: {
-        deploymentId: { required: true, type: String },
-        rolId: { required: true, type: String },
-        instanceId: { required: true, type: String },
-        clear: { required: true, type: Boolean } // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
-    },
-    components: {
-        'collapse': Collapse,
-        'collapse-item': CollapseItem,
-        'chart': Chart
-    }
+  name: "instance-card",
+  props: {
+    instance: { required: true },
+    clear: { required: true, type: Boolean }, // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
+    instanceMetrics: { required: true }
+  },
+  components: {
+    collapse: Collapse,
+    "collapse-item": CollapseItem,
+    chart: Chart,
+    "checkbox-input": Checkbox
+  }
 })
 export default class Card extends Vue {
-    deploymentId: string = this.deploymentId;
-    rolId: string = this.rolId;
-    instanceId: string = this.instanceId;
-    killInstance: boolean = false;
-    chartOptions = ChartOptions;
+  instance: Deployment.Rol.Instance = this.instance;
+  killInstance: boolean = false;
+  chartOptions = ChartOptions;
+  instanceMetrics = this.instanceMetrics;
 
-    mounted() {
-        this.$watch('clear', function (value) {
-            if (value == true) {
-                this.killInstance = false;
-            }
-        })
+  mounted() {
+    this.$watch("clear", function(value) {
+      if (value === true) {
+        this.killInstance = false;
+      }
+    });
+  }
+
+  get onInstanceMetricsUpdate() {
+    let res: {
+      data: Metric[];
+    } = {
+      data: []
+    };
+    for (let i in this.instanceMetrics) {
+      res.data.push(this.instanceMetrics[i][this.instance.id]);
     }
+    return res;
+  }
 
-    get state(): string {
-        let state = this.$store.getters.getDeploymentRolInstanceState(this.deploymentId, this.rolId, this.instanceId);
-        switch (state) {
-            case Deployment.Rol.Instance.State.CONNECTED:
-                return 'fa fa-check-circle';
-            case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'fa fa-exclamation-circle';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'fa fa-exclamation-triangle';
-            default:
-                console.error('InstanceCard received a non-covered instance state:', state);
-                return '';
-        }
+  get instanceChartData() {
+    return prepareData(this.onInstanceMetricsUpdate.data);
+  }
+
+  get state(): string {
+    let res: string = "fa ";
+    switch (this.instance.state) {
+      case Deployment.Rol.Instance.State.CONNECTED:
+        res += "fa-check-circle";
+      case Deployment.Rol.Instance.State.DISCONNECTED:
+        res += "fa-exclamation-circle";
+      default:
+        res += "fa-question-circle";
     }
+    return res;
+  }
 
-    get instanceMem(): number {
-        return this.$store.getters.getDeploymentRolInstanceMem(this.deploymentId, this.rolId, this.instanceId);
-    }
-
-    get instanceCPU(): number {
-        return this.$store.getters.getDeploymentRolInstanceCPU(this.deploymentId, this.rolId, this.instanceId);
-    }
-
-    get instanceNet(): number {
-        return this.$store.getters.getDeploymentRolInstanceNet(this.deploymentId, this.rolId, this.instanceId);
-    }
-
-    get instanceChartData(): any {
-        return this.$store.getters.getDeploymentRolInstanceChartData(this.deploymentId, this.rolId, this.instanceId);
-    }
-
-    /**
+  /**
      * Éste método se utiliza para enviar una notificación al componente superior para que lea que
      * se ha cambiado el valor de 'kill instance'
      */
-    killInstanceChange() {
-        this.$emit('killInstanceChange', [this.instanceId, this.killInstance]);
-    }
+  killInstanceChange() {
+    this.$emit("killInstanceChange", [this.instance.id, this.killInstance]);
+  }
 }
 </script>
 <style lang="scss" scoped>
-$color_green:#93c47d;
-$color_yellow:#f5d164;
-$color_red:#ff6666;
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
 $icon_size: 40px;
 $radius: 5px;
 .instance-chart {
-    width: 800px;
-    height: 400px;
+  width: 800px;
+  height: 250;
 }
 
 .fa-check-circle {
-    color: $color_green;
-    font-size: $icon_size;
+  color: $color_green;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-    color: $color_yellow;
-    font-size: $icon_size;
+  color: $color_yellow;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-    color: $color_red;
-    font-size: $icon_size;
+  color: $color_red;
+  font-size: $icon_size;
 }
 
 .card {
-    margin: 10px;
-    padding: 2px;
-    border-radius: $radius;
+  margin: 10px;
+  padding: 2px;
+  border-radius: $radius;
 }
 
 .card-header {
-    border-radius: $radius;
+  border-radius: $radius;
 }
 
 .card-body {
-    padding: 10px;
+  padding: 10px;
+}
+
+#killinstance {
+  padding-left: 10px;
 }
 
 a {
-    padding-left: 10px;
+  padding-left: 10px;
 }
 </style>
-

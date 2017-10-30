@@ -1,398 +1,187 @@
+import urlencode from 'urlencode';
+import { isServiceEntrypoint, getElementVersion, getElementOwner, getElementName } from '../../proxy/utils';
+import { Metric } from '../stamp_state/metric';
+
 export class Link {
-    deploymentOne: string;
-    channelOne: string;
-    deploymentTwo: string;
-    channelTwo: string;
-    constructor(deploymentOne: string, channelOne: string, deploymentTwo: string, channelTwo: string) {
-        this.deploymentOne = deploymentOne;
-        this.channelOne = channelOne;
-        this.deploymentTwo = deploymentTwo;
-        this.channelTwo = channelTwo;
-    }
+  deploymentOne: string;
+  channelOne: string;
+  deploymentTwo: string;
+  channelTwo: string;
+  constructor(deploymentOne: string, channelOne: string, deploymentTwo: string, channelTwo: string) {
+    this.deploymentOne = deploymentOne;
+    this.channelOne = channelOne;
+    this.deploymentTwo = deploymentTwo;
+    this.channelTwo = channelTwo;
+  }
 }
 
 export class Deployment {
-    name: string; // nombre amistoso para el usuario
-    serviceId: string; // servicio que define el despliegue
-    resourcesConfig: { [resource: string]: any }; // encaja cómo llama el servicio a las resources con la definición real de las resources
-    parameters: any;
-    roles: { [rolName: string]: Deployment.Rol };
-    website: Array<string>;
-    metrics: Deployment.Metrics;
-    isEntrypoint: boolean;
-    constructor(name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, website: Array<string>) {
-        this.name = name;
-        this.serviceId = serviceId;
-        this.resourcesConfig = resourcesConfig;
-        this.parameters = parameters;
-        this.roles = roles;
-        this.website = website;
+  readonly uri: string;
+  owner: string = null;
+  name: string = null; // nombre amistoso para el usuario
+  serviceId: string = null; // servicio que define el despliegue
+  resourcesConfig: { [resource: string]: any } = null; // encaja cómo llama el servicio a las resources con la definición real de las resources
+  parameters: any = null;
+  roles: { [rolName: string]: Deployment.Rol } = null;
+  website: Array<string> = [];
+  links: Array<Link> = [];
+  isEntrypoint: boolean = false;
+  metrics: [Date, { 'data': Metric, 'roles': { [roleId: string]: { 'data': Metric, 'instances': { [instanceId: string]: Metric } } } }][] = [];
+  path: string = null;
+  constructor(uri: string, name: string, serviceId: string, resourcesConfig: { [resource: string]: any }, parameters: any, roles: { [rolName: string]: Deployment.Rol }, links: Array<Link>, website: Array<string>) {
+    if (uri) {
+      this.uri = uri;
+      this.owner = getElementOwner(uri);
+    }
+    this.path = '/deployment/' + urlencode(uri);
 
-        if (this.serviceId === 'eslap://eslap.cloud/services/http/inbound/1_0_0') {
-            this.isEntrypoint = true;
-            this.metrics = new Deployment.EntryPointMetrics();
-        }
-        else {
-            this.isEntrypoint = false;
-            this.metrics = new Deployment.CommonMetrics();
-        }
+    if (name && name !== null) this.name = name;
+    if (serviceId && serviceId !== null) {
+      this.serviceId = serviceId;
+      this.isEntrypoint = isServiceEntrypoint(this.serviceId);
+
+      if (this.name === null) {
+        this.name = getElementName(serviceId) + getElementVersion(serviceId);
+      }
     }
 
-    addMetrics(m) {
-        if (!this.metrics && this.isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
-        if (!this.metrics && !this.isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-        if (this.isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
-        else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
+    if (resourcesConfig && resourcesConfig !== null) this.resourcesConfig = resourcesConfig;
+    if (parameters && parameters !== null) this.parameters = parameters;
+    if (roles && roles !== null) this.roles = roles;
+    if (links && links !== null) this.links = links;
+    if (website && website !== null) this.website = website;
+  }
+
+  get state(): Deployment.State {
+    let res: Deployment.State = Deployment.State.UNKOWN;
+    let ok: number = 0;
+    let warning: number = 0;
+    let error: number = 0;
+    let unkwon: number = 0;
+    for (let rol in this.roles) {
+      switch (this.roles[rol].state) {
+        case Deployment.Rol.State.OK:
+          ok++;
+          break;
+        case Deployment.Rol.State.DANGER:
+          error++;
+          break;
+        case Deployment.Rol.State.WARNING:
+          warning++;
+          break;
+        default:
+          unkwon++;
+      }
     }
+
+    if (error > 0) {
+      res = Deployment.State.DANGER;
+    }
+    else if (warning > 0) {
+      res = Deployment.State.WARNING;
+    }
+    else if (ok > 0) {
+      res = Deployment.State.OK;
+    }
+
+    return res;
+  }
 }
 
 export module Deployment {
+  export enum State { OK, DANGER, WARNING, UNKOWN };
 
-    export abstract class Metrics {
-        time: Array<Date>;
-        constructor() {
-            this.time = [];
+  export class Rol {
+    readonly id: string;
+    configuration: any;
+    cpu: number;
+    memory: number;
+    ioperf: number;
+    iopsintensive: boolean;
+    bandwidth: number;
+    resilience: number;
+    instanceList: { [instanceId: string]: Rol.Instance };
+    instanceNumber: number;
+    constructor(id: string, configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+      this.id = id;
+      this.configuration = configuration;
+      this.cpu = cpu;
+      this.memory = memory;
+      this.ioperf = ioperf;
+      this.iopsintensive = iopsintensive;
+      this.bandwidth = bandwidth;
+      this.resilience = resilience;
+      this.instanceList = instanceList;
+      this.instanceNumber = 0;
+      for (let key in instanceList) {
+        this.instanceNumber++;
+      }
+    };
+
+    get state(): Rol.State {
+      let res: Rol.State = Rol.State.UNKOWN;
+      let connected: number = 0;
+      let disconnected: number = 0;
+      let unkwon: number = 0;
+      for (let instance in this.instanceList) {
+        if (this.instanceList[instance]) {
+          switch (this.instanceList[instance].state) {
+            case Rol.Instance.State.CONNECTED:
+              connected++;
+              break;
+            case Rol.Instance.State.DISCONNECTED:
+              disconnected++;
+              break;
+            default:
+              unkwon++;
+          }
         }
-        abstract getFormattedMetrics();
+      }
+      if (connected > 0 && disconnected === 0) {
+        res = Rol.State.OK;
+      }
+      else if (connected > 0 && disconnected > 0) {
+        res = Rol.State.WARNING;
+      }
+      else if (connected === 0 && disconnected > 0) {
+        res = Rol.State.DANGER;
+      }
+      return res;
     }
-    export class EntryPointMetrics extends Metrics {
-        timestamp_init: Array<number>;
-        timestamp_end: Array<number>;
-        elapsed_msec: Array<number>;
-        http_requests_per_second: Array<number>;
-        http_errors_per_second: Array<number>;
-        http_size_in_per_second: Array<number>;
-        http_size_out_per_second: Array<number>;
-        http_chunk_in_per_second: Array<number>;
-        http_chunk_out_per_second: Array<number>;
-        http_response_time: Array<number>;
-        ws_size_in_per_second: Array<number>;
-        ws_size_out_per_second: Array<number>;
-        ws_chunk_in_per_second: Array<number>;
-        ws_chunk_out_per_second: Array<number>;
-        constructor() {
-            super();
-            this.timestamp_init = [];
-            this.timestamp_end = [];
-            this.elapsed_msec = [];
-            this.http_requests_per_second = [];
-            this.http_errors_per_second = [];
-            this.http_size_in_per_second = [];
-            this.http_size_out_per_second = [];
-            this.http_chunk_in_per_second = [];
-            this.http_chunk_out_per_second = [];
-            this.http_response_time = [];
-            this.ws_size_in_per_second = [];
-            this.ws_size_out_per_second = [];
-            this.ws_chunk_in_per_second = [];
-            this.ws_chunk_out_per_second = [];
+  }
+
+  export module Rol {
+    export enum State { OK, DANGER, WARNING, UNKOWN };
+
+    export class Instance {
+      readonly id: string;
+      cpu: number = 1;
+      memory: number = 1;
+      bandwidth: number = 1;
+      volumes: { [key: string]: string; } = {};
+      ports: { [key: string]: string; } = {};
+      state: Instance.State = Instance.State.UNKOWN;
+      constructor(id: string, cpu: number, memory: number, bandwidth: number, volumes?: { [key: string]: string; }, ports?: { [key: string]: string; }) {
+        if (!id) throw new Error('An instance cant be created without an id');
+        this.id = id;
+        if (cpu && cpu !== null && cpu > 0) this.cpu = cpu;
+        if (memory && memory !== null && memory > 0) this.memory = memory;
+        if (bandwidth && bandwidth !== null && bandwidth > 0) this.bandwidth = bandwidth;
+        if (volumes && volumes !== null) this.volumes = volumes;
+        if (ports && ports !== null) this.ports = ports;
+      }
+
+      setState(connected: boolean) {
+        if (connected) {
+          this.state = Instance.State.CONNECTED;
+        } else {
+          this.state = Instance.State.DISCONNECTED;
         }
-        /**
-         *  Adds some values to the metrics
-         * @param time 
-         * @param timestamp_init 
-         * @param timestamp_end 
-         * @param elapsed_msec 
-         * @param http_request_per_second 
-         * @param http_errors_per_second 
-         * @param http_size_in_per_second 
-         * @param http_size_out_per_second 
-         * @param http_chunk_in_per_second 
-         * @param http_chunk_out_per_second 
-         * @param http_response_time 
-         * @param ws_size_in_per_second 
-         * @param ws_size_out_per_second 
-         * @param ws_chunk_in_per_second 
-         * @param ws_chunk_out_per_second 
-         */
-        addValues(time: Date, timestamp_init: number, timestamp_end: number, elapsed_msec: number, http_requests_per_second: number, http_errors_per_second: number, http_size_in_per_second: number, http_size_out_per_second: number, http_chunk_in_per_second: number, http_chunk_out_per_second: number, http_response_time: number, ws_size_in_per_second: number, ws_size_out_per_second: number, ws_chunk_in_per_second: number, ws_chunk_out_per_second: number): void {
-            this.time.push(time);
-            this.timestamp_init.push(timestamp_init);
-            this.timestamp_end.push(timestamp_end);
-            this.elapsed_msec.push(elapsed_msec);
-            this.http_requests_per_second.push(http_requests_per_second);
-            this.http_errors_per_second.push(http_errors_per_second);
-            this.http_size_in_per_second.push(http_size_in_per_second);
-            this.http_size_out_per_second.push(http_size_out_per_second);
-            this.http_chunk_in_per_second.push(http_chunk_in_per_second);
-            this.http_chunk_out_per_second.push(http_chunk_out_per_second);
-            this.http_response_time.push(http_response_time);
-            this.ws_size_in_per_second.push(ws_size_in_per_second);
-            this.ws_size_out_per_second.push(ws_size_out_per_second);
-            this.ws_chunk_in_per_second.push(ws_chunk_in_per_second);
-            this.ws_chunk_out_per_second.push(ws_chunk_out_per_second);
-        }
-        getFormattedMetrics() {
-            return {
-                labels: this.time,
-                datasets: [
-                    {
-                        label: 'timestamp_init',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: this.timestamp_init
-                    },
-                    {
-                        label: 'timestamp_end',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: this.timestamp_end
-                    },
-                    {
-                        label: 'elapsed_msec',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: this.elapsed_msec
-                    },
-                    {
-                        label: 'http_requests_per_second',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: this.http_requests_per_second
-                    },
-                    {
-                        label: 'http_errors_per_second',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: this.http_errors_per_second
-                    },
-                    {
-                        label: 'http_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.http_size_in_per_second
-                    },
-                    {
-                        label: 'http_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.http_size_out_per_second
-                    },
-                    {
-                        label: 'http_response_time',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.http_response_time
-                    },
-                    {
-                        label: 'ws_size_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_size_in_per_second
-                    },
-                    {
-                        label: 'ws_size_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_size_out_per_second
-                    },
-                    {
-                        label: 'ws_chunk_in_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_chunk_in_per_second
-                    },
-                    {
-                        label: 'ws_chunk_out_per_second',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.ws_chunk_out_per_second
-                    }
-                ]
-            };
-        }
+      }
     }
 
-    export class CommonMetrics extends Metrics {
-        cpu: Array<number>;
-        memory: Array<number>;
-        bandwith_input: Array<number>;
-        bandwith_output: Array<number>;
-        rpm: Array<number>;
-        res: Array<number>;
-        constructor() {
-            super();
-            this.cpu = [];
-            this.memory = [];
-            this.bandwith_input = [];
-            this.bandwith_output = [];
-            this.rpm = []; // Request Per Minute
-            this.res = []; // Response time
-        }
-
-        /**
-         * Adds some values to metrics
-         * @param time 
-         * @param cpu 
-         * @param memory 
-         * @param bandwith_input 
-         * @param bandwith_output 
-         * @param rpm 
-         * @param res 
-         */
-        addValues(time: Date, cpu: number, memory: number, bandwith_input: number, bandwith_output: number, rpm: number, res: number): void {
-            this.time.push(time);
-            this.cpu.push(cpu);
-            this.memory.push(memory);
-            this.bandwith_input.push(bandwith_input);
-            this.bandwith_output.push(bandwith_output);
-            this.rpm.push(rpm);
-            this.res.push(res);
-        }
-        getFormattedMetrics() {
-            return {
-                labels: this.time,
-                datasets: [
-                    {
-                        label: 'CPU',
-                        backgroundColor: '#1fc8db',
-                        borderColor: '#1fc8db',
-                        fill: false,
-                        data: this.cpu
-                    },
-                    {
-                        label: 'MEM',
-                        backgroundColor: '#fce473',
-                        borderColor: '#fce473',
-                        fill: false,
-                        data: this.memory
-                    },
-                    {
-                        label: 'NET_IN',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: this.bandwith_input
-                    },
-                    {
-                        label: 'NET_OUT',
-                        backgroundColor: '#42afe3',
-                        borderColor: '#42afe3',
-                        fill: false,
-                        data: this.bandwith_output
-                    },
-                    {
-                        label: 'RPM',
-                        backgroundColor: '#ed6c63',
-                        borderColor: '#ed6c63',
-                        fill: false,
-                        data: this.rpm
-                    },
-                    {
-                        label: 'RES',
-                        backgroundColor: '#97cd76',
-                        borderColor: '#97cd76',
-                        fill: false,
-                        data: this.res
-                    }
-                ]
-            };
-        }
+    export module Instance {
+      export enum State { CONNECTED, DISCONNECTED, UNKOWN };
     }
-    export class Rol {
-        cpu: number;
-        memory: number;
-        ioperf: number;
-        iopsintensive: boolean;
-        bandwidth: number;
-        resilience: number;
-        instanceList: { [instanceId: string]: Rol.Instance };
-        instanceNumber: number;
-        metrics: Deployment.Metrics;
-        constructor(cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
-            this.cpu = cpu;
-            this.memory = memory;
-            this.ioperf = ioperf;
-            this.iopsintensive = iopsintensive;
-            this.bandwidth = bandwidth;
-            this.resilience = resilience;
-            this.instanceList = instanceList;
-            this.instanceNumber = 0;
-            for (let key in instanceList) {
-                this.instanceNumber++;
-            }
-        };
-
-        addMetrics(isEntrypoint, m) {
-            if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
-            if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-            if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
-            else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
-        }
-    }
-    export module Rol {
-
-        export class Instance {
-
-            cnid: string;
-            publicIp: string;
-            privateIp: string;
-            arrangement: Instance.Arrangement;
-            volumes: { [key: string]: string; };
-            ports: { [key: string]: string; };
-            state: Instance.State;
-            metrics: Deployment.Metrics;
-
-            constructor(cnid: string, publicIp: string, privateIp: string, arrangement: Instance.Arrangement, volumes?: { [key: string]: string; }, ports?: { [key: string]: string; }) {
-                this.cnid = cnid;
-                this.publicIp = publicIp;
-                this.privateIp = privateIp;
-                this.arrangement = arrangement;
-                this.volumes = volumes;
-                this.ports = ports;
-            }
-            setState(connected: boolean) {
-                switch (connected) {
-                    case true:
-                        this.state = Instance.State.CONNECTED;
-                        break;
-                    case false:
-                        this.state = Instance.State.DISCONNECTED;
-                        break;
-                    default:
-                        this.state = Instance.State.ON_PROGRESS;
-                }
-            }
-
-            addMetrics(isEntrypoint, m) {
-                if (!this.metrics && isEntrypoint) { this.metrics = new Deployment.EntryPointMetrics(); }
-                if (!this.metrics && !isEntrypoint) { this.metrics = new Deployment.CommonMetrics(); }
-                if (isEntrypoint) { (<Deployment.EntryPointMetrics>this.metrics).addValues(m.timestamp, m.timestamp_init, m.timestamp_end, m.elapsed_msec, m.http_requests_per_second, m.http_errors_per_second, m.http_size_in_per_second, m.http_size_out_per_second, m.http_chunk_in_per_second, m.http_chunk_out_per_second, m.http_response_time, m.ws_size_in_per_second, m.ws_size_out_per_second, m.ws_chunk_in_per_second, m.ws_chunk_out_per_second); }
-                else { (<Deployment.CommonMetrics>this.metrics).addValues(m.timestamp, m.cpu, m.memory, m.bandwith_input, m.bandwith_output, 0, 0); }
-            }
-
-        }
-        export module Instance {
-            export enum State { CONNECTED, DISCONNECTED, ON_PROGRESS };
-
-            export class Arrangement {
-                minInstances: number;
-                maxInstances: number;
-                cpu: number;
-                memory: number;
-                bandwith: number;
-                failureZones: number;
-                constructor(minInstances, maxInstances, cpu, memory, bandwith, failureZones) {
-                    this.minInstances = minInstances;
-                    this.maxInstances = maxInstances;
-                    this.cpu = cpu;
-                    this.memory = memory;
-                    this.bandwith = bandwith;
-                    this.failureZones = failureZones;
-                }
-            }
-        }
-    }
+  }
 }

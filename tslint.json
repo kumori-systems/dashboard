@@ -7,7 +7,22 @@
     ],
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      2
+    ],
+    "ordered-imports": true,
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "static-field",
+          "instance-field",
+          "constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ]
+      }
     ],
     "no-duplicate-variable": true,
     "no-eval": true,
@@ -22,6 +37,10 @@
     "quotemark": [
       true,
       "single"
+    ],
+    "max-line-length": [
+      true,
+      80
     ],
     "semicolon": [
       true

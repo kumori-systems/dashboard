@@ -1,17 +1,17 @@
 <template>
   <aside class="menu app-sidebar animated slideInDown">
     <ul class="menu-list">
-      <li v-for="(menuItem, index) in menuItems" v-bind:key="index">
-        <router-link v-bind:to="menuItem.path" v-on:click.native="onClick(menuItem)">
-          {{ menuItem.name }}
-          <span class="icon is-small is-angle fa" v-if="menuItem.children && menuItem.children.length > 0">
-            <i v-if="menuItem.meta.expanded" class="fa-angle-down"></i>
+      <li>
+        <router-link v-bind:to="'/'" v-on:click.native="expanded=!expanded">
+          Overview
+          <span class="icon is-small is-angle fa">
+            <i v-if="expanded" class="fa-angle-down"></i>
             <i v-else class="fa-angle-right"></i>
           </span>
         </router-link>
-        <expanding v-show="menuItem.meta.expanded">
+        <expanding v-show="expanded">
           <ul>
-            <li v-for="(subItem, index) in menuItem.children" v-bind:key="index">
+            <li v-for="(subItem, index) in deploymentItems" v-bind:key="index">
               <router-link v-bind:to="subItem.path">
                 {{ subItem.name }}
               </router-link>
@@ -19,35 +19,70 @@
           </ul>
         </expanding>
       </li>
+      <li>
+        <router-link v-bind:to="'/elements'">Elements</router-link>
+      </li>
+      <li>
+        <router-link v-bind:to="'/domains'">Domains</router-link>
+      </li>
+      <li>
+        <router-link v-bind:to="'/dataVolumes'">Data Volumes</router-link>
+      </li>
+      <li>
+        <router-link v-bind:to="'/alarmsAndLogs'">Alarms and logs</router-link>
+      </li>
+      <li>
+        <router-link v-bind:to="'/help'">Help</router-link>
+      </li>
     </ul>
   </aside>
 </template>
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import Expanding from 'vue-bulma-expanding/src/Expanding.vue';
+import Vue from "vue";
+import Component from "vue-class-component";
+import Expanding from "vue-bulma-expanding/src/Expanding.vue";
+import {
+  Overview,
+  Elements,
+  Domains,
+  DataVolumes,
+  DeploymentItem,
+  AlarmsAndLogs,
+  Help
+} from "../index";
+
+import { Deployment } from "../../store/classes";
 
 @Component({
-  name: 'side-bar',
+  name: "side-bar",
   components: {
-    'expanding': Expanding
+    expanding: Expanding
   }
 })
 export default class Sidebar extends Vue {
+  expanded: boolean = true;
 
-  // Computed
-  get menuItems() {
-    return this.$store.getters.menuItems;
+  get deployments() {
+    return this.$store.getters.deployments;
   }
 
-  onClick(menuItem): void {
-    this.$store.dispatch('toggleMenuItemExpanded', { menuItem });
+  get deploymentItems() {
+    let res = [];
+    for (let deploymentId in this.deployments) {
+      res.push({
+        path: (<Deployment>this.deployments[deploymentId]).path,
+        name: (<Deployment>this.deployments[deploymentId]).name,
+        component: DeploymentItem,
+        meta: { expanded: false }
+      });
+    }
+    return res;
   }
 }
 </script>
 <style lang="scss" scoped>
-@import '~bulma/sass/utilities/variables';
-@import '~bulma/sass/utilities/mixins';
+@import "~bulma/sass/utilities/variables";
+@import "~bulma/sass/utilities/mixins";
 .app-sidebar {
   position: fixed;
   top: 50px;
@@ -59,7 +94,7 @@ export default class Sidebar extends Vue {
   max-height: 100vh;
   height: calc(100% - 50px);
   z-index: 1;
-  background: #FFF;
+  background: #fff;
   box-shadow: 0 2px 3px rgba(17, 17, 17, 0.1), 0 0 0 1px rgba(17, 17, 17, 0.1);
   overflow-y: auto;
   overflow-x: hidden;
@@ -71,7 +106,7 @@ export default class Sidebar extends Vue {
     &.is-angle {
       position: absolute;
       right: 10px;
-      transition: transform .377s ease;
+      transition: transform 0.377s ease;
     }
   }
   .menu-list {
@@ -82,7 +117,7 @@ export default class Sidebar extends Vue {
         }
       }
     }
-    li a+ul {
+    li a + ul {
       margin: 0 10px 0 15px;
     }
   }

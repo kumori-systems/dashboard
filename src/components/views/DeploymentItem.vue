@@ -1,190 +1,243 @@
 <template>
-    <div>
+    <div id="deployment-item-view">
         <i v-bind:class="state" aria-hidden="true"></i>
-        <span class="title">{{deploymentName}}</span>
-        <button class="button is-danger is-medium" v-on:click="undeploy">UNDEPLOY</button>
-        <button v-bind:disabled="!haveChanges" class="button is-success is-medium" v-on:click="applyChanges">APPLY CHANGES</button>
-        <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        <span class="title">{{deployment.name}}</span>
+        <div>
+            <button class="button is-danger is-medium" v-on:click="showUndeployModal">UNDEPLOY</button>
+            <button v-bind:disabled="!haveChanges" class="button is-success is-medium " v-on:click="applyChanges">APPLY CHANGES</button>
+            <button v-bind:disabled="!haveChanges" class="button is-warning is-medium" v-on:click="cancelChanges">CANCEL</button>
+        </div>
         <div class="is-parent tile">
             <div class="tile">
                 <div>
-                    <p>Service: {{deploymentService}}</p>
-                    <p v-if="website!=null">
+                    <p>Service: {{deployment.serviceId}}</p>
+                    <p v-if="deployment.website.length > 0">
                         Websites:
-                        <p class="inner-content" v-for="(web, index) in website" v-bind:key="index">
-                            <a v-bind:href=" 'http://'+web ">
-                                {{web}}
-                            </a>
+                        <p class="inner-content" v-for="(web, index) in deployment.website" v-bind:key="index">
+                            <a v-bind:href=" 'http://' + web ">{{web}}</a>
                         </p>
                     </p>
                     <p v-if="serviceProvideChannels.length>0 || serviceRequireChannels.length>0"> Connected to:
                         <div v-for="(proChannel, index) in serviceProvideChannels" v-bind:key="index" class="inner-content">
-                            {{proChannel.myChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
+                            {{proChannel.fromChannel}} -&gt; {{proChannel.toDeployment}} ({{proChannel.toChannel}})
                         </div>
                         <div v-for="(reqChannel, index) in serviceRequireChannels" v-bind:key="index" class="inner-content">
-                            {{reqChannel.myChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}}) </div>
+                            {{reqChannel.fromChannel}} &lt;- {{reqChannel.toDeployment}} ({{reqChannel.toChannel}})
+                        </div>
                     </p>
                 </div>
             </div>
             <div class="is-child is-pulled-right box deployment-chart">
-                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="300"></chart>
+                <chart v-bind:chartData="deploymentChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart>
             </div>
         </div>
         <div>
-            <rol-card v-for="(rolId, index) in deploymentRoles" v-bind:key="index" v-bind:deploymentId="deploymentId" v-bind:rolId="rolId" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false">
-            </rol-card>
+            <rol-card v-for="(rolContent, rolId) in deployment.roles" v-bind:key="rolId" v-bind:service="service" v-bind:rol="rolContent" v-bind:rolMetrics="rolMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-on:numInstancesChange="handleNumInstancesChange" v-bind:clear="clear" v-on:clearedRol="clear=false"></rol-card>
         </div>
-        <undeploy v-bind:visible="showModal" v-bind:deploymentId="deploymentId" v-bind:deploymentName="deploymentName" v-on:close="showModal=false">
+        <undeploy-modal v-bind:visible="showModal" v-bind:deploymentId="deployment.uri" v-bind:deploymentName="deployment.name" v-on:close="showModal=false" v-on:undeploy="handleUndeploy">
             This action will
-            <strong>UNDEPLOY</strong> {{deploymentName}} and you will
+            <strong>UNDEPLOY</strong> {{deployment.name}} and you will
             <strong>loose all data</strong>
-        </undeploy>
+        </undeploy-modal>
     </div>
 </template>
-<script lang="ts">
+<script lang="ts" scoped>
+import Vue from "vue";
+import Component from "vue-class-component";
+import Moment from "moment";
 
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import Moment from 'moment';
-
-import { FabElement, Deployment, Service } from '../../store/classes';
-import RolCard from './innerComponents/card/RolCard.vue';
-import Chart from './innerComponents/chart/Chart.js';
-import ChartOptions from './innerComponents/chart/ChartOptions.js';
-import Undeploy from './innerComponents/modal/Undeploy.vue';
+import { Deployment, Service, Channel, Metric } from "../../store/classes";
+import RolCard from "./innerComponents/card/RolCard.vue";
+import Chart from "./innerComponents/chart/Chart.js";
+import ChartOptions from "./innerComponents/chart/ChartOptions.js";
+import { prepareData } from "./innerComponents/chart/Utils.js";
+import UndeployModal from "./innerComponents/modal/UndeployModal.vue";
 
 @Component({
-    name: 'DeploymentItem',
-    components: {
-        'rol-card': RolCard,
-        'chart': Chart,
-        'undeploy': Undeploy
-    }
+  name: "DeploymentItem",
+  components: {
+    "rol-card": RolCard,
+    chart: Chart,
+    "undeploy-modal": UndeployModal
+  }
 })
 export default class DeploymentItem extends Vue {
-    rolNumInstances: { [rolId: string]: number } = {};
-    instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
-    haveChanges: boolean = false;
-    clear: boolean = false;
-    showModal: boolean = false;
-    modalOkCallback: Function = function () { };
-    chartOptions = ChartOptions;
+  rolNumInstances: { [rolId: string]: number } = {};
+  instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+  haveChanges: boolean = false;
+  clear: boolean = false;
+  showModal: boolean = false;
+  modalOkCallback: Function = function() {};
+  chartOptions = ChartOptions;
 
-    mounted() {
-        let fabElementsList: Array<FabElement> = [];
-        this.$store.dispatch('setFabElements', { fabElementsList: fabElementsList });
+  get state(): string {
+    let res: string = "fa ";
+    switch (this.deployment.state) {
+      case Deployment.State.OK:
+        res += "fa-check-circle";
+      case Deployment.State.DANGER:
+        res += "fa-exclamation-circle";
+      case Deployment.State.WARNING:
+        res += "fa-exclamation-triangle";
+      default:
+        res += "fa-question-circle";
     }
-    get state(): string {
-        switch (this.$store.getters.getDeploymentState(this.deploymentId)) {
-            case Deployment.Rol.Instance.State.CONNECTED:
-                return 'fa fa-check-circle';
-            case Deployment.Rol.Instance.State.DISCONNECTED:
-                return 'fa fa-exclamation-circle';
-            case Deployment.Rol.Instance.State.ON_PROGRESS:
-                return 'fa fa-exclamation-triangle';
-            default:
-                console.error('DeploymentItem received a non-covered instance state');
-                return '';
-        }
-    }
+    return res;
+  }
 
-    get deploymentId() {
-        return this.$store.getters.getDeploymentIdFromDeploymentRoute(this.$route.path);
-    }
-    get website(): string {
-        return this.$store.getters.getDeploymentWebsite(this.deploymentId);
-    }
+  get deployment(): Deployment {
+    return this.$store.getters.getDeploymentFromDeploymentRoute(
+      this.$route.path
+    );
+  }
 
-    get deploymentName(): string {
-        return this.$store.getters.getDeploymentName(this.deploymentId);
-    }
+  get deploymentMetrics() {
+    let metrics: [
+      Date,
+      {
+        data: Metric;
+        roles: {
+          [roleId: string]: {
+            data: Metric;
+            instances: { [instanceId: string]: Metric };
+          };
+        };
+      }
+    ][] = this.$store.getters.deploymentMetricList(this.deployment.uri);
 
-    get isEntrypoint() {
-        return this.$store.getters.getIsEntryPoint(this.deploymentId);
-    }
+    let res: {
+      data: Metric[];
+      roles: {
+        [roleId: string]: {
+          data: Metric;
+          instances: { [instanceId: string]: Metric };
+        };
+      }[];
+    } = {
+      data: [],
+      roles: []
+    };
 
-    get deploymentChartData(): any {
-        return this.$store.getters.getDeploymentChartData(this.deploymentId);
+    for (let i in metrics) {
+      res.data.push(metrics[i][1].data);
+      res.roles.push(metrics[i][1].roles);
     }
+    // console.debug("Las métricas recien salidas del estado contienen:", res);
+    return res;
+  }
 
-    get deploymentRoles(): Array<string> {
-        return this.$store.getters.getDeploymentRoles(this.deploymentId);
-    }
+  get deploymentChartData(): { labels: string[]; datasets: any[] } {
+    return prepareData(this.deploymentMetrics.data);
+  }
 
-    /* Rol atributes */
-    get deploymentService(): string {
-        return this.$store.getters.getDeploymentService(this.deploymentId);
-    }
-    get serviceProvideChannels(): Array<Service.Rol.Channel> {
-        return this.$store.getters.getDeploymentProvideChannels(this.deploymentId);
-    }
+  get rolMetrics(): {
+    [roleId: string]: {
+      data: Metric;
+      instances: { [instanceId: string]: Metric };
+    };
+  }[] {
+    return this.deploymentMetrics.roles;
+  }
 
-    get serviceRequireChannels(): Array<Service.Rol.Channel> {
-        return this.$store.getters.getDeploymentRequireChannels(this.deploymentId);
+  get service() {
+    let ser:Service = this.$store.getters.service(this.deployment.serviceId);
+    if (!ser){
+      this.$store.dispatch("getElementInfo", {uri: this.deployment.serviceId});
     }
+    return ser;
+  }
 
-    applyChanges(): void {
-        this.haveChanges = false;
-        // Enviamos los valores que han cambiado
-        //  rolNumInstances
-        //  killInstances
-        this.$store.dispatch('aplyingChangesToDeployment', {
-            'deploymentId': this.deploymentId,
-            'rolNumInstances': this.rolNumInstances,
-            'killInstances': this.instanceKill
-        });
-    }
-    cancelChanges(): void {
-        this.rolNumInstances = {};
-        this.instanceKill = {};
-        this.clear = true;
-        this.haveChanges = false;
-    }
-    undeploy(): void {
-        const deploymentId = this.deploymentId;
-        this.modalOkCallback = function () { this.$store.dispatch('undeployDeployment', { 'deploymentId': deploymentId }); }
-        this.showModal = true;
-    }
+  get serviceProvideChannels(): Array<Channel> {
+    return this.$store.getters.getDeploymentProvideChannels(this.deployment.uri);
+  }
 
-    handleKillInstanceChange(payload) {
-        this.haveChanges = true;
-        let tempRol, tempInst, value;
-        [tempRol, tempInst, value] = payload;
-        if (this.instanceKill[tempRol] === undefined)
-            this.instanceKill[tempRol] = {};
-        this.instanceKill[tempRol][tempInst] = value;
-    }
-    handleNumInstancesChange(payload) {
-        this.haveChanges = true;
-        let tempRol, value;
-        [tempRol, value] = payload;
-        this.rolNumInstances[tempRol] = value;
-    }
+  get serviceRequireChannels(): Array<Channel> {
+    return this.$store.getters.getDeploymentRequireChannels(
+      this.deployment.uri
+    );
+  }
+
+  applyChanges(): void {
+    this.haveChanges = false;
+    // Enviamos los valores que han cambiado
+    //  rolNumInstances
+    //  killInstances
+    this.$store.dispatch("aplyingChangesToDeployment", {
+      deploymentId: this.deployment.uri,
+      rolNumInstances: this.rolNumInstances,
+      killInstances: this.instanceKill
+    });
+
+    this.cancelChanges(); // TODO: This won't be needed when the change functionaliti is available
+  }
+
+  cancelChanges(): void {
+    this.rolNumInstances = {};
+    this.instanceKill = {};
+    this.clear = true;
+    this.haveChanges = false;
+  }
+
+  showUndeployModal(): void {
+    const deploymentId = this.deployment.uri;
+    this.modalOkCallback = function() {
+      this.$store.dispatch("undeployDeployment", {
+        deploymentId: deploymentId
+      });
+    };
+    this.showModal = true;
+  }
+
+  handleUndeploy(payload): void {
+    this.$store.dispatch("undeployDeployment", payload);
+    this.$router.go(-1);
+  }
+
+  handleKillInstanceChange(payload) {
+    this.haveChanges = true;
+    let tempRol, tempInst, value;
+    [tempRol, tempInst, value] = payload;
+    if (this.instanceKill[tempRol] === undefined)
+      this.instanceKill[tempRol] = {};
+    this.instanceKill[tempRol][tempInst] = value;
+  }
+
+  handleNumInstancesChange(payload) {
+    this.haveChanges = true;
+    let tempRol, value;
+    [tempRol, value] = payload;
+    this.rolNumInstances[tempRol] = value;
+  }
 }
 </script>
 <style lang="scss" scoped>
-$color_green:#93c47d;
-$color_yellow:#f5d164;
-$color_red:#ff6666;
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
 $icon_size: 40px;
+
+#deployment-item-view {
+  min-width: 84em;
+}
+
 .deployment-chart {
-    width: 800px;
-    height: 400px;
-    margin-right: 40px;
+  width: 800px;
+  height: 250px;
+  margin-right: 40px;
 }
 
 .fa-check-circle {
-    color: $color_green;
-    font-size: $icon_size;
+  color: $color_green;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-triangle {
-    color: $color_yellow;
-    font-size: $icon_size;
+  color: $color_yellow;
+  font-size: $icon_size;
 }
 
 .fa-exclamation-circle {
-    color: $color_red;
-    font-size: $icon_size;
+  color: $color_red;
+  font-size: $icon_size;
 }
 </style>

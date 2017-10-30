@@ -1,6 +1,5 @@
 <template>
     <div id="app-main">
-        <level-bar/>
         <router-view class="content"/>
     </div>
 </template>
@@ -12,10 +11,7 @@ import Component from 'vue-class-component'
 import LevelBar from './LevelBar.vue'
 
 @Component({
-    name: 'app-main',
-    components:{
-        'level-bar': LevelBar
-    }
+    name: 'app-main'
 })
 export default class AppMain extends Vue{}
 </script>

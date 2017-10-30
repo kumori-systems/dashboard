@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, DeploymentItem, Elements, WebDomains, DataVolumes, AlarmsAndLogs, Help } from '../components';
+import { Overview, DeploymentItem, Elements, Domains, DataVolumes, AlarmsAndLogs, Help } from '../components';
 import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
-import NewService from '../components/views/innerComponents/form/NewService.vue';
+import NewDeployment from '../components/views/innerComponents/form/NewDeployment.vue';
 import NewServiceAdvanced from '../components/views/innerComponents/form/NewServiceAdvanced.vue';
-import AddVolume from '../components/views/innerComponents/form/AddVolume.vue';
+import NewVolume from '../components/views/innerComponents/form/NewVolume.vue';
+import NewDomain from '../components/views/innerComponents/form/NewDomain.vue';
 import NewBundle from '../components/views/innerComponents/form/NewBundle.vue';
 
 Vue.use(Router);
@@ -12,7 +13,7 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      name: 'OVERVIEW',
+      name: 'Overview',
       path: '/',
       meta: { expanded: false },
       component: Overview,
@@ -24,49 +25,61 @@ export default new Router({
       ]
     },
     {
-      name: 'ELEMENTS',
+      name: 'Elements',
       path: '/elements',
       meta: { expanded: false },
       component: Elements
     },
     {
-      name: 'WEB DOMAINS',
-      path: '/webdomains',
+      name: 'Domains',
+      path: '/domains',
       meta: { expanded: false },
-      component: WebDomains
+      component: Domains
     },
     {
-      name: 'DATA VOLUMES',
+      name: 'Data volumes',
       path: '/dataVolumes',
       meta: { expanded: false },
       component: DataVolumes
     },
     {
-      name: 'ALARMS & LOGS',
+      name: 'Alarms & logs',
       path: '/alarmsAndLogs',
       meta: { expanded: false },
       component: AlarmsAndLogs
     },
     {
-      name: 'HELP',
+      name: 'Help',
       path: '/help',
       meta: { expanded: false },
       component: Help
     },
     {
-      name: 'NEW HTTP ENTRYPOINT',
+      name: 'Add entrypoint',
       path: '/newHTTPEntrypoint',
       meta: { expanded: false },
       component: NewHTTPEntrypoint
     },
     {
-      name: 'NEW SERVICE',
-      path: '/newService',
+      name: 'New deployment',
+      path: '/newDeployment',
       meta: { expanded: false },
-      component: NewService
+      component: NewDeployment
     },
     {
-      name: 'UPLOAD BUNDLE',
+      name: 'New domain',
+      path: '/newDomain',
+      meta: { expanded: false },
+      component: NewDomain
+    },
+    {
+      name: 'New volume',
+      path: '/newVolume',
+      meta: { expanded: false },
+      component: NewVolume
+    },
+    {
+      name: 'Upload bundle',
       path: '/newBundle',
       meta: { expanded: false },
       component: NewBundle
