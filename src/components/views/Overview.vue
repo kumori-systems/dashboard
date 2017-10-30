@@ -2,14 +2,14 @@
     <div>
         <router-view v-if="this.$route.name !== 'Overview'"></router-view>
         <div v-else-if="deploymentList.length > 0">
-            <checkbox-input v-model="hideEntrypoints"> Hide HTTP entrypoints</checkbox-input>
+            <checkbox-input v-model="showEntrypoints"> Show HTTP entrypoints</checkbox-input>
             <div class="tile">
             <div class="columns">
               <div class="column" >
-                    <deployment-card  class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0 && (!deployment.isEntrypoint || hideEntrypoints)" v-bind:deployment="deployment"></deployment-card>
+                    <deployment-card  class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2===0 && (!deployment.isEntrypoint || showEntrypoints)" v-bind:deployment="deployment"></deployment-card>
               </div>              
               <div class="column" >
-                    <deployment-card class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2!==0 && (!deployment.isEntrypoint || hideEntrypoints)" v-bind:deployment="deployment"></deployment-card>
+                    <deployment-card class="deployment-card" v-for="(deployment, index) in deploymentList" v-bind:key="index" v-if="index%2!==0 && (!deployment.isEntrypoint || showEntrypoints)" v-bind:deployment="deployment"></deployment-card>
               </div>
             </div>
             </div>
@@ -40,7 +40,7 @@ import { Deployment } from "../../store/classes";
   }
 })
 export default class Overview extends Vue {
-  hideEntrypoints: boolean = false;
+  showEntrypoints: boolean = true;
 
   get deploymentList(): Array<string> {
     return this.$store.getters.getDeploymentList;
