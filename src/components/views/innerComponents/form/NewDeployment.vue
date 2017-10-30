@@ -321,7 +321,7 @@ export default class NewService extends Vue {
       instances = {};
       for (let counter = 0; counter < this.rolInstances[rolIndex]; counter++) {
         instances[counter] = new Deployment.Rol.Instance(
-          null,
+          counter.toString(),
           null,
           null,
           null,

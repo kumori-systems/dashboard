@@ -125,7 +125,7 @@ export default class NewHTTPEntrypoint extends Vue {
 
         let instanceList = {};
         for (let counter = 0; counter < this.instances; counter++) {
-            instanceList[counter] = new Deployment.Rol.Instance(null,null, null, null, null);
+            instanceList[counter] = new Deployment.Rol.Instance(counter.toString(),null, null, null, null);
         }
 
         let roles = {}

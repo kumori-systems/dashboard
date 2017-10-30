@@ -149,11 +149,12 @@ export class ProxyConnection extends EventEmitter {
                             case EcloudEventName.status:
                                 console.warn('Event under development: %s / %s event received: ', event.strType, event.strName, event);
                                 let inst = new Deployment.Rol.Instance(
-                                    null,
                                     event.entity['instance'], // cnid
-                                    null, // publicIp
-                                    null, // privateIp
-                                    null // arrangement
+                                    null, // cpu
+                                    null, // memory
+                                    null, // bandwidth
+                                    null, // volumes
+                                    null // ports
                                 ); // Instance
                                 let connected: boolean = false;
                                 if (event.data.status === 'connected') connected = true;
