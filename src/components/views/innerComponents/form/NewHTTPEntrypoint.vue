@@ -131,6 +131,7 @@ export default class NewHTTPEntrypoint extends Vue {
         let roles = {}
         roles['sep'] = new Deployment.Rol(
             null, // id
+            null, // component - overrided by service configuration
             null,// configuration
             1, //cpu
             1, //memory

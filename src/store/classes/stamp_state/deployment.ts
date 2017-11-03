@@ -93,6 +93,7 @@ export module Deployment {
 
   export class Rol {
     readonly id: string;
+    component: string;
     configuration: any;
     cpu: number;
     memory: number;
@@ -102,8 +103,9 @@ export module Deployment {
     resilience: number;
     instanceList: { [instanceId: string]: Rol.Instance };
     instanceNumber: number;
-    constructor(id: string, configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
+    constructor(id: string, component: string, configuration: any, cpu: number, memory: number, ioperf: number, iopsintensive: boolean, bandwidth: number, resilience: number, instanceList: { [instanceId: string]: Rol.Instance }) {
       this.id = id;
+      this.component = component;
       this.configuration = configuration;
       this.cpu = cpu;
       this.memory = memory;
