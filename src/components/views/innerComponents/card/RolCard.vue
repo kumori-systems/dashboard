@@ -1,15 +1,16 @@
 <template>
     <div id="rol-card" class="card">
+      <div v-if="onClearUpdate"></div>
         <div class="card-header">
             <i class="state" v-bind:class="state" aria-hidden="true"></i>
             <span class="title">{{ rol.id }}</span>
-            <span class="box is-unselectable">{{ rol.instanceNumber }}</span>
+            <span class="box is-unselectable">{{ localNumInstances }}</span>
             <div>
                 <div class="tile is-vertical">
-                    <button class="button is-primary" v-on:click="localNumInstances += 1" disabled>
+                    <button class="button is-primary" v-on:click="moreInstances">
                         <i class="fa fa-angle-up"></i>
                     </button>
-                    <button class="button is-primary is-outlined" v-on:click="localNumInstances += -1" disabled>
+                    <button class="button is-primary is-outlined" v-on:click="lessInstances">
                         <i class="fa fa-angle-down"></i>
                     </button>
                 </div>
@@ -35,9 +36,9 @@
                     </p>
                     -->
                     <div>
-                        <div class="left-padding">
-                          <div v-if="service">
-                            Channels: {{ rol.id | roleChannels(service.connectors) }}
+                      <div class="left-padding">
+                        <div v-if="service">
+                          Channels: {{ rol.id | roleChannels(service.connectors) }}
                             <!--
                             <div v-for="(connection, connectionIndex) in rolConnections" v-bind:key="connectionIndex">
                               {{ connection.provided }} -> {{ connection.depended }}
@@ -48,7 +49,6 @@
                             Channels: retrieving info..
                           </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -98,32 +98,36 @@ import {
     "instance-card": InstanceCard,
     chart: Chart
   },
-  filters:{
-    roleChannels: function(rolId:string, connectors:Service.Connector[]) {
-      if(connectors)
-      return connectors.filter((conn)=>{
-        return conn.depended.find((dep)=>{return dep.role === rolId;})
-        ||conn.provided.find((pro)=>{return pro.role === rolId;})
-      })
-      return '';
-    },
+  filters: {
+    roleChannels: function(rolId: string, connectors: Service.Connector[]) {
+      if (connectors)
+        return connectors.filter(conn => {
+          return (
+            conn.depended.find(dep => {
+              return dep.role === rolId;
+            }) ||
+            conn.provided.find(pro => {
+              return pro.role === rolId;
+            })
+          );
+        });
+      return "";
+    }
   }
 })
 export default class RolCard extends Vue {
   rol: Deployment.Rol = this.rol;
-  localNumInstances: number = -1;
+  localNumInstances: number = this.rol.instanceNumber;
   chartOptions = ChartOptions;
   rolMetrics = this.rolMetrics;
   service: Service = this.service;
 
-  mounted() {
-    this.$watch("clear", function(value) {
-      if (value === true) {
-        // Limpiamos el estado temporal
-        this.localNumInstances = -1;
-        this.$emit("clearedRol");
-      }
-    });
+  get onClearUpdate() {
+    if (this.$props.clear) {
+      this.localNumInstances = this.rol.instanceNumber;
+      this.$emit("clearedRol");
+    }
+    return this.$props.clear;
   }
 
   get onRolMetricsUpdate() {
@@ -164,6 +168,7 @@ export default class RolCard extends Vue {
     }
     return res;
   }
+
   get component() {
     let res;
     if (this.service) {
@@ -177,6 +182,18 @@ export default class RolCard extends Vue {
       }
     }
     return res;
+  }
+
+  lessInstances() {
+    if (this.localNumInstances > 0) {
+      this.localNumInstances -= 1;
+      this.$emit("numInstancesChange", [this.rol.id, this.localNumInstances]);
+    }
+  }
+
+  moreInstances() {
+    this.localNumInstances += 1;
+    this.$emit("numInstancesChange", [this.rol.id, this.localNumInstances]);
   }
 
   /**

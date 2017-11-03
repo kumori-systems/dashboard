@@ -86,6 +86,7 @@ export default class DeploymentItem extends Vue {
   }
 
   get deployment(): Deployment {
+    this.cancelChanges();
     return this.$store.getters.getDeploymentFromDeploymentRoute(
       this.$route.path
     );

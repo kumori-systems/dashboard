@@ -1,5 +1,6 @@
 <template>
     <div class="tile is-horizontal">
+      <div v-if="onClearUpdate"></div>
         <div class="tile is-vertical">
             <div class="content" id="instancecontent">
                 <i class="state" v-bind:class="state" aria-hidden="true"></i>
@@ -8,7 +9,7 @@
                     <div>{{ instance.memory }} MEM</div>
                     <div>{{ instance.cpu }} CPU</div>
                     <div>{{ instance.bandwidth }} NET</div>
-                    <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
+                    <checkbox-input id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
                 </div>
             </div>
         </div>
@@ -49,12 +50,12 @@ export default class Card extends Vue {
   chartOptions = ChartOptions;
   instanceMetrics = this.instanceMetrics;
 
-  mounted() {
-    this.$watch("clear", function(value) {
-      if (value === true) {
-        this.killInstance = false;
-      }
-    });
+  get onClearUpdate() {
+    if (this.$props.clear) {
+      this.killInstance = false;
+      this.killInstanceChange();
+    }
+    return this.$props.clear;
   }
 
   get onInstanceMetricsUpdate() {
@@ -87,9 +88,9 @@ export default class Card extends Vue {
   }
 
   /**
-     * Éste método se utiliza para enviar una notificación al componente superior para que lea que
-     * se ha cambiado el valor de 'kill instance'
-     */
+   * Éste método se utiliza para enviar una notificación al componente superior para que lea que
+   * se ha cambiado el valor de 'kill instance'
+   */
   killInstanceChange() {
     this.$emit("killInstanceChange", [this.instance.id, this.killInstance]);
   }
