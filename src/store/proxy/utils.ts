@@ -17,16 +17,16 @@ export function transformEcloudDeploymentToDeployment(ecloudDeployment: EcloudDe
             );
         }
 
-        // TODO ERROR001: Esto debería de resolverse en una actualización de la api
         roles[rolId] = new Deployment.Rol( 
             rolId,
+            ecloudDeployment.roles[rolId].component,
             ecloudDeployment.roles[rolId].configuration,
-            1, // ecloudDeployment.roles[rolId].arrangement.cpu : number
-            1, // ecloudDeployment.roles[rolId].arrangement.memory : number
-            1, // ecloudDeployment.roles[rolId].arrangement.ioperf : number
-            false, // ecloudDeployment.roles[rolId].arrangement.iopsintensive : boolean
-            1, // ecloudDeployment.roles[rolId].arrangement.bandwidth : number
-            1, // ecloudDeployment.roles[rolId].arrangement.resilence : number
+            ecloudDeployment.roles[rolId].arrangement.cpu,
+            ecloudDeployment.roles[rolId].arrangement.memory,
+            ecloudDeployment.roles[rolId].arrangement.ioperf,
+            ecloudDeployment.roles[rolId].arrangement.iopsintensive,
+            ecloudDeployment.roles[rolId].arrangement.bandwidth,
+            ecloudDeployment.roles[rolId].arrangement.resilience,
             instances
         );
     }

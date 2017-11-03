@@ -18,7 +18,7 @@
                     <i id="rol-circle" class="fa-circle fa"></i>
                     <div>
                         <strong>{{ rolId | truncateLeft(30) }}</strong>
-                        <div class="rol-component">{{ 'unavailable' | truncateLeft(50) }}</div>
+                        <div class="rol-component">{{ rolContent.component || 'unavailable' | truncateLeft(50) }}</div>
                     </div>
                     <div class="box is-unselectable">
                         {{ rolContent.instanceNumber }}

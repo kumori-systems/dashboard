@@ -100,6 +100,7 @@ export class ProxyConnection extends EventEmitter {
                                 for (let instance in event.data.instances) {
                                     roles[event.data.instances[instance].role] = new Deployment.Rol(
                                         null, // id
+                                        null, // component
                                         null, // configuration
                                         null, // cpu
                                         null, // memory
@@ -277,7 +278,6 @@ export class ProxyConnection extends EventEmitter {
                     default:
                         console.error('Case not covered', uri, element);
                 }
-                this.requestedElements.splice(this.requestedElements.indexOf(uri));
             }).catch((error) => {
                 console.error('Error getting element info', error);
             });
@@ -290,7 +290,9 @@ export class ProxyConnection extends EventEmitter {
 
     // @param elementId: Elemento o lista de elementos
     deleteElement(elementId) {
-        console.error('Delete Element is under development');
+      this.admission.removeStorage(elementId).catch((error) => {
+        console.error('Error removing element %s', elementId, error);
+      });
     }
 
     // @param elementId: Elemento o lista de elementos
