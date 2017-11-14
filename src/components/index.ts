@@ -1,17 +1,17 @@
-// Layouts
-import AppMain from './layout/AppMain.vue';
-import FAB from './layout/fab/FAB.vue';
-import FooterBar from './layout/FooterBar.vue';
-import NavBar from './layout/NavBar.vue';
-import SideBar from './layout/SideBar.vue';
-export { AppMain, FAB, FooterBar, NavBar, SideBar };
+// Layout
+import FABComponent from './FABComponent.vue';
+import NavigationComponent from './NavigationComponent.vue';
+import ToolbarComponent from './ToolbarComponent.vue';
+export { FABComponent, NavigationComponent, ToolbarComponent }
 
-// Views
-import Overview from './views/Overview.vue';
-import DeploymentItem from './views/DeploymentItem.vue';
-import Elements from './views/Elements.vue';
-import Domains from './views/Domains.vue';
-import DataVolumes from './views/DataVolumes.vue';
-import AlarmsAndLogs from './views/AlarmsAndLogs.vue';
-import Help from './views/Help.vue';
-export { Overview, DeploymentItem, Elements, Domains, DataVolumes, AlarmsAndLogs, Help };
+// Card
+import DeploymentCardComponent from './card/DeploymentCardComponent.vue';
+import InstanceCardComponent from './card/InstanceCardComponent.vue';
+import RoleCardComponent from './card/RoleCardComponent.vue';
+export { DeploymentCardComponent, RoleCardComponent, InstanceCardComponent }
+
+// Chart
+import ChartComponent from './chart';
+import ChartComponentOptions from './chart/options';
+import * as ChartComponentUtils from './chart/utils';
+export { ChartComponent, ChartComponentOptions, ChartComponentUtils }

@@ -3,7 +3,7 @@ var utils = require('./utils')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 
@@ -37,10 +37,11 @@ module.exports = {
       //     formatter: require('eslint-friendly-formatter')
       //   }
       // },
-      { 
-        test: /\.ts$/, 
-        exclude: /node_modules/, enforce: 'pre', 
-        loader: 'tslint-loader' },
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/, enforce: 'pre',
+        loader: 'tslint-loader'
+      },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
@@ -51,7 +52,7 @@ module.exports = {
       //   loader: 'babel-loader',
       //   include: [resolve('src'), resolve('test')]
       // },
-       {
+      {
         test: /\.ts$/,
         loader: 'ts-loader',
         exclude: /node_modules/,
