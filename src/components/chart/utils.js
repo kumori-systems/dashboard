@@ -14,7 +14,11 @@ export function prepareData(data) {
 
   for (let index in data) {
     for (let prop in data[index]) {
-      if (prop === 'timestamp')
+      if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
+    || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
+        // Descartamos estas propiedades
+      }
+      else if (prop === 'timestamp')
         res.labels.push(moment(data[index].timestamp));
       else {
         // Recorremos el dataset buscando la posición de uno ya existente. Si existe guardamos su pos

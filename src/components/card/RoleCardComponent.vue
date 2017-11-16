@@ -1,8 +1,32 @@
 <template>
   <v-card>
-    <v-card-title primary-title class="headline">
-      {{ role.name }}
+    <v-card-title primary-title>
+      
+      <!-- Role name -->
+      <span class="headline">{{ role.name }}</span>
+      
+      
+      <v-flex xs1></v-flex>
+
+      <!-- Role num instances -->         
+      <v-btn-toggle>
+        <v-btn flat>
+          <v-icon>remove</v-icon>
+        </v-btn>
+      </v-btn-toggle>
+      
+      {{localNumInstances}}
+      <v-btn-toggle>
+        <v-btn flat>
+          <v-icon>add</v-icon>
+        </v-btn>
+      </v-btn-toggle>
+
+      </v-flex>
+      
+      
     </v-card-title>
+  
     <v-container fluid>
 
       <!-- Role info -->
@@ -44,9 +68,9 @@
         </v-flex>
 
         <v-spacer></v-spacer>
-
+        
         <!-- Role chart -->
-       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+        <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
           <role-chart-component class="role-chart" v-bind:chartData="rolChartData" v-bind:options="chartOptions"
             v-bind:width="800" v-bind:height="400"></role-chart-component>
         </v-flex>

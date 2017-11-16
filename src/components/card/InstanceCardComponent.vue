@@ -1,12 +1,16 @@
 <template>
   <v-container fluid>
     <v-layout row wrap>
+      
+      <!-- Instance name -->
       <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
         <i v-bind:class="state" aria-hidden="true"></i>
         <p class="title">{{ instance.cnid }}</p>
       </v-flex>
+
     </v-layout>
     <v-layout row wrap>
+      
       <!-- Instance arrangement -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
         <v-layout>
@@ -25,6 +29,7 @@
       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
         <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400"></chart-component>
       </v-flex>
+
     </v-layout>
   </v-container>
 </template>
