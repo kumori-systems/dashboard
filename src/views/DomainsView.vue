@@ -1,4 +1,5 @@
 <template>
+<div>
     <v-data-table
       v-bind:headers="headers"
       v-bind:items="domains"
@@ -8,14 +9,28 @@
       <td class="text-xs-left">{{ props.item.state }}</td>
       <td class="text-xs-left">unavailable</td>
       <td class="text-xs-left">
-        <v-btn color="error" icon v-on:click="deleteDomain(props.item._uri)">
+        <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
           <v-icon class="white--text">delete_forever</v-icon>
         </v-btn>
       </td>
     </template>
   </v-data-table>
+  <v-dialog v-model="dialog" max-width="800px">
+    <v-card>
+      <v-card-title class="headline">Delete domain?</v-card-title>
+      <v-card-text>
+        This action <strong>CANNOT BE UNDONE</strong> and will
+        permanently delete the {{ selectedDomain }} domain.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="red darken-1" flat="flat" @click.native="deleteDomain">Delete domain</v-btn>
+        <v-btn color="green darken-1" flat="flat" @click.native="dialog = false">Cancel</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</div>
 </template>
-
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
@@ -26,6 +41,8 @@ import { Domain } from "../store/stampstate/classes";
   components: {}
 })
 export default class DomainsView extends Vue {
+  dialog: boolean = false;
+  selectedDomain: string = null;
   headers: any[] = [
     {
       text: "Domain",
@@ -63,13 +80,14 @@ export default class DomainsView extends Vue {
     }
     return domains;
   }
+  showDialog(domainURI) {
+    this.dialog = true;
+    this.selectedDomain = domainURI;
+  }
 
-  deleteDomain(domainURI) {
-    console.debug("The domain we are trying to erase is %s ", domainURI);
-    // console.debug("Llamamos a deleteDomain");
-    // this.modalElementId = domainURI;
-    // this.modalElementName = domainURI;
-    // this.deleteModalIsVisible = true;
+  deleteDomain() {
+    this.$store.dispatch("deleteElement", this.selectedDomain);
+    this.dialog = false;
   }
 }
 </script>

@@ -6,7 +6,7 @@
 
       <!-- Toolbar title -->
       <v-toolbar-title>{{ names[route] }}</v-toolbar-title>
-        
+    
     </v-toolbar>
 </template>
 <script lang="ts">
@@ -15,18 +15,26 @@ import VueClassComponent from "vue-class-component";
 import PSGetters from "../store/pagestate/getters";
 
 @VueClassComponent({
-  name: "toolbar-component"
+  name: "toolbar-component",
+  components: {}
 })
 export default class ToolbarComponent extends Vue {
-  names = {
-    "/overview": 'Overview',
-    "/elements": 'Elements',
-    "/domains": 'Domains',
-    "/addHTTPEntrypoint": 'Add a http entrypoint',
-    "/addDeployment":'Add a deployment'
-  };
+  get names() {
+    let res =  {
+    "/overview": "Overview",
+    "/elements": "Elements",
+    "/domains": "Domains",
+    "/addHTTPEntrypoint": "Add a http entrypoint",
+    "/addDeployment": "Add a deployment"
+    }
 
-  get route(): string{
+    if(!res[this.route]){
+      res[this.route] = this.$store.getters.deploymentFromPath(this.route).name;
+    }
+    return res;
+  }
+
+  get route(): string {
     return this.$route.path;
   }
 

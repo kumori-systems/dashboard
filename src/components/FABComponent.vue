@@ -1,6 +1,6 @@
 <template>
   <v-speed-dial v-if="elements[route]" v-model="open" fixed bottom right hover
-  transition="scale-transition">
+  transition="scale-transition" direction="top">
 
   <v-btn slot="activator" v-bind:class="elements[route].bgColor" fab hover v-model="open">
     <v-icon>add</v-icon>

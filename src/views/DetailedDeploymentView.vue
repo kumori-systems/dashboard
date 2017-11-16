@@ -7,47 +7,63 @@
         </v-flex>
       
         <!-- Deployment name -->
-        <v-flex ma-1 xs12 sm5 md5 lg5 xl3><span class="headline">{{ deployment.name }}</span></v-flex>
+        <!--
+          <v-flex ma-1 xs12 sm5 md5 lg5 xl3><span class="headline">{{ deployment.name }}</span></v-flex>
+        -->
       
-        <!-- Deployment actions -->
-        <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
-          <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-          <v-btn color="warning" v-bind:disabled="!haveChanges" 
-            v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-        </v-flex>
+       
       </v-layout>
+      
       <v-layout row wrap>
-        <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+        <v-container fluid id="deployment-item-view">
+          <v-layout clo row wrap>
+          
+            <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
-          <!-- Deployment service -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12>
-              <p>Service: {{ deployment.service }}</p>
+              <!-- Deployment service -->
+              <v-layout row wrap>
+                <v-flex ma-1 xs12>
+                  <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
+                </v-flex>
+              </v-layout>
+
+              <!-- Deployment links -->
+              <v-layout row wrap>
+                <v-flex ma-1 xs12 v-if="deployment.links.length > 0"> 
+                  <span class="subheading">Links:</span>
+                  <div v-for="(link, index) in deployment.links" v-bind:key="index" class="inner-content">
+                    {{ link.fromChannel }} ~ {{ searchDeployment(link.toDeployment).name }} ({{ link.toChannel }})
+                  </div>
+                </v-flex>
+              </v-layout>
+
             </v-flex>
-          </v-layout>
 
-          <!-- Deployment links -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12>  
-              <div v-if="deployment.links.length > 0">
-                <span class="subheading">Links</span>
-                <div v-for="(link, index) in deployment.links" v-bind:key="index" class="inner-content">
-                  {{ link.fromChannel }} ~ {{ searchDeployment(link.toDeployment).name }} ({{ link.toChannel }})
-                </div>
-              </div>
+            <v-spacer></v-spacer>
+
+            <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+
+              <!-- Deployment actions -->
+              <v-layout>
+                <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+                <v-btn color="warning" v-bind:disabled="!haveChanges" 
+                  v-on:click="applyChanges">Apply changes</v-btn>
+                <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+              </v-layout>
+
+              <!-- Deployment chart -->
+                <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+                  <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+                    v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+                  </deployment-chart-component>
+                </v-flex>
+
             </v-flex>
+
           </v-layout>
-
-        </v-flex>
-
-        <!-- Deployment chart -->
-        <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-          <deployment-chart-component v-bind:chartData="deploymentChartData"
-            v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160">
-          </deployment-chart-component>
-        </v-flex>
+        </v-container>
       </v-layout>
+      
 
       <!-- Deployment roles -->
       <v-layout row wrap>
@@ -123,12 +139,12 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   /** Required to obtain additional information of a role. */
-  get service():  Service {
-      let ser = this.$store.getters.service(this.deployment.service);
-      if (!ser) {
-        this.$store.dispatch("getElementInfo", this.deployment.service);
-      }
-      return ser;
+  get service(): Service {
+    let ser = this.$store.getters.service(this.deployment.service);
+    if (!ser) {
+      this.$store.dispatch("getElementInfo", this.deployment.service);
+    }
+    return ser;
   }
 
   get deploymentMetrics() {
@@ -162,7 +178,7 @@ export default class DetailedDeploymentView extends Vue {
       res.data.push(metrics[i][1].data);
       res.roles.push(metrics[i][1].roles);
     }
-    // console.debug("Las métricas recien salidas del estado contienen:", res);
+
     return res;
   }
 
@@ -238,12 +254,6 @@ $color_green: #93c47d;
 $color_yellow: #f5d164;
 $color_red: #ff6666;
 $icon_size: 40px;
-
-.deployment-chart {
-  width: 800px;
-  height: 250px;
-  margin-right: 40px;
-}
 
 .fa-check-circle {
   color: $color_green;

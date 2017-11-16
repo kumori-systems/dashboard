@@ -5,59 +5,65 @@
     </v-card-title>
     <v-container fluid>
 
-      <!-- Component uri -->
+      <!-- Role info -->
       <v-layout row wrap>
-        <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
-          <p v-if="!component">Component: retrieving info..</p>
-          <p v-else>Component: {{ component._uri }}</p>
+       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+          
+          <!-- Component uri -->
+          <v-layout>
+            <v-flex ma-1 xs12>
+              <p v-if="!component">
+                <span class="subheading">Component:</span> retrieving info..</p>
+              <p v-else><span class="subheading">Component:</span> {{ component._uri }}</p>
+            </v-flex>
+          </v-layout>
 
           <!-- Component runtime -->
-          <p v-if="!component">Runtime: retrieving info..</p>
-          <p v-else>Runtime: {{ component.runtime }}</p>
+          <v-layout>
+            <v-flex ma-1 xs12>
+              <p v-if="!component"><span class="subheading">Runtime:</span> retrieving info..</p>
+              <p v-else><span class="subheading">Runtime:</span> {{ component.runtime }}</p>
+            </v-flex>
+          </v-layout>
         
           <!-- Role arrangement -->
-          <p>{{ role.memory }} MEM {{ role.cpu }} CPU {{ role.bandwidth }} NET</p>
+          <v-layout>
+            <v-flex ma-1 xs12>
+              <p>{{ role.memory }} <span class="subheading">MEM</span> {{ role.cpu }} <span class="subheading">CPU</span> {{ role.bandwidth }} <span class="subheading">NET</span></p>
+            </v-flex>
+          </v-layout>
         
-          <!-- Role channels -->        
-          Channels: {{ role.id | roleChannels(service) }}
-          <!--
-          <div v-for="(connection, connectionIndex) in rolConnections" v-bind:key="connectionIndex">
-            {{ connection.provided }} -> {{ connection.depended }}
-          </div>
-          -->
+          <!-- Role channels -->
+          <v-layout>
+            <v-flex ma-1 xs12>
+              <span class="subheading">Channels:</span>
+              <div>{{ role.id | roleChannels(service) }}</div>
+            </v-flex>
+          </v-layout>
+
         </v-flex>
+
+        <v-spacer></v-spacer>
+
         <!-- Role chart -->
-       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>  
-          <role-chart-component v-bind:chartData="rolChartData" v-bind:options="chartOptions"
-          v-bind:width="600" v-bind:height="160"></role-chart-component>
+       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+          <role-chart-component class="role-chart" v-bind:chartData="rolChartData" v-bind:options="chartOptions"
+            v-bind:width="800" v-bind:height="400"></role-chart-component>
         </v-flex>
+
       </v-layout>
       
-
       <!-- Role instances -->
       <v-layout row wrap v-if="service">
         <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
           <v-expansion-panel expand>
-            <v-expansion-panel-content v-for="(instance, instanceId)
-            in role.instances" v-bind:key="instanceId">
+            <v-expansion-panel-content>
               <div slot="header">Instances</div>
-              <v-container fluid>
-                <!--
-                <i v-bind:class="state" aria-hidden="true"></i>
-                  <span class="title">{{ instance.id }}</span>
-                <div>{{ instance.memory }} MEM</div>
-                <div>{{ instance.cpu }} CPU</div>
-                <div>{{ instance.bandwidth }} NET</div>
-                
-                  <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
-                
-                <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart-component>
-               -->
+              
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances" v-bind:key="instanceId" v-bind:instance="instanceContent"
                   v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
                 </instance-card-component>
-                
-              </v-container>              
+              
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-flex>
@@ -65,16 +71,11 @@
     </v-container>
   </v-card>
 </template>
-
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
-import {
-  InstanceCardComponent,
-  ChartComponentOptions,
-  ChartComponentUtils
-} from "../index";
+import { ChartComponentOptions, ChartComponentUtils } from "../index";
 import {
   Connector,
   Deployment,
@@ -83,36 +84,23 @@ import {
   Metric
 } from "../../store/stampstate/classes";
 
-import { Line, mixins } from "vue-chartjs";
-const { reactiveProp } = mixins;
-
-/**
- * A change in Vue makes this object not rendered if it's imported. Warning:
- * Unknown custom element: <my-component> - did you register the component
- * correctly? For recursive components, make sure to provide the "name" option.
- * (found in root instance)
- */
-const ChartComponent = Vue.component("chart-component", {
-  name: "chart-component",
-  extends: Line,
-  mixins: [reactiveProp],
-  props: ["options"],
-  mounted() {
-    (<any>this).renderChart((<any>this).chartData, (<any>this).options);
-  }
-});
+/* Theese components are loaded separatedly to avoid recursivity problems. */
+import InstanceCardComponent from "./InstanceCardComponent.vue";
+import ChartComponent from "./../chart";
 
 @VueClassComponent({
   name: "role-card-component",
   components: {
     "role-chart-component": ChartComponent,
-    InstanceCardComponent
+    "instance-card-component": InstanceCardComponent
   },
   props: {
     role: { required: true },
     service: { required: true },
-    clear: { required: true, type: Boolean }, // Se utiliza para limpiar los cambios cuando se cancelan
-    roleMetrics: { required: true } // Role and Instance metrics
+    /**  Clear changes when user cancels. */
+    clear: { required: true, type: Boolean },
+    /** Role and instance metrics. */
+    roleMetrics: { required: true }
   },
   filters: {
     roleChannels: function(rolId: string, service: Service) {
@@ -134,10 +122,9 @@ const ChartComponent = Vue.component("chart-component", {
 export default class RoleCardComponent extends Vue {
   role: Deployment.Role = this.role;
   localNumInstances: number = -1;
-  chartOptions = ChartComponentOptions;
-  chartUtils = ChartComponentUtils;
-  rolMetrics = this.rolMetrics;
+  roleMetrics = this.roleMetrics;
   service: Service = this.service;
+  chartOptions = ChartComponentOptions;
 
   mounted() {
     this.$watch("clear", function(value) {
@@ -158,16 +145,15 @@ export default class RoleCardComponent extends Vue {
       instances: []
     };
 
-    for (let i in this.rolMetrics) {
-      res.data.push(this.rolMetrics[i][this.role.name].data);
-      res.instances.push(this.rolMetrics[i][this.role.name].instances);
+    for (let i in this.roleMetrics) {
+      res.data.push(this.roleMetrics[i][this.role.name].data);
+      res.instances.push(this.roleMetrics[i][this.role.name].instances);
     }
     return res;
   }
 
-
   get rolChartData() {
-    return this.chartUtils.prepareData(this.onRoleMetricsUpdate.data);
+    return ChartComponentUtils.prepareData(this.onRoleMetricsUpdate.data);
   }
 
   get instanceMetrics() {
@@ -214,10 +200,3 @@ export default class RoleCardComponent extends Vue {
   }
 }
 </script>
-<style lang="scss" scoped>
-.rol-chart {
-  width: 800px;
-  height: 250;
-  margin-right: 30px;
-}
-</style>

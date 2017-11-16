@@ -66,26 +66,30 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.addDomain(domain);
   }
 
-  /*
-  deleteElement(context, elementId) {
-    connection.deleteElement(elementId);
-  },
+  deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
+    void => {
+    connection.deleteElement(elementId).catch((error) => {
+      console.error('Error erasing element %s', elementId, error);
+    });
+  }
 
-  downloadManifest(context, elementId) {
+  downloadManifest = (injectee: Vuex.ActionContext<State, any>, elementId):
+    void => {
     connection.downloadManifest(elementId);
-  },
+  }
 
+  /*
   undeployDeployment({ commit }, { deploymentId }) {
     connection.undeployDeployment(deploymentId).catch((error) => {
-    console.error('The deployment ' + deploymentId +
-    ' could not be undeployed: ' + error);
-        });
-    },
+      console.error('The deployment ' + deploymentId +
+        ' could not be undeployed: ' + error);
+    });
+  },
 
   aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances,
     killInstances }) {
-      connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
-         killInstances);
+    connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
+      killInstances);
   },
 
   selectedService({ commit }, serviceId) {

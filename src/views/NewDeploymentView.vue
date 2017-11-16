@@ -23,7 +23,7 @@
       <span v-if="selectedService && selectedService.length > 0" class="headline">Roles</span>
       <v-flex xs5 v-for="(role, index) in serviceRoleList" v-bind:key="index">
         <v-flex ma-1 xs4>
-          <strong class="title">{{role}}</strong>
+          <strong class="title">{{ role }}</strong>
         </v-flex>
         <v-flex ma-1 xs4>
           <v-text-field  label="MEM" v-model="rolMem[index]" mask='####' v-bind:rules="[v => !!v || 'MEM number is required']" required></v-text-field>
@@ -42,13 +42,14 @@
         </v-flex>
       </v-flex>
 
-      <!-- Deployment channels -->
+      <!-- Deployment channels: Provided channels -->
       <span v-if="selectedService && selectedService.length > 0" class="headline">Channels</span>
       <v-flex xs5 v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
         <span class="title">{{ channel }} -&gt;</span>
           <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalDependedDeploymentChannels(channel)">  </v-select>
       </v-flex>
 
+      <!-- Deployment channels: Depended channels -->
       <v-flex xs5 v-for="(channel, index) in serviceDepChannelList" v-bind:key="index">
         <span class="title">{{ channel }} <-</span>
          <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalProvidedDeploymentChannels(channel)">  </v-select>

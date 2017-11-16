@@ -182,7 +182,7 @@ class ProxyConnection extends EventEmitter {
                     ) // Deployment
                   );
                 }
-                
+
                 break;
               case EcloudEventName.undeploying:
                 this.emit(this.onRemoveDeploymemt, event.entity['service']);
@@ -359,9 +359,7 @@ class ProxyConnection extends EventEmitter {
 
   // @param elementId: Elemento o lista de elementos
   deleteElement(elementId) {
-    this.admission.removeStorage(elementId).catch((error) => {
-      console.error('Error removing element %s', elementId, error);
-    });
+    return this.admission.removeStorage(elementId);
   }
 
   // @param elementId: Elemento o lista de elementos

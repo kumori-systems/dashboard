@@ -28,7 +28,6 @@
       <span>&copy; 2017</span>
     </v-footer>
 
-    <!-- Floating Action Button -->
     <fab-component></fab-component>
 
   </v-app>
@@ -38,7 +37,11 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import { SignInView } from "./views";
-import { NavigationComponent, ToolbarComponent, FABComponent } from "./components";
+import {
+  NavigationComponent,
+  ToolbarComponent,
+  FABComponent
+} from "./components";
 import PSGetters from "./store/pagestate/getters";
 
 @VueClassComponent({
@@ -47,7 +50,7 @@ import PSGetters from "./store/pagestate/getters";
     "signin-view": SignInView,
     "navigation-component": NavigationComponent,
     "toolbar-component": ToolbarComponent,
-    "fab-component":FABComponent
+    "fab-component": FABComponent
   }
 })
 export default class App extends Vue {

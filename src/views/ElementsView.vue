@@ -1,15 +1,15 @@
 <template>
   <v-container id="elements-view">
         <v-layout row wrap>
-            <v-flex xs12 sm5 md6 xl4>
+            <v-flex xs12 sm3 md3 xl4>
                 <v-text-field label="Search" v-model="search"
                 prepend-icon="search"></v-text-field>
             </v-flex>
-            <v-flex xs12 sm4 offset-sm1 md3 offset-md1 xl2 offset-xl4>
+            <v-flex xs12 offset-sm1 sm3 offset-md4 md3 offset-xl4 xl2>
                 <v-btn class="blue" v-bind:disabled="!someoneSelected"
                 v-on:click="downloadSelected">Download manifest</v-btn>
             </v-flex>
-            <v-flex xs12 sm2 md2 xl2>
+            <v-flex xs12 offset-sm2 sm2 offset-md0 md2 offset-xl0 xl2>
                 <v-btn class="red" v-bind:disabled="!someoneSelected"
                 v-on:click="deleteSelected">Delete</v-btn>
             </v-flex>
@@ -46,10 +46,10 @@
                                                     <div v-else>not in use</div>
                                                 </v-flex>
                                                 <v-flex xs2>
-                                                    <v-btn color="info" icon v-on:click="showElementInfo(runtime)">
+                                                    <v-btn color="info" icon v-on:click="showInfoElementDialog(runtime)">
                                                         <v-icon class="white--text">info_outline</v-icon>
                                                     </v-btn>
-                                                    <v-btn color="error" icon v-on:click="deleteElement(runtime)">
+                                                    <v-btn color="error" icon v-on:click="showDeleteElementDialog(runtime)">
                                                         <v-icon class="white--text">delete_forever</v-icon>
                                                     </v-btn>
                                                 </v-flex>
@@ -83,10 +83,10 @@
                                                     <div v-else>not in use</div>
                                                 </v-flex>
                                                 <v-flex xs2>
-                                                    <v-btn color="info" icon v-on:click="showElementInfo(component)">
+                                                    <v-btn color="info" icon v-on:click="showInfoElementDialog(component)">
                                                         <v-icon class="white--text">info_outline</v-icon>
                                                     </v-btn>
-                                                    <v-btn color="error" icon v-on:click="deleteElement(owner, component, version)">
+                                                    <v-btn color="error" icon v-on:click="showDeleteElementDialog(component)">
                                                         <v-icon class="white--text">delete_forever</v-icon>
                                                     </v-btn>
                                                 </v-flex>
@@ -120,10 +120,10 @@
                                                     <div v-else>not in use</div>
                                                 </v-flex>
                                                 <v-flex xs2>
-                                                    <v-btn color="info" icon v-on:click="showElementInfo(service)">
+                                                    <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
                                                         <v-icon class="white--text">info_outline</v-icon>
                                                     </v-btn>
-                                                    <v-btn color="error" icon v-on:click="deleteElement(service)">
+                                                    <v-btn color="error" icon v-on:click="showDeleteElementDialog(service)">
                                                         <v-icon class="white--text">delete_forever</v-icon>
                                                     </v-btn>
                                                 </v-flex>
@@ -137,6 +137,56 @@
                 </v-expansion-panel>
             </v-flex>
         </v-layout>
+
+        <!-- Single delete -->
+        <v-dialog v-model="deleteElementDialog" max-width="800px">
+          <v-card>
+            <v-card-title class="headline">Delete element?</v-card-title>
+            <v-card-text>
+              This action <strong>CAN'T BE UNDONE</strong> and will
+              delete the {{selectedElement}} element.
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" flat="flat" @click.native="deleteElement">Delete element</v-btn>
+              <v-btn flat="flat" @click.native="deleteElementDialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <!-- Single info -->
+        <v-dialog v-model="infoElementDialog" max-width="800px">
+          <v-card>
+            <v-card-title class="headline">{{ selectedElement }} info:</v-card-title>
+            <v-card-text>              
+              <div v-for="(value, index) in selectedElementInfo" v-bind:key="index">
+                {{index}}: {{value}}
+              </div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" flat="flat" @click.native="showElementInfo">Download Manifest</v-btn>
+              <v-btn flat="flat" @click.native="infoElementDialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <!-- Groupal delete -->
+        <v-dialog v-model="deleteGroupDialog" max-width="800px">
+          <v-card>
+            <v-card-title class="headline">Delete element?</v-card-title>
+            <v-card-text>
+              This action <strong>CAN'T BE UNDONE</strong> and will
+              delete:
+              <div v-for="(comp, index) in selectedComponents" v-bind:key="index">{{comp}}</div>
+              <div v-for="(serv, index) in selectedServices" v-bind:key="index">{{serv}}</div>
+              <div v-for="(runt, index) in selectedRuntimes" v-bind:key="index">{{runt}}</div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" flat="flat" @click.native="deleteElement">Delete elements</v-btn>
+              <v-btn flat="flat" @click.native="deleteGroupDialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -161,12 +211,10 @@ export default class ElementsView extends Vue {
   selectedRuntimes: string[] = [];
   search: string = null;
   // Modal Arguments
-  deleteIsVisible: boolean = false;
-  deleteGroupIsVisible: boolean = false;
-  elementInfoIsVisible: boolean = false;
-  modalElement: any = null;
-  // id, tipo, elemento, version
-  modalElementList: Array<[string, string, string, string]> = [];
+  deleteElementDialog: boolean = false;
+  deleteGroupDialog: boolean = false;
+  infoElementDialog: boolean = false;
+  selectedElement: string = null;
 
   get someoneSelected() {
     if (
@@ -235,26 +283,57 @@ export default class ElementsView extends Vue {
     };
   }
 
-  deleteElement(element) {
-    this.modalElement = element;
-    this.deleteIsVisible = true;
+  /**
+   * This returns all stored info about the element. The dialog must publish
+   * all related info.
+   */
+  get selectedElementInfo(): any {
+    let res = {};
+    if (this.selectedElement) {
+      res = this.$store.getters.elementInfo(this.selectedElement);
+      if (!res) {
+        this.$store.dispatch("getElementInfo", this.selectedElement);
+      }
+    }
+    return res;
   }
 
-  showElementInfo(element) {
-    this.modalElement = element;
-    this.elementInfoIsVisible = true;
+  showDeleteElementDialog(element: string) {
+    this.selectedElement = element;
+    this.deleteElementDialog = true;
+  }
+
+  deleteElement() {
+    this.$store.dispatch("deleteElement", this.selectedElement);
+    this.deleteElementDialog = false;
+    this.selectedElement = null;
+  }
+
+  showInfoElementDialog(element: string) {
+    this.selectedElement = element;
+    this.infoElementDialog = true;
+  }
+
+  showElementInfo() {
+    this.$store.dispatch("downloadManifest", this.selectedElement);
+    this.infoElementDialog = false;
+    this.selectedElement = null;
   }
 
   downloadSelected() {
-    this.$store.dispatch(
-      "downloadManifest",
-      this.selectedComponents
-        .concat(this.selectedServices)
-        .concat(this.selectedRuntimes)
-    );
+    for (let serv in this.selectedServices) {
+      this.$store.dispatch("downloadManifest", this.selectedServices[serv]);
+    }
+    for (let comp in this.selectedComponents) {
+      this.$store.dispatch("downloadManifest", this.selectedServices[comp]);
+    }
+    for (let runt in this.selectedRuntimes) {
+      this.$store.dispatch("downloadManifest", this.selectedServices[runt]);
+    }
   }
 
   deleteSelected() {
+    /*
     this.modalElementList = [];
 
     // id, tipo, elemento, version
@@ -289,6 +368,7 @@ export default class ElementsView extends Vue {
     }
 
     this.deleteGroupIsVisible = true;
+    */
   }
 }
 </script>

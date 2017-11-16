@@ -1,31 +1,42 @@
 <template>
-  <div>  
-    <i v-bind:class="state" aria-hidden="true"></i>
-    <span class="title">{{ instance.id }}</span>
-    <div>
-        <div>{{ instance.memory }} MEM</div>
-        <div>{{ instance.cpu }} CPU</div>
-        <div>{{ instance.bandwidth }} NET</div>
-        <!--
-        <checkbox-input v-bind:disabled="true" id="killinstance" v-model="killInstance" v-on:change="killInstanceChange()"> Kill instance</checkbox-input>
-        -->
-    </div>
-    <div class="is-child is-pulled-right box instance-chart">
-      <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="600" v-bind:height="160"></chart-component>
-    </div>
-  </div>
+  <v-container fluid>
+    <v-layout row wrap>
+      <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
+        <i v-bind:class="state" aria-hidden="true"></i>
+        <p class="title">{{ instance.cnid }}</p>
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap>
+      <!-- Instance arrangement -->
+      <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+        <v-layout>
+          <v-flex ma-1 xs2>{{ instance.memory }} MEM</v-flex>
+          <v-flex ma-1 xs2>{{ instance.cpu }} CPU</v-flex>
+          <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
+        </v-layout>
+        <v-layout>
+          <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
+        </v-layout>
+      </v-flex>
+      
+      <v-spacer></v-spacer>
+
+      <!-- Instance chart data -->
+      <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+        <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400"></chart-component>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 // Components
-import {
-  ChartComponent,
-  ChartComponentOptions,
-  ChartComponentUtils
-} from "../index";
+import { ChartComponentOptions, ChartComponentUtils } from "../index";
 import { Deployment, Metric } from "../../store/stampstate/classes";
+
+import ChartComponent from "./../chart";
 
 @VueClassComponent({
   name: "instance-card-component",
@@ -96,10 +107,6 @@ $color_yellow: #f5d164;
 $color_red: #ff6666;
 $icon_size: 40px;
 $radius: 5px;
-.instance-chart {
-  width: 800px;
-  height: 250;
-}
 
 .fa-check-circle {
   color: $color_green;

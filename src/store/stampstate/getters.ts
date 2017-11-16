@@ -379,4 +379,29 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.certificates;
   }
 
+  elementInfo = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): (uri: string) => any => {
+    return (uri: string) => {
+      let res: any = null;
+      switch (utils.getElementType(uri)) {
+        case utils.ElementType.component:
+          res = state.components[uri];
+          break;
+        case utils.ElementType.runtime:
+          res = state.runtimes[uri];
+          break;
+        case utils.ElementType.service:
+          res = state.services[uri];
+          break;
+        case utils.ElementType.deployment:
+        case utils.ElementType.resource:
+          console.warn('This case is under development');
+          break;
+        default:
+          console.error('Unknown element type %s', uri);
+      }
+      return res;
+    };
+  }
+
 };
