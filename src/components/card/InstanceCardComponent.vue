@@ -4,8 +4,8 @@
       
       <!-- Instance name -->
       <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
-        <i v-bind:class="state" aria-hidden="true"></i>
-        <p class="title">{{ instance.cnid }}</p>
+        <v-icon v-bind:id="state">{{ state }}</v-icon>
+        <span class="title">{{ instance.cnid }}</span>
       </v-flex>
 
     </v-layout>
@@ -85,14 +85,16 @@ export default class InstanceCardComponent extends Vue {
   }
 
   get state(): string {
-    let res: string = "fa ";
+    let res: string;
     switch (this.instance.state) {
       case Deployment.Role.Instance.STATE.CONNECTED:
-        res += "fa-check-circle";
+        res = "check_circle";
+        break;
       case Deployment.Role.Instance.STATE.DISCONNECTED:
-        res += "fa-exclamation-circle";
+        res = "error";
+        break;
       default:
-        res += "fa-question-circle";
+        res = "replay";
     }
     return res;
   }
@@ -110,21 +112,26 @@ export default class InstanceCardComponent extends Vue {
 $color_green: #93c47d;
 $color_yellow: #f5d164;
 $color_red: #ff6666;
-$icon_size: 40px;
+$icon_size: 30px;
 $radius: 5px;
 
-.fa-check-circle {
+#check_circle {
   color: $color_green;
   font-size: $icon_size;
 }
 
-.fa-exclamation-triangle {
+#warning {
   color: $color_yellow;
   font-size: $icon_size;
 }
 
-.fa-exclamation-circle {
+#error {
   color: $color_red;
+  font-size: $icon_size;
+}
+
+#replay {
+  color: grey;
   font-size: $icon_size;
 }
 

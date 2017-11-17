@@ -60,7 +60,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       console.error('Error deploying a service', error);
     });
   }
-
+  undeploy = (injectee: Vuex.ActionContext<State, any>, deploymentId): void => {
+    connection.undeployDeployment(deploymentId).catch((error) => {
+      console.error('The deployment ' + deploymentId +
+        ' could not be undeployed: ' + error);
+    });
+  }
   addNewDomain = (injectee: Vuex.ActionContext<State, any>,
     domain: string): void => {
     connection.addDomain(domain);
@@ -78,20 +83,28 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.downloadManifest(elementId);
   }
 
-  /*
-  undeployDeployment({ commit }, { deploymentId }) {
-    connection.undeployDeployment(deploymentId).catch((error) => {
-      console.error('The deployment ' + deploymentId +
-        ' could not be undeployed: ' + error);
-    });
-  },
+  aplyingChangesToDeployment = (injectee: Vuex.ActionContext<State, any>, {
+    deploymentId, rolNumInstances, killInstances
+  }):
+    void => {
 
-  aplyingChangesToDeployment({ commit }, { deploymentId, rolNumInstances,
-    killInstances }) {
-    connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
+    console.debug('El deployment que estamos intentando cambiar es ',
+      deploymentId);
+
+    console.debug('Num instancias rol: ',
+      rolNumInstances);
+
+    console.debug('Kill instances: ',
       killInstances);
-  },
 
+    connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
+      killInstances).catch((error) => {
+        console.error('Error modifying deployment. ',
+        deploymentId, rolNumInstances, killInstances, error);
+      });
+  }
+
+  /*
   selectedService({ commit }, serviceId) {
     commit('selectedService', serviceId);
   },

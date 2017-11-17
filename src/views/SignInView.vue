@@ -17,7 +17,7 @@
                     </div>
                 </v-card-text>
                 <v-card-actions>
-                    <span class="ma-3" v-bind:class="friendlyMessageClass">{{friendlyMessage}}</span>
+                    <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
                     <v-spacer></v-spacer>
                     <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
                         Continue

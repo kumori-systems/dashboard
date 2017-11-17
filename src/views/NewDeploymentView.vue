@@ -15,7 +15,7 @@
         <v-flex xs12 sm6>
           <v-select label="Service" v-model="selectedService" v-bind:items="services"
             item-text="_uri" item-value="_uri" required
-            v-bind:rules="[v => !!v || 'A service is required']"></v-select>
+            v-bind:rules="[v => !!v || 'A service is required']" autocomplete></v-select>
         </v-flex>
       </v-layout>
 
@@ -46,13 +46,13 @@
       <span v-if="selectedService && selectedService.length > 0" class="headline">Channels</span>
       <v-flex xs5 v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
         <span class="title">{{ channel }} -&gt;</span>
-          <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalDependedDeploymentChannels(channel)">  </v-select>
+          <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalDependedDeploymentChannels(channel)" autocomplete>  </v-select>
       </v-flex>
 
       <!-- Deployment channels: Depended channels -->
       <v-flex xs5 v-for="(channel, index) in serviceDepChannelList" v-bind:key="index">
         <span class="title">{{ channel }} <-</span>
-         <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalProvidedDeploymentChannels(channel)">  </v-select>
+         <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalProvidedDeploymentChannels(channel)" autocomplete>  </v-select>
       </v-flex>
 
       <!-- Deployment resources -->
@@ -116,7 +116,10 @@ export default class NewServiceView extends Vue {
   }
 
   get service(): Service {
-    return this.$store.getters.service(this.selectedService);
+    let res = this.$store.getters.service(this.selectedService)
+    if(!res)
+     this.$store.dispatch("getElementInfo",res);
+    return res;
   }
 
   get services(): Service[] {
@@ -134,12 +137,8 @@ export default class NewServiceView extends Vue {
           this.deployments[deploymentURI].service
         );
     }
-    let services: Service[] = [];
-    for (let ser in this.$store.getters.services) {
-      if (this.$store.getters.services[ser])
-        services.push(this.$store.getters.services[ser]);
-    }
-    return services;
+   
+    return this.$store.getters.servicesList;
   }
 
   get serviceRoleList(): Array<string> {
@@ -296,7 +295,9 @@ export default class NewServiceView extends Vue {
 
         roles[this.serviceRoleList[rolIndex]] = new Deployment.Role(
           rolIndex, // name
-          this.$store.getters.services[this.selectedService].roles[this.serviceRoleList[rolIndex]].component, //component
+          this.$store.getters.services[this.selectedService].roles[
+            this.serviceRoleList[rolIndex]
+          ].component, //component
           null, // configuration
           this.rolCPU[rolIndex], // cpu
           this.rolMem[rolIndex], // memory

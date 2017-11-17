@@ -1,23 +1,13 @@
 <template>
-   <v-container fluid id="deployment-item-view">
-      <v-layout row wrap>
-        <!-- Deployment state -->
-        <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
-          <i v-bind:class="deployment.state" aria-hidden="true"></i>
-        </v-flex>
-      
-        <!-- Deployment name -->
-        <!--
-          <v-flex ma-1 xs12 sm5 md5 lg5 xl3><span class="headline">{{ deployment.name }}</span></v-flex>
-        -->
-      
-       
-      </v-layout>
-      
+   <v-container fluid id="deployment-item-view">    
       <v-layout row wrap>
         <v-container fluid id="deployment-item-view">
           <v-layout clo row wrap>
-          
+
+            <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
+              <v-icon v-bind:id="state">{{ state }}</v-icon>
+            </v-flex>
+
             <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
               <!-- Deployment service -->
@@ -52,18 +42,17 @@
               </v-layout>
 
               <!-- Deployment chart -->
-                <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-                  <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
-                    v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
-                  </deployment-chart-component>
-                </v-flex>
+              <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+                <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+                  v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+                </deployment-chart-component>
+              </v-flex>
 
             </v-flex>
 
           </v-layout>
         </v-container>
       </v-layout>
-      
 
       <!-- Deployment roles -->
       <v-layout row wrap>
@@ -76,6 +65,24 @@
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
         </v-flex>
       </v-layout>
+
+        <!-- Single delete -->
+        <v-dialog v-model="undeployElementDialog" max-width="800px">
+          <v-card>
+            <v-card-title class="headline">Undeploy?</v-card-title>
+            <v-card-text>
+              This action <strong>CAN'T BE UNDONE</strong> and will
+              undeploy {{deployment.name}}.
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
+              <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+
     </v-container>
 </template>
 <script lang="ts" scoped>
@@ -108,21 +115,24 @@ export default class DetailedDeploymentView extends Vue {
   instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
   haveChanges: boolean = false;
   clear: boolean = false;
-  showModal: boolean = false;
+  undeployElementDialog: boolean = false;
   modalOkCallback: Function = function() {};
   chartOptions = ChartComponentOptions;
 
   get state(): string {
-    let res: string = "fa ";
+    let res: string;
     switch (this.deployment.state) {
       case Deployment.Role.STATE.SUCCESS:
-        res += "fa-check-circle";
+        res = "check_circle";
+        break;
       case Deployment.Role.STATE.DANGER:
-        res += "fa-exclamation-circle";
+        res = "error";
+        break;
       case Deployment.Role.STATE.WARNING:
-        res += "fa-exclamation-triangle";
+        res = "warning";
+        break;
       default:
-        res += "fa-question-circle";
+        res = "replay";
     }
     return res;
   }
@@ -218,13 +228,12 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   showUndeployModal(): void {
-    const deploymentId = this.deployment._uri;
-    this.modalOkCallback = function() {
-      this.$store.dispatch("undeployDeployment", {
-        deploymentId: deploymentId
-      });
-    };
-    this.showModal = true;
+    this.undeployElementDialog = true;
+  }
+
+  undeploy():void{
+    this.$store.dispatch("undeploy", this.deployment._uri);
+    this.$router.push("/overview");
   }
 
   handleUndeploy(payload): void {
@@ -253,20 +262,26 @@ export default class DetailedDeploymentView extends Vue {
 $color_green: #93c47d;
 $color_yellow: #f5d164;
 $color_red: #ff6666;
-$icon_size: 40px;
+$icon_size: 80px;
 
-.fa-check-circle {
+#check_circle {
   color: $color_green;
   font-size: $icon_size;
 }
 
-.fa-exclamation-triangle {
+#warning {
   color: $color_yellow;
   font-size: $icon_size;
 }
 
-.fa-exclamation-circle {
+#error {
   color: $color_red;
   font-size: $icon_size;
 }
+
+#replay {
+  color: grey;
+  font-size: $icon_size;
+}
+
 </style>

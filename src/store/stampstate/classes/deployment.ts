@@ -235,7 +235,10 @@ export module Deployment {
     get actualInstances(): number {
       let res: number = 0;
       for (let i in this.instances) {
-        if (this.instances[i].state === Role.Instance.STATE.CONNECTED)
+        if (this.instances[i].state === Role.Instance.STATE.CONNECTED 
+          || this.instances[i].state === Role.Instance.STATE.DISCONNECTED
+          || this.instances[i].state === Role.Instance.STATE.UNKOWN
+        )
           res++;
       }
       return res;

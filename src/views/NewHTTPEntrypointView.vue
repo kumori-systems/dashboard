@@ -7,12 +7,12 @@
       <v-flex>
         <!-- Domain list-->
         <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
-          item-value="_uri"v-bind:rules="[v => !!v || 'A domain is required']" required></v-select>
+          item-value="_uri"v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
 
         <!-- Checkbuttons -->
         <v-layout>
           <v-checkbox label="Accept TLS/SSL" v-model="acceptTLSSSL" disabled></v-checkbox>
-          <v-select label="Certificate" v-model="selectedCertificate" v-bind:items="certificates" v-bind:rules="[v => !!v || 'A domain is required']" disabled></v-select>
+          <v-select label="Certificate" v-model="selectedCertificate" v-bind:items="certificates" v-bind:rules="[v => !!v || 'A domain is required']" disabled autocomplete></v-select>
         </v-layout>
         <v-checkbox label="Require client certificates" v-model="requireClientCertificates" disabled></v-checkbox>
 

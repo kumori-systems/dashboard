@@ -2,6 +2,9 @@
   <v-card>
     <v-card-title primary-title>
       
+      <!-- Role state -->
+      <v-icon v-bind:id="state">{{ state }}</v-icon>
+
       <!-- Role name -->
       <span class="headline">{{ role.name }}</span>
       
@@ -10,14 +13,13 @@
 
       <!-- Role num instances -->         
       <v-btn-toggle>
-        <v-btn flat>
+        <v-btn flat v-on:click="lessInstances">
           <v-icon>remove</v-icon>
         </v-btn>
       </v-btn-toggle>
-      
-      {{localNumInstances}}
+      {{ localNumInstances }}
       <v-btn-toggle>
-        <v-btn flat>
+        <v-btn flat v-on:click="moreInstances">
           <v-icon>add</v-icon>
         </v-btn>
       </v-btn-toggle>
@@ -83,11 +85,9 @@
           <v-expansion-panel expand>
             <v-expansion-panel-content>
               <div slot="header">Instances</div>
-              
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances" v-bind:key="instanceId" v-bind:instance="instanceContent"
-                  v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="clear">
+                  v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="onClearHandler">
                 </instance-card-component>
-              
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-flex>
@@ -145,19 +145,17 @@ import ChartComponent from "./../chart";
 })
 export default class RoleCardComponent extends Vue {
   role: Deployment.Role = this.role;
-  localNumInstances: number = -1;
+  localNumInstances: number = this.role.actualInstances;
   roleMetrics = this.roleMetrics;
   service: Service = this.service;
   chartOptions = ChartComponentOptions;
 
-  mounted() {
-    this.$watch("clear", function(value) {
-      if (value === true) {
-        // Limpiamos el estado temporal
-        this.localNumInstances = -1;
-        this.$emit("clearedRol");
-      }
-    });
+  get onClearHandler() {
+    if (this.$props.clear) {
+      this.localNumInstances = this.role.actualInstances;
+      this.$emit("clearedRol");
+    }
+    return this.$props.clear;
   }
 
   get onRoleMetricsUpdate() {
@@ -185,16 +183,19 @@ export default class RoleCardComponent extends Vue {
   }
 
   get state(): string {
-    let res: string = "fa ";
+    let res: string;
     switch (this.role.state) {
       case Deployment.Role.STATE.SUCCESS:
-        res += "fa-check-circle";
+        res = "check_circle";
+        break;
       case Deployment.Role.STATE.DANGER:
-        res += "fa-exclamation-circle";
+        res = "error";
+        break;
       case Deployment.Role.STATE.WARNING:
-        res += "fa-exclamation-triangle";
+        res = "warning";
+        break;
       default:
-        res += "fa-question-circle";
+        res = "replay";
     }
     return res;
   }
@@ -222,5 +223,45 @@ export default class RoleCardComponent extends Vue {
   handleKillInstanceChange(payload) {
     this.$emit("killInstanceChange", [this.role.name, ...payload]);
   }
+
+  lessInstances() {
+    if (this.localNumInstances > 0) {
+      this.localNumInstances--;
+      this.$emit("numInstancesChange", [
+        this.role.name,
+        this.localNumInstances
+      ]);
+    }
+  }
+
+  moreInstances() {
+    this.localNumInstances++;
+    this.$emit("numInstancesChange", [this.role.name, this.localNumInstances]);
+  }
 }
 </script>
+<style lang="scss">
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
+$icon_size: 60px;
+#check_circle {
+  color: $color_green;
+  font-size: $icon_size;
+}
+
+#warning {
+  color: $color_yellow;
+  font-size: $icon_size;
+}
+
+#error {
+  color: $color_red;
+  font-size: $icon_size;
+}
+
+#replay {
+  color: grey;
+  font-size: $icon_size;
+}
+</style>

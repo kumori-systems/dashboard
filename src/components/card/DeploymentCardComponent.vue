@@ -4,13 +4,14 @@
         <!-- The entire card is a link to the deployment's details -->
         <router-link v-bind:to="deployment._path">
             <!-- Card's background represents the deployment's state -->
-            <v-card v-bind:class="stateColor">
+            <v-card>
 
                 <!-- Card title: Deployment name -->
                 <v-card-title primary-title class="headline" v-bind:class="stateColor">
-                    {{ deployment.name }}
-                    <v-spacer></v-spacer>
-                    {{ deployment._uri | truncateLeft(8)}}
+                  <v-icon class="ma-1" v-bind:id="state">{{ state }}</v-icon>
+                  {{ deployment.name }}
+                  <v-spacer></v-spacer>
+                  {{ deployment._uri | truncateLeft(8)}}
                 </v-card-title>
 
                 <!-- Card body: Deployment stats -->
@@ -20,7 +21,7 @@
                     <v-flex>
 
                         <!-- List of deployment's properties -->
-                        <v-list two-line v-bind:class="stateColor">
+                        <v-list two-line>
 
                             <!-- Service -->
                             <template>
@@ -155,10 +156,53 @@ export default class Card extends Vue {
     }
     return res + " lighten-2";
   }
+   get state(): string {
+    let res: string;
+    switch (this.deployment.state) {
+      case Deployment.Role.STATE.SUCCESS:
+        res = "check_circle";
+        break;
+      case Deployment.Role.STATE.DANGER:
+        res = "error";
+        break;
+      case Deployment.Role.STATE.WARNING:
+        res = "warning";
+        break;
+      default:
+        res = "replay";
+    }
+    return res;
+  }
+
 }
 </script>
 <style lang="scss" scoped>
 a {
   text-decoration: none;
+}
+
+$color_green: #93c47d;
+$color_yellow: #f5d164;
+$color_red: #ff6666;
+$icon_size: 30px;
+
+#check_circle {
+  color: $color_green;
+  font-size: $icon_size;
+}
+
+#warning {
+  color: $color_yellow;
+  font-size: $icon_size;
+}
+
+#error {
+  color: $color_red;
+  font-size: $icon_size;
+}
+
+#replay {
+  color: grey;
+  font-size: $icon_size;
 }
 </style>

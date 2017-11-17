@@ -20,15 +20,15 @@ import PSGetters from "../store/pagestate/getters";
 })
 export default class ToolbarComponent extends Vue {
   get names() {
-    let res =  {
-    "/overview": "Overview",
-    "/elements": "Elements",
-    "/domains": "Domains",
-    "/addHTTPEntrypoint": "Add a http entrypoint",
-    "/addDeployment": "Add a deployment"
-    }
+    let res = {
+      "/overview": "Overview",
+      "/elements": "Elements",
+      "/domains": "Domains",
+      "/addHTTPEntrypoint": "Add a http entrypoint",
+      "/addDeployment": "Add a deployment"
+    };
 
-    if(!res[this.route]){
+    if (!res[this.route]) {
       res[this.route] = this.$store.getters.deploymentFromPath(this.route).name;
     }
     return res;

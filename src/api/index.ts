@@ -1,8 +1,8 @@
 import { AcsClient as EcloudAcsClient } from 'acs-client';
 import {
   AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent,
-  EcloudEventName, EcloudEventType, FileStream, RegistrationResult,
-  ScalingDeploymentModification,
+  EcloudEventName, EcloudEventType, FileStream, ReconfigDeploymentModification,
+  RegistrationResult, ScalingDeploymentModification
 } from 'admission-client';
 
 
@@ -14,9 +14,6 @@ import {
 } from '../store/stampstate/classes';
 import { ACS_URI, ADMISSION_URI } from './config.js';
 import * as utils from './utils';
-
-
-
 
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá
@@ -408,7 +405,11 @@ class ProxyConnection extends EventEmitter {
   aplyChangesToDeployment(deploymentId: string,
     rolNumInstances: { [rolId: string]: number },
     killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
-    console.warn('The modification of a deploymet is under development');
+
+    let modification = new ScalingDeploymentModification();
+    modification.deploymentURN = deploymentId;
+    modification.scaling = rolNumInstances;
+    return this.admission.modifyDeployment(modification);
   }
 
   /* RESOURCES */

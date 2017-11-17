@@ -121,6 +121,15 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.services;
   }
 
+  servicesList = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): string[] => {
+    let res: string[] = [];
+    for (let ser in state.services) {
+      res.push(ser);
+    }
+    return res;
+  }
+
   service = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (serviceURI: string) => Service => {
     return (serviceURI: string) => {
