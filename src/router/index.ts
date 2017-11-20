@@ -1,88 +1,67 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { Overview, DeploymentItem, Elements, Domains, DataVolumes, AlarmsAndLogs, Help } from '../components';
-import NewHTTPEntrypoint from '../components/views/innerComponents/form/NewHTTPEntrypoint.vue';
-import NewDeployment from '../components/views/innerComponents/form/NewDeployment.vue';
-import NewServiceAdvanced from '../components/views/innerComponents/form/NewServiceAdvanced.vue';
-import NewVolume from '../components/views/innerComponents/form/NewVolume.vue';
-import NewDomain from '../components/views/innerComponents/form/NewDomain.vue';
-import NewBundle from '../components/views/innerComponents/form/NewBundle.vue';
+
+import {
+  DetailedDeploymentView, DomainsView, ElementsView, NewBundleView,
+  NewDeploymentView, NewDomainView, NewHTTPEntrypointView, OverviewView,
+  SignInView
+} from '../views';
 
 Vue.use(Router);
 
 export default new Router({
+  base: '/',
   routes: [
     {
-      name: 'Overview',
-      path: '/',
-      meta: { expanded: false },
-      component: Overview,
-      children: [
-        {
-          path: '/deployment/:deploymentRoute', name: ' ', component: DeploymentItem,
-          meta: { expanded: false }
-        }
-      ]
+      path: '/overview',
+      component: OverviewView
     },
     {
-      name: 'Elements',
+      path: '/deployment/:uri',
+      component: DetailedDeploymentView
+    },
+    {
       path: '/elements',
-      meta: { expanded: false },
-      component: Elements
+      component: ElementsView
     },
     {
-      name: 'Domains',
       path: '/domains',
-      meta: { expanded: false },
-      component: Domains
+      component: DomainsView
     },
     {
-      name: 'Data volumes',
-      path: '/dataVolumes',
-      meta: { expanded: false },
-      component: DataVolumes
+      path: '/volumes',
+      component: null
     },
     {
-      name: 'Alarms & logs',
       path: '/alarmsAndLogs',
-      meta: { expanded: false },
-      component: AlarmsAndLogs
+      component: null
     },
     {
-      name: 'Help',
       path: '/help',
-      meta: { expanded: false },
-      component: Help
+      component: null
     },
     {
-      name: 'Add entrypoint',
-      path: '/newHTTPEntrypoint',
-      meta: { expanded: false },
-      component: NewHTTPEntrypoint
+      path: '/addHTTPEntrypoint',
+      component: NewHTTPEntrypointView
     },
     {
-      name: 'New deployment',
-      path: '/newDeployment',
-      meta: { expanded: false },
-      component: NewDeployment
+      path: '/addDeployment',
+      component: NewDeploymentView
     },
     {
-      name: 'New domain',
-      path: '/newDomain',
-      meta: { expanded: false },
-      component: NewDomain
+      path: '/addDomain',
+      component: NewDomainView
     },
     {
-      name: 'New volume',
-      path: '/newVolume',
-      meta: { expanded: false },
-      component: NewVolume
+      path: '/addVolume',
+      component: null
     },
     {
-      name: 'Upload bundle',
-      path: '/newBundle',
-      meta: { expanded: false },
-      component: NewBundle
-    }
+      path: '/uploadbundle',
+      component: NewBundleView
+    },
+    // Global redirect for 404
+    { path: '*', redirect: '/overview' }
   ]
 });
+Vue.use(Router);
