@@ -102,7 +102,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     connection.onModifyDeployment((value) => {
       console.warn('Received event onModifyDeployment, which is still under'
-        + ' development');
+        + ' development', value);
     });
 
     connection.onRemoveDeploymemt((deploymentId) => {

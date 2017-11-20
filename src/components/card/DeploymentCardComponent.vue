@@ -74,8 +74,6 @@
                                 <!--<div v-if="deployment.volumes !== null && deployment.volumes.length>0"><div v-for="(volume, index) in deployment.volumes" v-bind:key="index" class="tile"><i class="fa fa-circle"></i><div>{{volume}}</div></div></div>-->
                             </template>
 
-                           
-
                             <!-- Websites -->
                             <template v-if="isHTTPEntryPoint">
                                 <v-subheader><strong>WEBSITES</strong></v-subheader>
@@ -177,32 +175,26 @@ export default class Card extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+
 a {
   text-decoration: none;
 }
 
-$color_green: #93c47d;
-$color_yellow: #f5d164;
-$color_red: #ff6666;
 $icon_size: 30px;
 
 #check_circle {
-  color: $color_green;
   font-size: $icon_size;
 }
 
 #warning {
-  color: $color_yellow;
   font-size: $icon_size;
 }
 
 #error {
-  color: $color_red;
   font-size: $icon_size;
 }
 
 #replay {
-  color: grey;
   font-size: $icon_size;
 }
 </style>

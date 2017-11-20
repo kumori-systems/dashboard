@@ -42,19 +42,6 @@
         </v-flex>
       </v-flex>
 
-      <!-- Deployment channels: Provided channels -->
-      <span v-if="selectedService && selectedService.length > 0" class="headline">Channels</span>
-      <v-flex xs5 v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
-        <span class="title">{{ channel }} -&gt;</span>
-          <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalDependedDeploymentChannels(channel)" autocomplete>  </v-select>
-      </v-flex>
-
-      <!-- Deployment channels: Depended channels -->
-      <v-flex xs5 v-for="(channel, index) in serviceDepChannelList" v-bind:key="index">
-        <span class="title">{{ channel }} <-</span>
-         <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalProvidedDeploymentChannels(channel)" autocomplete>  </v-select>
-      </v-flex>
-
       <!-- Deployment resources -->
       <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
       <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
@@ -159,24 +146,7 @@ export default class NewServiceView extends Vue {
       this.rolResilence[i] = 1;
     }
     return roleList;
-  }
-
-  get serviceProChannelList(): Array<string> {
-    if (!this.selectedService || this.selectedService === null) return [];
-    let res = this.$store.getters.getServiceProvidedChannels(
-      this.selectedService
-    );
-    this.selectedRequiredChannel = new Array<string>(res.length);
-    return res;
-  }
-  get serviceDepChannelList(): Array<string> {
-    if (!this.selectedService || this.selectedService === null) return [];
-    let res = this.$store.getters.getServiceDependedChannels(
-      this.selectedService
-    );
-    this.selectedProvidedChannel = new Array<string>(res.length);
-    return res;
-  }
+  } 
 
   get serviceResourcesList(): Array<string> {
     let resourceList = [];
@@ -186,24 +156,6 @@ export default class NewServiceView extends Vue {
       );
     this.resourceConfig = new Array<string>(resourceList.length);
     return resourceList;
-  }
-
-  get totalProvidedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalProvidedDeploymentChannels(
-        this.selectedService,
-        channel
-      );
-    };
-  }
-
-  get totalDependedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalDependedDeploymentChannels(
-        this.selectedService,
-        channel
-      );
-    };
   }
 
   get totalResourceConfig() {
