@@ -218,9 +218,9 @@ export default class ElementsView extends Vue {
 
   get someoneSelected() {
     if (
-      this.selectedComponents.length > 0 ||
-      this.selectedServices.length > 0 ||
-      this.selectedRuntimes.length > 0
+      this.selectedComponents.length > 0
+      || this.selectedServices.length > 0
+      || this.selectedRuntimes.length > 0
     )
       return true;
     return false;

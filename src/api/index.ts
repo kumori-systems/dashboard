@@ -409,7 +409,10 @@ class ProxyConnection extends EventEmitter {
     let modification = new ScalingDeploymentModification();
     modification.deploymentURN = deploymentId;
     modification.scaling = rolNumInstances;
-    return this.admission.modifyDeployment(modification);
+    console.debug('Los cambios que vamos a realizar son:', modification);
+    return this.admission.modifyDeployment(modification).then(() => {
+      console.debug('Cambios realizados satisfactoriamente');
+    });
   }
 
   /* RESOURCES */
