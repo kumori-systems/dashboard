@@ -32,6 +32,8 @@ export function transformEcloudDeploymentToDeployment(
       );
     }
 
+
+
     roles[rolId] = new Deployment.Role(
       rolId, // name
       ecloudDeployment.roles[rolId].component, // component
@@ -51,7 +53,8 @@ export function transformEcloudDeploymentToDeployment(
     );
   }
 
-  let resourcesConfig: { [resource: string]: any } = {};
+  let resourcesConfig: { [resource: string]: any } = ecloudDeployment.resources;
+  
   let parameters: any = {};
 
   let links: Array<Deployment.Link> = [];
@@ -329,7 +332,7 @@ export function transformManifestToComponent(manifest: {
   spec: string,
   codelocator: string
 }): Component {
-  
+
   let resources: { [resourceName: string]: string } = {};
   if (manifest.configuration.resources)
     for (let i = 0; i < manifest.configuration.resources.length; i++) {
@@ -479,17 +482,20 @@ export function transformManifestToResource(manifest: {
       res = new Domain(
         manifest.name,
         manifest.parameters.vhost,
-        Domain.STATE.SUCCESS
+        Domain.STATE.SUCCESS,
+        []
       );
       break;
     case ResourceType.certificate:
       res = new Certificate(
-        manifest.name
+        manifest.name,
+        []
       );
       break;
     case ResourceType.volume:
       res = new Volume(
-        manifest.name
+        manifest.name,
+        []
       );
       break;
     default:

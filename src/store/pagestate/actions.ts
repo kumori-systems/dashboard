@@ -54,10 +54,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'details': 'Loading data..'
       });
 
-      return connection.getDeploymentList().then(() => {
-        console.debug('Retrieved all deployments from the platform');
-        return connection.getRegisteredElements().then(() => {
-          console.debug('Stored a reference to all elements from the platform');
+      // Load all elements
+      return connection.getRegisteredElements().then(() => {
+        console.debug('Stored a reference to all elements from the platform');
+
+        // Load all deployments
+        return connection.getDeploymentList().then(() => {
+          console.debug('Retrieved all deployments from the platform');
           injectee.commit('finishBackgroundAction', {
             'id': loadInfoAction.id,
             'state': BackgroundAction.State.SUCCESS,

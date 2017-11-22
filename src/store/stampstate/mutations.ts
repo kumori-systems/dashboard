@@ -69,6 +69,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more domains to the state */
   addDomain = (state: State, payload: { [uri: string]: Domain }): void => {
+    for (let domainResource in payload) {
+      for (let deploymentId in state.deployments) {
+        if (state.deployments[deploymentId].resourcesConfig[domainResource]
+          !== undefined)
+          payload[domainResource].usedBy.push(deploymentId);
+      }
+    }
     state.domains = { ...state.domains, ...payload };
   }
 
@@ -79,6 +86,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more volumes to the state */
   addVolume = (state: State, payload: { [uri: string]: Volume }): void => {
+    for (let domainResource in payload) {
+      for (let deploymentId in state.deployments) {
+        if (state.deployments[deploymentId].resourcesConfig[domainResource]
+          !== undefined)
+          payload[domainResource].usedBy.push(deploymentId);
+      }
+    }
     state.volumes = { ...state.volumes, ...payload };
   }
 
@@ -90,6 +104,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
   /** Adds one or more certificates to the state */
   addCertificate = (state: State,
     payload: { [uri: string]: Certificate }): void => {
+    for (let domainResource in payload) {
+      for (let deploymentId in state.deployments) {
+        if (state.deployments[deploymentId].resourcesConfig[domainResource]
+          !== undefined)
+          payload[domainResource].usedBy.push(deploymentId);
+      }
+    }
     state.certificates = { ...state.certificates, ...payload };
   }
 

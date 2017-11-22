@@ -59,7 +59,9 @@ export default class NewHTTPEntrypointView extends Vue {
     let domainList: Domain[] = [];
     for (let domainUri in domains) {
       if (domains[domainUri]) {
-        domainList.push(domains[domainUri]);
+        if (domains[domainUri].usedBy.length === 0) {
+          domainList.push(domains[domainUri]);
+        }
       } else {
         this.$store.dispatch("getElementInfo", domainUri);
       }

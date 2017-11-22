@@ -9,11 +9,14 @@ import {
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
 import { EventEmitter, Listener } from 'typed-event-emitter';
+
 import {
-  Component, Deployment, HTTPEntryPoint, Resource, Runtime, Service
+  Certificate, Component, Deployment, Domain, HTTPEntryPoint, Resource, Runtime,
+  Service, Volume
 } from '../store/stampstate/classes';
 import { ACS_URI, ADMISSION_URI } from './config.js';
 import * as utils from './utils';
+
 
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá
@@ -374,16 +377,65 @@ class ProxyConnection extends EventEmitter {
     });
   }
 
-
-
   /* DEPLOYMENTS */
   getDeploymentList() {
     return this.admission.findDeployments().then((deploymentList) => {
       for (let deploymentId in deploymentList) {
-        this.emit(this.onAddDeployment, deploymentId,
-          utils
-            .transformEcloudDeploymentToDeployment(deploymentList[deploymentId])
-        );
+        let deployment: Deployment = utils.
+          transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
+
+        for (let resource in deployment.resourcesConfig) {
+          // There are actually two certificates which dont have the same
+          // structure
+          if (deployment.resourcesConfig[resource].resource.name) {
+            switch (utils.getResourceType(deployment.resourcesConfig[resource]
+              .resource.name)) {
+              case utils.ResourceType.certificate:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Certificate(
+                    deployment.resourcesConfig[resource].resource.name,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              case utils.ResourceType.domain:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Domain(
+                    deployment.resourcesConfig[resource].resource.name,
+                    deployment.resourcesConfig[resource].resource.parameters
+                      .vhost,
+                    Domain.STATE.SUCCESS,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              case utils.ResourceType.volume:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Volume(
+                    deployment.resourcesConfig[resource].resource.name,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              default:
+                console.error('Unkown resource type: %s', resource);
+            }
+          }
+          else {
+            console.warn('resource not following structure at deployment %s',
+              deployment._uri,
+              deployment.resourcesConfig[resource]);
+          }
+        }
+
+        this.emit(this.onAddDeployment, deploymentId, deployment);
+
       }
     });
   }

@@ -6,14 +6,16 @@ import { EcloudElement } from './ecloudelement';
  * communication and storage.
  */
 export abstract class Resource extends EcloudElement {
+  usedBy: string[] = [];
   /**
    * Phisical or virtual component of linited availability within a computer or
    * information management system. Includes means for input, processing,
    * output, communication and storage.
    * @param uri <string> Uniform Resource Identifier for this resource.
    */
-  constructor(uri: string) {
+  constructor(uri: string, usedBy: string[]) {
     super(uri);
+    if (this.usedBy) this.usedBy = usedBy;
   }
 }
 
@@ -33,8 +35,8 @@ export class Domain extends Resource {
    * @param url <string> Direction of this domain.
    * @param state <Domain.State> Availability of this domain. Default Pending.
    */
-  constructor(uri: string, url: string, state: Domain.STATE) {
-    super(uri);
+  constructor(uri: string, url: string, state: Domain.STATE, usedBy: string[]) {
+    super(uri, usedBy);
     if (url) this.url = url;
     if (state) this.state = state;
   }
@@ -55,8 +57,8 @@ export class Volume extends Resource {
    * Phisical data volume
    * @param uri <string> Uniform Resource Identifier for this volume.
    */
-  constructor(uri: string) {
-    super(uri);
+  constructor(uri: string, usedBy: string[]) {
+    super(uri, usedBy);
   }
 }
 
@@ -68,7 +70,7 @@ export class Certificate extends Resource {
    * A confirmation of veracity of the connection.
    * @param uri <string> Uniform Resource Identifier for this data volume.
    */
-  constructor(uri: string) {
-    super(uri);
+  constructor(uri: string, usedBy: string[]) {
+    super(uri, usedBy);
   }
 }
