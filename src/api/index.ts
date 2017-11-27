@@ -388,6 +388,20 @@ class ProxyConnection extends EventEmitter {
     });
   }
 
+  getDeployment(uri: string) {
+    this.admission.findDeployments(uri).then((deploymentList) => {
+      for (let deploymentId in deploymentList) {
+        this.emit(this.onAddDeployment, deploymentId,
+          utils
+            .transformEcloudDeploymentToDeployment(deploymentList[deploymentId])
+        );
+      }
+
+    });
+
+
+  }
+
   undeployDeployment(deploymentURN: string) {
     return this.admission.undeploy(deploymentURN).then((value) => {
       this.emit(this.onRemoveDeploymemt, deploymentURN);
