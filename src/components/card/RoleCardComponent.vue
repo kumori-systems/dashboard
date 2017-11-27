@@ -1,24 +1,24 @@
 <template>
   <v-card>
-    <v-card-title primary-title>
-      
+    <v-card-title primary-title class="grey lighten-3">
+
       <!-- Role state -->
       <v-icon v-bind:id="state">{{ state }}</v-icon>
 
       <!-- Role name -->
-      <span class="headline">{{ role.name }}</span>
+      <span class="headline">Role: {{ role.name }}</span>
       
       
       <v-flex xs1></v-flex>
-
+      Instances
       <!-- Role num instances -->         
-      <v-btn-toggle>
+      <v-btn-toggle class="grey lighten-3">
         <v-btn flat v-on:click="lessInstances">
           <v-icon>remove</v-icon>
         </v-btn>
       </v-btn-toggle>
       {{ localNumInstances }}
-      <v-btn-toggle>
+      <v-btn-toggle class="grey lighten-3">
         <v-btn flat v-on:click="moreInstances">
           <v-icon>add</v-icon>
         </v-btn>
@@ -29,7 +29,7 @@
       
     </v-card-title>
   
-    <v-container fluid>
+    <v-container fluid class="grey lighten-3">
 
       <!-- Role info -->
       <v-layout row wrap>
@@ -195,7 +195,7 @@ export default class RoleCardComponent extends Vue {
         res = "warning";
         break;
       default:
-        res = "replay";
+        res = "help";
     }
     return res;
   }
@@ -240,10 +240,11 @@ export default class RoleCardComponent extends Vue {
   }
 }
 </script>
-<style lang="scss">
-$color_green: #93c47d;
-$color_yellow: #f5d164;
-$color_red: #ff6666;
+<style lang="scss" scoped>
+$color_green: #81c784;
+$color_yellow: #fff176;
+$color_red: #e57373ed;
+$color_grey: #e0e0e0;
 $icon_size: 60px;
 #check_circle {
   color: $color_green;
@@ -260,8 +261,8 @@ $icon_size: 60px;
   font-size: $icon_size;
 }
 
-#replay {
-  color: grey;
+#help {
+  color: $color_grey;
   font-size: $icon_size;
 }
 </style>

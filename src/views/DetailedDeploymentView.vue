@@ -10,7 +10,23 @@
 
             <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
-              <!-- Deployment service -->
+              <!-- Deployment uri -->
+              <v-layout row wrap>
+                <v-flex ma-1 xs12>
+                  <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
+                </v-flex>
+              </v-layout>
+
+               <!-- Deployment date -->
+              <v-layout row wrap>
+                <v-flex ma-1 xs12>
+                  <p><span class="subheading">Date:</span>
+                  {{ deployment._uri |day }}-{{ deployment._uri |month }}-{{ deployment._uri |year }}  {{ deployment._uri |hour }}:{{ deployment._uri |min }}
+                  </p>
+                </v-flex>
+              </v-layout>
+
+               <!-- Deployment service -->
               <v-layout row wrap>
                 <v-flex ma-1 xs12>
                   <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
@@ -108,6 +124,23 @@ import {
   components: {
     "role-card-component": RoleCardComponent,
     "deployment-chart-component": ChartComponent
+  },
+  filters: {
+    year: function(text: string) {
+      return text.split("/")[4].substring(0, 4);
+    },
+    month: function(text: string, value: number) {
+      return text.split("/")[4].substring(4, 6);
+    },
+    day: function(text: string, value: number) {
+      return text.split("/")[4].substring(6, 8);
+    },
+    hour: function(text: string, value: number) {
+      return text.split("/")[4].substring(9, 11);
+    },
+    min: function(text: string, value: number) {
+      return text.split("/")[4].substring(11, 13);
+    }
   }
 })
 export default class DetailedDeploymentView extends Vue {
@@ -132,7 +165,7 @@ export default class DetailedDeploymentView extends Vue {
         res = "warning";
         break;
       default:
-        res = "replay";
+        res = "help";
     }
     return res;
   }
@@ -231,7 +264,7 @@ export default class DetailedDeploymentView extends Vue {
     this.undeployElementDialog = true;
   }
 
-  undeploy():void{
+  undeploy(): void {
     this.$store.dispatch("undeploy", this.deployment._uri);
     this.$router.push("/overview");
   }
@@ -259,9 +292,10 @@ export default class DetailedDeploymentView extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #93c47d;
-$color_yellow: #f5d164;
-$color_red: #ff6666;
+$color_green: #81c784;
+$color_yellow: #fff176;
+$color_red: #e57373ed;
+$color_grey: #e0e0e0;
 $icon_size: 80px;
 
 #check_circle {
@@ -279,9 +313,8 @@ $icon_size: 80px;
   font-size: $icon_size;
 }
 
-#replay {
-  color: grey;
+#help {
+  color: $color_grey;
   font-size: $icon_size;
 }
-
 </style>

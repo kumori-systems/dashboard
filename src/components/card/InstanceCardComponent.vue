@@ -94,7 +94,7 @@ export default class InstanceCardComponent extends Vue {
         res = "error";
         break;
       default:
-        res = "replay";
+        res = "help";
     }
     return res;
   }
@@ -109,9 +109,10 @@ export default class InstanceCardComponent extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #93c47d;
-$color_yellow: #f5d164;
-$color_red: #ff6666;
+$color_green: #81c784;
+$color_yellow: #fff176;
+$color_red: #e57373ed;
+$color_grey: #e0e0e0;
 $icon_size: 30px;
 $radius: 5px;
 
@@ -130,8 +131,8 @@ $radius: 5px;
   font-size: $icon_size;
 }
 
-#replay {
-  color: grey;
+#help {
+  color: $color_grey;
   font-size: $icon_size;
 }
 

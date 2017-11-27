@@ -25,7 +25,12 @@ export default class ToolbarComponent extends Vue {
       "/elements": "Elements",
       "/domains": "Domains",
       "/addHTTPEntrypoint": "Add a http entrypoint",
-      "/addDeployment": "Add a deployment"
+      "/addDeployment": "Add a deployment",
+      "/uploadbundle": "Upload bundle",
+      "/adddomain": "Add domain",
+      "/volumes": "Volumes",
+      "/alarmsAndLogs": "Alarms and logs",
+      "/help": "Help"
     };
 
     if (!res[this.route]) {

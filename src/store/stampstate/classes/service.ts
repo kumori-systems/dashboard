@@ -31,7 +31,8 @@ export class Service extends EcloudElement {
   dependedChannels: { [channel: string]: DependedChannel } = {};
   /** <Service.Connector[]> Connections between channels in this service. */
   connectors: Connector[] = [];
-
+  /** <string[]> Actual deployments which instance the service. */
+  usedBy: string[] = [];
   /**
    * Definition of a system for the Ecloud ecosystem.
    * @param uri <string> Uniform Resource Identifier for this service.

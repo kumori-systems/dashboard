@@ -70,6 +70,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return res;
   }
 
+
+  components = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): { [uri: string]: Component } => {
+    return state.components;
+  }
+
   component = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (componentURI: string) => Component => {
     return (componentURI: string) => {
@@ -78,39 +84,37 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   componentsByOwner = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): {
+    rootGetters?: any): (searchFilter: string) => {
       [owner: string]: { [name: string]: { [version: string]: string } }
     } => {
-    let res: {
-      [owner: string]: { [name: string]: { [version: string]: string } }
-    } = {};
-    for (let uri in state.components) {
-      let [componentDomain, componentName, componentVersion] =
-        utils.getElementAtributes(uri);
+    return (searchFilter: string) => {
+      let res: {
+        [owner: string]: { [name: string]: { [version: string]: string } }
+      } = {};
+      for (let uri in state.components) {
+        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
+          let [componentDomain, componentName, componentVersion] =
+            utils.getElementAtributes(uri);
 
-      if (!res[componentDomain])
-        res[componentDomain] = {};
-      if (!res[componentDomain][componentName])
-        res[componentDomain][componentName] = {};
+          if (!res[componentDomain])
+            res[componentDomain] = {};
+          if (!res[componentDomain][componentName])
+            res[componentDomain][componentName] = {};
 
-      res[componentDomain][componentName][componentVersion] = uri;
-    }
+          res[componentDomain][componentName][componentVersion] = uri;
+        }
+      }
 
-    return res;
+      return res;
+    };
   }
 
   componentUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (componentURI: string) => Service[] => {
+    rootGetters?: any): (componentURI: string) => string[] => {
     return (componentUri: string) => {
-      let res: Service[] = [];
-      for (let uri in state.services) {
-        if (state.services[uri]) {
-          for (let r in state.services[uri].roles) {
-            if (state.services[uri].roles[r].component === componentUri) {
-              res.push(state.services[uri]);
-            }
-          }
-        }
+      let res: string[] = [];
+      if (state.components[componentUri]) {
+        res = state.components[componentUri].usedBy;
       }
       return res;
     };
@@ -138,42 +142,44 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   servicesByOwner = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): {
+    rootGetters?: any): (searchFilter: string) => {
       [owner: string]: {
         [name: string]: {
           [version: string]: string
         }
       }
     } => {
-    let res: {
-      [owner: string]: {
-        [name: string]: {
-          [version: string]: string
+    return (searchFilter: string) => {
+      let res: {
+        [owner: string]: {
+          [name: string]: {
+            [version: string]: string
+          }
+        }
+      } = {};
+      for (let uri in state.services) {
+        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
+          let [serviceDomain, serviceName, serviceVersion] =
+            utils.getElementAtributes(uri);
+
+          if (!res[serviceDomain])
+            res[serviceDomain] = {};
+          if (!res[serviceDomain][serviceName])
+            res[serviceDomain][serviceName] = {};
+
+          res[serviceDomain][serviceName][serviceVersion] = uri;
         }
       }
-    } = {};
-    for (let uri in state.services) {
-      let [serviceDomain, serviceName, serviceVersion] =
-        utils.getElementAtributes(uri);
-
-      if (!res[serviceDomain])
-        res[serviceDomain] = {};
-      if (!res[serviceDomain][serviceName])
-        res[serviceDomain][serviceName] = {};
-
-      res[serviceDomain][serviceName][serviceVersion] = uri;
-    }
-    return res;
+      return res;
+    };
   }
 
   serviceUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (serviceURI: string) => Deployment[] => {
+    rootGetters?: any): (serviceURI: string) => string[] => {
     return (serviceUri: string) => {
-      let res: Deployment[] = [];
-      for (let uri in state.deployments) {
-        if (state.deployments[uri].service === serviceUri) {
-          res.push(state.deployments[uri]);
-        }
+      let res: string[] = [];
+      if (state.services[serviceUri]) {
+        res = state.services[serviceUri].usedBy;
       }
       return res;
     };
@@ -272,7 +278,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
-
   getTotalDependedDeploymentChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURI: string,
       channelId: string) => string[] => {
@@ -335,44 +340,50 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
+  runtimes = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): { [uri: string]: Runtime } => {
+    return state.runtimes;
+  }
+
   runtimesByOwner = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): {
+    rootGetters?: any): (searchFilter: string) => {
       [owner: string]: {
         [name: string]: {
           [version: string]: string
         }
       }
     } => {
-    let res: {
-      [owner: string]: {
-        [name: string]: {
-          [version: string]: string
+    return (searchFilter: string) => {
+      let res: {
+        [owner: string]: {
+          [name: string]: {
+            [version: string]: string
+          }
+        }
+      } = {};
+      for (let uri in state.runtimes) {
+        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
+          let [runtimeDomain, runtimeName, runtimeVersion] =
+            utils.getElementAtributes(uri);
+
+          if (!res[runtimeDomain])
+            res[runtimeDomain] = {};
+          if (!res[runtimeDomain][runtimeName])
+            res[runtimeDomain][runtimeName] = {};
+
+          res[runtimeDomain][runtimeName][runtimeVersion] = uri;
         }
       }
-    } = {};
-    for (let uri in state.runtimes) {
-      let [runtimeDomain, runtimeName, runtimeVersion] =
-        utils.getElementAtributes(uri);
-
-      if (!res[runtimeDomain])
-        res[runtimeDomain] = {};
-      if (!res[runtimeDomain][runtimeName])
-        res[runtimeDomain][runtimeName] = {};
-
-      res[runtimeDomain][runtimeName][runtimeVersion] = uri;
-    }
-    return res;
+      return res;
+    };
   }
 
   runtimeUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (componentURI: string) => Component[] => {
+    rootGetters?: any): (componentURI: string) => string[] => {
     return (runtimeUri: string) => {
-      let res: Component[] = [];
-      for (let uri in state.components) {
-        if (state.components[uri]
-          && state.components[uri].runtime === runtimeUri) {
-          res.push(state.components[uri]);
-        }
+      let res: string[] = [];
+      if (state.runtimes[runtimeUri]) {
+        res = state.runtimes[runtimeUri].usedBy;
       }
       return res;
     };
