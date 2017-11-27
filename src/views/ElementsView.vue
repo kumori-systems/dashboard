@@ -35,7 +35,11 @@
                               <div>
                                 <span class="yellow">in use by component/s:</span>
                               </div>
-                              <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">{{usedBy}}</div>
+                              <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">
+                                <router-link  v-bind:to="deploymentInfo(usedBy)._path">
+                                    {{deploymentInfo(usedBy).name}}
+                                  </router-link>
+                              </div>
                             </div>
                             <div v-else>not in use</div>
                           </v-flex>
@@ -72,7 +76,11 @@
                                 <div>
                                   <span class="yellow">in use by service/s:</span>
                                 </div>
-                                <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">{{usedBy}}</div>
+                                <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">
+                                  <router-link  v-bind:to="deploymentInfo(usedBy)._path">
+                                    {{deploymentInfo(usedBy).name}}
+                                  </router-link>
+                                </div>
                             </div>
                             <div v-else>not in use</div>
                           </v-flex>
@@ -109,7 +117,11 @@
                                 <div>
                                   <span class="yellow">in use by deployment/s:</span>
                                 </div>
-                                <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">{{usedBy}}</div>
+                                <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">
+                                  <router-link  v-bind:to="deploymentInfo(usedBy)._path">
+                                    {{deploymentInfo(usedBy).name}}
+                                  </router-link>
+                                </div>
                               </div>
                               <div v-else>not in use</div>
                             </v-flex>
@@ -217,6 +229,12 @@ export default class ElementsView extends Vue {
     )
       return true;
     return false;
+  }
+
+  get deploymentInfo() {
+    return (uri: string) => {
+      return this.$store.getters.deployment(uri);
+    };
   }
 
   get componentsByOwner(): {
