@@ -73,7 +73,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
-    connection.deleteElement(elementId).catch((error) => {
+    connection.deleteElement(elementId).then(() => {
+      let action: string;
+      switch (utils.getElementType(elementId)) {
+        case utils.ElementType.component:
+          action = 'removeComponent';
+          break;
+        case utils.ElementType.service:
+          action = 'removeService';
+          break;
+        case utils.ElementType.runtime:
+          action = 'removeRuntime';
+          break;
+        default:
+          console.error('Error deleting element: Unknown type of element');
+      }
+
+      injectee.commit(action, elementId);
+    }).catch((error) => {
       console.error('Error erasing element %s', elementId, error);
     });
   }
@@ -100,9 +117,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
       killInstances).catch((error) => {
         console.error('Error modifying deployment. ',
-        deploymentId, rolNumInstances, killInstances, error);
+          deploymentId, rolNumInstances, killInstances, error);
       });
   }
+
+  addNewBundle = (injectee: Vuex.ActionContext<State, any>, params):
+    void => {
+    connection.addNewBundle(params);
+  }
+
 
   /*
   selectedService({ commit }, serviceId) {

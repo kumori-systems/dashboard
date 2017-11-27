@@ -41,20 +41,7 @@
           <v-text-field label="Resilence" v-model="rolResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
         </v-flex>
       </v-flex>
-
-      <!-- Deployment channels: Provided channels -->
-      <span v-if="selectedService && selectedService.length > 0" class="headline">Channels</span>
-      <v-flex xs5 v-for="(channel, index) in serviceProChannelList" v-bind:key="index">
-        <span class="title">{{ channel }} -&gt;</span>
-          <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalDependedDeploymentChannels(channel)" autocomplete>  </v-select>
-      </v-flex>
-
-      <!-- Deployment channels: Depended channels -->
-      <v-flex xs5 v-for="(channel, index) in serviceDepChannelList" v-bind:key="index">
-        <span class="title">{{ channel }} <-</span>
-         <v-select v-model="selectedRequiredChannel[index]" v-bind:items="totalProvidedDeploymentChannels(channel)" autocomplete>  </v-select>
-      </v-flex>
-
+    
       <!-- Deployment resources -->
       <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
       <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
@@ -100,8 +87,6 @@ export default class NewServiceView extends Vue {
   rolResilence: Array<number> = [];
   resourceConfig: Array<string> = [];
   serviceConfig: string = null;
-  selectedRequiredChannel: Array<string> = [];
-  selectedProvidedChannel: Array<string> = [];
   selectedResourceConfig: Array<string> = [];
   valid: boolean = false;
 
@@ -161,23 +146,6 @@ export default class NewServiceView extends Vue {
     return roleList;
   }
 
-  get serviceProChannelList(): Array<string> {
-    if (!this.selectedService || this.selectedService === null) return [];
-    let res = this.$store.getters.getServiceProvidedChannels(
-      this.selectedService
-    );
-    this.selectedRequiredChannel = new Array<string>(res.length);
-    return res;
-  }
-  get serviceDepChannelList(): Array<string> {
-    if (!this.selectedService || this.selectedService === null) return [];
-    let res = this.$store.getters.getServiceDependedChannels(
-      this.selectedService
-    );
-    this.selectedProvidedChannel = new Array<string>(res.length);
-    return res;
-  }
-
   get serviceResourcesList(): Array<string> {
     let resourceList = [];
     if (this.selectedService && this.selectedService !== null)
@@ -186,24 +154,6 @@ export default class NewServiceView extends Vue {
       );
     this.resourceConfig = new Array<string>(resourceList.length);
     return resourceList;
-  }
-
-  get totalProvidedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalProvidedDeploymentChannels(
-        this.selectedService,
-        channel
-      );
-    };
-  }
-
-  get totalDependedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalDependedDeploymentChannels(
-        this.selectedService,
-        channel
-      );
-    };
   }
 
   get totalResourceConfig() {
@@ -233,12 +183,6 @@ export default class NewServiceView extends Vue {
     }
     for (let index in this.resourceConfig) {
       if (this.resourceConfig[index] === undefined) return false;
-    }
-    for (let index in this.selectedRequiredChannel) {
-      if (this.selectedRequiredChannel[index] === undefined) return false;
-    }
-    for (let index in this.selectedProvidedChannel) {
-      if (this.selectedProvidedChannel[index] === undefined) return false;
     }
     return true;
   }

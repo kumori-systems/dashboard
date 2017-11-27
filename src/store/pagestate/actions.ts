@@ -73,8 +73,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         injectee.commit('finishBackgroundAction', {
           'id': loadInfoAction.id,
           'state': BackgroundAction.State.FAIL,
-          'details': 'Error loading data: ' + error
+          'details': 'Error loading data, please contact your administrator'
         });
+        console.error('Error loading data: ', error);
       });
     }).catch((error) => {
       injectee.commit('finishBackgroundAction',

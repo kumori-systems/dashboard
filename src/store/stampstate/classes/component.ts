@@ -24,7 +24,8 @@ export class Component extends EcloudElement {
    * connection.
    */
   reqChannels: { [channel: string]: Channel } = {};
-
+  /** <string[]> All services which use this component*/
+  usedBy: string[] = [];
   /**
    * Component from Ecloud ecosystem.
    * @param uri <string> Uniform Resource Identifier for this element following
