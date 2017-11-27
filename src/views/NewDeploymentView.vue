@@ -41,7 +41,11 @@
           <v-text-field label="Resilence" v-model="rolResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
         </v-flex>
       </v-flex>
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> master
       <!-- Deployment resources -->
       <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
       <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
@@ -87,8 +91,6 @@ export default class NewServiceView extends Vue {
   rolResilence: Array<number> = [];
   resourceConfig: Array<string> = [];
   serviceConfig: string = null;
-  selectedRequiredChannel: Array<string> = [];
-  selectedProvidedChannel: Array<string> = [];
   selectedResourceConfig: Array<string> = [];
   valid: boolean = false;
 
@@ -146,7 +148,7 @@ export default class NewServiceView extends Vue {
       this.rolResilence[i] = 1;
     }
     return roleList;
-  } 
+  }
 
   get serviceResourcesList(): Array<string> {
     let resourceList = [];
@@ -185,12 +187,6 @@ export default class NewServiceView extends Vue {
     }
     for (let index in this.resourceConfig) {
       if (this.resourceConfig[index] === undefined) return false;
-    }
-    for (let index in this.selectedRequiredChannel) {
-      if (this.selectedRequiredChannel[index] === undefined) return false;
-    }
-    for (let index in this.selectedProvidedChannel) {
-      if (this.selectedProvidedChannel[index] === undefined) return false;
     }
     return true;
   }

@@ -15,20 +15,31 @@ export default class Mutations implements Vuex.MutationTree<State> {
   addDeployment = (state: State,
     payload: { [uri: string]: Deployment }): void => {
     state.deployments = { ...state.deployments, ...payload };
+
+    for (let dep in state.deployments) {
+      // If the service is already in the state
+      if (state.services[state.deployments[dep].service]) {
+        state.services[state.deployments[dep].service].usedBy.push(dep);
+      }
+    }
   }
 
   /** Removes one deployment from the state */
   removeDeployment = (state: State, deploymentURI: string): void => {
-    // Unlink all services related to the deployment
-    for (let dep in state.deployments) {
-      for (let i = 0; i < state.deployments[dep].links.length; i++) {
-        if (state.deployments[dep].links[i].toDeployment === deploymentURI) {
-          state.deployments[dep].links.splice(i);
-        }
+    // remove this deployment from all domains
+    for (let dom in state.domains) {
+      let index = state.domains[dom].usedBy.indexOf(deploymentURI);
+      if (index !== -1) {
+        state.domains[dom].usedBy.splice(index, 1);
       }
     }
 
-    // Remove the deployment from the state
+    // remove this deployment from the service
+    let ser = state.deployments[deploymentURI].service;
+    let index = state.services[ser].usedBy.indexOf(deploymentURI);
+    state.services[ser].usedBy.splice(index, 1);
+
+    /// remove this deployment from the state
     Vue.delete(state.deployments, deploymentURI);
   }
 
@@ -44,36 +55,101 @@ export default class Mutations implements Vuex.MutationTree<State> {
       .roles[payload.roleId].instances, payload.instanceId, payload.instance);
   }
 
-
   /** Adds one or more services to the state */
   addService = (state: State,
     payload: { [uri: string]: Service }): void => {
+
+    // for each service we add
+    for (let ser in payload) {
+      if (payload[ser]) {
+        // if any deployment is using this service, advice it
+        for (let dep in state.deployments) {
+          if (
+            state.deployments[dep].service === ser
+            && payload[ser].usedBy.indexOf(dep) < 0 
+          ) {
+            payload[ser].usedBy.push(dep);
+          }
+        }
+      }
+    }
+
+    // add services to the state
     state.services = { ...state.services, ...payload };
   }
 
   /** Removes one service from the state */
   removeService = (state: State, serviceURI: string): void => {
+    // This service wont be removed if any deployment is using it
+
+    // Remove this service from the state
     Vue.delete(state.services, serviceURI);
   }
 
   /** Adds one or more components to the state */
   addComponent = (state: State,
     payload: { [uri: string]: Component }): void => {
+
+    // for each component we add
+    for (let comp in payload) {
+
+      // if any deployment is using this component, advice it
+      for (let serv in state.services) {
+        for (let role in state.services.roles) {
+          if (state.services[serv].roles[role].component === comp) {
+            for (let dep in state.services[serv].usedBy) {
+              if (payload[comp].usedBy.indexOf(dep) < 0 ) {
+                payload[comp].usedBy.push(dep);
+              }
+            }
+          }
+        }
+      }
+    }
+
     state.components = { ...state.components, ...payload };
   }
 
   /** Removes one component from the state */
   removeComponent = (state: State, componentURI: string): void => {
+    /*
+      When a component is erased from the state, all deployments using it
+      are previously undeployed
+    */
+
+    // Remove component from the state
     Vue.delete(state.components, componentURI);
   }
 
   /** Adds one or more runtimes to the state */
   addRuntime = (state: State, payload: { [uri: string]: Runtime }): void => {
+    // Check for all components using this runtime
+    for (let runt in payload) {
+
+      // If any component is using this runtime, advice it
+      for (let comp in state.components) {
+        if (state.components[comp] && state.components[comp].runtime === runt) {
+          for (let dep in state.components[comp].usedBy) {
+            if (payload[runt].usedBy.indexOf(dep) < 0 ) {
+              payload[runt].usedBy.push(dep);
+            }
+          }
+        }
+      }
+    }
+
+    // Add runtimes to the state
     state.runtimes = { ...state.runtimes, ...payload };
   }
 
   /** Removes one runtime from the state */
   removeRuntime = (state: State, runtimeURI: string): void => {
+    /*
+      All components which are using this runtime must be removed before this
+      runtime can be removed
+    */
+
+    // Remove runtime from the state
     Vue.delete(state.runtimes, runtimeURI);
   }
 
@@ -119,10 +195,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   }) => {
     for (let deploymentId in metricBundle) { // This will only happen once
-      state.deployments[deploymentId].metrics
-        .push([metricBundle[deploymentId].data.timestamp,
+      if (state.deployments[deploymentId]) {
+        state.deployments[deploymentId].metrics.push([metricBundle[deploymentId]
+          .data.timestamp,
         metricBundle[deploymentId]
         ]);
+      }
     }
   }
 };

@@ -3,9 +3,21 @@ import * as moment from 'moment';
 const color = {
   cpu: '#ff0400',
   memory: '#ffec00',
-  bandwidth_input: '#00ecff',
-  bandwidth_output: '#1300ff'
+  bandwith_input: '#0000ff',
+  bandwith_output: '#228B22',
+  http_requests_per_second: '#ff3333',
+  http_errors_per_second: '#ffa533',
+  http_size_in_per_second: '#fcff33',
+  http_size_out_per_second: '#bce26c',
+  http_chunk_in_per_second: '#3cff33',
+  http_chunk_out_per_second: '#33fff9',
+  http_response_time: '#337aff',
+  ws_size_in_per_second: '#b833ff',
+  ws_size_out_per_second: '#ff33ff'
 };
+
+console.warn('bandwith_input and bandwith_output typo');
+
 export function prepareData(data) {
   var res = {
     labels: [],
