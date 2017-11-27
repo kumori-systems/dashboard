@@ -19,6 +19,16 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Removes one deployment from the state */
   removeDeployment = (state: State, deploymentURI: string): void => {
+    // Unlink all services related to the deployment
+    for (let dep in state.deployments) {
+      for (let i = 0; i < state.deployments[dep].links.length; i++) {
+        if (state.deployments[dep].links[i].toDeployment === deploymentURI) {
+          state.deployments[dep].links.splice(i);
+        }
+      }
+    }
+
+    // Remove the deployment from the state
     Vue.delete(state.deployments, deploymentURI);
   }
 
@@ -115,6 +125,4 @@ export default class Mutations implements Vuex.MutationTree<State> {
         ]);
     }
   }
-
-
 };
