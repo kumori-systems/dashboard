@@ -239,18 +239,15 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   applyChanges(): void {
-    this.haveChanges = false;
-    // Enviamos los valores que han cambiado
-    //  rolNumInstances
-    //  killInstances
+    // Send changes to the stamp
     this.$store.dispatch("aplyingChangesToDeployment", {
       deploymentId: this.deployment._uri,
       rolNumInstances: this.rolNumInstances,
       killInstances: this.instanceKill
     });
 
-    this.cancelChanges(); // TODO: This won't be needed when the change
-    //functionaliti is available
+    // Marc as there are no changes
+    this.haveChanges = false;
   }
 
   cancelChanges(): void {
