@@ -225,14 +225,17 @@ $color_blue: #64b5f6;
 $icon_size: 40px;
 
 #check_circle {
+  color: $color_green;
   font-size: $icon_size;
 }
 
 #warning {
+  color: $color_yellow;
   font-size: $icon_size;
 }
 
 #error {
+  color: $color_red;
   font-size: $icon_size;
 }
 
