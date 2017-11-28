@@ -1,8 +1,14 @@
 <template>
     <v-container fluid id="overview-view">
-        <!-- Deployments found -->
+      <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
+        <!-- EntryPoint Deployments -->
+        <v-layout row wrap v-if="showEntrypoints">
+            <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+        </v-layout>
+
+        <!-- No EntryPoint Deployments -->
         <v-layout row wrap v-if="numDeployments > 0">
-            <deployment-card-component v-for="(deployment, deploymentURI) in deployments" v-bind:key="deploymentURI" v-bind:deploymentURI="deploymentURI"></deployment-card-component>
+            <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
         </v-layout>
 
         <!-- No deployments found -->
@@ -18,7 +24,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
-import { Deployment } from "../store/stampstate/classes";
+import { Deployment, EntryPoint } from "../store/stampstate/classes";
 
 import { DeploymentCardComponent } from "../components";
 
@@ -29,6 +35,7 @@ import { DeploymentCardComponent } from "../components";
   }
 })
 export default class OverviewView extends Vue {
+  showEntrypoints:boolean = true;
   /**
      * Obtains actual number of deployments.
      * @return <number> actual number of deployments.
@@ -45,6 +52,14 @@ export default class OverviewView extends Vue {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [uri: string]: Deployment;
     };
+  }
+
+  get orderedDeploymentURN(): string[] {
+    return this.$store.getters.orderedDeploymentURN;
+  }
+
+  isEntrypoint(deployment){
+    return deployment instanceof EntryPoint;
   }
 }
 </script>
