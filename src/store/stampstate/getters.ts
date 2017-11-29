@@ -34,7 +34,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     });
 
     for (let dep in state.deployments) {
-      pq.add({
+      pq.push({
         'name': state.deployments[dep].name,
         '_uri': state.deployments[dep]._uri
       });
@@ -42,9 +42,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
     let res: string[] = [];
 
-    pq.forEach((value) => {
-      res.push(value['_uri']);
-    });
+    while (pq.size() > 0) {
+      res.push(pq.pop()['_uri']);
+    }
+
 
     return res;
   }
