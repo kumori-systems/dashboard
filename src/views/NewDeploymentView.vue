@@ -41,7 +41,7 @@
           <v-text-field label="Resilence" v-model="rolResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
         </v-flex>
       </v-flex>
-    
+      
       <!-- Deployment resources -->
       <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
       <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">

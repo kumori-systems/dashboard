@@ -32,7 +32,15 @@ export abstract class EcloudElement {
       if (!URI) throw new Error();
       let splitted = URI.split('/');
       // Check two first static pieces
-      if (splitted[0] !== 'eslap:' || splitted[1] !== '') throw new Error();
+      if (
+        (splitted[0] !== 'eslap:' && splitted[0] !== 'slap:')
+        || splitted[1] !== ''
+      ) throw new Error();
+      
+      if (splitted[0] !== 'slap:') {
+        console.warn('deprecated protocol slap: at %s', URI);
+      }
+
       // Save domain
       this._domain = splitted[2];
       // Save type

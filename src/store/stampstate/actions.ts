@@ -105,15 +105,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }):
     void => {
 
-    console.debug('El deployment que estamos intentando cambiar es ',
-      deploymentId);
-
-    console.debug('Num instancias rol: ',
-      rolNumInstances);
-
-    console.debug('Kill instances: ',
-      killInstances);
-
     connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
       killInstances).catch((error) => {
         console.error('Error modifying deployment. ',
@@ -125,7 +116,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     void => {
     connection.addNewBundle(params);
   }
-
 
   /*
   selectedService({ commit }, serviceId) {

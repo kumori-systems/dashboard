@@ -1,6 +1,6 @@
 <template>
     <v-container fluid id="overview-view">
-        <!-- Deployments found -->
+        <!-- Deployments Found -->
         <v-layout row wrap v-if="numDeployments > 0">
             <deployment-card-component v-for="(deployment, deploymentURI) in deployments" v-bind:key="deploymentURI" v-bind:deploymentURI="deploymentURI"></deployment-card-component>
         </v-layout>
