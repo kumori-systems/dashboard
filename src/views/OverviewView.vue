@@ -41,25 +41,38 @@ export default class OverviewView extends Vue {
   showEntrypoints: boolean = true;
 
   /**
-     * Obtains actual number of deployments.
-     * @return <number> actual number of deployments.
-     */
+    * Obtains actual number of deployments.
+    * @return <number> actual number of deployments.
+    */
   get numDeployments(): number {
     return ((<SSGetters>this.$store.getters).numDeployments as any) as number;
   }
 
   /**
-     * Obtains all deployments stored in the state.
-     * @return <{ [uri: string]: Deployment }> all deployments stored in the state.
-     */
+    * Obtains all deployments stored in the state.
+    * @return <{ [uri: string]: Deployment }> all deployments stored in the
+    * state.
+    */
   get deployments(): { [uri: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [uri: string]: Deployment;
     };
   }
 
+  /**
+   * Checks if a deployment is EntryPoint or not.
+   * @return true if entrypoint.
+   */
   isEntrypoint(deployment) {
     return deployment instanceof EntryPoint;
+  }
+
+  /**
+   * Gets the deployment URIs ordered by deployment name.
+   * @return <string[]> array with deployment uris ordered by deployment name
+   */
+  get orderedDeploymentURN(): string[] {
+    return this.$store.getters.orderDeploymentsByName;
   }
 }
 </script>
