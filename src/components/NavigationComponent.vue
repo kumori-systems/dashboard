@@ -79,7 +79,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import { NavigationItem, User, Notification } from "../store/pagestate/classes";
 import PSGetters from "../store/pagestate/getters";
-import { Deployment, EntryPoint } from "../store/stampstate/classes";
+import { Deployment } from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
@@ -137,37 +137,17 @@ export default class NavigationComponent extends Vue {
      * Services deployed to show in the menu.
      */
   get deployedServices(): NavigationItem[] {
-    let entrypoint: NavigationItem[] = [];
-    let commonDeployments: NavigationItem[] = [];
+    let res: NavigationItem[] = [];
     let deployments = ((<SSGetters>this.$store.getters).deployments as any) as {
       [uri: string]: Deployment;
     };
-
-    let i: number;
-    for (i = 0; i < this.orderedDeploymentURN.length; i++) {
-      if (deployments[this.orderedDeploymentURN[i]] instanceof EntryPoint) {
-        entrypoint.push(
-          new NavigationItem(
-            null,
-            deployments[this.orderedDeploymentURN[i]].name,
-            deployments[this.orderedDeploymentURN[i]]._path
-          )
-        );
-      } else {
-        commonDeployments.push(
-          new NavigationItem(
-            null,
-            deployments[this.orderedDeploymentURN[i]].name,
-            deployments[this.orderedDeploymentURN[i]]._path
-          )
-        );
-      }
+    for (let uri in deployments) {
+      res.push(
+        new NavigationItem(null, deployments[uri].name, deployments[uri]._path)
+      );
     }
-    return entrypoint.concat(commonDeployments);
-  }
 
-  get orderedDeploymentURN(): string[] {
-    return this.$store.getters.orderedDeploymentURN;
+    return res;
   }
 }
 </script>

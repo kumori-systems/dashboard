@@ -1,4 +1,3 @@
-import PriorityQueue from 'priorityqueue';
 import Vuex from 'vuex';
 import State from './state';
 
@@ -17,31 +16,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   deployments = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [uri: string]: Deployment } => {
     return state.deployments;
-  }
-
-  orderedDeploymentURN = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): string[] => {
-
-    let pq: PriorityQueue = new PriorityQueue({
-      comparator: (a, b) => {
-        return a.name < b.name ? 1 : -1;
-      }
-    });
-
-    for (let dep in state.deployments) {
-      pq.add({
-        'name': state.deployments[dep].name,
-        '_uri': state.deployments[dep]._uri
-      });
-    }
-
-    let res: string[] = [];
-
-    pq.forEach((value) => {
-      res.push(value['_uri']);
-    });
-
-    return res;
   }
 
   deployment = (state?: State, getters?: Getters, rootState?: any,
