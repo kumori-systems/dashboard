@@ -1,6 +1,5 @@
 <template>
     <v-container fluid id="overview-view">
-      <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
         <!-- Deployments Found -->
         <v-layout row wrap v-if="numDeployments > 0">
             <deployment-card-component v-for="(deployment, deploymentURI) in deployments" v-bind:key="deploymentURI" v-bind:deploymentURI="deploymentURI"></deployment-card-component>
@@ -30,7 +29,6 @@ import { DeploymentCardComponent } from "../components";
   }
 })
 export default class OverviewView extends Vue {
-  showEntrypoints:boolean = true;
   /**
      * Obtains actual number of deployments.
      * @return <number> actual number of deployments.
