@@ -4,9 +4,9 @@
     <!-- Card's background represents the deployment's state -->
     <v-card>
       <!-- Card title: Deployment name -->
-      <v-card-title primary-title class="headline" v-bind:class="stateColor">   
-        {{ deployment.name }}
-      <v-spacer></v-spacer>
+      <v-card-title primary-title class="headline" v-bind:class="stateColor">
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint">input</v-icon>{{ deployment.name }}
+        <v-spacer></v-spacer>
 
       <v-tooltip bottom>
         <span dark slot="activator">{{ deployment._uri | truncateLeft(8)}}</span>

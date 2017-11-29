@@ -147,7 +147,7 @@ export default class NavigationComponent extends Vue {
       if (deployments[this.orderedDeploymentURN[i]] instanceof EntryPoint) {
         entrypoint.push(
           new NavigationItem(
-            null,
+            "input",
             deployments[this.orderedDeploymentURN[i]].name,
             deployments[this.orderedDeploymentURN[i]]._path
           )
