@@ -3,7 +3,7 @@
       <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
         <!-- Deployments Found -->
         <v-layout row wrap v-if="numDeployments > 0">
-            <deployment-card-component v-for="uri in orderedDeploymentURN" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+            <deployment-card-component v-for="(deployment, deploymentURI) in deployments" v-bind:key="deploymentURI" v-bind:deploymentURI="deploymentURI"></deployment-card-component>
         </v-layout>
 
         <!-- No deployments found -->
@@ -47,10 +47,6 @@ export default class OverviewView extends Vue {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [uri: string]: Deployment;
     };
-  }
-
-  get orderedDeploymentURN(): string[] {
-    return this.$store.getters.orderedDeploymentURN;
   }
 }
 </script>

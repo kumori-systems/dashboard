@@ -146,7 +146,6 @@ export default class NavigationComponent extends Vue {
         new NavigationItem(null, deployments[uri].name, deployments[uri]._path)
       );
     }
-
     return res;
   }
 }
