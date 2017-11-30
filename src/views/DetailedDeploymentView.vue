@@ -43,12 +43,6 @@
                 </v-flex>
               </v-layout>
 
-
-              <!-- For each channel -->
-
-              <v-select label="Links" v-model="selectedDomain" v-bind:items="domains" autocomplete></v-select>
-
-
             </v-flex>
 
             <v-spacer></v-spacer>
