@@ -1,6 +1,8 @@
 import Vuex from 'vuex';
 import State from './state';
 
+import PriorityQueue from 'priorityqueue';
+
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
@@ -17,6 +19,37 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any): { [uri: string]: Deployment } => {
     return state.deployments;
   }
+
+  /**
+   * Gets the deployment uris ordered by their names.
+   * @returns <string[]> array of the uris ordered by deployment name
+  */
+  orderDeploymentsByName = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): string[] => {
+
+    let pq: PriorityQueue = new PriorityQueue({
+      comparator: (a, b) => {
+        return a.name < b.name ? 1 : -1;
+      }
+    });
+
+    for (let dep in state.deployments) {
+      pq.push({
+        'name': state.deployments[dep].name,
+        '_uri': state.deployments[dep]._uri
+      });
+    }
+
+    let res: string[] = [];
+
+    while (pq.size() > 0) {
+      res.push(pq.pop()['_uri']);
+    }
+
+
+    return res;
+  }
+
 
   deployment = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (deploymentURI: string) => Deployment => {

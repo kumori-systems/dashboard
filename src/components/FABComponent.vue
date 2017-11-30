@@ -28,7 +28,7 @@ export default class FABComponent extends Vue {
       bgColor: "blue",
       fabActions: [
         {
-          icon: "input",
+          icon: "language",
           to: "/addHTTPEntrypoint"
         },
         {

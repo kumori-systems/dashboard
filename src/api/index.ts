@@ -182,7 +182,7 @@ class ProxyConnection extends EventEmitter {
                     ) // Deployment
                   );
                 }
-
+                this.getDeployment(event.entity['service']);
                 break;
               case EcloudEventName.undeploying:
                 this.emit(this.onRemoveDeploymemt, event.entity['service']);
@@ -192,9 +192,7 @@ class ProxyConnection extends EventEmitter {
               case EcloudEventName.status:
               case EcloudEventName.undeployed:
               case EcloudEventName.unlink:
-
                 // TODO
-
                 break;
               default:
                 console.error('Not espected ecloud event name: ' + event.strType
@@ -433,9 +431,7 @@ class ProxyConnection extends EventEmitter {
               deployment.resourcesConfig[resource]);
           }
         }
-
         this.emit(this.onAddDeployment, deploymentId, deployment);
-
       }
     });
   }
@@ -448,10 +444,7 @@ class ProxyConnection extends EventEmitter {
             .transformEcloudDeploymentToDeployment(deploymentList[deploymentId])
         );
       }
-
     });
-
-
   }
 
   undeployDeployment(deploymentURN: string) {

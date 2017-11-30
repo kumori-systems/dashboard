@@ -79,7 +79,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import { NavigationItem, User, Notification } from "../store/pagestate/classes";
 import PSGetters from "../store/pagestate/getters";
-import { Deployment } from "../store/stampstate/classes";
+import { Deployment, EntryPoint } from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
@@ -87,37 +87,37 @@ import SSGetters from "../store/stampstate/getters";
 })
 export default class NavigationComponent extends Vue {
   /**
-     * User properties.
-     */
+    * User properties.
+    */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
   }
 
   /**
-     * Getter for showing or hinding this component.
-     */
+    * Getter for showing or hinding this component.
+    */
   get showNavigation(): Boolean {
     return ((<PSGetters>this.$store.getters).showNavigation as any) as boolean;
   }
 
   /**
-     * Setter for showing or hinding this component.
-     */
+    * Setter for showing or hinding this component.
+    */
   set showNavigation(value) {
     this.$store.dispatch("showNavigation", value);
   }
 
   /**
-     * Gets user's notifications.
-     */
+    * Gets user's notifications.
+    */
   get notifications(): Notification[] {
     return ((<PSGetters>this.$store.getters)
       .notifications as any) as Notification[];
   }
 
   /**
-     * Items in the navigation component.
-     */
+    * Items in the navigation component.
+    */
   items: NavigationItem[] = [
     new NavigationItem("dashboard", "Overview", "/overview"),
     new NavigationItem(
@@ -134,19 +134,42 @@ export default class NavigationComponent extends Vue {
   ];
 
   /**
-     * Services deployed to show in the menu.
-     */
+    * Services deployed to show in the menu.
+    */
   get deployedServices(): NavigationItem[] {
-    let res: NavigationItem[] = [];
+    let entrypoint: NavigationItem[] = [];
+    let commonDeployments: NavigationItem[] = [];
     let deployments = ((<SSGetters>this.$store.getters).deployments as any) as {
       [uri: string]: Deployment;
     };
-    for (let uri in deployments) {
-      res.push(
-        new NavigationItem(null, deployments[uri].name, deployments[uri]._path)
-      );
+    let i: number;
+    for (i = 0; i < this.orderedDeploymentURN.length; i++) {
+      if (deployments[this.orderedDeploymentURN[i]] instanceof EntryPoint) {
+        entrypoint.push(
+          new NavigationItem(
+            "input",
+            deployments[this.orderedDeploymentURN[i]].name,
+            deployments[this.orderedDeploymentURN[i]]._path
+          )
+        );
+      } else {
+        commonDeployments.push(
+          new NavigationItem(
+            null,
+            deployments[this.orderedDeploymentURN[i]].name,
+            deployments[this.orderedDeploymentURN[i]]._path
+          )
+        );
+      }
     }
-    return res;
+    return entrypoint.concat(commonDeployments);
+  }
+
+  /**
+    * Returns all deployment urn ordered by deployment name
+    */
+  get orderedDeploymentURN(): string[] {
+    return this.$store.getters.orderDeploymentsByName;
   }
 }
 </script>

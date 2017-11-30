@@ -4,12 +4,12 @@
     <!-- Card's background represents the deployment's state -->
     <v-card>
       <!-- Card title: Deployment name -->
-      <v-card-title primary-title class="headline" v-bind:class="stateColor">   
-        {{ deployment.name }}
-      <v-spacer></v-spacer>
+      <v-card-title primary-title class="headline" v-bind:class="stateColor">
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>{{ deployment.name }}
+        <v-spacer></v-spacer>
 
       <v-tooltip bottom>
-        <span dark slot="activator">{{ deployment._uri | truncateLeft(8)}}</span>
+        <span dark slot="activator">{{ deployment._uri | truncateLeft(8) }}</span>
         <span>{{deployment._uri}}</span>
       </v-tooltip>
   
@@ -35,7 +35,7 @@
                     <v-icon></v-icon>
                   </v-card-actions>
                   <v-list-tile-title>
-                    {{ deployment._uri |day }}-{{ deployment._uri |month }}-{{ deployment._uri |year }}  {{ deployment._uri |hour }}:{{ deployment._uri |min }}
+                    {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
                   </v-list-tile-title>
                 </v-list-tile>
             </template>
@@ -50,7 +50,7 @@
                 <v-list-tile-title>
                   <v-tooltip bottom>
                     <span dark slot="activator">  {{ deployment.service }}</span>
-                    <span>{{deployment.service}}</span>
+                    <span>{{ deployment.service }}</span>
                   </v-tooltip>
                 </v-list-tile-title>
               </v-list-tile>
@@ -68,7 +68,7 @@
                   <v-list-tile-sub-title>
                     <v-tooltip bottom>
                       <span dark slot="activator">{{ rol.component }}</span>
-                      <span>{{rol.component}}</span>
+                      <span>{{ rol.component }}</span>
                     </v-tooltip>
                   </v-list-tile-sub-title>
                 </v-list-tile-content>

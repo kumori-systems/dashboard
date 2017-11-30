@@ -21,7 +21,7 @@
               <v-layout row wrap>
                 <v-flex ma-1 xs12>
                   <p><span class="subheading">Date:</span>
-                  {{ deployment._uri |day }}-{{ deployment._uri |month }}-{{ deployment._uri |year }}  {{ deployment._uri |hour }}:{{ deployment._uri |min }}
+                  {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
                   </p>
                 </v-flex>
               </v-layout>
