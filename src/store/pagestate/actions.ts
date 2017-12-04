@@ -110,7 +110,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       // connection.getDeployment()
     });
 
-    connection.onRemoveDeploymemt((deploymentId) => {
+    connection.onRemoveDeployment((deploymentId) => {
       injectee.commit('removeDeployment', deploymentId);
     });
 
