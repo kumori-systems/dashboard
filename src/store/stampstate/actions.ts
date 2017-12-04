@@ -17,10 +17,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   getElementInfo = (injectee: Vuex.ActionContext<State, any>,
     elementURI: string): void => {
-
+    // Obtain the element in the state
     let res: any = undefined;
-    let type: utils.ElementType = utils.getElementType(elementURI);
-    switch (type) {
+    switch (utils.getElementType(elementURI)) {
       case utils.ElementType.runtime:
         res = injectee.state.runtimes[elementURI];
         break;
@@ -48,10 +47,17 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
         break;
       default:
-        console.error('Element type not covered %s', type);
+        console.error('Unkown element type at %s', elementURI);
     }
-    if (!res)
-      connection.getElementInfo(elementURI);
+
+    // If the element isn't stored in the state, info is requested to the
+    // platform
+    if (!res) {
+      connection.getElementInfo(elementURI).catch((error) => {
+        console.error('Error getting info from element %s', elementURI, error);
+      });
+    }
+
   }
 
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
