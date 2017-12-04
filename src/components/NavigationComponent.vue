@@ -118,20 +118,22 @@ export default class NavigationComponent extends Vue {
   /**
     * Items in the navigation component.
     */
-  items: NavigationItem[] = [
-    new NavigationItem("dashboard", "Overview", "/overview"),
-    new NavigationItem(
-      "cloud",
-      "Deployed services",
-      "deployment",
-      this.deployedServices
-    ),
-    new NavigationItem("widgets", "Elements", "/elements"),
-    new NavigationItem("domain", "Domains", "/domains"),
-    new NavigationItem("storage", "Data volumes", "/volumes"),
-    new NavigationItem("alarm", "Alarms & logs", "/alarmsAndLogs"),
-    new NavigationItem("help", "Help", "/help")
-  ];
+  get items(): NavigationItem[] {
+    return [
+      new NavigationItem("dashboard", "Overview", "/overview"),
+      new NavigationItem(
+        "cloud",
+        "Deployed services",
+        "deployment",
+        this.deployedServices
+      ),
+      new NavigationItem("widgets", "Elements", "/elements"),
+      new NavigationItem("domain", "Domains", "/domains"),
+      new NavigationItem("storage", "Data volumes", "/volumes"),
+      new NavigationItem("alarm", "Alarms & logs", "/alarmsAndLogs"),
+      new NavigationItem("help", "Help", "/help")
+    ];
+  }
 
   /**
     * Services deployed to show in the menu.

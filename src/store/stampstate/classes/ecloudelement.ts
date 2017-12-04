@@ -37,7 +37,7 @@ export abstract class EcloudElement {
         || splitted[1] !== ''
       ) throw new Error();
       
-      if (splitted[0] !== 'slap:') {
+      if (splitted[0] === 'slap:') {
         console.warn('deprecated protocol slap: at %s', URI);
       }
 

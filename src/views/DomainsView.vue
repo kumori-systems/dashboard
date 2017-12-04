@@ -43,6 +43,12 @@ import { Domain } from "../store/stampstate/classes";
 export default class DomainsView extends Vue {
   dialog: boolean = false;
   selectedDomain: string = null;
+
+  // Modal Arguments
+  deleteModalIsVisible: boolean = false;
+  modalElementId: string = "";
+  modalElementName: string = "";
+
   headers: any[] = [
     {
       text: "Domain",
@@ -64,11 +70,6 @@ export default class DomainsView extends Vue {
     }
   ];
 
-  // Modal Arguments
-  deleteModalIsVisible: boolean = false;
-  modalElementId: string = "";
-  modalElementName: string = "";
-
   get domains(): Domain[] {
     let domains: Domain[] = [];
     for (let domainId in this.$store.getters.domains) {
@@ -80,12 +81,13 @@ export default class DomainsView extends Vue {
     }
     return domains;
   }
-  showDialog(domainURI) {
+
+  showDialog(domainURI): void {
     this.dialog = true;
     this.selectedDomain = domainURI;
   }
 
-  deleteDomain() {
+  deleteDomain(): void {
     this.$store.dispatch("deleteElement", this.selectedDomain);
     this.dialog = false;
   }

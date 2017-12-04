@@ -1,25 +1,28 @@
 <template>
-    <v-container fluid id="overview-view">
+  <v-container fluid id="overview-view">
+    <template v-if="numDeployments > 0">
       <!-- Show/Hide Entrypoints -->
-      <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
+    <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
 
-        <!-- EntryPoint Deployments -->
-        <v-layout row wrap v-if="showEntrypoints">
-            <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+      <!-- EntryPoint Deployments -->
+      <v-layout row wrap v-if="showEntrypoints">
+          <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+      </v-layout>
+
+      <!-- No EntryPoint Deployments -->
+        <v-layout row wrap>
+          <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
         </v-layout>
 
-        <!-- No EntryPoint Deployments -->
-          <v-layout row wrap v-if="numDeployments > 0">
-            <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
-          </v-layout>
-
-        <!-- No deployments found -->
-        <v-layout v-else wrap>
-            <!-- Bief tutorial of how recognize a disconnected deployment -->
-            <!-- Bief tutorial of how to create a deployment -->
-            Start making some deployments
-        </v-layout>
-    </v-container>
+      <!-- No deployments found -->
+    </template>
+    
+    <v-layout v-else wrap>
+        <!-- Bief tutorial of how recognize a disconnected deployment -->
+        <!-- Bief tutorial of how to create a deployment -->
+        Start making some deployments
+    </v-layout>
+  </v-container>
 </template>
 <script lang="ts">
 import Vue from "vue";
