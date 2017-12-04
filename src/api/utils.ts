@@ -6,6 +6,7 @@ import {
   Domain, FullConnector, HTTPEntryPoint, LoadBalancerConnector, ProvidedChannel,
   PublishSubscribeConnector, Resource, Runtime, Service, Volume
 } from '../store/stampstate/classes';
+
 export function transformEcloudDeploymentToDeployment(
   ecloudDeployment: EcloudDeployment) {
 
@@ -32,8 +33,6 @@ export function transformEcloudDeploymentToDeployment(
       );
     }
 
-
-
     roles[rolId] = new Deployment.Role(
       rolId, // name
       ecloudDeployment.roles[rolId].component, // component
@@ -53,8 +52,13 @@ export function transformEcloudDeploymentToDeployment(
     );
   }
 
-  let resourcesConfig: { [resource: string]: any } = ecloudDeployment.resources;
-  
+  let resourcesConfig: { [resource: string]: any } = {};
+  // ecloudDeployment.resources;
+  for (let res in ecloudDeployment.resources) {
+    console.debug('resource: %s: ', res, ecloudDeployment.resources[res]);
+  }
+
+
   let parameters: any = {};
 
   let links: Array<Deployment.Link> = [];
@@ -611,7 +615,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
 export enum ElementType { deployment, service, runtime, component, resource }
 
 export function getElementType(uri: string): ElementType {
-  let res: ElementType;
+  let res: ElementType = null;
 
   let splitted = uri.split('/');
 
@@ -623,7 +627,7 @@ export function getElementType(uri: string): ElementType {
   // realocated to the left
   switch (splitted[i]) {
     case 'runtime':
-      console.warn('deprecated element type \'runtime\'');
+      console.warn('deprecated element type \'runtime\': %s', uri);
     case 'runtimes':
       res = ElementType.runtime;
       break;
@@ -637,7 +641,7 @@ export function getElementType(uri: string): ElementType {
       res = ElementType.resource;
       break;
     default:
-      console.info('Element type not covered', uri);
+      console.error('Unknown element type', uri);
   }
   return res;
 }
@@ -653,7 +657,7 @@ export function getResourceType(uri: string): ResourceType {
   // realocated to the left
   switch (splitted[i]) {
     case 'volume':
-      console.warn('deprecated type of resource \'volume\'');
+      console.warn('deprecated resource type \'volume\': %s', uri);
     case 'volumes':
       res = ResourceType.volume;
       break;

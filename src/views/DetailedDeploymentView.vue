@@ -266,11 +266,6 @@ export default class DetailedDeploymentView extends Vue {
     this.$router.push("/overview");
   }
 
-  handleUndeploy(payload): void {
-    this.$store.dispatch("undeployDeployment", payload);
-    this.$router.go(-1);
-  }
-
   handleKillInstanceChange(payload) {
     this.haveChanges = true;
     let tempRol, tempInst, value;
