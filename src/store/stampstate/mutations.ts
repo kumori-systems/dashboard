@@ -17,7 +17,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     for (let dep in payload) {
       let serv = payload[dep].service;
-      
+
       // If the service is already in the state, it's marked as usedby
       if (state.services[serv]) {
         state.services[serv].usedBy.push(dep);
@@ -126,10 +126,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Removes one component from the state */
   removeComponent = (state: State, componentURI: string): void => {
-    /*
-      When a component is erased from the state, all deployments using it
-      are previously undeployed
-    */
+    // When a component is erased from the state, all deployments using it
+    // are previously undeployed
 
     // Remove component from the state
     Vue.delete(state.components, componentURI);
@@ -158,10 +156,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Removes one runtime from the state */
   removeRuntime = (state: State, runtimeURI: string): void => {
-    /*
-      All components which are using this runtime must be removed before this
-      runtime can be removed
-    */
+    //  All components which are using this runtime must be removed before this
+    //  runtime can be removed
 
     // Remove runtime from the state
     Vue.delete(state.runtimes, runtimeURI);
@@ -210,10 +206,19 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }) => {
     for (let deploymentId in metricBundle) { // This will only happen once
       if (state.deployments[deploymentId]) {
-        state.deployments[deploymentId].metrics.push([metricBundle[deploymentId]
-          .data.timestamp,
-        metricBundle[deploymentId]
+        state.deployments[deploymentId].metrics.push([
+          metricBundle[deploymentId].data.timestamp,
+          metricBundle[deploymentId]
         ]);
+      }
+
+      // If we receive metrics from an instance, it means the instance is
+      // connected
+      for (let role in metricBundle[deploymentId].roles) {
+        for (let inst in metricBundle[deploymentId].roles[role].instances) {
+          state.deployments[deploymentId].roles[role].instances[inst].state =
+            Deployment.Role.Instance.STATE.CONNECTED;
+        }
       }
     }
   }
