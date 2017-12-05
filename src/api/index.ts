@@ -388,22 +388,22 @@ class ProxyConnection extends EventEmitter {
       for (let deploymentId in deploymentList) {
         let deployment: Deployment = utils.
           transformEcloudDeploymentToDeployment(
-          deploymentList[deploymentId]
+            deploymentList[deploymentId]
           );
 
         for (let resource in deployment.resourcesConfig) {
           // There are actually two certificates which dont have the same
           // structure
-          if (deployment.resourcesConfig[resource].resource.name) {
+
+          if (deployment.resourcesConfig[resource].name) {
             switch (utils
-              .getResourceType(deployment.resourcesConfig[resource]
-                .resource.name)) {
+              .getResourceType(deployment.resourcesConfig[resource].name)) {
               case utils.ResourceType.certificate:
                 this.emit(
                   this.onAddResource,
-                  deployment.resourcesConfig[resource].resource.name,
+                  deployment.resourcesConfig[resource].name,
                   new Certificate(
-                    deployment.resourcesConfig[resource].resource.name,
+                    deployment.resourcesConfig[resource].name,
                     [deployment._uri]
                   )
                 );
@@ -411,11 +411,10 @@ class ProxyConnection extends EventEmitter {
               case utils.ResourceType.domain:
                 this.emit(
                   this.onAddResource,
-                  deployment.resourcesConfig[resource].resource.name,
+                  deployment.resourcesConfig[resource].name,
                   new Domain(
-                    deployment.resourcesConfig[resource].resource.name,
-                    deployment.resourcesConfig[resource].resource.parameters
-                      .vhost,
+                    deployment.resourcesConfig[resource].name,
+                    deployment.resourcesConfig[resource].parameters.vhost,
                     Domain.STATE.SUCCESS,
                     [deployment._uri]
                   )
@@ -424,9 +423,9 @@ class ProxyConnection extends EventEmitter {
               case utils.ResourceType.volume:
                 this.emit(
                   this.onAddResource,
-                  deployment.resourcesConfig[resource].resource.name,
+                  deployment.resourcesConfig[resource].name,
                   new Volume(
-                    deployment.resourcesConfig[resource].resource.name,
+                    deployment.resourcesConfig[resource].name,
                     [deployment._uri]
                   )
                 );
