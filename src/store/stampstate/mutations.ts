@@ -210,15 +210,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
           metricBundle[deploymentId].data.timestamp,
           metricBundle[deploymentId]
         ]);
-      }
 
-      // If we receive metrics from an instance, it means the instance is
-      // connected
-      for (let role in metricBundle[deploymentId].roles) {
-        for (let inst in metricBundle[deploymentId].roles[role].instances) {
-          state.deployments[deploymentId].roles[role].instances[inst].state =
-            Deployment.Role.Instance.STATE.CONNECTED;
+
+        // If we receive metrics from an instance, it means the instance is
+        // connected
+        for (let role in metricBundle[deploymentId].roles) {
+          for (let inst in metricBundle[deploymentId].roles[role].instances) {
+            state.deployments[deploymentId].roles[role].instances[inst].state =
+              Deployment.Role.Instance.STATE.CONNECTED;
+          }
         }
+
       }
     }
   }
