@@ -315,10 +315,10 @@ class ProxyConnection extends EventEmitter {
   getElementInfo(uri: string): Promise<any> {
     let res: Promise<any> = Promise.resolve();
     if (this.requestedElements.indexOf(uri) === -1) {
+      this.requestedElements.push(uri);
       res = res.then(() => {
         return this.admission.getStorageManifest(uri);
       }).then((element) => {
-        this.requestedElements.push(uri);
         switch (utils.getElementType(uri)) {
           case utils.ElementType.runtime:
             this.emit(
@@ -386,70 +386,62 @@ class ProxyConnection extends EventEmitter {
     return this.admission.findDeployments().then((deploymentList) => {
       let promiseArray: Promise<any>[] = [];
       for (let deploymentId in deploymentList) {
-        promiseArray.push(
+        let deployment: Deployment = utils.
+          transformEcloudDeploymentToDeployment(
+          deploymentList[deploymentId]
+          );
 
-          this.getElementInfo(deploymentList[deploymentId].service).then(() => {
-            console.debug('Servoce info already retrieved from the stamp');
-            let deployment: Deployment = utils.
-              transformEcloudDeploymentToDeployment(
-              deploymentList[deploymentId]
-              );
-
-            for (let resource in deployment.resourcesConfig) {
-              // There are actually two certificates which dont have the same
-              // structure
-              if (deployment.resourcesConfig[resource].resource.name) {
-                switch (utils
-                  .getResourceType(deployment.resourcesConfig[resource]
-                    .resource.name)) {
-                  case utils.ResourceType.certificate:
-                    this.emit(
-                      this.onAddResource,
-                      deployment.resourcesConfig[resource].resource.name,
-                      new Certificate(
-                        deployment.resourcesConfig[resource].resource.name,
-                        [deployment._uri]
-                      )
-                    );
-                    break;
-                  case utils.ResourceType.domain:
-                    this.emit(
-                      this.onAddResource,
-                      deployment.resourcesConfig[resource].resource.name,
-                      new Domain(
-                        deployment.resourcesConfig[resource].resource.name,
-                        deployment.resourcesConfig[resource].resource.parameters
-                          .vhost,
-                        Domain.STATE.SUCCESS,
-                        [deployment._uri]
-                      )
-                    );
-                    break;
-                  case utils.ResourceType.volume:
-                    this.emit(
-                      this.onAddResource,
-                      deployment.resourcesConfig[resource].resource.name,
-                      new Volume(
-                        deployment.resourcesConfig[resource].resource.name,
-                        [deployment._uri]
-                      )
-                    );
-                    break;
-                  default:
-                    console.error('Unkown resource type: %s', resource);
-                }
-              }
-              else {
-                console.warn('unrecognized resource %s structure at %s',
-                  resource, deployment._uri);
-              }
+        for (let resource in deployment.resourcesConfig) {
+          // There are actually two certificates which dont have the same
+          // structure
+          if (deployment.resourcesConfig[resource].resource.name) {
+            switch (utils
+              .getResourceType(deployment.resourcesConfig[resource]
+                .resource.name)) {
+              case utils.ResourceType.certificate:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Certificate(
+                    deployment.resourcesConfig[resource].resource.name,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              case utils.ResourceType.domain:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Domain(
+                    deployment.resourcesConfig[resource].resource.name,
+                    deployment.resourcesConfig[resource].resource.parameters
+                      .vhost,
+                    Domain.STATE.SUCCESS,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              case utils.ResourceType.volume:
+                this.emit(
+                  this.onAddResource,
+                  deployment.resourcesConfig[resource].resource.name,
+                  new Volume(
+                    deployment.resourcesConfig[resource].resource.name,
+                    [deployment._uri]
+                  )
+                );
+                break;
+              default:
+                console.error('Unkown resource type: %s', resource);
             }
-            this.emit(this.onAddDeployment, deploymentId, deployment);
-          })
-        );
+          }
+          else {
+            console.warn('unrecognized resource %s structure at %s',
+              resource, deployment._uri);
+          }
+        }
+        this.emit(this.onAddDeployment, deploymentId, deployment);
       }
-
-      return Promise.all(promiseArray);
     });
   }
 
