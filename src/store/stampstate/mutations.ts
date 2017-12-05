@@ -85,8 +85,20 @@ export default class Mutations implements Vuex.MutationTree<State> {
             payload[ser].usedBy.push(dep);
           }
         }
+
+        // If this service is using any component, advice it
+        for (let role in payload[ser].roles) {
+          // if component is already in the state
+          if (state.components[payload[ser].roles[role].component]) {
+            state.components[payload[ser].roles[role].component].usedBy.concat(
+              payload[ser].usedBy
+            );
+          }
+        }
+
       }
     }
+
 
     // add services to the state
     state.services = { ...state.services, ...payload };
