@@ -52,9 +52,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     // If the element isn't stored in the state, info is requested to the
     // platform
-    if (!res) {
+    if (!res && res !== null) {
       connection.getElementInfo(elementURI).catch((error) => {
-        console.error('Error getting info from element %s', elementURI, error);
+      // console.error('Error getting info from element %s', elementURI, error);
       });
     }
 
