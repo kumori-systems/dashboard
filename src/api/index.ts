@@ -319,6 +319,7 @@ class ProxyConnection extends EventEmitter {
       res = res.then(() => {
         return this.admission.getStorageManifest(uri);
       }).then((element) => {
+
         switch (utils.getElementType(uri)) {
           case utils.ElementType.runtime:
             this.emit(
@@ -327,15 +328,18 @@ class ProxyConnection extends EventEmitter {
               utils.transformManifestToRuntime(element));
             break;
           case utils.ElementType.service:
-            this.emit(
-              this.onAddService,
-              uri,
-              utils.transformManifestToService(element));
+            let ser = utils.transformManifestToService(element);
+            this.emit(this.onAddService, uri, ser);
+            for (let role in ser.roles) {
+              this.getElementInfo(ser.roles[role].component);
+            }
             break;
           case utils.ElementType.component:
-            this.emit(this.onAddComponent,
-              uri,
-              utils.transformManifestToComponent(element));
+            let comp = utils.transformManifestToComponent(element);
+            this.emit(this.onAddComponent, uri, comp);
+            
+            this.getElementInfo(comp.runtime);
+            
             break;
           case utils.ElementType.resource:
             this.emit(
@@ -347,6 +351,9 @@ class ProxyConnection extends EventEmitter {
           default:
             console.error('Element not covered', uri, element);
         }
+
+        return Promise.resolve();
+
       });
     }
     else {

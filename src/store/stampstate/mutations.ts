@@ -121,11 +121,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // if any deployment is using this component, advice it
       for (let serv in state.services) {
-        for (let role in state.services.roles) {
-          if (state.services[serv].roles[role].component === comp) {
-            for (let dep in state.services[serv].usedBy) {
-              if (payload[comp].usedBy.indexOf(dep) < 0) {
-                payload[comp].usedBy.push(dep);
+        if (state.services[serv]) {
+          for (let role in state.services[serv].roles) {
+            if (state.services[serv].roles[role].component === comp) {
+              for (let dep in state.services[serv].usedBy) {
+                if (payload[comp].usedBy
+                  .indexOf(state.services[serv].usedBy[dep]) < 0) {
+                  payload[comp].usedBy.push(state.services[serv].usedBy[dep]);
+                }
               }
             }
           }
@@ -154,8 +157,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
       for (let comp in state.components) {
         if (state.components[comp] && state.components[comp].runtime === runt) {
           for (let dep in state.components[comp].usedBy) {
-            if (payload[runt].usedBy.indexOf(dep) < 0) {
-              payload[runt].usedBy.push(dep);
+            if (payload[runt].usedBy
+              .indexOf(state.components[comp].usedBy[dep]) < 0) {
+              payload[runt].usedBy.push(state.components[comp].usedBy[dep]);
             }
           }
         }
