@@ -221,11 +221,25 @@ export default class ElementsView extends Vue {
   infoElementDialog: boolean = false;
   selectedElement: string = null;
 
+  mounted() {
+    // Retrieve all actually deployed services
+    for (let dep in this.$store.getters.deployments) {
+      if (!this.$store.getters.service(
+        this.$store.getters.deployments[dep].service
+      )) {
+        this.$store.dispatch(
+          "getElementInfo",
+          this.$store.getters.deployments[dep].service
+        );
+      }
+    }
+  }
+
   get someoneSelected() {
     if (
-      this.selectedComponents.length > 0
-      || this.selectedServices.length > 0
-      || this.selectedRuntimes.length > 0
+      this.selectedComponents.length > 0 ||
+      this.selectedServices.length > 0 ||
+      this.selectedRuntimes.length > 0
     )
       return true;
     return false;
@@ -267,35 +281,6 @@ export default class ElementsView extends Vue {
 
   get serviceUsedBy(): Function {
     return (uri): string[] => {
-      // Retrieve required info
-      for (let dep in this.$store.getters.deployments) {
-        let ser: Service = this.$store.getters.service(
-          this.$store.getters.deployments[dep].service
-        );
-        if (!ser) {
-          this.$store.dispatch(
-            "getElementInfo",
-            this.$store.getters.deployments[dep].service
-          );
-        }
-        /*
-        else {
-          console.debug("Defined service %s", ser._uri);
-          for (let role in ser.roles) {
-            let comp: string = ser.roles[role].component;
-            if (!this.$store.getters.components[comp]) {
-              this.$store.dispatch("getElementInfo", comp);
-            } else {
-              let runt: string = this.$store.getters.components[comp].runtime;
-              if (!this.$store.getters.runtimes[runt]) {
-                this.$store.dispatch("getElementInfo", runt);
-              }
-            }
-          }
-        }
-        */
-      }
-
       return (((<SSGetters>this.$store.getters).serviceUsedBy as Function)(
         uri
       ) as any) as string[];
