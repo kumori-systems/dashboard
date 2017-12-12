@@ -7,7 +7,12 @@
     <template slot="items" scope="props">
       <td class="text-xs-left">{{ props.item.url }}</td>
       <td class="text-xs-left">{{ props.item.state }}</td>
-      <td class="text-xs-left">unavailable</td>
+      <td class="text-xs-left">
+        <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
+          v-bind:to="deployment(elem)._path">
+          {{ deployment(elem).name }}
+        </router-link>
+      </td>
       <td class="text-xs-left">
         <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
           <v-icon class="white--text">delete_forever</v-icon>
@@ -34,7 +39,10 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
-import { Domain } from "../store/stampstate/classes";
+
+import SSGetters from "../store/stampstate/getters";
+
+import { Domain, Deployment } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "domains-view",
@@ -80,6 +88,14 @@ export default class DomainsView extends Vue {
       }
     }
     return domains;
+  }
+
+  get deployment(): (stri: string) => Deployment {
+    return (deploymentURI: string) => {
+      return ((<SSGetters>this.$store.getters).deployment as any)(
+        deploymentURI
+      );
+    };
   }
 
   showDialog(domainURI): void {

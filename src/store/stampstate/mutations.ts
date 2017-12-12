@@ -85,8 +85,20 @@ export default class Mutations implements Vuex.MutationTree<State> {
             payload[ser].usedBy.push(dep);
           }
         }
+
+        // If this service is using any component, advice it
+        for (let role in payload[ser].roles) {
+          // if component is already in the state
+          if (state.components[payload[ser].roles[role].component]) {
+            state.components[payload[ser].roles[role].component].usedBy.concat(
+              payload[ser].usedBy
+            );
+          }
+        }
+
       }
     }
+
 
     // add services to the state
     state.services = { ...state.services, ...payload };
@@ -109,11 +121,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // if any deployment is using this component, advice it
       for (let serv in state.services) {
-        for (let role in state.services.roles) {
-          if (state.services[serv].roles[role].component === comp) {
-            for (let dep in state.services[serv].usedBy) {
-              if (payload[comp].usedBy.indexOf(dep) < 0) {
-                payload[comp].usedBy.push(dep);
+        if (state.services[serv]) {
+          for (let role in state.services[serv].roles) {
+            if (state.services[serv].roles[role].component === comp) {
+              for (let dep in state.services[serv].usedBy) {
+                if (payload[comp].usedBy
+                  .indexOf(state.services[serv].usedBy[dep]) < 0) {
+                  payload[comp].usedBy.push(state.services[serv].usedBy[dep]);
+                }
               }
             }
           }
@@ -142,8 +157,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
       for (let comp in state.components) {
         if (state.components[comp] && state.components[comp].runtime === runt) {
           for (let dep in state.components[comp].usedBy) {
-            if (payload[runt].usedBy.indexOf(dep) < 0) {
-              payload[runt].usedBy.push(dep);
+            if (payload[runt].usedBy
+              .indexOf(state.components[comp].usedBy[dep]) < 0) {
+              payload[runt].usedBy.push(state.components[comp].usedBy[dep]);
             }
           }
         }
@@ -210,15 +226,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
           metricBundle[deploymentId].data.timestamp,
           metricBundle[deploymentId]
         ]);
-      }
 
-      // If we receive metrics from an instance, it means the instance is
-      // connected
-      for (let role in metricBundle[deploymentId].roles) {
-        for (let inst in metricBundle[deploymentId].roles[role].instances) {
-          state.deployments[deploymentId].roles[role].instances[inst].state =
-            Deployment.Role.Instance.STATE.CONNECTED;
+
+        // If we receive metrics from an instance, it means the instance is
+        // connected
+        for (let role in metricBundle[deploymentId].roles) {
+          for (let inst in metricBundle[deploymentId].roles[role].instances) {
+            state.deployments[deploymentId].roles[role].instances[inst].state =
+              Deployment.Role.Instance.STATE.CONNECTED;
+          }
         }
+
       }
     }
   }
