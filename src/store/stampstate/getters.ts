@@ -261,10 +261,11 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
-
   getTotalProvidedDeploymentChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURI: string,
-      channelId: string) => string[] => {
+      channelId: string) => {
+        'value': string, 'text': string
+      }[] => {
     return (serviceId: string, channelId: string) => {
       // Obtenemos el canal y miramos de qué tipo es
       let type: string = (<Service>state.services[serviceId])
@@ -287,7 +288,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
             serviceId, channelId);
       }
 
-      let res: string[] = [];
+      let res: {
+        'value': string, 'text': string
+      }[] = [];
+
       for (let deploymentId in state.deployments) {
         if (!(state.deployments[deploymentId] instanceof EntryPoint)
           || state.deployments[deploymentId].links.length === 0) {
@@ -300,8 +304,16 @@ export default class Getters implements Vuex.GetterTree<State, any> {
               if (typeSearched.indexOf(state.services[serviceId]
                 .providedChannels[providedChannelId].type) !== -1) {
                 // Si encaja con el tipo de canal que buscamos
-                res.push(state.deployments[deploymentId].name + ' + '
-                  + providedChannelId); // Lo añadimos
+                res.push(
+                  {
+                    'value': JSON.stringify({
+                      'deployment': deploymentId,
+                      'channel': providedChannelId
+                    }),
+                    'text': (getters.deployment as any)(deploymentId).name
+                      + ' ~ ' + providedChannelId
+                  }
+                ); // Lo añadimos
               }
             }
           }
@@ -313,7 +325,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   getTotalDependedDeploymentChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURI: string,
-      channelId: string) => string[] => {
+      channelId: string) => {
+        'value': string, 'text': string
+      }[] => {
     return (serviceId: string, channelId: string) => {
       // Obtenemos el canal y miramos de qué tipo es
       let type: string = (<Service>state.services[serviceId])
@@ -336,7 +350,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
             serviceId, channelId);
       }
 
-      let res: string[] = [];
+      let res: {
+        'value': string, 'text': string
+      }[]
+        = [];
       for (let deploymentId in state.deployments) {
         if (state.deployments[deploymentId] instanceof EntryPoint
           || state.deployments[deploymentId].links.length === 0) {
@@ -349,8 +366,16 @@ export default class Getters implements Vuex.GetterTree<State, any> {
               if (typeSearched.indexOf(state.services[serviceId]
                 .dependedChannels[requiredChannelId].type) !== -1) {
                 // Si encaja con el tipo de canal que buscamos
-                res.push(state.deployments[deploymentId].name + ' + '
-                  + requiredChannelId); // Lo añadimos
+                res.push(
+                  {
+                    'value': JSON.stringify({
+                      'deployment': deploymentId,
+                      'channel': requiredChannelId
+                    }),
+                    'text': (getters.deployment as any)(deploymentId).name
+                      + ' ~ ' + requiredChannelId
+                  }
+                ); // Lo añadimos
               }
             }
           }

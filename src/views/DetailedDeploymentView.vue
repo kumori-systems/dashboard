@@ -35,11 +35,52 @@
 
               <!-- Deployment links -->
               <v-layout row wrap>
-                <v-flex ma-1 xs12 v-if="deployment.links.length > 0"> 
-                  <span class="subheading">Links:</span>
+                <v-flex ma-1 xs12 v-if="service">
+                  <span class="subheading">Connections:</span>
+                  <div v-for="(chann, name) in service.providedChannels" v-bind:key="name">
+                    <v-layout>
+                      <v-flex ma-1 xs6 md4>
+                        {{ name }} ->
+                      </v-flex>
+                      <v-flex ma-1 xs6 md8>
+                        <v-select
+                          v-bind:items="totalDependedDeploymentChannels(service, name)"
+                          v-model="serviceNewDependedConnections[name]"
+                          multiple
+                          chips
+                          multi-line
+                          return-object
+                        >
+                        </v-select>
+                      </v-flex>
+                    </v-layout>
+                  </div>
+                  
+                  <div v-for="(chann, name) in service.dependedChannels" v-bind:key="name">
+                    <v-layout>
+                      <v-flex ma-1 xs6 md8>
+                        <v-select
+                          v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                          v-model="serviceNewProvidedConnections[name]"
+                          multiple
+                          chips
+                          multi-line
+                          return-object
+                        ></v-select>
+                      </v-flex>
+                      <v-flex ma-1 xs6 md4>
+                        -> {{ name }}
+                      </v-flex>
+                    </v-layout>
+                  </div>
+                    
+
+                  <!--
                   <div v-for="(link, index) in deployment.links" v-bind:key="index" class="inner-content">
                     {{ link.fromChannel }} ~ {{ searchDeployment(link.toDeployment).name }} ({{ link.toChannel }})
                   </div>
+                  -->
+
                 </v-flex>
               </v-layout>
 
@@ -151,6 +192,24 @@ export default class DetailedDeploymentView extends Vue {
   undeployElementDialog: boolean = false;
   modalOkCallback: Function = function() {};
   chartOptions = ChartComponentOptions;
+  serviceNewDependedConnections = {};
+  serviceNewProvidedConnections = {};
+
+  mounted() {
+    // Retrieve all actually deployed services
+    for (let dep in this.$store.getters.deployments) {
+      if (
+        !this.$store.getters.service(
+          this.$store.getters.deployments[dep].service
+        )
+      ) {
+        this.$store.dispatch(
+          "getElementInfo",
+          this.$store.getters.deployments[dep].service
+        );
+      }
+    }
+  }
 
   get state(): string {
     let res: string;
@@ -236,6 +295,24 @@ export default class DetailedDeploymentView extends Vue {
     };
   }[] {
     return this.deploymentMetrics.roles;
+  }
+
+  get totalProvidedDeploymentChannels() {
+    return (service, channel) => {
+      return this.$store.getters.getTotalProvidedDeploymentChannels(
+        this.deployment.service,
+        channel
+      );
+    };
+  }
+
+  get totalDependedDeploymentChannels() {
+    return (service, channel) => {
+      return this.$store.getters.getTotalDependedDeploymentChannels(
+        this.deployment.service,
+        channel
+      );
+    };
   }
 
   applyChanges(): void {
