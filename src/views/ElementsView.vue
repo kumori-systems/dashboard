@@ -33,7 +33,7 @@
                           <v-flex xs6>
                             <div v-if="runtimeUsedBy(runtime).length>0">
                               <div>
-                                <span class="yellow">in use by component/s:</span>
+                                <span class="yellow">in use by:</span>
                               </div>
                               <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">
                                 <router-link  v-bind:to="deploymentInfo(usedBy)._path">
@@ -74,7 +74,7 @@
                             <v-flex xs6>
                               <div v-if="componentUsedBy(component).length>0">
                                 <div>
-                                  <span class="yellow">in use by service/s:</span>
+                                  <span class="yellow">in use by:</span>
                                 </div>
                                 <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">
                                   <router-link  v-bind:to="deploymentInfo(usedBy)._path">
@@ -115,7 +115,7 @@
                             <v-flex xs6>
                               <div v-if="serviceUsedBy(service).length>0">
                                 <div>
-                                  <span class="yellow">in use by deployment/s:</span>
+                                  <span class="yellow">in use by:</span>
                                 </div>
                                 <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">
                                   <router-link  v-bind:to="deploymentInfo(usedBy)._path">
@@ -159,6 +159,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
       <!-- Single info -->
       <v-dialog v-model="infoElementDialog" max-width="800px">
         <v-card>
@@ -175,6 +176,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
       <!-- Groupal delete -->
       <v-dialog v-model="deleteGroupDialog" max-width="800px">
         <v-card>
@@ -192,6 +194,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
   </v-container>
 </template>
 

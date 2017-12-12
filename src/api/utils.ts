@@ -53,9 +53,17 @@ export function transformEcloudDeploymentToDeployment(
   }
 
   let resourcesConfig: { [resource: string]: any } = {};
+  // ecloudDeployment.resources;
+  for (let res in ecloudDeployment.resources) {
+    if (ecloudDeployment.resources[res].resource.name) {
+      resourcesConfig[ecloudDeployment.resources[res].resource.name] =
+        ecloudDeployment.resources[res].resource;
+    } else {
+      console.warn('found resource not following structure: ', res);
+    }
+  }
 
   let parameters: any = {};
-
   let links: Array<Deployment.Link> = [];
 
   for (let firstChannel in ecloudDeployment.links) {
