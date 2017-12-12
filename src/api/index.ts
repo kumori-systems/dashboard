@@ -46,6 +46,7 @@ class ProxyConnection extends EventEmitter {
 
   private requestedElements: string[];
 
+
   // Constructor
   constructor() {
     super();
@@ -313,55 +314,62 @@ class ProxyConnection extends EventEmitter {
    * @param uri 
    */
   getElementInfo(uri: string): Promise<any> {
-    let res: Promise<any> = Promise.resolve();
-    if (this.requestedElements.indexOf(uri) === -1) {
-      this.requestedElements.push(uri);
-      res = res.then(() => {
-        return this.admission.getStorageManifest(uri);
-      }).then((element) => {
+    return Promise.resolve().then(() => {
+      let res: Promise<any>;
+      if (this.requestedElements.indexOf(uri) < 0) {
+        this.requestedElements.push(uri);
+        res = this.admission.getStorageManifest(uri);
+      } else {
+        res = Promise.reject({ 'msg': 'Request already done', 'code': '001' });
+      }
+      return res;
+    }).then((element) => {
+      let res: Promise<any> = Promise.resolve();
 
-        switch (utils.getElementType(uri)) {
-          case utils.ElementType.runtime:
-            this.emit(
-              this.onAddRuntime,
-              uri,
-              utils.transformManifestToRuntime(element));
-            break;
-          case utils.ElementType.service:
-            let ser = utils.transformManifestToService(element);
-            this.emit(this.onAddService, uri, ser);
-            for (let role in ser.roles) {
-              this.getElementInfo(ser.roles[role].component);
-            }
-            break;
-          case utils.ElementType.component:
-            let comp = utils.transformManifestToComponent(element);
-            this.emit(this.onAddComponent, uri, comp);
-            
-            this.getElementInfo(comp.runtime);
-            
-            break;
-          case utils.ElementType.resource:
-            this.emit(
-              this.onAddResource,
-              uri,
-              utils.transformManifestToResource(element)
-            );
-            break;
-          default:
-            console.error('Element not covered', uri, element);
-        }
+      switch (utils.getElementType(uri)) {
+        case utils.ElementType.runtime:
+          this.emit(
+            this.onAddRuntime,
+            uri,
+            utils.transformManifestToRuntime(element));
+          break;
 
-        return Promise.resolve();
+        case utils.ElementType.service:
+          let ser = utils.transformManifestToService(element);
+          this.emit(this.onAddService, uri, ser);
 
-      });
-    }
-    else {
-      res = res.then(() => {
-        return Promise.reject('Request already done');
-      });
-    }
-    return res;
+          let promiseArray: Promise<any>[] = [];
+          for (let role in ser.roles) {
+            res = res.then(() => {
+              return this.getElementInfo(ser.roles[role].component);
+            });
+          }
+          break;
+
+        case utils.ElementType.component:
+          let comp = utils.transformManifestToComponent(element);
+          this.emit(this.onAddComponent, uri, comp);
+
+          res = res.then(() => {
+            return this.getElementInfo(comp.runtime);
+          });
+
+          break;
+
+        case utils.ElementType.resource:
+          this.emit(
+            this.onAddResource,
+            uri,
+            utils.transformManifestToResource(element)
+          );
+          break;
+
+        default:
+          res = Promise.reject({ 'msg': 'Element not covered', 'code': '002' });
+      }
+
+      return res;
+    });
   }
 
   addNewBundle(file: File) {

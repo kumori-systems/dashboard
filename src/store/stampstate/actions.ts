@@ -54,7 +54,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // platform
     if (!res && res !== null) {
       connection.getElementInfo(elementURI).catch((error) => {
-      // console.error('Error getting info from element %s', elementURI, error);
+        if (error.code !== '001')
+          console.error('Error getting info from element %s', elementURI,
+            error);
       });
     }
 
