@@ -53,11 +53,6 @@ export function transformEcloudDeploymentToDeployment(
   }
 
   let resourcesConfig: { [resource: string]: any } = {};
-  // ecloudDeployment.resources;
-  for (let res in ecloudDeployment.resources) {
-    console.debug('resource: %s: ', res, ecloudDeployment.resources[res]);
-  }
-
 
   let parameters: any = {};
 
