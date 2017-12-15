@@ -121,7 +121,7 @@ export default class NewHTTPEntrypointView extends Vue {
         EntryPoint.TYPE.HTTP_INBOUND, //service
         roles, // roles
         resourcesConfig, // resourcesConfig
-        [] // links
+        {} // channels
       )
     );
 

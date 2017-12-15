@@ -15,7 +15,13 @@ import {
   Service, Volume
 } from '../store/stampstate/classes';
 import { ACS_URI, ADMISSION_URI } from './config.js';
-import * as utils from './utils';
+import {
+  ElementType, getElementType, getResourceType, isServiceEntrypoint,
+  ResourceType, transformDeploymentToManifest, transformDomainToManifest,
+  transformEcloudDeploymentToDeployment, transformEcloudEventDataToMetrics,
+  transformManifestToComponent, transformManifestToResource,
+  transformManifestToRuntime, transformManifestToService
+} from './utils';
 
 
 /**
@@ -105,7 +111,7 @@ class ProxyConnection extends EventEmitter {
                 // Depending on the service, it's created a deployment or an
                 // entrypoint
 
-                if (utils.isServiceEntrypoint(event.entity['serviceApp'])) {
+                if (isServiceEntrypoint(event.entity['serviceApp'])) {
                   // Entrypoint deployment
                   this.emit(
                     this.onAddDeployment, // Metodo
@@ -155,7 +161,7 @@ class ProxyConnection extends EventEmitter {
                       null // maxinstances
                     );
                 }
-                if (utils.isServiceEntrypoint(event.entity['serviceApp'])) {
+                if (isServiceEntrypoint(event.entity['serviceApp'])) {
                   this.emit(
                     this.onAddDeployment, // Metodo
                     event.entity['service'], // DeploymentID
@@ -240,7 +246,7 @@ class ProxyConnection extends EventEmitter {
             switch (event.name) {
               case EcloudEventName.service:
                 this.emit(this.onAddMetrics,
-                  utils.transformEcloudEventDataToMetrics(event));
+                  transformEcloudEventDataToMetrics(event));
                 break;
               default:
                 console.error('Not espected ecloud event name: %s/%s',
@@ -274,28 +280,28 @@ class ProxyConnection extends EventEmitter {
   getRegisteredElements() {
     return this.admission.findStorage().then((registeredElements) => {
       for (let i = 0; i < registeredElements.length; i++) {
-        switch (utils.getElementType(registeredElements[i])) {
-          case utils.ElementType.runtime:
+        switch (getElementType(registeredElements[i])) {
+          case ElementType.runtime:
             this.emit(
               this.onAddRuntime,
               registeredElements[i],
               undefined
             );
             break;
-          case utils.ElementType.service:
+          case ElementType.service:
             this.emit(
               this.onAddService,
               registeredElements[i],
               undefined
             );
             break;
-          case utils.ElementType.component:
+          case ElementType.component:
             this.emit(this.onAddComponent,
               registeredElements[i],
               undefined
             );
             break;
-          case utils.ElementType.resource:
+          case ElementType.resource:
             this.emit(
               this.onAddResource,
               registeredElements[i],
@@ -326,16 +332,16 @@ class ProxyConnection extends EventEmitter {
     }).then((element) => {
       let res: Promise<any> = Promise.resolve();
 
-      switch (utils.getElementType(uri)) {
-        case utils.ElementType.runtime:
+      switch (getElementType(uri)) {
+        case ElementType.runtime:
           this.emit(
             this.onAddRuntime,
             uri,
-            utils.transformManifestToRuntime(element));
+            transformManifestToRuntime(element));
           break;
 
-        case utils.ElementType.service:
-          let ser = utils.transformManifestToService(element);
+        case ElementType.service:
+          let ser = transformManifestToService(element);
           this.emit(this.onAddService, uri, ser);
 
           let promiseArray: Promise<any>[] = [];
@@ -346,8 +352,8 @@ class ProxyConnection extends EventEmitter {
           }
           break;
 
-        case utils.ElementType.component:
-          let comp = utils.transformManifestToComponent(element);
+        case ElementType.component:
+          let comp = transformManifestToComponent(element);
           this.emit(this.onAddComponent, uri, comp);
 
           res = res.then(() => {
@@ -356,11 +362,11 @@ class ProxyConnection extends EventEmitter {
 
           break;
 
-        case utils.ElementType.resource:
+        case ElementType.resource:
           this.emit(
             this.onAddResource,
             uri,
-            utils.transformManifestToResource(element)
+            transformManifestToResource(element)
           );
           break;
 
@@ -397,23 +403,22 @@ class ProxyConnection extends EventEmitter {
   }
 
   /* DEPLOYMENTS */
-  getDeploymentList() {
-    return this.admission.findDeployments().then((deploymentList) => {
+  getDeploymentList(): Promise<any> {
+    let pro: Promise<any> = this.admission.findDeployments();
+    pro = pro.then((deploymentList) => {
       let promiseArray: Promise<any>[] = [];
       for (let deploymentId in deploymentList) {
-        let deployment: Deployment = utils.
-          transformEcloudDeploymentToDeployment(
-          deploymentList[deploymentId]
-          );
+        let deployment: Deployment =
+          transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
 
         for (let resource in deployment.resourcesConfig) {
           // There are actually two certificates which dont have the same
           // structure
 
           if (deployment.resourcesConfig[resource].name) {
-            switch (utils
-              .getResourceType(deployment.resourcesConfig[resource].name)) {
-              case utils.ResourceType.certificate:
+            switch (getResourceType(deployment.resourcesConfig[resource]
+              .name)) {
+              case ResourceType.certificate:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -423,7 +428,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
-              case utils.ResourceType.domain:
+              case ResourceType.domain:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -435,7 +440,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
-              case utils.ResourceType.volume:
+              case ResourceType.volume:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -454,20 +459,30 @@ class ProxyConnection extends EventEmitter {
               resource, deployment._uri);
           }
         }
+
         this.emit(this.onAddDeployment, deploymentId, deployment);
+
+        promiseArray.push(this.getElementInfo(deployment.service)
+          .catch((err) => {
+            console.debug('duplicated request');
+            return err;
+          }));
       }
+
+      return Promise.all(promiseArray)
+        .then((values) => {})
+        .catch(err => console.log('Catch', err))
+        .then(() => {});
     });
+    return pro;
   }
 
   getDeployment(uri: string) {
     this.admission.findDeployments(uri).then((deploymentList) => {
       for (let deploymentId in deploymentList) {
 
-
-        let deployment: Deployment = utils.
-          transformEcloudDeploymentToDeployment(
-          deploymentList[deploymentId]
-          );
+        let deployment: Deployment = transformEcloudDeploymentToDeployment(
+          deploymentList[deploymentId]);
 
 
         for (let resource in deployment.resourcesConfig) {
@@ -475,9 +490,10 @@ class ProxyConnection extends EventEmitter {
           // structure
 
           if (deployment.resourcesConfig[resource].name) {
-            switch (utils
-              .getResourceType(deployment.resourcesConfig[resource].name)) {
-              case utils.ResourceType.certificate:
+            switch (
+            getResourceType(deployment.resourcesConfig[resource].name)
+            ) {
+              case ResourceType.certificate:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -487,7 +503,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
-              case utils.ResourceType.domain:
+              case ResourceType.domain:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -499,7 +515,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
-              case utils.ResourceType.volume:
+              case ResourceType.volume:
                 this.emit(
                   this.onAddResource,
                   deployment.resourcesConfig[resource].name,
@@ -530,7 +546,7 @@ class ProxyConnection extends EventEmitter {
   addDeployment(deployment: Deployment) {
     return this.admission.deploy(new FileStream(
       new Blob(
-        [JSON.stringify(utils.transformDeploymentToManifest(deployment))]
+        [JSON.stringify(transformDeploymentToManifest(deployment))]
       )
     ));
   }
@@ -545,16 +561,16 @@ class ProxyConnection extends EventEmitter {
     return this.admission.modifyDeployment(modification).then(() => {
       this.admission.findDeployments(deploymentId).then((deploymentList) => {
         for (let deploymentId in deploymentList) {
-          let deployment: Deployment = utils.
+          let deployment: Deployment =
             transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
 
           for (let resource in deployment.resourcesConfig) {
             // There are actually two certificates which dont have the same
             // structure
             if (deployment.resourcesConfig[resource].resource.name) {
-              switch (utils.getResourceType(deployment.resourcesConfig[resource]
+              switch (getResourceType(deployment.resourcesConfig[resource]
                 .resource.name)) {
-                case utils.ResourceType.certificate:
+                case ResourceType.certificate:
                   this.emit(
                     this.onAddResource,
                     deployment.resourcesConfig[resource].resource.name,
@@ -564,7 +580,7 @@ class ProxyConnection extends EventEmitter {
                     )
                   );
                   break;
-                case utils.ResourceType.domain:
+                case ResourceType.domain:
                   this.emit(
                     this.onAddResource,
                     deployment.resourcesConfig[resource].resource.name,
@@ -577,7 +593,7 @@ class ProxyConnection extends EventEmitter {
                     )
                   );
                   break;
-                case utils.ResourceType.volume:
+                case ResourceType.volume:
                   this.emit(
                     this.onAddResource,
                     deployment.resourcesConfig[resource].resource.name,
@@ -606,7 +622,7 @@ class ProxyConnection extends EventEmitter {
 
   /* RESOURCES */
   addDomain(webdomain: string) {
-    const manifest = utils.transformDomainToManifest(webdomain);
+    const manifest = transformDomainToManifest(webdomain);
     let zip = new JSZip();
     let content: string = JSON.stringify(manifest) + '\n';
     zip.file('Manifest.json', content);
@@ -626,7 +642,7 @@ class ProxyConnection extends EventEmitter {
 
         instance.sendBundle(file).then((value) => {
           let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-          let res = utils.transformManifestToResource({
+          let res = transformManifestToResource({
             'spec': 'eslap://eslap.cloud/resource/vhost/1_0_0',
             'name': uri,
             'parameters': {

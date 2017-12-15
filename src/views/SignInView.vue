@@ -1,31 +1,31 @@
 <template>
-    <v-layout id="signin-view">
-        <!-- Flexible content allows good resize: MarginAll size_eXtraSmall, size_SMall, size_MeDium, size_LarGe, size_eXtraLarge -->
-        <v-flex xs12 sm6 offset-sm3 md4 offset-md4 lg4 offset-lg4 xl2 offset-xl5 v-on:keyup.enter="signIn" wrap>
-            <v-card>
-                <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
-                <v-card-title primary-title>
-                    <div>
-                        <h3 class="headline">Sign in</h3>
-                        <p class="subheading grey--text">to continue to Ecloud's dashboard</p>
-                    </div>
-                </v-card-title>
-                <v-card-text>
-                    <div>
-                        <v-text-field v-model="userName" v-bind:disabled="loading" prepend-icon="person" label="Enter your User" autofocus></v-text-field>
-                        <v-text-field v-model="userPassword" v-bind:disabled="loading" prepend-icon="lock" label="Enter your password" min="1" v-bind:append-icon="viewPassword ? 'visibility' : 'visibility_off'" v-bind:append-icon-cb="() => (viewPassword = !viewPassword)" :type="viewPassword ? 'text' : 'password'"></v-text-field>
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
-                        Continue
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-flex>
-    </v-layout>
+  <v-layout id="signin-view">
+    <!-- Flexible content allows good resize: MarginAll size_eXtraSmall, size_SMall, size_MeDium, size_LarGe, size_eXtraLarge -->
+    <v-flex xs12 sm6 offset-sm3 md4 offset-md4 lg4 offset-lg4 xl2 offset-xl5 v-on:keyup.enter="signIn" wrap>
+      <v-card>
+        <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
+        <v-card-title primary-title>
+          <div>
+            <h3 class="headline">Sign in</h3>
+            <p class="subheading grey--text">to continue to Ecloud's dashboard</p>
+          </div>
+        </v-card-title>
+        <v-card-text>
+          <div>
+            <v-text-field v-model="userName" v-bind:disabled="loading" prepend-icon="person" label="Enter your User" autofocus></v-text-field>
+            <v-text-field v-model="userPassword" v-bind:disabled="loading" prepend-icon="lock" label="Enter your password" min="1" v-bind:append-icon="viewPassword ? 'visibility' : 'visibility_off'" v-bind:append-icon-cb="() => (viewPassword = !viewPassword)" :type="viewPassword ? 'text' : 'password'"></v-text-field>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
+            Continue
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 <script lang="ts">
 import Vue from "vue";

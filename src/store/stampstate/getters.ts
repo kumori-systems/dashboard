@@ -6,7 +6,7 @@ import PriorityQueue from 'priorityqueue';
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
-  EntryPoint, Metric, ProvidedChannel, Runtime, Service
+  EntryPoint, HTTPEntryPoint, Metric, ProvidedChannel, Runtime, Service
 } from './classes';
 
 /**
@@ -288,14 +288,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
             serviceId, channelId);
       }
 
-      let res: {
-        'value': string, 'text': string
-      }[] = [];
+      let res: { 'value': string, 'text': string }[] = [];
 
       for (let deploymentId in state.deployments) {
-        if (!(state.deployments[deploymentId] instanceof EntryPoint)
-          || state.deployments[deploymentId].links.length === 0) {
-          // Si es un entrypoint y ya está en uso no lo listamos
+        if (!(state.deployments[deploymentId] instanceof EntryPoint)) {
           let serviceId: string = state.deployments[deploymentId].service;
           if (state.services[serviceId]) { // if service exists
             for (let providedChannelId in
@@ -304,16 +300,21 @@ export default class Getters implements Vuex.GetterTree<State, any> {
               if (typeSearched.indexOf(state.services[serviceId]
                 .providedChannels[providedChannelId].type) !== -1) {
                 // Si encaja con el tipo de canal que buscamos
-                res.push(
-                  {
+
+                let elem: {
+                  'value': string,
+                  'text': string
+                } = {
                     'value': JSON.stringify({
                       'deployment': deploymentId,
                       'channel': providedChannelId
                     }),
                     'text': (getters.deployment as any)(deploymentId).name
                       + ' ~ ' + providedChannelId
-                  }
-                ); // Lo añadimos
+                  };
+
+                if (res.indexOf(elem) === -1)
+                  res.push(elem); // Lo añadimos
               }
             }
           }
@@ -350,33 +351,46 @@ export default class Getters implements Vuex.GetterTree<State, any> {
             serviceId, channelId);
       }
 
-      let res: {
-        'value': string, 'text': string
-      }[]
-        = [];
+      let res: { 'value': string, 'text': string }[] = [];
+
       for (let deploymentId in state.deployments) {
-        if (state.deployments[deploymentId] instanceof EntryPoint
-          || state.deployments[deploymentId].links.length === 0) {
-          // Si es un entrypoint y ya está en uso no lo listamos
+        if (
+          state.deployments[deploymentId] instanceof HTTPEntryPoint
+          && state.deployments[deploymentId].channels['sep']
+          && state.deployments[deploymentId].channels['sep'].length > 0
+        ) {
+          // If it's an entrypoint in use, it's not purposed for a new
+          // connection
+        } else {
+          // Si es un entrypoint sin uso lo listamos
           let serviceId: string = state.deployments[deploymentId].service;
           if (state.services[serviceId]) { // if service exists
             for (let requiredChannelId in
               state.services[serviceId].dependedChannels) {
+
               // Recorremos los canales required del servicio
               if (typeSearched.indexOf(state.services[serviceId]
                 .dependedChannels[requiredChannelId].type) !== -1) {
+
                 // Si encaja con el tipo de canal que buscamos
-                res.push(
-                  {
+                let elem: {
+                  'value': string,
+                  'text': string
+                } = {
                     'value': JSON.stringify({
                       'deployment': deploymentId,
                       'channel': requiredChannelId
                     }),
                     'text': (getters.deployment as any)(deploymentId).name
                       + ' ~ ' + requiredChannelId
-                  }
-                ); // Lo añadimos
+                  };
+
+                if (res.indexOf(elem) === -1) {
+                  res.push(elem); // Lo añadimos
+                }
+
               }
+
             }
           }
         }

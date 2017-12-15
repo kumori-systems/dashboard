@@ -1,127 +1,119 @@
 <template>
-   <v-container fluid id="deployment-item-view">    
-      <v-layout row wrap>
-        <v-container fluid id="deployment-item-view">
-          <v-layout clo row wrap>
+  <v-container fluid id="deployment-item-view">    
+    <v-layout row wrap>
+      <v-container fluid id="deployment-item-view">
+        <v-layout clo row wrap>
 
-            <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
-              <v-icon v-bind:id="state">{{ state }}</v-icon>
+          <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
+            <v-icon v-bind:id="state">{{ state }}</v-icon>
+          </v-flex>
+
+          <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+
+          <!-- Deployment uri -->
+          <v-layout row wrap>
+            <v-flex ma-1 xs12>
+              <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
             </v-flex>
-
-            <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
-
-              <!-- Deployment uri -->
-              <v-layout row wrap>
-                <v-flex ma-1 xs12>
-                  <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
-                </v-flex>
-              </v-layout>
-
-               <!-- Deployment date -->
-              <v-layout row wrap>
-                <v-flex ma-1 xs12>
-                  <p><span class="subheading">Date:</span>
-                  {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
-                  </p>
-                </v-flex>
-              </v-layout>
-
-               <!-- Deployment service -->
-              <v-layout row wrap>
-                <v-flex ma-1 xs12>
-                  <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
-                </v-flex>
-              </v-layout>
-
-              <!-- Deployment links -->
-              <v-layout row wrap>
-                <v-flex ma-1 xs12 v-if="service">
-                  <span class="subheading">Connections:</span>
-                  <div v-for="(chann, name) in service.providedChannels" v-bind:key="name">
-                    <v-layout>
-                      <v-flex ma-1 xs6 md4>
-                        {{ name }} ->
-                      </v-flex>
-                      <v-flex ma-1 xs6 md8>
-                        <v-select
-                          v-bind:items="totalDependedDeploymentChannels(service, name)"
-                          v-model="serviceNewDependedConnections[name]"
-                          multiple
-                          chips
-                          multi-line
-                          return-object
-                        >
-                        </v-select>
-                      </v-flex>
-                    </v-layout>
-                  </div>
-                  
-                  <div v-for="(chann, name) in service.dependedChannels" v-bind:key="name">
-                    <v-layout>
-                      <v-flex ma-1 xs6 md8>
-                        <v-select
-                          v-bind:items="totalProvidedDeploymentChannels(service, name)"
-                          v-model="serviceNewProvidedConnections[name]"
-                          multiple
-                          chips
-                          multi-line
-                          return-object
-                        ></v-select>
-                      </v-flex>
-                      <v-flex ma-1 xs6 md4>
-                        -> {{ name }}
-                      </v-flex>
-                    </v-layout>
-                  </div>
-                    
-
-                  <!--
-                  <div v-for="(link, index) in deployment.links" v-bind:key="index" class="inner-content">
-                    {{ link.fromChannel }} ~ {{ searchDeployment(link.toDeployment).name }} ({{ link.toChannel }})
-                  </div>
-                  -->
-
-                </v-flex>
-              </v-layout>
-
-            </v-flex>
-
-            <v-spacer></v-spacer>
-
-            <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-
-              <!-- Deployment actions -->
-              <v-layout>
-                <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-                <v-btn color="warning" v-bind:disabled="!haveChanges" 
-                  v-on:click="applyChanges">Apply changes</v-btn>
-                <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-              </v-layout>
-
-              <!-- Deployment chart -->
-              <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-                <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
-                  v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
-                </deployment-chart-component>
-              </v-flex>
-
-            </v-flex>
-
           </v-layout>
-        </v-container>
-      </v-layout>
 
-      <!-- Deployment roles -->
-      <v-layout row wrap>
-        <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-          <role-card-component v-for="(rolContent, rolId) in deployment.roles"
-          v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service" 
-          v-bind:roleMetrics="roleMetrics"
-          v-on:killInstanceChange="handleKillInstanceChange"
-          v-on:numInstancesChange="handleNumInstancesChange"
-          v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
+          <!-- Deployment date -->
+          <v-layout row wrap>
+            <v-flex ma-1 xs12>
+              <p><span class="subheading">Date:</span>
+              {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
+              </p>
+            </v-flex>
+          </v-layout>
+
+          <!-- Deployment service -->
+          <v-layout row wrap>
+            <v-flex ma-1 xs12>
+              <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
+            </v-flex>
+          </v-layout>
+
+          <!-- Deployment links -->
+          <v-layout row wrap>
+            <v-flex ma-1 xs12 v-if="service">
+
+              <template v-if="service">
+                <span class="subheading">Connections:</span>
+                
+
+                <div v-for="(conn, name) in service.providedChannels" v-bind:key="name">                 
+                  <v-layout>
+                    <v-flex ma-1 xs6 md4>{{ name }} -></v-flex>
+
+                    <v-flex ma-1 xs6 md8>
+                      <v-select
+                        v-bind:items="totalDependedDeploymentChannels(service, name)"
+                        v-model="serviceNewProvidedConnections[name]"
+                        multiple chips multi-line v-on:input="handleInput"
+                        return-object autocomplete>
+                      </v-select>
+                    </v-flex>
+                  </v-layout>
+                  
+                </div>
+
+                <div v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                  <v-layout>
+                    <v-flex ma-1 xs6 md8>
+                      <v-select
+                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                        v-model="serviceNewDependedConnections[name]"
+                        multiple chips multi-line v-on:input="handleInput"
+                        return-object autocomplete>
+                      </v-select>
+                    </v-flex>
+                    <v-flex ma-1 xs6 md4>-> {{ name }}</v-flex>
+                  </v-layout>
+                </div>
+
+              </template>
+            
+            </v-flex>
+          </v-layout>
+
         </v-flex>
+
+        <v-spacer></v-spacer>
+
+        <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+
+          <!-- Deployment actions -->
+          <v-layout>
+            <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+            <v-btn color="warning" v-bind:disabled="!haveChanges" 
+              v-on:click="applyChanges">Apply changes</v-btn>
+            <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+          </v-layout>
+
+          <!-- Deployment chart -->
+          <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+            </deployment-chart-component>
+          </v-flex>
+
+        </v-flex>
+
       </v-layout>
+    </v-container>
+  </v-layout>
+
+  <!-- Deployment roles -->
+  <v-layout row wrap>
+    <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+      <role-card-component v-for="(rolContent, rolId) in deployment.roles"
+      v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service" 
+      v-bind:roleMetrics="roleMetrics"
+      v-on:killInstanceChange="handleKillInstanceChange"
+      v-on:numInstancesChange="handleNumInstancesChange"
+      v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
+    </v-flex>
+  </v-layout>
 
         <!-- Single delete -->
         <v-dialog v-model="undeployElementDialog" max-width="800px">
@@ -139,8 +131,7 @@
           </v-card>
         </v-dialog>
 
-
-    </v-container>
+  </v-container>
 </template>
 <script lang="ts" scoped>
 import Vue from "vue";
@@ -192,8 +183,8 @@ export default class DetailedDeploymentView extends Vue {
   undeployElementDialog: boolean = false;
   modalOkCallback: Function = function() {};
   chartOptions = ChartComponentOptions;
-  serviceNewDependedConnections = {};
-  serviceNewProvidedConnections = {};
+  serviceNewDependedConnections: { [channel: string]: any[] } = {};
+  serviceNewProvidedConnections: { [channel: string]: any[] } = {};
 
   mounted() {
     // Retrieve all actually deployed services
@@ -209,6 +200,7 @@ export default class DetailedDeploymentView extends Vue {
         );
       }
     }
+    this.$watch("$route.path", value => this.cancelChanges());
   }
 
   get state(): string {
@@ -230,7 +222,6 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get deployment(): Deployment {
-    this.cancelChanges();
     return this.$store.getters.deploymentFromPath(this.$route.path);
   }
 
@@ -242,9 +233,13 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Required to obtain additional information of a role. */
   get service(): Service {
-    let ser = this.$store.getters.service(this.deployment.service);
+    this.serviceNewDependedConnections = {};
+    this.serviceNewProvidedConnections = {};
+    let ser: Service = this.$store.getters.service(this.deployment.service);
     if (!ser) {
       this.$store.dispatch("getElementInfo", this.deployment.service);
+    } else {
+      this.loadDeploymentConnections(ser);
     }
     return ser;
   }
@@ -323,15 +318,66 @@ export default class DetailedDeploymentView extends Vue {
       killInstances: this.instanceKill
     });
 
+    // Compare actual links whith deployment's links
+    // Remove links
+    for (let chann in this.deployment.channels) {
+      for (let conn in this.deployment.channels[chann]) {
+        if (this.serviceNewDependedConnections[chann]) {
+          this.serviceNewDependedConnections[chann];
+        }
+      }
+    }
+
+    // Add new links
+
     // Marc as there are no changes
     this.haveChanges = false;
   }
 
   cancelChanges(): void {
-    this.rolNumInstances = {};
-    this.instanceKill = {};
-    this.clear = true;
-    this.haveChanges = false;
+    if (this.haveChanges) {
+      this.rolNumInstances = {};
+      this.instanceKill = {};
+      this.serviceNewDependedConnections = {};
+      this.serviceNewProvidedConnections = {};
+      this.clear = true;
+      this.haveChanges = false;
+    }
+  }
+
+  loadDeploymentConnections(ser: Service) {
+    for (let chann in this.deployment.channels) {
+      for (let conn in this.deployment.channels[chann]) {
+        let element = {
+          value: JSON.stringify({
+            deployment: this.deployment.channels[chann][conn]
+              .destinyDeploymentId,
+            channel: this.deployment.channels[chann][conn].destinyChannelId
+          }),
+          text: this.deployment.name + " ~ " + chann
+        };
+
+        // Es el canal depended o provided?
+        if (ser.dependedChannels[chann]) {
+          if (!this.serviceNewDependedConnections[chann]) {
+            this.serviceNewDependedConnections[chann] = [];
+          }
+          if (
+            this.serviceNewDependedConnections[chann].indexOf(element) === -1
+          ) {
+            this.serviceNewDependedConnections[chann].push(element);
+          }
+        }
+
+        if (ser.providedChannels[chann]) {
+          if (!this.serviceNewProvidedConnections[chann]) {
+            this.serviceNewProvidedConnections[chann] = [];
+          }
+          if (this.serviceNewProvidedConnections[chann].indexOf(element) === -1)
+            this.serviceNewProvidedConnections[chann].push(element);
+        }
+      }
+    }
   }
 
   showUndeployModal(): void {
@@ -343,20 +389,20 @@ export default class DetailedDeploymentView extends Vue {
     this.$router.push("/overview");
   }
 
-  handleKillInstanceChange(payload) {
-    this.haveChanges = true;
-    let tempRol, tempInst, value;
-    [tempRol, tempInst, value] = payload;
+  handleKillInstanceChange([tempRol, tempInst, value]) {
     if (this.instanceKill[tempRol] === undefined)
       this.instanceKill[tempRol] = {};
     this.instanceKill[tempRol][tempInst] = value;
+    this.haveChanges = true;
   }
 
-  handleNumInstancesChange(payload) {
-    this.haveChanges = true;
-    let tempRol, value;
-    [tempRol, value] = payload;
+  handleNumInstancesChange([tempRol, value]) {
     this.rolNumInstances[tempRol] = value;
+    this.haveChanges = true;
+  }
+
+  handleInput(value) {
+    if (!this.clear) this.haveChanges = true;
   }
 }
 </script>
