@@ -1,7 +1,10 @@
-import { AcsClient as EcloudAcsClient } from 'acs-client';
+import {
+  AcsClient as EcloudAcsClient, AcsUser as EcloudAcsUser
+} from 'acs-client';
 import {
   AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent,
-  EcloudEventName, EcloudEventType, FileStream, ReconfigDeploymentModification,
+  EcloudEventName, EcloudEventType, Endpoint, FileStream,
+  ReconfigDeploymentModification,
   RegistrationResult, ScalingDeploymentModification
 } from 'admission-client';
 
@@ -22,7 +25,6 @@ import {
   transformManifestToComponent, transformManifestToResource,
   transformManifestToRuntime, transformManifestToService
 } from './utils';
-
 
 /**
  * Esta clase está preparada para lanzar eventos que la página leerá y podrá
@@ -49,6 +51,8 @@ class ProxyConnection extends EventEmitter {
   public onAddResource: Function;
   public onRemoveResource: Function;
   public onAddMetrics: Function;
+  public onLink: Function;
+  public onUnlink: Function;
 
   private requestedElements: string[];
 
@@ -56,28 +60,35 @@ class ProxyConnection extends EventEmitter {
   // Constructor
   constructor() {
     super();
-    this.onLogin = this.registerEvent<Function>();
-    this.onAddDeployment = this.registerEvent<(deploymentId: string,
-      deployment: Deployment) => any>();
-    this.onAddInstance = this.registerEvent<(deploymentId: string,
-      rolId: string, instanceId: string,
-      instance: Deployment.Role.Instance) => any>();
-    this.onModifyDeployment = this.registerEvent<(value) => any>();
-    this.onRemoveDeployment =
-      this.registerEvent<(deploymentId: string) => any>();
-    this.onAddService =
-      this.registerEvent<(serviceId: string, service: Service) => any>();
-    this.onRemoveService = this.registerEvent<Function>();
     this.onAddComponent =
       this.registerEvent<(componentId: string, component: Component) => any>();
-    this.onRemoveComponent = this.registerEvent<Function>();
-    this.onAddRuntime =
-      this.registerEvent<(runtimeId: string, runtime: Runtime) => any>();
-    this.onRemoveRuntime = this.registerEvent<Function>();
+    this.onAddDeployment =
+      this.registerEvent<(deploymentId: string,
+        deployment: Deployment) => any>();
+    this.onAddInstance =
+      this.registerEvent<(deploymentId: string, rolId: string,
+        instanceId: string, instance: Deployment.Role.Instance) => any>();
+    this.onAddMetrics = this.registerEvent<(value) => any>();
     this.onAddResource =
       this.registerEvent<(resourceId: string, resource: Resource) => any>();
-    this.onRemoveResource = this.registerEvent<(resourceId: string) => any>();
-    this.onAddMetrics = this.registerEvent<(value) => any>();
+    this.onAddRuntime =
+      this.registerEvent<(runtimeId: string, runtime: Runtime) => any>();
+    this.onAddService =
+      this.registerEvent<(serviceId: string, service: Service) => any>();
+    this.onLogin =
+      this.registerEvent<(username: string,
+        userpassword: string) => EcloudAcsUser>();
+    this.onModifyDeployment = this.registerEvent<(value) => any>();
+    this.onRemoveComponent =
+      this.registerEvent<(componentURN: string) => void>();
+    this.onRemoveDeployment =
+      this.registerEvent<(deploymentURN: string) => void>();
+    this.onRemoveService = this.registerEvent<(serviceURN: string) => void>();
+    this.onRemoveRuntime = this.registerEvent<(runtimeURN: string) => void>();
+    this.onRemoveResource = this.registerEvent<(resourceURN: string) => void>();
+    this.onLink = this.registerEvent<(value) => any>();
+    this.onUnlink = this.registerEvent<(value) => any>();
+
     this.requestedElements = [];
   }
 
@@ -195,11 +206,27 @@ class ProxyConnection extends EventEmitter {
                 this.emit(this.onRemoveDeployment, event.entity['service']);
                 break;
               case EcloudEventName.link:
+                this.emit(this.onLink,
+                  {
+                    'deploymentOne': event.data.endpoints[0].deployment,
+                    'channelOne': event.data.endpoints[0].channel,
+                    'deploymentTwo': event.data.endpoints[1].deployment,
+                    'channelTwo': event.data.endpoints[1].channel
+                  });
+                break;
+              case EcloudEventName.unlink:
+                this.emit(this.onUnlink,
+                  {
+                    'deploymentOne': event.data.endpoints[0].deployment,
+                    'channelOne': event.data.endpoints[0].channel,
+                    'deploymentTwo': event.data.endpoints[1].deployment,
+                    'channelTwo': event.data.endpoints[1].channel
+                  });
+                break;
               case EcloudEventName.scale:
               case EcloudEventName.status:
+                console.warn('Event under development');
               case EcloudEventName.undeploying:
-              case EcloudEventName.unlink:
-                // TODO
                 break;
               default:
                 console.error('Not espected ecloud event name: ' + event.strType
@@ -259,7 +286,7 @@ class ProxyConnection extends EventEmitter {
         }
         const timeEnd = performance.now();
         const totalTime = timeEnd - timeStart;
-        console.debug('Event handler took %d for %s:%s', totalTime,
+        console.debug('Event handler took %dms for %s:%s', totalTime,
           event.strType, event.strName);
       });
 
@@ -464,15 +491,14 @@ class ProxyConnection extends EventEmitter {
 
         promiseArray.push(this.getElementInfo(deployment.service)
           .catch((err) => {
-            console.debug('duplicated request');
             return err;
           }));
       }
 
       return Promise.all(promiseArray)
-        .then((values) => {})
+        .then((values) => { })
         .catch(err => console.log('Catch', err))
-        .then(() => {});
+        .then(() => { });
     });
     return pro;
   }
@@ -662,6 +688,20 @@ class ProxyConnection extends EventEmitter {
 
   addDataVolume(params) {
     console.error('Datavolume creation is under development');
+  }
+
+  link({ deploymentOne, channelOne, deploymentTwo, channelTwo }) {
+    this.admission.linkDeployments([
+      new Endpoint(deploymentOne, channelOne),
+      new Endpoint(deploymentTwo, channelTwo)
+    ]);
+  }
+
+  unlink({ deploymentOne, channelOne, deploymentTwo, channelTwo }) {
+    this.admission.unlinkDeployments([
+      new Endpoint(deploymentOne, channelOne),
+      new Endpoint(deploymentTwo, channelTwo)
+    ]);
   }
 
   private sendBundle(file: File) {

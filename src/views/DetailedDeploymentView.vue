@@ -1,135 +1,133 @@
 <template>
-  <v-container fluid id="deployment-item-view">    
+  <v-container fluid id="deployment-item-view">
     <v-layout row wrap>
       <v-container fluid id="deployment-item-view">
         <v-layout clo row wrap>
-
           <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
             <v-icon v-bind:id="state">{{ state }}</v-icon>
           </v-flex>
 
           <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
-          <!-- Deployment uri -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12>
-              <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
-            </v-flex>
-          </v-layout>
+            <!-- Deployment uri -->
+            <v-layout row wrap>
+              <v-flex ma-1 xs12>
+                <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
+              </v-flex>
+            </v-layout>
 
-          <!-- Deployment date -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12>
-              <p><span class="subheading">Date:</span>
-              {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
-              </p>
-            </v-flex>
-          </v-layout>
+            <!-- Deployment date -->
+            <v-layout row wrap>
+              <v-flex ma-1 xs12>
+                <p><span class="subheading">Date:</span>
+                {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
+                </p>
+              </v-flex>
+            </v-layout>
 
-          <!-- Deployment service -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12>
-              <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
-            </v-flex>
-          </v-layout>
+            <!-- Deployment service -->
+            <v-layout row wrap>
+              <v-flex ma-1 xs12>
+                <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
+              </v-flex>
+            </v-layout>
 
-          <!-- Deployment links -->
-          <v-layout row wrap>
-            <v-flex ma-1 xs12 v-if="service">
+            <!-- Deployment links -->
+            <v-layout row wrap>
+              <v-flex ma-1 xs12 v-if="service">
 
-              <template v-if="service">
-                <span class="subheading">Connections:</span>
-                
+                <template v-if="service">
+                  <span class="subheading">Connections:</span>
 
-                <div v-for="(conn, name) in service.providedChannels" v-bind:key="name">                 
-                  <v-layout>
-                    <v-flex ma-1 xs6 md4>{{ name }} -></v-flex>
+                  <div v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                    <v-layout>
+                      <v-flex ma-1 xs6 md4>{{ name }} -></v-flex>
 
-                    <v-flex ma-1 xs6 md8>
-                      <v-select
-                        v-bind:items="totalDependedDeploymentChannels(service, name)"
-                        v-model="serviceNewProvidedConnections[name]"
-                        multiple chips multi-line v-on:input="handleInput"
-                        return-object autocomplete>
-                      </v-select>
-                    </v-flex>
-                  </v-layout>
-                  
-                </div>
+                      <v-flex ma-1 xs6 md8>
+                        <v-select
+                          v-bind:items="totalDependedDeploymentChannels(service, name)"
+                          v-model="serviceNewProvidedConnections[name]"
+                          multiple chips multi-line v-on:input="handleInput"
+                          return-object autocomplete>
+                        </v-select>
+                      </v-flex>
 
-                <div v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                  <v-layout>
-                    <v-flex ma-1 xs6 md8>
-                      <v-select
-                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
-                        v-model="serviceNewDependedConnections[name]"
-                        multiple chips multi-line v-on:input="handleInput"
-                        return-object autocomplete>
-                      </v-select>
-                    </v-flex>
-                    <v-flex ma-1 xs6 md4>-> {{ name }}</v-flex>
-                  </v-layout>
-                </div>
+                    </v-layout>
+                  </div>
 
-              </template>
-            
-            </v-flex>
-          </v-layout>
+                  <div v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                    <v-layout>
+                      <v-flex ma-1 xs6 md8>
+                        <v-select
+                          v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                          v-model="serviceNewDependedConnections[name]"
+                          multiple chips multi-line v-on:input="handleInput"
+                          return-object autocomplete>
+                        </v-select>
+                      </v-flex>
+                      <v-flex ma-1 xs6 md4>-> {{ name }}</v-flex>
+                    </v-layout>
+                  </div>
 
-        </v-flex>
+                </template>
 
-        <v-spacer></v-spacer>
+              </v-flex>
+            </v-layout>
 
-        <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-
-          <!-- Deployment actions -->
-          <v-layout>
-            <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-            <v-btn color="warning" v-bind:disabled="!haveChanges" 
-              v-on:click="applyChanges">Apply changes</v-btn>
-            <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-          </v-layout>
-
-          <!-- Deployment chart -->
-          <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
-              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
-            </deployment-chart-component>
           </v-flex>
 
-        </v-flex>
+          <v-spacer></v-spacer>
 
-      </v-layout>
-    </v-container>
-  </v-layout>
+          <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
 
-  <!-- Deployment roles -->
-  <v-layout row wrap>
-    <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-      <role-card-component v-for="(rolContent, rolId) in deployment.roles"
-      v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service" 
-      v-bind:roleMetrics="roleMetrics"
-      v-on:killInstanceChange="handleKillInstanceChange"
-      v-on:numInstancesChange="handleNumInstancesChange"
-      v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
-    </v-flex>
-  </v-layout>
+            <!-- Deployment actions -->
+            <v-layout>
+              <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+              <v-btn color="warning" v-bind:disabled="!haveChanges"
+                v-on:click="applyChanges">Apply changes</v-btn>
+              <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+            </v-layout>
 
-        <!-- Single delete -->
-        <v-dialog v-model="undeployElementDialog" max-width="800px">
-          <v-card>
-            <v-card-title class="headline">Undeploy?</v-card-title>
-            <v-card-text>
-              This action <strong>CAN'T BE UNDONE</strong> and will
-              undeploy {{deployment.name}}.
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
-              <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            <!-- Deployment chart -->
+            <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+              <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+                v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+              </deployment-chart-component>
+            </v-flex>
+
+          </v-flex>
+
+        </v-layout>
+      </v-container>
+    </v-layout>
+
+    <!-- Deployment roles -->
+    <v-layout row wrap>
+      <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+        <role-card-component v-for="(rolContent, rolId) in deployment.roles"
+        v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
+        v-bind:roleMetrics="roleMetrics"
+        v-on:killInstanceChange="handleKillInstanceChange"
+        v-on:numInstancesChange="handleNumInstancesChange"
+        v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
+      </v-flex>
+    </v-layout>
+
+    <!-- Single delete -->
+    <v-dialog v-model="undeployElementDialog" max-width="800px">
+      <v-card>
+        <v-card-title class="headline">Undeploy?</v-card-title>
+        <v-card-text>
+          This action <strong>CAN'T BE UNDONE</strong> and will
+          undeploy {{deployment.name}}.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
+          <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </v-container>
 </template>
@@ -183,8 +181,12 @@ export default class DetailedDeploymentView extends Vue {
   undeployElementDialog: boolean = false;
   modalOkCallback: Function = function() {};
   chartOptions = ChartComponentOptions;
-  serviceNewDependedConnections: { [channel: string]: any[] } = {};
-  serviceNewProvidedConnections: { [channel: string]: any[] } = {};
+  serviceNewDependedConnections: {
+    [channel: string]: { text: string; value: string }[];
+  } = {};
+  serviceNewProvidedConnections: {
+    [channel: string]: { text: string; value: string }[];
+  } = {};
 
   mounted() {
     // Retrieve all actually deployed services
@@ -310,26 +312,172 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /**
+   * Compares the temporary state with the real state and sends to the stamp
+   * the differences
+   */
   applyChanges(): void {
-    // Send changes to the stamp
-    this.$store.dispatch("aplyingChangesToDeployment", {
-      deploymentId: this.deployment._uri,
-      rolNumInstances: this.rolNumInstances,
-      killInstances: this.instanceKill
-    });
-
-    // Compare actual links whith deployment's links
-    // Remove links
+    /*
+    Remove links
+    */
     for (let chann in this.deployment.channels) {
-      for (let conn in this.deployment.channels[chann]) {
-        if (this.serviceNewDependedConnections[chann]) {
-          this.serviceNewDependedConnections[chann];
+      for (let realConn in this.deployment.channels[chann]) {
+        let found = false; // Marks if the connection has been found
+
+        // Search in provided links
+        for (let tempConn in this.serviceNewProvidedConnections[chann]) {
+          if (
+            this.serviceNewProvidedConnections[chann][tempConn].value ===
+            JSON.stringify({
+              deployment: this.deployment.channels[chann][realConn]
+                .destinyDeploymentId,
+              channel: this.deployment.channels[chann][realConn]
+                .destinyChannelId
+            })
+          ) {
+            found = true;
+          }
+        }
+
+        // Search in depended links
+        for (let tempConn in this.serviceNewDependedConnections[chann]) {
+          if (
+            this.serviceNewDependedConnections[chann][tempConn].value ===
+            JSON.stringify({
+              deployment: this.deployment.channels[chann][realConn]
+                .destinyDeploymentId,
+              channel: this.deployment.channels[chann][realConn]
+                .destinyChannelId
+            })
+          ) {
+            found = true;
+          }
+        }
+
+        // If the link haven't been found, the link is erased
+        if (!found) {
+          this.$store.dispatch("unlink", {
+            deploymentOne: this.deployment._uri,
+            channelOne: chann,
+            deploymentTwo: this.deployment.channels[chann][realConn]
+              .destinyDeploymentId,
+            channelTwo: this.deployment.channels[chann][realConn]
+              .destinyChannelId
+          });
         }
       }
     }
 
-    // Add new links
+    /*
+    Add new provided links
+    */
+    for (let chann in this.serviceNewProvidedConnections) {
+      for (let tempConn in this.serviceNewProvidedConnections[chann]) {
+        let found = false; // Checks if the connection has been found
 
+        // Search in deployment channels
+        for (let realConn in this.deployment.channels[chann]) {
+          if (
+            this.serviceNewProvidedConnections[chann][tempConn].value ===
+            JSON.stringify({
+              deployment: this.deployment.channels[chann][realConn]
+                .destinyDeploymentId,
+              channel: this.deployment.channels[chann][realConn]
+                .destinyChannelId
+            })
+          ) {
+            found = true;
+          }
+        }
+
+        // If the connection haven't been found, a new one is created
+        if (!found) {
+          let newConnexion: {
+            deployment: string;
+            channel: string;
+          } = JSON.parse(
+            this.serviceNewProvidedConnections[chann][tempConn].value
+          );
+
+          this.$store.dispatch("link", {
+            deploymentOne: this.deployment._uri,
+            channelOne: chann,
+            deploymentTwo: newConnexion.deployment,
+            channelTwo: newConnexion.channel
+          });
+        }
+      }
+    }
+
+    /*
+    Add new depended links
+    */
+    for (let chann in this.serviceNewDependedConnections) {
+      for (let tempConn in this.serviceNewDependedConnections[chann]) {
+        let found = false; // Checks if the connection has been found
+
+        // Search in deployment channels
+        for (let realConn in this.deployment.channels[chann]) {
+          if (
+            this.serviceNewDependedConnections[chann][tempConn].value ===
+            JSON.stringify({
+              deployment: this.deployment.channels[chann][realConn]
+                .destinyDeploymentId,
+              channel: this.deployment.channels[chann][realConn]
+                .destinyChannelId
+            })
+          ) {
+            found = true;
+          }
+        }
+
+        // If the connection haven't been found, a new one is created
+        if (!found) {
+          let newConnexion: {
+            deployment: string;
+            channel: string;
+          } = JSON.parse(
+            this.serviceNewDependedConnections[chann][tempConn].value
+          );
+
+          this.$store.dispatch("link", {
+            deploymentOne: this.deployment._uri,
+            channelOne: chann,
+            deploymentTwo: newConnexion.deployment,
+            channelTwo: newConnexion.channel
+          });
+        }
+      }
+    }
+
+    /*
+      If the number of instances has changed, a petition is sent
+    */
+    let changedNumInstances = false;
+    for (let role in this.deployment.roles) {
+      console.log(
+        "deployment instances",
+        role,
+        this.deployment.roles[role].actualInstances
+      );
+      console.log("temporal instances", role, this.rolNumInstances[role]);
+      if (
+        this.rolNumInstances[role] &&
+        this.deployment.roles[role].actualInstances !==
+          this.rolNumInstances[role]
+      ) {
+        changedNumInstances = true;
+      }
+    }
+
+    if (changedNumInstances) {
+      // Send changes to the stamp
+      this.$store.dispatch("aplyingChangesToDeployment", {
+        deploymentId: this.deployment._uri,
+        rolNumInstances: this.rolNumInstances,
+        killInstances: this.instanceKill
+      });
+    }
     // Marc as there are no changes
     this.haveChanges = false;
   }

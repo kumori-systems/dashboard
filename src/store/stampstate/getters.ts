@@ -388,9 +388,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                 if (res.indexOf(elem) === -1) {
                   res.push(elem); // Lo añadimos
                 }
-
+                
               }
-
             }
           }
         }

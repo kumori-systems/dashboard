@@ -166,6 +166,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.commit('addMetrics', metrics);
     });
 
+    connection.onLink((params) => {
+      injectee.commit('link', params);
+    });
+
+    connection.onUnlink((params) => {
+      injectee.commit('unlink', params);
+    });
   }
 
   /**
