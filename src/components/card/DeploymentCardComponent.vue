@@ -77,16 +77,17 @@
             </template>
 
             <!-- Links -->
-            <template v-if="deployment.links.length > 0">
+            <template >
+              <!-- Links are calculated with channel connections -->
               <v-subheader><strong>LINKS</strong></v-subheader>
-              <v-list-tile v-for="(link, index) in deployment.links" v-bind:key="index" tag="div">
+              <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
+              <v-list-tile  v-for="(conn, index) in channConnections" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <v-icon></v-icon>
                 </v-card-actions>
-                <v-list-tile-title>
-                  {{ findDeployment(link.toDeployment).name }}
-                </v-list-tile-title>
+                <v-list-tile-title>{{ findDeployment(conn.destinyDeploymentId).name }}</v-list-tile-title>
               </v-list-tile>
+              </div>
             </template>
 
             <!-- Volumes -->

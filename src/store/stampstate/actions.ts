@@ -54,29 +54,48 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // platform
     if (!res && res !== null) {
       connection.getElementInfo(elementURI).catch((error) => {
-      // console.error('Error getting info from element %s', elementURI, error);
+        if (error.code !== '001')
+          console.error('Error getting info from element %s', elementURI,
+            error);
       });
     }
 
   }
 
+  /**
+   * Adds a new deployment to the stamp
+   * @requires deployment <Deployment> Deployment to add in the stamp
+   */
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
     connection.addDeployment(deployment).catch((error) => {
       console.error('Error deploying a service', error);
     });
   }
-  undeploy = (injectee: Vuex.ActionContext<State, any>, deploymentId): void => {
-    connection.undeployDeployment(deploymentId).catch((error) => {
-      console.error('The deployment ' + deploymentId +
+
+  /**
+   * Removes a deployment from the stamp
+   * @requires deploymentURN <string> urn of the deployment to remove
+   */
+  undeploy = (injectee: Vuex.ActionContext<State, any>,
+    deploymentURN: string): void => {
+    connection.undeployDeployment(deploymentURN).catch((error) => {
+      console.error('The deployment ' + deploymentURN +
         ' could not be undeployed: ' + error);
     });
   }
+
+  /**
+   * Adds a new domain to the stamp
+   */
   addNewDomain = (injectee: Vuex.ActionContext<State, any>,
     domain: string): void => {
     connection.addDomain(domain);
   }
 
+  /**
+   * Removes an element from the stamp
+   */
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
     connection.deleteElement(elementId).then(() => {
@@ -101,20 +120,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     });
   }
 
-  downloadManifest = (injectee: Vuex.ActionContext<State, any>, elementId):
+  downloadManifest = (injectee: Vuex.ActionContext<State, any>,
+    elementURN: string):
     void => {
-    connection.downloadManifest(elementId);
+    connection.downloadManifest(elementURN);
   }
 
   aplyingChangesToDeployment = (injectee: Vuex.ActionContext<State, any>, {
-    deploymentId, rolNumInstances, killInstances
+    deploymentURN, rolNumInstances, killInstances
   }):
     void => {
 
-    connection.aplyChangesToDeployment(deploymentId, rolNumInstances,
+    connection.aplyChangesToDeployment(deploymentURN, rolNumInstances,
       killInstances).catch((error) => {
         console.error('Error modifying deployment. ',
-          deploymentId, rolNumInstances, killInstances, error);
+        deploymentURN, rolNumInstances, killInstances, error);
       });
   }
 
@@ -123,10 +143,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.addNewBundle(params);
   }
 
-  /*
-  selectedService({ commit }, serviceId) {
-    commit('selectedService', serviceId);
-  },
-  */
+  link = (injectee: Vuex.ActionContext<State, any>, params):
+    void => {
+    connection.link(params);
+  }
+
+  unlink = (injectee: Vuex.ActionContext<State, any>, params):
+    void => {
+    connection.unlink(params);
+  }
 
 };

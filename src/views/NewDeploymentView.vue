@@ -101,9 +101,8 @@ export default class NewServiceView extends Vue {
   }
 
   get service(): Service {
-    let res = this.$store.getters.service(this.selectedService)
-    if(!res)
-     this.$store.dispatch("getElementInfo",res);
+    let res = this.$store.getters.service(this.selectedService);
+    if (!res) this.$store.dispatch("getElementInfo", res);
     return res;
   }
 
@@ -122,7 +121,7 @@ export default class NewServiceView extends Vue {
           this.deployments[deploymentURI].service
         );
     }
-   
+
     return this.$store.getters.servicesList;
   }
 
@@ -264,7 +263,7 @@ export default class NewServiceView extends Vue {
           this.selectedService, //serviceId
           roles, //roles
           config, //resourcesConfig
-          [] //links
+          {} //channels
         )
       );
       this.$router.push("/");

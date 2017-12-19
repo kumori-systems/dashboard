@@ -54,7 +54,10 @@ export class Deployment extends Measurable {
    */
   roles: { [role: string]: Deployment.Role } = {};
   /** <Deployment.Link> Connections with this deployment. MUST NOT BE EDITED. */
-  links: Deployment.Link[] = [];
+  channels: {
+    [originChannel: string]:
+    { destinyChannelId: string, destinyDeploymentId: string }[]
+  };
   /**
    * <Deployment.Role.STATE> Represents the state of the conjuntion of the
    * instances. If all instances are connected the state will be GOOD, if all
@@ -114,7 +117,10 @@ export class Deployment extends Measurable {
    */
   constructor(uri: string, name: string, parameters: any, service: string,
     roles: { [rol: string]: Deployment.Role },
-    resourcesConfig: { [resource: string]: any }, links: Deployment.Link[]) {
+    resourcesConfig: { [resource: string]: any }, channels: {
+      [originChannel: string]:
+      { destinyChannelId: string, destinyDeploymentId: string }[]
+    }) {
     super();
     // Check URI and assign results
     [this._domain, {}] = rightURIformat(uri);
@@ -137,7 +143,7 @@ export class Deployment extends Measurable {
       this.name = aux[4] + ' ~ ' + aux[aux.length - 1];
     }
 
-    if (links) this.links = links;
+    if (channels) this.channels = channels;
   }
 
   /**
@@ -235,7 +241,7 @@ export module Deployment {
     get actualInstances(): number {
       let res: number = 0;
       for (let i in this.instances) {
-        if (this.instances[i].state === Role.Instance.STATE.CONNECTED 
+        if (this.instances[i].state === Role.Instance.STATE.CONNECTED
           || this.instances[i].state === Role.Instance.STATE.DISCONNECTED
           || this.instances[i].state === Role.Instance.STATE.UNKOWN
         )

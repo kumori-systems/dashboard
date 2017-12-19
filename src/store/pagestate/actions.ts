@@ -39,7 +39,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     injectee.commit('signOut');
 
     // Launch background action
-
     connection.login(payload.username, payload.userpassword).then((user) => {
       injectee.commit('finishBackgroundAction', {
         'id': authenticationAction.id,
@@ -61,21 +60,26 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         // Load all deployments
         return connection.getDeploymentList().then(() => {
           console.debug('Retrieved all deployments from the platform');
+
           injectee.commit('finishBackgroundAction', {
             'id': loadInfoAction.id,
             'state': BackgroundAction.State.SUCCESS,
             'details': 'All data loaded'
           });
+
           injectee.commit('signIn', new User(user.id, user.name,
             User.State.AUTHENTICATED));
+
         });
       }).catch((error) => {
-        injectee.commit('finishBackgroundAction', {
-          'id': loadInfoAction.id,
-          'state': BackgroundAction.State.FAIL,
-          'details': 'Error loading data, please contact your administrator'
-        });
-        console.error('Error loading data: ', error);
+        if (!error.code || error.code !== '001') {
+          injectee.commit('finishBackgroundAction', {
+            'id': loadInfoAction.id,
+            'state': BackgroundAction.State.FAIL,
+            'details': 'Error loading data, please contact your administrator'
+          });
+          console.error('Error loading data: ', error);
+        }
       });
     }).catch((error) => {
       injectee.commit('finishBackgroundAction',
@@ -162,6 +166,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.commit('addMetrics', metrics);
     });
 
+    connection.onLink((params) => {
+      injectee.commit('link', params);
+    });
+
+    connection.onUnlink((params) => {
+      injectee.commit('unlink', params);
+    });
   }
 
   /**

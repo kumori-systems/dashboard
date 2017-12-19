@@ -58,16 +58,21 @@ export class HTTPEntryPoint extends EntryPoint {
   websites: string[] = [];
   constructor(URI: string, parameters: any,
     roles: { [roleURI: string]: Deployment.Role }, resourcesConfig: any,
-    links: Deployment.Link[]) {
+    channels: {
+      [originChannel: string]: {
+        destinyChannelId: string,
+        destinyDeploymentId: string
+      }[]
+    }) {
     super(
       URI,
       roles && roles['sep'].configuration ?
-      roles['sep'].configuration.domain : null,
+        roles['sep'].configuration.domain : null,
       parameters,
       EntryPoint.TYPE.HTTP_INBOUND,
       roles,
       resourcesConfig,
-      links);
+      channels);
 
     // TODO: The configuration should be given in a future ticket
     if (roles && roles['sep'].configuration)

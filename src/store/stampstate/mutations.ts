@@ -226,17 +226,79 @@ export default class Mutations implements Vuex.MutationTree<State> {
           metricBundle[deploymentId].data.timestamp,
           metricBundle[deploymentId]
         ]);
+      }
+    }
+  }
 
+  link = (state: State,
+    { deploymentOne, channelOne, deploymentTwo, channelTwo }): void => {
+    let conn = {
+      'destinyDeploymentId': deploymentTwo,
+      'destinyChannelId': channelTwo
+    };
+    // if deployment and channel, both exists in the state
+    if (state.deployments[deploymentOne]) {
+      if (!state.deployments[deploymentOne].channels[channelOne]) {
+        state.deployments[deploymentOne].channels[channelOne] = [];
+      }
+      if (state.deployments[deploymentOne].channels[channelOne].findIndex(
+        (elem) => {
+          return (elem.destinyChannelId === conn.destinyChannelId)
+            && (elem.destinyDeploymentId === conn.destinyDeploymentId);
+        })
+        === -1) { // if connexion isn't already inserted
+        state.deployments[deploymentOne].channels[channelOne].push(conn);
+      }
+    }
 
-        // If we receive metrics from an instance, it means the instance is
-        // connected
-        for (let role in metricBundle[deploymentId].roles) {
-          for (let inst in metricBundle[deploymentId].roles[role].instances) {
-            state.deployments[deploymentId].roles[role].instances[inst].state =
-              Deployment.Role.Instance.STATE.CONNECTED;
-          }
-        }
+    conn = {
+      'destinyDeploymentId': deploymentOne,
+      'destinyChannelId': channelOne
+    };
 
+    if (state.deployments[deploymentTwo]) {
+      if (!state.deployments[deploymentTwo].channels[channelTwo]) {
+        state.deployments[deploymentTwo].channels[channelTwo] = [];
+      }
+      if (state.deployments[deploymentTwo].channels[channelTwo].findIndex(
+        (elem) => {
+          return (elem.destinyChannelId === conn.destinyChannelId)
+            && (elem.destinyDeploymentId === conn.destinyDeploymentId);
+        })
+        === -1) { // if connexion isn't already inserted
+        state.deployments[deploymentTwo].channels[channelTwo].push(conn);
+      }
+    }
+  }
+
+  unlink = (state: State,
+    { deploymentOne, channelOne, deploymentTwo, channelTwo }): void => {
+    let index;
+    // Locate connexion
+    if (state.deployments[deploymentOne]
+      && state.deployments[deploymentOne].channels[channelOne]) {
+      index = state.deployments[deploymentOne].channels[channelOne].findIndex(
+        (elem) => {
+          return (elem.destinyChannelId === channelTwo)
+            && (elem.destinyDeploymentId === deploymentTwo);
+        });
+      // Remove connexion
+      if (index >= 0) {
+        state.deployments[deploymentOne].channels[channelOne].splice(index, 1);
+      }
+    }
+
+    // Locate connexion
+    if (state.deployments[deploymentTwo]
+      && state.deployments[deploymentTwo].channels[channelTwo]) {
+      index = state.deployments[deploymentTwo].channels[channelTwo].findIndex(
+        (elem) => {
+          return (elem.destinyChannelId === channelOne)
+            && (elem.destinyDeploymentId === deploymentOne);
+        });
+      // Remove connexion
+      if (index >= 0) {
+        state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
       }
     }
   }

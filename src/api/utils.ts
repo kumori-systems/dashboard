@@ -64,16 +64,29 @@ export function transformEcloudDeploymentToDeployment(
   }
 
   let parameters: any = {};
-  let links: Array<Deployment.Link> = [];
 
-  for (let firstChannel in ecloudDeployment.links) {
-    for (let secondDeployment in ecloudDeployment.links[firstChannel])
+  let channels: {
+    [originChannel: string]: {
+      destinyChannelId: string,
+      destinyDeploymentId: string
+    }[]
+  } = {};
+
+  for (let originChannel in ecloudDeployment.links) {
+    for (let destinyDeploymentId in ecloudDeployment.links[originChannel]) {
       for (
-        let secondChannel in
-        ecloudDeployment.links[firstChannel][secondDeployment]
-      )
-        links.push(
-          new Deployment.Link(firstChannel, secondDeployment, secondChannel));
+        let destinyChannel in
+        ecloudDeployment.links[originChannel][destinyDeploymentId]
+      ) {
+        if (!channels[originChannel]) {
+          channels[originChannel] = [];
+        }
+        channels[originChannel].push({
+          'destinyChannelId': destinyChannel,
+          'destinyDeploymentId': destinyDeploymentId
+        });
+      }
+    }
   }
 
   let res: Deployment = null;
@@ -84,7 +97,7 @@ export function transformEcloudDeploymentToDeployment(
       parameters,
       roles,
       resourcesConfig,
-      links
+      channels // channels
     );
   } else {
     res = new Deployment(
@@ -94,7 +107,7 @@ export function transformEcloudDeploymentToDeployment(
       ecloudDeployment.service, // serviceId: string
       roles, // roles: { [rolName: string]: DeploymentRol }
       resourcesConfig, // resourcesConfig: { [resource: string]: any }
-      links
+      channels // channels
     );
   }
   return res;
