@@ -34,41 +34,40 @@
 
             <!-- Deployment links -->
             <v-layout row wrap>
-              <v-flex ma-1 xs12 v-if="service">
-
+              <v-flex ma-1 xs12 md12 v-if="service">
                 <template v-if="service">
                   <span class="subheading">Connections:</span>
 
-                  <div v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <v-layout>
-                      <v-flex ma-1 xs6 md4>{{ name }} -></v-flex>
+                  <table>
+                    <tr>
+                      <th>From</th>
+                      <th>To</th>
+                    </tr>
+                  <tr  v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                    <th>{{ name }}</th>
+                    <th>
+                      <v-select
+                        v-bind:items="totalDependedDeploymentChannels(service, name)"
+                        v-model="serviceNewProvidedConnections[name]"
+                        multiple chips multi-line v-on:input="handleInput"
+                        return-object autocomplete>
+                      </v-select>
+                    </th>
+                  </tr>
 
-                      <v-flex ma-1 xs6 md8>
-                        <v-select
-                          v-bind:items="totalDependedDeploymentChannels(service, name)"
-                          v-model="serviceNewProvidedConnections[name]"
-                          multiple chips multi-line v-on:input="handleInput"
-                          return-object autocomplete>
-                        </v-select>
-                      </v-flex>
+                  <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                    <th>
+                      <v-select
+                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                        v-model="serviceNewDependedConnections[name]"
+                        multiple chips multi-line v-on:input="handleInput"
+                        return-object autocomplete>
+                      </v-select>
+                    </th>
+                    <th>{{ name }}</th>
+                  </tr>
 
-                    </v-layout>
-                  </div>
-
-                  <div v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                    <v-layout>
-                      <v-flex ma-1 xs6 md8>
-                        <v-select
-                          v-bind:items="totalProvidedDeploymentChannels(service, name)"
-                          v-model="serviceNewDependedConnections[name]"
-                          multiple chips multi-line v-on:input="handleInput"
-                          return-object autocomplete>
-                        </v-select>
-                      </v-flex>
-                      <v-flex ma-1 xs6 md4>-> {{ name }}</v-flex>
-                    </v-layout>
-                  </div>
-
+                </table>
                 </template>
 
               </v-flex>
