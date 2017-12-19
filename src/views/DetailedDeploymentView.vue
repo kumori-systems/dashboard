@@ -44,7 +44,7 @@
                       <th>To</th>
                     </tr>
                   <tr  v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th>{{ name }}</th>
+                    <th><v-chip>{{ name }}</v-chip></th>
                     <th>
                       <v-select
                         v-bind:items="totalDependedDeploymentChannels(service, name)"
@@ -64,7 +64,7 @@
                         return-object autocomplete>
                       </v-select>
                     </th>
-                    <th>{{ name }}</th>
+                    <th><v-chip>{{ name }}</v-chip></th>
                   </tr>
 
                 </table>
