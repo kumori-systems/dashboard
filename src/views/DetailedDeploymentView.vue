@@ -455,12 +455,6 @@ export default class DetailedDeploymentView extends Vue {
     */
     let changedNumInstances = false;
     for (let role in this.deployment.roles) {
-      console.log(
-        "deployment instances",
-        role,
-        this.deployment.roles[role].actualInstances
-      );
-      console.log("temporal instances", role, this.rolNumInstances[role]);
       if (
         this.rolNumInstances[role] &&
         this.deployment.roles[role].actualInstances !==
@@ -473,7 +467,7 @@ export default class DetailedDeploymentView extends Vue {
     if (changedNumInstances) {
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
-        deploymentId: this.deployment._uri,
+        deploymentURN: this.deployment._uri,
         rolNumInstances: this.rolNumInstances,
         killInstances: this.instanceKill
       });

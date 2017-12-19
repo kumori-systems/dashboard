@@ -282,7 +282,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
           return (elem.destinyChannelId === channelTwo)
             && (elem.destinyDeploymentId === deploymentTwo);
         });
-      console.log('index is:', index);
       // Remove connexion
       if (index >= 0) {
         state.deployments[deploymentOne].channels[channelOne].splice(index, 1);
@@ -297,7 +296,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
           return (elem.destinyChannelId === channelOne)
             && (elem.destinyDeploymentId === deploymentOne);
         });
-      console.log('index is:', index);
       // Remove connexion
       if (index >= 0) {
         state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
