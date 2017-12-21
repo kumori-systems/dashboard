@@ -17,7 +17,7 @@
       <!-- Content of the page -->
       <v-content>
         <v-container fluid>
-          <router-view></router-view>  
+          <router-view></router-view>
         </v-container>
       </v-content>
 
@@ -36,8 +36,7 @@ import VueClassComponent from "vue-class-component";
 import { SignInView } from "./views";
 import {
   AppbarComponent,
-  NavigationComponent,
-  FABComponent
+  NavigationComponent
 } from "./components";
 import PSGetters from "./store/pagestate/getters";
 
@@ -46,8 +45,7 @@ import PSGetters from "./store/pagestate/getters";
   components: {
     "signin-view": SignInView,
     "appbar-component": AppbarComponent,
-    "navigation-component": NavigationComponent,
-    "fab-component": FABComponent
+    "navigation-component": NavigationComponent
   }
 })
 export default class App extends Vue {

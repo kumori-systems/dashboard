@@ -1,13 +1,34 @@
 <template>
-    <div>
-      <!-- 
-        input-file on process: https://github.com/vuetifyjs/vuetify/issues/238
-      -->
-      <input type="file" class="box" v-on:change="onFileChange">  
-      <v-btn class="blue" v-bind:disabled="fileList === null || fileList.length === 0"
-      v-on:click="addElement">Upload bundle</v-btn>
+    <v-card id="upload-bundle-view">
+      <v-card-title>
 
-    </div>
+        <!-- View title -->
+        <h3 class="headline mb-0">Upload bundle</h3>
+
+        <!-- Applies spaces between elements -->
+        <v-spacer></v-spacer>
+
+        <!-- View actions -->
+        <v-card-actions>
+
+          <!-- Upload bundle button -->
+          <v-btn color="primary" class="elevation-0"
+          v-bind:disabled="fileList === null || fileList.length === 0"
+          v-on:click="addElement">
+            <span>Upload bundle</span>
+            <v-icon right>file_upload</v-icon>
+          </v-btn>
+
+          <!-- Cancels the action -->
+          <v-btn outline to="-1">Cancel</v-btn>
+          
+        </v-card-actions>
+      </v-card-title>
+      <v-container>
+          <!--input-file on process: https://github.com/vuetifyjs/vuetify/issues/238-->
+          <input type="file" class="box" v-on:change="onFileChange">  
+      </v-container>
+    </v-card>
 </template>
 
 <script lang="ts">

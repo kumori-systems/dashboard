@@ -2,7 +2,7 @@
   <v-layout id="signin-view">
     <!-- Flexible content allows good resize: MarginAll size_eXtraSmall, size_SMall, size_MeDium, size_LarGe, size_eXtraLarge -->
     <v-flex xs12 sm6 offset-sm3 md4 offset-md4 lg4 offset-lg4 xl2 offset-xl5 v-on:keyup.enter="signIn" wrap>
-      <v-card>
+      <v-card class="elevation-10">
         <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
         <v-card-title primary-title>
           <div>

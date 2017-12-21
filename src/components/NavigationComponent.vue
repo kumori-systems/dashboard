@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer floating clipped fixed app>
+  <v-navigation-drawer clipped permanent app>
     <!-- Menu items -->
     <v-list dense v-for="(item, i) in items" v-bind:key="i">
       <!-- If item doesn't have children -->

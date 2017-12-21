@@ -1,23 +1,48 @@
 <template>
-  <v-container fluid id="deployment-item-view">
-    <v-layout row wrap>
+  <v-card>
+    <v-card-title>
+      
+      <!-- View title-->
+      <h3 class="headline mb-0">{{ deployment.name }}</h3>
+        
+        <!-- Applies a space between elements -->
+        <v-spacer></v-spacer>
+        
+        <!-- Deployment actions -->
+        <v-card-actions>
+          <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+          <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
+          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+        </v-card-actions>
+      
+    </v-card-title>
+    
+    <!-- Divides the swections of the card -->
+    <v-divider></v-divider>
+
+    <!-- Main content of the view-->
+    <v-container fluid id="deployment-item-view">
+      <!-- Deployment general info -->
       <v-container fluid id="deployment-item-view">
-        <v-layout clo row wrap>
+        <v-layout wrap>
+
+          <!-- Deployment state -->
           <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
             <v-icon v-bind:id="state">{{ state }}</v-icon>
           </v-flex>
 
+          <!-- Detailed info -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
             <!-- Deployment uri -->
-            <v-layout row wrap>
+            <v-layout wrap>
               <v-flex ma-1 xs12>
                 <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
               </v-flex>
             </v-layout>
 
-            <!-- Deployment date -->
-            <v-layout row wrap>
+            <!-- Deployment creation date -->
+            <v-layout wrap>
               <v-flex ma-1 xs12>
                 <p><span class="subheading">Date:</span>
                 {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
@@ -26,23 +51,26 @@
             </v-layout>
 
             <!-- Deployment service -->
-            <v-layout row wrap>
+            <v-layout wrap>
               <v-flex ma-1 xs12>
                 <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
               </v-flex>
             </v-layout>
 
             <!-- Deployment links -->
-            <v-layout row wrap>
+            <v-layout wrap>
               <v-flex ma-1 xs12 md12 v-if="service">
-                <template v-if="service">
-                  <span class="subheading">Connections:</span>
+                <span class="subheading">Connections:</span>
+                
+                <!-- Link table representation -->
+                <table>
+                  <!-- Heders-->
+                  <tr>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
 
-                  <table>
-                    <tr>
-                      <th>From</th>
-                      <th>To</th>
-                    </tr>
+                  <!-- Provided Channels -->
                   <tr  v-for="(conn, name) in service.providedChannels" v-bind:key="name">
                     <th><v-chip>{{ name }}</v-chip></th>
                     <th>
@@ -55,6 +83,7 @@
                     </th>
                   </tr>
 
+                  <!-- Depended channels -->
                   <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
                     <th>
                       <v-select
@@ -68,67 +97,53 @@
                   </tr>
 
                 </table>
-                </template>
-
               </v-flex>
             </v-layout>
-
           </v-flex>
 
+          <!-- Applies space between elements -->
           <v-spacer></v-spacer>
 
+          <!-- Deployment chart -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-
-            <!-- Deployment actions -->
-            <v-layout>
-              <v-btn color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-              <v-btn color="warning" v-bind:disabled="!haveChanges"
-                v-on:click="applyChanges">Apply changes</v-btn>
-              <v-btn v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-            </v-layout>
-
-            <!-- Deployment chart -->
-            <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-              <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
-                v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
-              </deployment-chart-component>
-            </v-flex>
-
+            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+            </deployment-chart-component>
           </v-flex>
 
         </v-layout>
       </v-container>
-    </v-layout>
 
-    <!-- Deployment roles -->
-    <v-layout row wrap>
-      <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-        <role-card-component v-for="(rolContent, rolId) in deployment.roles"
-        v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
-        v-bind:roleMetrics="roleMetrics"
-        v-on:killInstanceChange="handleKillInstanceChange"
-        v-on:numInstancesChange="handleNumInstancesChange"
-        v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
-      </v-flex>
-    </v-layout>
+      <!-- Deployment roles -->
+      <v-layout wrap>
+        <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+          <role-card-component v-for="(rolContent, rolId) in deployment.roles"
+          v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
+          v-bind:roleMetrics="roleMetrics"
+          v-on:killInstanceChange="handleKillInstanceChange"
+          v-on:numInstancesChange="handleNumInstancesChange"
+          v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
+        </v-flex>
+      </v-layout>
 
-    <!-- Single delete -->
-    <v-dialog v-model="undeployElementDialog" max-width="800px">
-      <v-card>
-        <v-card-title class="headline">Undeploy?</v-card-title>
-        <v-card-text>
-          This action <strong>CAN'T BE UNDONE</strong> and will
-          undeploy {{deployment.name}}.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
-          <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      <!-- Undeploy dialog -->
+      <v-dialog v-model="undeployElementDialog" max-width="800px">
+        <v-card>
+          <v-card-title class="headline">Undeploy?</v-card-title>
+          <v-card-text>
+            This action <strong>CAN'T BE UNDONE</strong> and will
+            undeploy {{ deployment.name }}.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
+            <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
-  </v-container>
+    </v-container>
+  </v-card>
 </template>
 <script lang="ts" scoped>
 import Vue from "vue";

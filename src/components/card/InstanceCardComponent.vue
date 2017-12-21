@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-layout row wrap>
+    <v-layout wrap>
       
       <!-- Instance name -->
       <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
@@ -9,7 +9,7 @@
       </v-flex>
 
     </v-layout>
-    <v-layout row wrap>
+    <v-layout wrap>
       
       <!-- Instance arrangement -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>

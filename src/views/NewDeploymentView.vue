@@ -1,62 +1,85 @@
 <template>
- <v-form v-model="valid" ref="form">
-    <!-- Card body: Deployment stats -->
-    <v-container>
+  <v-form v-model="valid" ref="form">
+    <v-card id="add-deployment-view">
 
-      <!-- Deployment name -->
-      <v-layout>
-        <v-flex xs4>
-          <v-text-field label="Name" v-model="deploymentName" v-bind:rules="[v => !!v && v.length > 0 || 'A name is required']" required></v-text-field>
-        </v-flex>
-      </v-layout>
+      <!-- Card tittle -->
+      <v-card-title>
+        <h3 class="headline mb-0">Add a new common deployment</h3>
 
-      <!-- Deployment service -->
-      <v-layout>
-        <v-flex xs12 sm6>
-          <v-select label="Service" v-model="selectedService" v-bind:items="services"
-            item-text="_uri" item-value="_uri" required
-            v-bind:rules="[v => !!v || 'A service is required']" autocomplete></v-select>
-        </v-flex>
-      </v-layout>
+        <!-- Applies a space between elements -->
+        <v-spacer></v-spacer>
 
-      <!-- Deployment roles -->
-      <span v-if="selectedService && selectedService.length > 0" class="headline">Roles</span>
-      <v-flex xs5 v-for="(role, index) in serviceRoleList" v-bind:key="index">
-        <v-flex ma-1 xs4>
-          <strong class="title">{{ role }}</strong>
-        </v-flex>
-        <v-flex ma-1 xs4>
-          <v-text-field  label="MEM" v-model="rolMem[index]" mask='####' v-bind:rules="[v => !!v || 'MEM number is required']" required></v-text-field>
-        </v-flex>
-        <v-flex ma-1 xs4>
-          <v-text-field label="CPU" v-model="rolCPU[index]" mask='####' v-bind:rules="[v => !!v || 'CPU number is required']" required></v-text-field>
-        </v-flex>
-        <v-flex ma-1 xs4>
-          <v-text-field label="NET" v-model="rolNet[index]" mask='####' v-bind:rules="[v => !!v || 'NET number is required']" required></v-text-field>
-        </v-flex>
-        <v-flex ma-1 xs4>
-          <v-text-field label="Instances" v-model="rolInstances[index]" mask='####' v-bind:rules="[v => !!v || 'Instance number is required']" required></v-text-field>
-        </v-flex>
-        <v-flex ma-1 xs4>
-          <v-text-field label="Resilence" v-model="rolResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
-        </v-flex>
-      </v-flex>
-      
-      <!-- Deployment resources -->
-      <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
-      <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
-        <v-text-field v-bind:label="resource" v-model="resourceConfig[index]" placeholder="text/json" multi-line></v-text-field>
-      </v-flex>
+        <!-- View actions -->
+        <v-card-actions>
 
-      <!-- Deployment config -->
-      <span v-if="selectedService && selectedService.length > 0 && selectedService.length > 0" class="headline">Service configuration</span>
-      <v-text-field v-if="selectedService && selectedService.length > 0 && selectedService.length > 0" v-model="serviceConfig" placeholder="text/json" multi-line></v-text-field>
+          <!-- Submit button -->
+          <v-btn class="elevation-0" color="primary" v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
+          
+          <!-- Cancel button -->
+          <v-btn outline to="-1">Cancel</v-btn>
 
-     <!-- Submit buttons -->
-      <v-layout>
-        <v-btn v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
-      </v-layout>
-    </v-container>
+        </v-card-actions>
+
+      </v-card-title>
+
+      <!-- Divides the sections of the card -->
+      <v-divider></v-divider>
+
+      <!-- Card body: Deployment stats -->
+      <v-container>
+
+        <!-- Deployment name -->
+        <v-layout>
+          <v-flex xs4>
+            <v-text-field label="Name" v-model="deploymentName" v-bind:rules="[v => !!v && v.length > 0 || 'A name is required']" required></v-text-field>
+          </v-flex>
+        </v-layout>
+
+        <!-- Deployment service -->
+        <v-layout>
+          <v-flex xs12 sm6>
+            <v-select label="Service" v-model="selectedService" v-bind:items="services"
+              item-text="_uri" item-value="_uri" required
+              v-bind:rules="[v => !!v || 'A service is required']" autocomplete></v-select>
+          </v-flex>
+        </v-layout>
+
+        <!-- Deployment roles -->
+        <span v-if="selectedService && selectedService.length > 0" class="headline">Roles</span>
+        <v-flex xs5 v-for="(role, index) in serviceRoleList" v-bind:key="index">
+          <v-flex ma-1 xs4>
+            <strong class="title">{{ role }}</strong>
+          </v-flex>
+          <v-flex ma-1 xs4>
+            <v-text-field  label="MEM" v-model="rolMem[index]" mask='####' v-bind:rules="[v => !!v || 'MEM number is required']" required></v-text-field>
+          </v-flex>
+          <v-flex ma-1 xs4>
+            <v-text-field label="CPU" v-model="rolCPU[index]" mask='####' v-bind:rules="[v => !!v || 'CPU number is required']" required></v-text-field>
+          </v-flex>
+          <v-flex ma-1 xs4>
+            <v-text-field label="NET" v-model="rolNet[index]" mask='####' v-bind:rules="[v => !!v || 'NET number is required']" required></v-text-field>
+          </v-flex>
+          <v-flex ma-1 xs4>
+            <v-text-field label="Instances" v-model="rolInstances[index]" mask='####' v-bind:rules="[v => !!v || 'Instance number is required']" required></v-text-field>
+          </v-flex>
+          <v-flex ma-1 xs4>
+            <v-text-field label="Resilence" v-model="rolResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
+          </v-flex>
+        </v-flex>
+        
+        <!-- Deployment resources -->
+        <span v-if="selectedService && selectedService.length > 0 && serviceResourcesList.length > 0" class="headline">Resources configuration</span>
+        <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="index">
+          <v-text-field v-bind:label="resource" v-model="resourceConfig[index]" placeholder="text/json" multi-line></v-text-field>
+        </v-flex>
+
+        <!-- Deployment config -->
+        <span v-if="selectedService && selectedService.length > 0 && selectedService.length > 0" class="headline">Service configuration</span>
+        <v-text-field v-if="selectedService && selectedService.length > 0 && selectedService.length > 0" v-model="serviceConfig" placeholder="text/json" multi-line></v-text-field>
+
+      </v-container>
+
+    </v-card>
   </v-form>
 </template>
 

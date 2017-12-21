@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar color="white" light flat fixed clipped-left app>
+  <v-toolbar color="white" fixed clipped-left app>
 
     <!-- Corporative logo -->
     <v-toolbar-title>
@@ -48,7 +48,7 @@ import { User, Notification } from "../store/pagestate/classes";
   components: {}
 })
 export default class AppbarComponent extends Vue {
-  showEntrypoints: boolean = true;
+
   /** Gets the user authenticated in the system */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;

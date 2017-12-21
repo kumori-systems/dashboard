@@ -1,40 +1,71 @@
 <template>  
-  <v-card>
+  <v-card id="overview-view">
+    <v-card-title>
+
+        <!-- View title -->
+        <h3 class="headline mb-0">Overview</h3>
+
+        <!-- Applies spaces between elements -->
+        <v-spacer></v-spacer>
+
+        <!-- View actions -->
+        <v-card-actions>
+          
+          <!-- Add Deployment -->
+          <v-btn color="primary" outline to="/addDeployment">
+            <span>Add Common Deployment</span>
+            <v-icon right>cloud</v-icon>
+          </v-btn>
+
+          <!-- Add Entrypoint -->
+          <v-btn color="primary" outline to="/addHTTPEntrypoint">
+            <span>Add Entrypoint</span>
+            <v-icon right>language</v-icon>
+          </v-btn>
+
+        </v-card-actions>
+      </v-card-title>
+
+    <!-- Divides the content of the card-->
+    <v-divider></v-divider>
+
+    <!-- View actions on deployments -->
     <v-card-actions>
-      <v-btn-toggle mandatory v-model="toggle_one" >
+
+      <!-- Show all, entrypoint or common deployment -->
+      <v-btn-toggle mandatory v-model="show" class="elevation-0">
+
+        <!-- Show all -->
         <v-btn flat value="all">
           <span>All</span>
         </v-btn>
-        <v-btn flat value="entrypoints">
-          <span>Entrypoints</span>
-          <v-icon>language</v-icon>      
-        </v-btn>
+
+        <!-- Show only common deployments -->
         <v-btn flat value="deployments">
           <span>Common Deployments</span>
           <v-icon>cloud</v-icon>
         </v-btn>
+
+        <!-- Show only entrypoints -->
+        <v-btn flat value="entrypoints">
+          <span>Entrypoints</span>
+          <v-icon>language</v-icon>      
+        </v-btn>
+
       </v-btn-toggle>
-      <v-spacer></v-spacer>
-      <v-btn  color="primary" outline>
-        <span>Add Common Deployment</span>
-        <v-icon right>cloud</v-icon>
-      </v-btn>
-      <v-btn color="primary" outline>
-        <span>Add Entrypoint</span>
-        <v-icon right>language</v-icon>
-      </v-btn>
+
     </v-card-actions>
-    <v-divider></v-divider>
+
     <!-- The view changes depending on if we've got deployed services or not-->
     <v-container fluid v-if="numDeployments > 0">
         
       <!-- EntryPoint Deployments -->
-      <v-layout row wrap v-if="showEntrypoints">
+      <v-layout wrap v-if="show==='all' || show==='entrypoints'">
         <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
       </v-layout>
 
       <!-- Common Deployments -->
-      <v-layout row wrap>
+      <v-layout wrap v-if="show==='all' || show==='deployments'">
         <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
       </v-layout>
 
@@ -63,9 +94,8 @@ import { DeploymentCardComponent } from "../components";
   }
 })
 export default class OverviewView extends Vue {
-  /** Show/Hide Entrypoints */
-  showEntrypoints: boolean = true;
-  toggle_one = 'all';
+  /** Show All, Entrypoints or Common Deployments */
+  show: string = "all";
 
   /**
     * Obtains actual number of deployments.

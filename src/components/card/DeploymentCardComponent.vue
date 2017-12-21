@@ -8,15 +8,15 @@
         <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>{{ deployment.name }}
         <v-spacer></v-spacer>
 
-      <v-tooltip bottom>
-        <span dark slot="activator">{{ deployment._uri | truncateLeft(8) }}</span>
-        <span>{{deployment._uri}}</span>
-      </v-tooltip>
+        <v-tooltip bottom>
+          <span dark slot="activator">{{ deployment._uri | truncateLeft(8) }}</span>
+          <span>{{deployment._uri}}</span>
+        </v-tooltip>
   
-    </v-card-title>
+      </v-card-title>
 
-    <!-- Card body: Deployment stats -->
-    <v-container>
+      <!-- Card body: Deployment stats -->
+      <v-container>
 
         <!-- Flexible content allows good resize -->
         <v-flex>

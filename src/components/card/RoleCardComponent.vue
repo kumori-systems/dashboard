@@ -32,7 +32,7 @@
     <v-container fluid class="grey lighten-3">
 
       <!-- Role info -->
-      <v-layout row wrap>
+      <v-layout wrap>
        <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
           
           <!-- Component uri -->
@@ -80,7 +80,7 @@
       </v-layout>
       
       <!-- Role instances -->
-      <v-layout row wrap v-if="service">
+      <v-layout wrap v-if="service">
         <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
           <v-expansion-panel expand>
             <v-expansion-panel-content>

@@ -1,9 +1,7 @@
 // Layout
 import AppbarComponent from './AppbarComponent.vue';
-import FABComponent from './FABComponent.vue';
 import NavigationComponent from './NavigationComponent.vue';
-import ToolbarComponent from './ToolbarComponent.vue';
-export { AppbarComponent, FABComponent, NavigationComponent, ToolbarComponent }
+export { AppbarComponent, NavigationComponent }
 
 // Card
 import DeploymentCardComponent from './card/DeploymentCardComponent.vue';

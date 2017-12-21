@@ -1,40 +1,61 @@
 <template>
-<div>
+  <v-card>
+    <v-card-title>
+
+      <!-- View title -->
+      <h3 class="headline mb-0">Domains</h3>
+
+      <!-- Applies spaces between elements -->
+      <v-spacer></v-spacer>
+
+      <!-- View actions -->
+      <v-card-actions>
+
+        <!-- Upload bundle button -->
+        <v-btn outline color="primary" class="elevation-0" to="/adddomain">
+          <span>Add domain</span>
+          <v-icon right>domain</v-icon>
+        </v-btn>
+        
+      </v-card-actions>
+    </v-card-title>
+    <v-container>
     <v-data-table
       v-bind:headers="headers"
       v-bind:items="domains"
       hide-actions>
-    <template slot="items" scope="props">
-      <td class="text-xs-left">{{ props.item.url }}</td>
-      <td class="text-xs-left">{{ props.item.state }}</td>
-      <td class="text-xs-left">
-        <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
-          v-bind:to="deployment(elem)._path">
-          {{ deployment(elem).name }}
-        </router-link>
-      </td>
-      <td class="text-xs-left">
-        <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
-          <v-icon class="white--text">delete_forever</v-icon>
-        </v-btn>
-      </td>
-    </template>
-  </v-data-table>
-  <v-dialog v-model="dialog" max-width="800px">
-    <v-card>
-      <v-card-title class="headline">Delete domain?</v-card-title>
-      <v-card-text>
-        This action <strong>CANNOT BE UNDONE</strong> and will
-        permanently delete the {{ selectedDomain }} domain.
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="red darken-1" flat="flat" @click.native="deleteDomain">Delete domain</v-btn>
-        <v-btn color="green darken-1" flat="flat" @click.native="dialog = false">Cancel</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-</div>
+      <template slot="items" scope="props">
+        <td class="text-xs-left">{{ props.item.url }}</td>
+        <td class="text-xs-left">{{ props.item.state }}</td>
+        <td class="text-xs-left">
+          <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
+            v-bind:to="deployment(elem)._path">
+            {{ deployment(elem).name }}
+          </router-link>
+        </td>
+        <td class="text-xs-left">
+          <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
+            <v-icon class="white--text">delete_forever</v-icon>
+          </v-btn>
+        </td>
+      </template>
+    </v-data-table>
+    <v-dialog v-model="dialog" max-width="800px">
+      <v-card>
+        <v-card-title class="headline">Delete domain?</v-card-title>
+        <v-card-text>
+          This action <strong>CANNOT BE UNDONE</strong> and will
+          permanently delete the {{ selectedDomain }} domain.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat @click.native="deleteDomain">Delete domain</v-btn>
+          <v-btn color="green darken-1" flat @click.native="dialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    </v-container>
+  </v-card>
 </template>
 <script lang="ts">
 import Vue from "vue";
@@ -59,7 +80,7 @@ export default class DomainsView extends Vue {
 
   headers: any[] = [
     {
-      text: "Domain",
+      text: "URL",
       align: "left",
       sortable: false,
       value: "domain"
