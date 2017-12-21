@@ -1,9 +1,9 @@
 <template>
-  <v-toolbar color="white" light flat fixed clipped-left app dense>
+  <v-toolbar color="white" light flat fixed clipped-left app>
 
     <!-- Corporative logo -->
     <v-toolbar-title>
-      <img src="/static/logo_text.png" alt="kumori systems" height="35px">
+      <img src="/static/logo_text.png" alt="kumori systems" height="40px">
     </v-toolbar-title>
       
     <!-- Separator -->
@@ -15,7 +15,7 @@
     </v-btn>
 
     <!-- User's avatar -->
-    <v-avatar size="35px" class="mr-1">
+    <v-avatar size="40px" class="mr-1">
       <img v-bind:src="user.avatar" alt="avatar">      
     </v-avatar>
 
@@ -33,19 +33,6 @@
         </v-list-tile>
       </v-list>
     </v-menu>
-
-    <!-- Extension form the toolbar -->
-    <v-toolbar light flat color="white" slot="extension" dense>
-      <v-spacer></v-spacer>
-      
-      <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
-      <v-btn outline>
-        add entrypoint<v-icon right>language</v-icon>
-      </v-btn>
-      <v-btn outline>
-        add deployment<v-icon right>cloud</v-icon>
-      </v-btn>
-    </v-toolbar>
 
   </v-toolbar>
 </template>

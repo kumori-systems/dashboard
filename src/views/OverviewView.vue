@@ -1,29 +1,51 @@
 <template>  
-  <v-container fluid id="overview-view">
+  <v-card>
+    <v-card-actions>
+      <v-btn-toggle mandatory v-model="toggle_one" >
+        <v-btn flat value="all">
+          <span>All</span>
+        </v-btn>
+        <v-btn flat value="entrypoints">
+          <span>Entrypoints</span>
+          <v-icon>language</v-icon>      
+        </v-btn>
+        <v-btn flat value="deployments">
+          <span>Common Deployments</span>
+          <v-icon>cloud</v-icon>
+        </v-btn>
+      </v-btn-toggle>
+      <v-spacer></v-spacer>
+      <v-btn  color="primary" outline>
+        <span>Add Common Deployment</span>
+        <v-icon right>cloud</v-icon>
+      </v-btn>
+      <v-btn color="primary" outline>
+        <span>Add Entrypoint</span>
+        <v-icon right>language</v-icon>
+      </v-btn>
+    </v-card-actions>
+    <v-divider></v-divider>
+    <!-- The view changes depending on if we've got deployed services or not-->
+    <v-container fluid v-if="numDeployments > 0">
+        
+      <!-- EntryPoint Deployments -->
+      <v-layout row wrap v-if="showEntrypoints">
+        <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+      </v-layout>
 
-      <!-- The view changes depending on if we've got deployed services or not-->
-      <template v-if="numDeployments > 0">
+      <!-- Common Deployments -->
+      <v-layout row wrap>
+        <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+      </v-layout>
 
-  <v-container>
-    <!-- EntryPoint Deployments -->
-        <v-layout row wrap v-if="showEntrypoints">
-          <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
-        </v-layout>
-
-        <!-- Common Deployments -->
-        <v-layout row wrap>
-          <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
-        </v-layout>
-  </v-container>
-    </template>
-    <template v-else>
+    </v-container>
+    <v-container v-else>
 
       <!-- No deployments found -->
       Start making some deployments
 
-    </template>
-
-  </v-container>
+    </v-container>
+  </v-card>
 </template>
 <script lang="ts">
 import Vue from "vue";
@@ -43,6 +65,7 @@ import { DeploymentCardComponent } from "../components";
 export default class OverviewView extends Vue {
   /** Show/Hide Entrypoints */
   showEntrypoints: boolean = true;
+  toggle_one = 'all';
 
   /**
     * Obtains actual number of deployments.
