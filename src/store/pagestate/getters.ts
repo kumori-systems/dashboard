@@ -60,13 +60,5 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any): Notification[] => {
     return state.notifications;
   }
-
-  /**
-   * Gets if the navigation pannel should be shown.
-   * @return <boolean>showNavigation
-   */
-  showNavigation = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): Boolean => {
-    return state.navigation.show;
-  }
+  
 };

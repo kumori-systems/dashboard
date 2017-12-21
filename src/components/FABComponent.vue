@@ -1,6 +1,6 @@
 <template>
-  <v-speed-dial v-if="elements[route]" v-model="open" fixed top right
-    transition="scale-transition" direction="bottom">
+  <v-speed-dial v-if="elements[route]" v-model="open" fixed bottom right
+    transition="scale-transition" direction="top">
 
   <v-btn slot="activator" v-bind:class="elements[route].bgColor" fab hover v-model="open">
     <v-icon>add</v-icon>
@@ -32,7 +32,7 @@ export default class FABComponent extends Vue {
           to: "/addHTTPEntrypoint"
         },
         {
-          icon: "widgets",
+          icon: "cloud",
           to: "/addDeployment"
         }
       ]

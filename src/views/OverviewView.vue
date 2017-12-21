@@ -1,27 +1,28 @@
-<template>
+<template>  
   <v-container fluid id="overview-view">
-    <template v-if="numDeployments > 0">
-      <!-- Show/Hide Entrypoints -->
-    <v-checkbox label="Show Entrypoints" v-model="showEntrypoints"></v-checkbox>
 
-      <!-- EntryPoint Deployments -->
-      <v-layout row wrap v-if="showEntrypoints">
+      <!-- The view changes depending on if we've got deployed services or not-->
+      <template v-if="numDeployments > 0">
+
+  <v-container>
+    <!-- EntryPoint Deployments -->
+        <v-layout row wrap v-if="showEntrypoints">
           <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
-      </v-layout>
+        </v-layout>
 
-      <!-- No EntryPoint Deployments -->
+        <!-- Common Deployments -->
         <v-layout row wrap>
           <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
         </v-layout>
+  </v-container>
+    </template>
+    <template v-else>
 
       <!-- No deployments found -->
+      Start making some deployments
+
     </template>
-    
-    <v-layout v-else wrap>
-        <!-- Bief tutorial of how recognize a disconnected deployment -->
-        <!-- Bief tutorial of how to create a deployment -->
-        Start making some deployments
-    </v-layout>
+
   </v-container>
 </template>
 <script lang="ts">
@@ -63,19 +64,20 @@ export default class OverviewView extends Vue {
   }
 
   /**
+   * Gets the deployment URIs ordered by deployment name.
+   * @return <string[]> array with deployment uris ordered by deployment name
+   */
+  get orderedDeploymentURN(): string[] {
+    return ((<SSGetters>this.$store.getters)
+      .orderDeploymentsByName as any) as string[];
+  }
+
+  /**
    * Checks if a deployment is EntryPoint or not.
    * @return true if entrypoint.
    */
   isEntrypoint(deployment) {
     return deployment instanceof EntryPoint;
-  }
-
-  /**
-   * Gets the deployment URIs ordered by deployment name.
-   * @return <string[]> array with deployment uris ordered by deployment name
-   */
-  get orderedDeploymentURN(): string[] {
-    return this.$store.getters.orderDeploymentsByName;
   }
 }
 </script>
