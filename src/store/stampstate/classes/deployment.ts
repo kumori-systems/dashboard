@@ -94,6 +94,9 @@ export class Deployment extends Measurable {
     else if (warning > 0) {
       res = Deployment.Role.STATE.WARNING;
     }
+    else if (unkown > 0) {
+      res = Deployment.Role.STATE.UNKOWN;
+    }
     else if (success > 0) {
       res = Deployment.Role.STATE.SUCCESS;
     }
@@ -285,10 +288,10 @@ export module Deployment {
       if (connected === 0 && disconnected > 0) {
         res = Role.STATE.DANGER;
       }
-      else if (connected !== 0 && disconnected > 0) {
+      else if (connected > 0 && disconnected > 0) {
         res = Role.STATE.WARNING;
       }
-      else if (connected !== 0 && disconnected === 0) {
+      else if (connected > 0 && disconnected === 0) {
         res = Role.STATE.SUCCESS;
       }
 
