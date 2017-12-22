@@ -83,7 +83,9 @@
 
                         <!-- Chips config-->
                         <template slot="selection" scope="items">
-                          <v-chip close color="indigo lighten-4">
+                          <v-chip
+                            @input="items.parent.selectItem(items.item)"
+                             close color="indigo lighten-4">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
@@ -102,7 +104,9 @@
                   
                          <!-- Chips config-->
                         <template slot="selection" scope="items">
-                          <v-chip close color="indigo lighten-4">
+                          <v-chip 
+                            @input="items.parent.selectItem(items.item)"
+                            close color="indigo lighten-4">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
@@ -235,7 +239,6 @@ export default class DetailedDeploymentView extends Vue {
         );
       }
     }
-    this.$watch("$route.path", value => this.cancelChanges());
   }
 
   get state(): string {
@@ -268,14 +271,14 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Required to obtain additional information of a role. */
   get service(): Service {
-    this.serviceNewDependedConnections = {};
-    this.serviceNewProvidedConnections = {};
     let ser: Service = this.$store.getters.service(this.deployment.service);
     if (!ser) {
       this.$store.dispatch("getElementInfo", this.deployment.service);
     } else {
-      this.loadDeploymentConnections(ser);
+      this.cancelChanges();
+      this.loadDeploymentConnections(this.deployment, ser);
     }
+
     return ser;
   }
 
@@ -513,43 +516,50 @@ export default class DetailedDeploymentView extends Vue {
     if (this.haveChanges) {
       this.rolNumInstances = {};
       this.instanceKill = {};
-      this.serviceNewDependedConnections = {};
-      this.serviceNewProvidedConnections = {};
       this.clear = true;
       this.haveChanges = false;
     }
   }
 
-  loadDeploymentConnections(ser: Service) {
-    for (let chann in this.deployment.channels) {
-      for (let conn in this.deployment.channels[chann]) {
-        let element = {
-          value: JSON.stringify({
-            deployment: this.deployment.channels[chann][conn]
-              .destinyDeploymentId,
-            channel: this.deployment.channels[chann][conn].destinyChannelId
-          }),
-          text: this.deployment.name + " ~ " + chann
-        };
+  loadDeploymentConnections(dep: Deployment, ser: Service) {
+      for (let chan in this.serviceNewDependedConnections)
+        this.serviceNewDependedConnections[chan] = [];
+      for (let chan in this.serviceNewProvidedConnections)
+        this.serviceNewProvidedConnections[chan] = [];
 
-        // Es el canal depended o provided?
-        if (ser.dependedChannels[chann]) {
-          if (!this.serviceNewDependedConnections[chann]) {
-            this.serviceNewDependedConnections[chann] = [];
-          }
-          if (
-            this.serviceNewDependedConnections[chann].indexOf(element) === -1
-          ) {
-            this.serviceNewDependedConnections[chann].push(element);
-          }
-        }
 
-        if (ser.providedChannels[chann]) {
-          if (!this.serviceNewProvidedConnections[chann]) {
-            this.serviceNewProvidedConnections[chann] = [];
+    if (dep && ser) {
+      for (let chann in dep.channels) {
+        for (let conn in dep.channels[chann]) {
+          let element = {
+            value: JSON.stringify({
+              deployment: dep.channels[chann][conn].destinyDeploymentId,
+              channel: dep.channels[chann][conn].destinyChannelId
+            }),
+            text: dep.name + " ~ " + chann
+          };
+
+          // Es el canal depended o provided?
+          if (ser.dependedChannels[chann]) {
+            if (!this.serviceNewDependedConnections[chann]) {
+              this.serviceNewDependedConnections[chann] = [];
+            }
+            if (
+              this.serviceNewDependedConnections[chann].indexOf(element) === -1
+            ) {
+              this.serviceNewDependedConnections[chann].push(element);
+            }
           }
-          if (this.serviceNewProvidedConnections[chann].indexOf(element) === -1)
-            this.serviceNewProvidedConnections[chann].push(element);
+
+          if (ser.providedChannels[chann]) {
+            if (!this.serviceNewProvidedConnections[chann]) {
+              this.serviceNewProvidedConnections[chann] = [];
+            }
+            if (
+              this.serviceNewProvidedConnections[chann].indexOf(element) === -1
+            )
+              this.serviceNewProvidedConnections[chann].push(element);
+          }
         }
       }
     }

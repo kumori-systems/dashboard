@@ -24,6 +24,7 @@
         </v-layout>
       </v-flex>
       
+      <!-- Applies spaces between components -->
       <v-spacer></v-spacer>
 
       <!-- Instance chart data -->
