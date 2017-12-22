@@ -28,7 +28,8 @@
 
           <!-- Deployment state -->
           <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
-            <v-icon v-bind:id="state">{{ state }}</v-icon>
+            <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
+            <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
           </v-flex>
 
           <!-- Detailed info -->
@@ -37,33 +38,34 @@
             <!-- Deployment uri -->
             <v-layout wrap>
               <v-flex ma-1 xs12>
-                <p><span class="subheading">URN:</span> {{ deployment._uri }}</p>
+                <span class="subheading">URN</span><p>{{ deployment._uri }}</p>
               </v-flex>
             </v-layout>
 
             <!-- Deployment creation date -->
             <v-layout wrap>
               <v-flex ma-1 xs12>
-                <p><span class="subheading">Date:</span>
-                {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
-                </p>
+                <span class="subheading">Date</span>
+                <p>{{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}</p>
               </v-flex>
             </v-layout>
 
             <!-- Deployment service -->
             <v-layout wrap>
               <v-flex ma-1 xs12>
-                <p><span class="subheading">Service:</span> {{ deployment.service }}</p>
+                <span class="subheading">Service</span>
+                <p>{{ deployment.service }}</p>
               </v-flex>
             </v-layout>
 
             <!-- Deployment links -->
             <v-layout wrap>
-              <v-flex ma-1 xs12 md12 v-if="service">
-                <span class="subheading">Connections:</span>
+            
+                <span class="subheading">Connections</span>
                 
                 <!-- Link table representation -->
                 <table>
+
                   <!-- Heders-->
                   <tr>
                     <th>From</th>
@@ -71,14 +73,21 @@
                   </tr>
 
                   <!-- Provided Channels -->
-                  <tr  v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip>{{ name }}</v-chip></th>
+                  <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
                     <th>
                       <v-select
-                        v-bind:items="totalDependedDeploymentChannels(service, name)"
                         v-model="serviceNewProvidedConnections[name]"
-                        multiple chips multi-line v-on:input="handleInput"
-                        return-object autocomplete>
+                        v-bind:items="totalDependedDeploymentChannels(service, name)"
+                        multiple chips v-on:input="handleInput" return-object autocomplete>
+
+                        <!-- Chips config-->
+                        <template slot="selection" scope="items">
+                          <v-chip close color="indigo lighten-4">
+                            {{ items.item.text }}
+                          </v-chip>
+                        </template>
+                        
                       </v-select>
                     </th>
                   </tr>
@@ -87,18 +96,26 @@
                   <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
                     <th>
                       <v-select
-                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
                         v-model="serviceNewDependedConnections[name]"
-                        multiple chips multi-line v-on:input="handleInput"
-                        return-object autocomplete>
+                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                        multiple chips v-on:input="handleInput" return-object autocomplete>
+                  
+                         <!-- Chips config-->
+                        <template slot="selection" scope="items">
+                          <v-chip close color="indigo lighten-4">
+                            {{ items.item.text }}
+                          </v-chip>
+                        </template>
+                  
                       </v-select>
                     </th>
-                    <th><v-chip>{{ name }}</v-chip></th>
+                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
                   </tr>
 
                 </table>
-              </v-flex>
+              
             </v-layout>
+
           </v-flex>
 
           <!-- Applies space between elements -->
@@ -107,11 +124,13 @@
           <!-- Deployment chart -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
             <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
-              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400">
+              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
             </deployment-chart-component>
           </v-flex>
 
         </v-layout>
+
+         
       </v-container>
 
       <!-- Deployment roles -->
@@ -232,7 +251,7 @@ export default class DetailedDeploymentView extends Vue {
         res = "warning";
         break;
       default:
-        res = "help";
+        res = "unknown";
     }
     return res;
   }
@@ -584,8 +603,7 @@ $icon_size: 80px;
   font-size: $icon_size;
 }
 
-#help {
-  color: $color_grey;
+#unknown {
   font-size: $icon_size;
 }
 </style>

@@ -28,7 +28,10 @@
               <v-subheader>
                 <strong>DATE</strong>
                 <v-spacer></v-spacer>
-                <v-icon class="ma-1" v-bind:id="state">{{ state }}</v-icon>
+
+                <v-icon class="ma-1" v-if="state!=='unknown'" v-bind:id="state">{{ state }}</v-icon>
+                <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
+
                 </v-subheader>
                 <v-list-tile tag="div">
                   <v-card-actions>
@@ -110,12 +113,15 @@
             </template>
 
           </v-list>
+          
+          <!-- More info -->
           <v-layout>
             <v-spacer></v-spacer>
               <router-link id="info_link" v-bind:to="deployment._path">
                 <v-icon id="info">info</v-icon>
               </router-link>
           </v-layout>
+
         </v-flex>
       </v-container>
     </v-card>
@@ -182,7 +188,7 @@ export default class Card extends Vue {
   }
 
   get stateColor() {
-    let res: string = "grey";
+    let res: string = "light-blue";
     switch (this.deployment.state) {
       case Deployment.Role.STATE.DANGER:
         res = "red";
@@ -211,8 +217,9 @@ export default class Card extends Vue {
         res = "warning";
         break;
       default:
-        res = "help";
+        res = "unknown";
     }
+
     return res;
   }
 }
@@ -240,7 +247,7 @@ $icon_size: 40px;
   font-size: $icon_size;
 }
 
-#help {
+#unknown {
   color: $color_grey;
   font-size: $icon_size;
 }

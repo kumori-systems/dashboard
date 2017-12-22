@@ -3,15 +3,17 @@
     <v-card-title primary-title class="grey lighten-3">
 
       <!-- Role state -->
-      <v-icon v-bind:id="state">{{ state }}</v-icon>
+      <v-icon v-bind:id="state"  v-if="state!=='unknown'">{{ state }}</v-icon>
+      <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
 
       <!-- Role name -->
       <span class="headline">Role: {{ role.name }}</span>
       
-      
+      <!-- Gives space between elements -->
       <v-flex xs1></v-flex>
-      Instances
-      <!-- Role num instances -->         
+
+      <!-- Num instances selector -->
+      <span>Instances</span>
       <v-btn-toggle class="grey lighten-3">
         <v-btn flat v-on:click="lessInstances">
           <v-icon>remove</v-icon>
@@ -24,9 +26,6 @@
         </v-btn>
       </v-btn-toggle>
 
-      </v-flex>
-      
-      
     </v-card-title>
   
     <v-container fluid class="grey lighten-3">
@@ -69,12 +68,14 @@
 
         </v-flex>
 
+        <!-- Applies space between elements -->
         <v-spacer></v-spacer>
         
         <!-- Role chart -->
         <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-          <role-chart-component class="role-chart" v-bind:chartData="rolChartData" v-bind:options="chartOptions"
-            v-bind:width="800" v-bind:height="400"></role-chart-component>
+          <role-chart-component class="role-chart" v-bind:chartData="rolChartData"
+            v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
+          </role-chart-component>
         </v-flex>
 
       </v-layout>
@@ -85,13 +86,17 @@
           <v-expansion-panel expand>
             <v-expansion-panel-content>
               <div slot="header">Instances</div>
-                <instance-card-component v-for="(instanceContent, instanceId) in role.instances" v-bind:key="instanceId" v-bind:instance="instanceContent"
-                  v-bind:instanceMetrics="instanceMetrics" v-on:killInstanceChange="handleKillInstanceChange" v-bind:clear="onClearHandler">
+                <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
+                  v-bind:key="instanceId" v-bind:instance="instanceContent"
+                  v-bind:instanceMetrics="instanceMetrics"
+                  v-on:killInstanceChange="handleKillInstanceChange"
+                  v-bind:clear="onClearHandler">
                 </instance-card-component>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-flex>
-      </v-layout>      
+      </v-layout>
+
     </v-container>
   </v-card>
 </template>
@@ -195,7 +200,7 @@ export default class RoleCardComponent extends Vue {
         res = "warning";
         break;
       default:
-        res = "help";
+        res = "unknown";
     }
     return res;
   }
@@ -261,8 +266,7 @@ $icon_size: 60px;
   font-size: $icon_size;
 }
 
-#help {
-  color: $color_grey;
+#unknown {
   font-size: $icon_size;
 }
 </style>
