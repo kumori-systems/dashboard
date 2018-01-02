@@ -1,15 +1,16 @@
 <template>
   <v-container fluid>
-    <v-layout row wrap>
+    <v-layout wrap>
       
       <!-- Instance name -->
       <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
-        <v-icon v-bind:id="state">{{ state }}</v-icon>
+        <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
+        <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
         <span class="title">{{ instance.cnid }}</span>
       </v-flex>
 
     </v-layout>
-    <v-layout row wrap>
+    <v-layout wrap>
       
       <!-- Instance arrangement -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
@@ -23,11 +24,12 @@
         </v-layout>
       </v-flex>
       
+      <!-- Applies spaces between components -->
       <v-spacer></v-spacer>
 
       <!-- Instance chart data -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-        <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="400"></chart-component>
+        <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
       </v-flex>
 
     </v-layout>
@@ -94,7 +96,7 @@ export default class InstanceCardComponent extends Vue {
         res = "error";
         break;
       default:
-        res = "help";
+        res = "unknown";
     }
     return res;
   }
@@ -131,8 +133,7 @@ $radius: 5px;
   font-size: $icon_size;
 }
 
-#help {
-  color: $color_grey;
+#unknown {
   font-size: $icon_size;
 }
 

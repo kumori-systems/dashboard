@@ -1,148 +1,196 @@
 <template>
-  <v-container id="elements-view">
-    <v-layout row wrap>
-      <v-flex xs12 sm3 md3 xl4>
+  <v-card id="elements-view">
+    <v-card-title>
+
+      <!-- View title -->
+      <h3 class="headline mb-0">Elements</h3>
+
+      <!-- Applies spaces between elements -->
+      <v-spacer></v-spacer>
+
+      <!-- View actions -->
+      <v-card-actions>
+
+        <!-- Upload bundle button -->
+        <v-btn outline color="primary" class="elevation-0" to="/uploadbundle">
+          <span>Upload bundle</span>
+          <v-icon right>file_upload</v-icon>
+        </v-btn>
+        
+      </v-card-actions>
+    </v-card-title>
+
+    <!-- Divides different sections of the view -->
+    <v-divider></v-divider>
+
+    <v-container>
+      
+      <!-- Actions on elements -->
+      <v-layout>
+      
+        <!-- Search -->
         <v-text-field label="Search" v-model="search" prepend-icon="search">
         </v-text-field>
-      </v-flex>
-      <v-flex xs12 offset-sm1 sm3 offset-md4 md3 offset-xl4 xl2>
-        <v-btn class="blue" v-bind:disabled="!someoneSelected"
+
+        <!-- Applies spaces between elements -->
+        <v-spacer></v-spacer>
+        
+        <!-- Groupal delete button -->
+        <v-btn color="error" class="elevation-0" v-bind:disabled="!someoneSelected"
+          v-on:click="ShowDeleteGroupDialog">Delete</v-btn>
+          
+        <!-- Groupal download button -->
+        <v-btn color="primary" class="elevation-0" v-bind:disabled="!someoneSelected"
           v-on:click="downloadSelected">Download manifest</v-btn>
-      </v-flex>
-        <v-flex xs12 offset-sm2 sm2 offset-md0 md2 offset-xl0 xl2>
-          <v-btn class="red" v-bind:disabled="!someoneSelected"
-            v-on:click="ShowDeleteGroupDialog">Delete</v-btn>
-        </v-flex>
-    </v-layout>
-    <v-layout row wrap>
-      <v-flex xs12>
-        <v-expansion-panel expand>
-          <v-expansion-panel-content>
-            <div slot="header">Runtimes</div>
-            <v-expansion-panel popout expand>
-              <v-expansion-panel-content v-for="(runtimesByName,owner) in runtimesByOwner" v-bind:key="owner">
-                <div slot="header">{{ owner }}</div>
-                <v-expansion-panel inset expand>
-                  <v-expansion-panel-content v-for="(runtimesByVersion, name) in runtimesByName" v-bind:key="name">
-                    <div slot="header">{{ name }}</div>
-                      <v-container fluid>
-                        <v-layout row wrap v-for="(runtime, version) in runtimesByVersion" v-bind:key="version" justify-space-between>
-                          <v-flex xs4>
-                            <v-checkbox v-bind:label="version" v-model="selectedRuntimes" v-bind:value="runtime"></v-checkbox>
-                          </v-flex>
-                          <v-flex xs6>
-                            <div v-if="runtimeUsedBy(runtime).length>0">
-                              <div>
-                                <span class="yellow">in use by:</span>
-                              </div>
-                              <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">
-                                <router-link  v-bind:to="deploymentInfo(usedBy)._path">
-                                    {{deploymentInfo(usedBy).name}}
-                                  </router-link>
-                              </div>
-                            </div>
-                            <div v-else>not in use</div>
-                          </v-flex>
-                          <v-flex xs2>
-                            <v-btn color="info" icon v-on:click="showInfoElementDialog(runtime)">
-                              <v-icon class="white--text">info_outline</v-icon>
-                            </v-btn>
-                            <v-btn color="error" icon v-on:click="showDeleteElementDialog(runtime)">
-                              <v-icon class="white--text">delete_forever</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </v-container>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panel-content>
-            <v-expansion-panel-content>
-              <div slot="header">Components</div>
-              <v-expansion-panel popout expand>
-                <v-expansion-panel-content v-for="(componentsByName, owner) in componentsByOwner" v-bind:key="owner">
-                  <div slot="header">{{ owner }}</div>
-                    <v-expansion-panel inset expand>
-                      <v-expansion-panel-content v-for="(componentsByVersion, name) in componentsByName" v-bind:key="name">
-                        <div slot="header">{{ name }}</div>
-                        <v-container fluid>
-                          <v-layout row wrap v-for="(component, version) in componentsByVersion" v-bind:key="version" justify-space-between>
-                            <v-flex xs4>
-                              <v-checkbox v-bind:label="version" v-model="selectedComponents" v-bind:value="component"></v-checkbox>
-                            </v-flex>
-                            <v-flex xs6>
-                              <div v-if="componentUsedBy(component).length>0">
-                                <div>
-                                  <span class="yellow">in use by:</span>
-                                </div>
-                                <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">
-                                  <router-link  v-bind:to="deploymentInfo(usedBy)._path">
-                                    {{deploymentInfo(usedBy).name}}
-                                  </router-link>
-                                </div>
-                            </div>
-                            <div v-else>not in use</div>
-                          </v-flex>
-                          <v-flex xs2>
-                            <v-btn color="info" icon v-on:click="showInfoElementDialog(component)">
-                              <v-icon class="white--text">info_outline</v-icon>
-                            </v-btn>
-                            <v-btn color="error" icon v-on:click="showDeleteElementDialog(component)">
-                              <v-icon class="white--text">delete_forever</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </v-container>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panel-content>
-            <v-expansion-panel-content>
-              <div slot="header">Services</div>
-              <v-expansion-panel popout expand>
-                <v-expansion-panel-content v-for="(servicesByName, owner) in servicesByOwner" v-bind:key="owner">
-                  <div slot="header">{{ owner }}</div>
-                  <v-expansion-panel inset expand>
-                    <v-expansion-panel-content v-for="(servicesByVersion, name) in servicesByName" v-bind:key="name">
-                      <div slot="header">{{ name }}</div>
-                        <v-container fluid>
-                          <v-layout row wrap v-for="(service, version) in servicesByVersion" v-bind:key="version" justify-space-between>
-                            <v-flex xs4>
-                              <v-checkbox v-bind:label="version" v-model="selectedServices" v-bind:value="service"></v-checkbox>
-                            </v-flex>
-                            <v-flex xs6>
-                              <div v-if="serviceUsedBy(service).length>0">
-                                <div>
-                                  <span class="yellow">in use by:</span>
-                                </div>
-                                <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">
-                                  <router-link  v-bind:to="deploymentInfo(usedBy)._path">
-                                    {{deploymentInfo(usedBy).name}}
-                                  </router-link>
-                                </div>
-                              </div>
-                              <div v-else>not in use</div>
-                            </v-flex>
-                            <v-flex xs2>
-                              <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
-                                <v-icon class="white--text">info_outline</v-icon>
-                              </v-btn>
-                              <v-btn color="error" icon v-on:click="showDeleteElementDialog(service)">
-                                <v-icon class="white--text">delete_forever</v-icon>
-                              </v-btn>
-                            </v-flex>
-                          </v-layout>
-                        </v-container>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-flex>
+      
       </v-layout>
+
+      <!-- Stamp elements -->
+      <v-expansion-panel expand>
+        <v-expansion-panel-content>
+
+          <!-- Runtimes -->
+          <div slot="header">Runtimes</div>
+          <v-expansion-panel popout expand>
+            <v-expansion-panel-content v-for="(runtimesByName,owner) in runtimesByOwner" v-bind:key="owner">
+
+              <!-- Runtime owners -->
+              <div slot="header">{{ owner }}</div>
+              <v-expansion-panel inset expand>
+                <v-expansion-panel-content v-for="(runtimesByVersion, name) in runtimesByName" v-bind:key="name">
+                  
+                  <!-- Runtime -->
+                  <div slot="header">{{ name }}</div>
+                  <v-container fluid>
+                    <v-layout wrap v-for="(runtime, version) in runtimesByVersion" v-bind:key="version" justify-space-between>
+                      <v-flex xs4>
+                        <v-checkbox v-bind:label="version" v-model="selectedRuntimes" v-bind:value="runtime"></v-checkbox>
+                      </v-flex>
+                      <v-flex xs6>
+                        <div v-if="runtimeUsedBy(runtime).length>0">
+                          <div>
+                            <span class="yellow">in use by:</span>
+                          </div>
+                          <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">
+                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{deploymentInfo(usedBy).name}}</router-link>
+                          </div>
+                        </div>
+                        <div v-else>not in use</div>
+                      </v-flex>
+                      <v-flex xs2>
+                        <v-btn color="info" icon v-on:click="showInfoElementDialog(runtime)">
+                          <v-icon class="white--text">info_outline</v-icon>
+                        </v-btn>
+                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(runtime)">
+                          <v-icon class="white--text">delete_forever</v-icon>
+                        </v-btn>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panel-content>
+        <v-expansion-panel-content>
+
+          <!-- Components -->
+          <div slot="header">Components</div>
+          <v-expansion-panel popout expand>
+            <v-expansion-panel-content v-for="(componentsByName, owner) in componentsByOwner" v-bind:key="owner">
+
+              <!-- Component owners -->
+              <div slot="header">{{ owner }}</div>
+              <v-expansion-panel inset expand>
+                <v-expansion-panel-content v-for="(componentsByVersion, name) in componentsByName" v-bind:key="name">
+
+                  <!-- Component -->
+                  <div slot="header">{{ name }}</div>
+                  <v-container fluid>
+                    <v-layout wrap v-for="(component, version) in componentsByVersion" v-bind:key="version" justify-space-between>
+                      <v-flex xs4>
+                        <v-checkbox v-bind:label="version" v-model="selectedComponents" v-bind:value="component"></v-checkbox>
+                      </v-flex>
+                      <v-flex xs6>
+                        <div v-if="componentUsedBy(component).length>0">
+                          <div>
+                            <span class="yellow">in use by:</span>
+                          </div>
+                          <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">
+                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{deploymentInfo(usedBy).name}}</router-link>
+                          </div>
+                        </div>
+                        <div v-else>not in use</div>
+                      </v-flex>
+                      <v-flex xs2>
+                        <v-btn color="info" icon v-on:click="showInfoElementDialog(component)">
+                          <v-icon class="white--text">info_outline</v-icon>
+                        </v-btn>
+                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(component)">
+                          <v-icon class="white--text">delete_forever</v-icon>
+                        </v-btn>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+        </v-expansion-panel-content>
+        <v-expansion-panel-content>
+          
+          <!-- Services -->
+          <div slot="header">Services</div>
+          <v-expansion-panel popout expand>
+            <v-expansion-panel-content v-for="(servicesByName, owner) in servicesByOwner" v-bind:key="owner">
+              
+              <!-- Service owners -->
+              <div slot="header">{{ owner }}</div>
+              <v-expansion-panel inset expand>
+                <v-expansion-panel-content v-for="(servicesByVersion, name) in servicesByName" v-bind:key="name">
+                  
+                  <!-- Service -->
+                  <div slot="header">{{ name }}</div>
+                  <v-container fluid>
+                    <v-layout wrap v-for="(service, version) in servicesByVersion" v-bind:key="version" justify-space-between>
+                      <v-flex xs4>
+                        <v-checkbox v-bind:label="version" v-model="selectedServices" v-bind:value="service"></v-checkbox>
+                      </v-flex>
+                      <v-flex xs6>
+                        <div v-if="serviceUsedBy(service).length>0">
+                          <div><span class="yellow">in use by:</span></div>
+                          <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">
+                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">
+                              {{deploymentInfo(usedBy).name}}
+                            </router-link>
+                          </div>
+                        </div>
+                        <div v-else>not in use</div>
+                      </v-flex>
+                      <v-flex xs2>
+                        <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
+                          <v-icon class="white--text">info_outline</v-icon>
+                        </v-btn>
+                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(service)">
+                          <v-icon class="white--text">delete_forever</v-icon>
+                        </v-btn>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+        </v-expansion-panel-content>
+      </v-expansion-panel>
 
       <!-- Single delete -->
       <v-dialog v-model="deleteElementDialog" max-width="800px">
@@ -195,7 +243,8 @@
         </v-card>
       </v-dialog>
 
-  </v-container>
+    </v-container>
+  </v-card>
 </template>
 
 <script lang="ts">

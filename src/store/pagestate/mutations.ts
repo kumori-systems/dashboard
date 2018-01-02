@@ -77,12 +77,4 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.pendingActions--;
   }
 
-  /**
-   * Sets if the navigation panel should be shown.
-   * @requires payload <boolean>
-   */
-  showNavigation = (state: State, payload: boolean): void => {
-    state.navigation.show = payload;
-  }
-
 };

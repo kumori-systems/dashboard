@@ -1,34 +1,60 @@
 <template>
   <v-form v-model="valid" ref="form" lazy-validation>
-    <!-- Card body: Deployment stats -->
-    <v-container>
-      <v-layout row wrap>
-      <!-- Flexible content allows good resize -->
-      <v-flex>
-        <!-- Domain list-->
-        <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
-          item-value="_uri"v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
+    <v-card id="add-htt-entrypoint-view">
 
-        <!-- Checkbuttons -->
-        <v-layout>
-          <v-checkbox label="Accept TLS/SSL" v-model="acceptTLSSSL" disabled></v-checkbox>
-          <v-select label="Certificate" v-model="selectedCertificate" v-bind:items="certificates" v-bind:rules="[v => !!v || 'A domain is required']" disabled autocomplete></v-select>
-        </v-layout>
-        <v-checkbox label="Require client certificates" v-model="requireClientCertificates" disabled></v-checkbox>
+      <!-- Card tittle -->
+      <v-card-title>
+        <h3 class="headline mb-0">Add a new entrypoint</h3>
 
-        <!-- Number inputs -->
-        <v-flex xs4>
-          <v-text-field label="Instances" v-model="instances" mask='####' v-bind:rules="[v => !!v || 'Instance number is required']" required></v-text-field>
-        </v-flex>
-        <v-flex xs4>
-          <v-text-field label="Resilience" v-model="resilience" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
-        </v-flex>
-        
-        <!-- Submit buttons -->
-        <v-btn @click="submit" v-bind:disabled="!valid">Deploy</v-btn>
-      </v-flex>
-      </v-layout>
-    </v-container>
+
+        <!-- Applies a space between elements -->
+        <v-spacer></v-spacer>
+
+         <!-- View actions -->
+        <v-card-actions>
+
+          <!-- Submit button -->
+          <v-btn class="elevation-0" color="primary"  v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
+          
+          <!-- Cancel button -->
+          <v-btn outline to="-1">Cancel</v-btn>
+
+        </v-card-actions>
+
+
+      </v-card-title>
+
+      <!-- Divides the sections of the card -->
+      <v-divider></v-divider>
+
+      <!-- Main content of the view -->
+      <v-container>
+
+          <!-- Domain list-->
+          <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
+            item-value="_uri" v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
+
+          <!-- Certificate -->
+          <v-layout>
+            <v-checkbox label="Accept TLS/SSL" v-model="acceptTLSSSL" disabled></v-checkbox>
+            <v-select label="Certificate" v-model="selectedCertificate" v-bind:items="certificates" v-bind:rules="[v => !!v || 'A domain is required']" disabled autocomplete></v-select>
+          </v-layout>
+
+          <!-- Client certificate -->
+          <v-checkbox label="Require client certificates" v-model="requireClientCertificates" disabled></v-checkbox>
+
+          <!-- Number of instances -->
+          <v-flex xs4>
+            <v-text-field label="Instances" v-model="instances" mask='####' v-bind:rules="[v => !!v || 'Instance number is required']" required></v-text-field>
+          </v-flex>
+
+          <!-- Resilience level-->
+          <v-flex xs4>
+            <v-text-field label="Resilience" v-model="resilience" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
+          </v-flex>   
+
+      </v-container>
+    </v-card>
   </v-form>
 </template>
 <script lang="ts">

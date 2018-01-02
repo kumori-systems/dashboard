@@ -14,6 +14,12 @@ import { BackgroundAction, User } from './classes';
 export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
+
+  signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
+    // Signs the user out of the page
+    injectee.commit('signOut');
+  }
+
   /**
    * Tries to sign the user into the system.
    * @requires payload <{ username: string, userpassword: string }>
@@ -36,59 +42,61 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       'details': 'Validating user'
     });
     // Remove previous authentications or intents
-    injectee.commit('signOut');
+    injectee.dispatch('signout').then(() => {
 
-    // Launch background action
-    connection.login(payload.username, payload.userpassword).then((user) => {
-      injectee.commit('finishBackgroundAction', {
-        'id': authenticationAction.id,
-        'state': BackgroundAction.State.SUCCESS,
-        'details': 'Authentication sucessfull'
-      });
+      // Launch background action
+      connection.login(payload.username, payload.userpassword).then((user) => {
+        injectee.commit('finishBackgroundAction', {
+          'id': authenticationAction.id,
+          'state': BackgroundAction.State.SUCCESS,
+          'details': 'Authentication sucessfull'
+        });
 
-      // Loading process
-      injectee.commit('addBackgroundAction', loadInfoAction);
-      injectee.commit('processingBackgroundAction', {
-        'id': loadInfoAction.id,
-        'details': 'Loading data..'
-      });
+        // Loading process
+        injectee.commit('addBackgroundAction', loadInfoAction);
+        injectee.commit('processingBackgroundAction', {
+          'id': loadInfoAction.id,
+          'details': 'Loading data..'
+        });
 
-      // Load all elements
-      return connection.getRegisteredElements().then(() => {
-        console.debug('Stored a reference to all elements from the platform');
+        // Load all elements
+        return connection.getRegisteredElements().then(() => {
+          console.debug('Stored a reference to all elements from the platform');
 
-        // Load all deployments
-        return connection.getDeploymentList().then(() => {
-          console.debug('Retrieved all deployments from the platform');
+          // Load all deployments
+          return connection.getDeploymentList().then(() => {
+            console.debug('Retrieved all deployments from the platform');
 
-          injectee.commit('finishBackgroundAction', {
-            'id': loadInfoAction.id,
-            'state': BackgroundAction.State.SUCCESS,
-            'details': 'All data loaded'
+            injectee.commit('finishBackgroundAction', {
+              'id': loadInfoAction.id,
+              'state': BackgroundAction.State.SUCCESS,
+              'details': 'All data loaded'
+            });
+
+            injectee.commit('signIn', new User(user.id, user.name,
+              User.State.AUTHENTICATED));
+
           });
-
-          injectee.commit('signIn', new User(user.id, user.name,
-            User.State.AUTHENTICATED));
-
+        }).catch((error) => {
+          if (!error.code || error.code !== '001') {
+            injectee.commit('finishBackgroundAction', {
+              'id': loadInfoAction.id,
+              'state': BackgroundAction.State.FAIL,
+              'details': 'Error loading data, please contact your administrator'
+            });
+            console.error('Error loading data: ', error);
+          }
         });
       }).catch((error) => {
-        if (!error.code || error.code !== '001') {
-          injectee.commit('finishBackgroundAction', {
-            'id': loadInfoAction.id,
+        injectee.commit('finishBackgroundAction',
+          {
+            'id': authenticationAction.id,
             'state': BackgroundAction.State.FAIL,
-            'details': 'Error loading data, please contact your administrator'
-          });
-          console.error('Error loading data: ', error);
-        }
+            'details': 'Authentication failure'
+          }
+        );
       });
-    }).catch((error) => {
-      injectee.commit('finishBackgroundAction',
-        {
-          'id': authenticationAction.id,
-          'state': BackgroundAction.State.FAIL,
-          'details': 'Authentication failure'
-        }
-      );
+
     });
 
     connection.onAddDeployment((deploymentId: string,
@@ -173,23 +181,5 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.onUnlink((params) => {
       injectee.commit('unlink', params);
     });
-  }
-
-  /**
-   * Sets if the navigation pannel should be shown.
-   * @requires payload <boolean>
-   */
-  showNavigation = (injectee: Vuex.ActionContext<State, any>,
-    show: boolean): void => {
-    injectee.commit('showNavigation', show);
-  }
-
-  /**
-   * Sets if the navigation pannel should be in the minified version.
-   * @requires payload <boolean>
-   */
-  miniNavigation = (injectee: Vuex.ActionContext<State, any>,
-    mini: boolean): void => {
-    injectee.commit('miniNavigation', mini);
   }
 };
