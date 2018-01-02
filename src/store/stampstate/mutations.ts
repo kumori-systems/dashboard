@@ -20,7 +20,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // If the service is already in the state, it's marked as usedby
       if (state.services[serv]) {
-        state.services[serv].usedBy.push(dep);
+        if (state.services[serv].usedBy.indexOf(dep) < 0)
+          state.services[serv].usedBy.push(dep);
       }
 
       // If deployment is using any resorce, it's marked as usedby
