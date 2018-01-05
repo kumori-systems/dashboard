@@ -56,22 +56,22 @@
             </v-flex>
             
             <v-flex ma-1 xs4>
-              <v-text-field  label="MEM" type="integer" v-model="roleMem[index]"
-                mask='####' v-bind:rules="[v => v>0 || 'Must be higher than 0']"
+              <v-text-field  label="MEM" type="number" v-model="roleMem[index]"
+                mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
                 required
               ></v-text-field>
             </v-flex>
             
             <v-flex ma-1 xs4>
-              <v-text-field label="CPU" type="integer" v-model="roleCPU[index]"
-                mask='####' v-bind:rules="[v => v>0 || 'Must be higher than 0']"
+              <v-text-field label="CPU" type="number" v-model="roleCPU[index]"
+                mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
                 required
               ></v-text-field>
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="NET" type="integer" v-model="roleNet[index]"
-                mask='####' v-bind:rules="[v => v>0 || 'Must be higher than 0']"
+              <v-text-field label="NET" type="number" v-model="roleNet[index]"
+                mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
                 required
               ></v-text-field>
             </v-flex>
@@ -79,38 +79,40 @@
             <!-- Number of Instance fields -->
             <v-flex ma-1 xs4>
               <v-text-field
-                label="Minimum Instances" type="integer" ref="minInstancesField"
+                label="Minimum Instances" type="number" ref="minInstancesField"
                 mask='####' required v-on:change="validateFields" v-model="roleMinInstances[index]"
                 v-bind:rules="[
-                  (v) => v > 0 || 'Must be higher than 0',
-                  (v) => v <= roleInstances[index] || 'Can\'t be higher than initial instances'
+                  (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                  (v) => parseInt(v) <= parseInt(roleInstances[index]) || 'Can\'t be higher than initial instances'
                 ]"
               ></v-text-field>
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="Initial Instances" type="integer" ref="instancesField"
+              <v-text-field
+                label="Initial Instances" type="number" ref="instancesField"
+                mask='####' required v-on:change="validateFields" v-model="roleInstances[index]" 
                 v-bind:rules="[
-                  (v) => v > 0 || 'Must be higher than 0',
-                  (v) => v >= roleMinInstances[index] || 'Can\'t be less than MinInstances',
-                  (v) => v <= roleMaxInstances[index] || 'Can\'t be more than MaxInstances'
+                  (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                  (v) => parseInt(v) >= parseInt(roleMinInstances[index]) || 'Can\'t be less than MinInstances',
+                  (v) => parseInt(v) <= parseInt(roleMaxInstances[index]) || 'Can\'t be more than MaxInstances'
                 ]"
-                v-on:change="validateFields" v-model="roleInstances[index]" mask='####' required
               ></v-text-field>
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="Maximum Instances" type="integer" ref="maxInstancesField"
-                v-on:change="validateFields" v-model="roleMaxInstances[index]" mask='####'
+              <v-text-field
+              label="Maximum Instances" type="number" ref="maxInstancesField"
+                mask='####' required v-on:change="validateFields" v-model="roleMaxInstances[index]" 
                 v-bind:rules="[
-                  (v) => v > 0 || 'Must be higher than 0',
-                  (v) => v >= roleInstances[index] || 'Can\'t be less than initial instances'
-                ]"  required
+                  (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                  (v) => parseInt(v) >= parseInt(roleInstances[index]) || 'Can\'t be less than initial instances'
+                ]"
               ></v-text-field>
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="Resilence" type="integer" v-model="roleResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
+              <v-text-field label="Resilence" type="number" v-model="roleResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
             </v-flex>
               
           </v-flex>
@@ -122,13 +124,13 @@
           <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="resource[0]">
 
             <!-- Volatile volumes -->
-            <v-text-field type="number"
+            <v-text-field type="integer"
               v-if="resource[1] === 'eslap://eslap.cloud/resource/volume/volatile/1_0_0'"
               v-bind:label="resource[0] + ' Size'"
               v-model="resourceConfig[index]"
               mask='#####'
               v-bind:rules="[
-                (v) => v > 0 || 'Size must have a non cero value'
+                (v) => parseInt(v) > 0 || 'Size must have a non cero value'
               ]"
               suffix="GB"
             ></v-text-field>
@@ -151,11 +153,15 @@
         <!-- Deployment config -->
         <div v-if="selectedService && selectedService.length > 0">
           <span class="headline">Service configuration</span>
-          <v-text-field v-model="serviceConfig" placeholder="text/json" multi-line></v-text-field>
+          <v-text-field
+            v-model="serviceConfig" placeholder="text/json" multi-line
+            type="text/json"
+            v-bind:rules="[(v) => parseable(v)]"
+          ></v-text-field>
         </div>
 
       </v-container>
-
+      
     </v-card>
   </v-form>
 </template>
@@ -377,6 +383,15 @@ export default class NewDeploymentView extends Vue {
     (<any>this.$refs.form).validate();
   }
 
+  parseable(v: string): boolean {
+    try {
+      JSON.parse(v);
+      return true;
+    } catch (err) {
+     return err.toString();
+    }
+  }
+
   submit() {
     if ((<any>this.$refs.form).validate()) {
       let roles = {};
@@ -399,8 +414,9 @@ export default class NewDeploymentView extends Vue {
 
         roles[this.serviceRolesList[roleIndex]] = new Deployment.Role(
           this.serviceRolesList[roleIndex], // name
-          this.$store.getters.services[this.selectedService].roles[this.serviceRolesList[roleIndex]]
-            .component, //component
+          this.$store.getters.services[this.selectedService].roles[
+            this.serviceRolesList[roleIndex]
+          ].component, //component
           null, // configuration
           this.roleCPU[roleIndex], // cpu
           this.roleMem[roleIndex], // memory
@@ -445,6 +461,7 @@ export default class NewDeploymentView extends Vue {
       this.$router.push("/");
     }
   }
+
 }
 </script>
 <style lang="scss" scoped>

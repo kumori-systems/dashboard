@@ -32,7 +32,7 @@
 
           <!-- Domain list-->
           <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
-            item-value="_uri" v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
+            v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
 
           <!-- Certificate -->
           <v-select
@@ -51,8 +51,8 @@
           <v-flex xs4>
             <v-text-field type="number" ref="minInstancesField" label="MinInstances" v-model="minInstances" mask='####'
               v-bind:rules="[(v) => !!v || 'A minimum number of Instances is required',
-                (v) => v>0 || 'Must be higher than 0',
-                (v) => v<=this.instances || 'Can\'t be higher than initial instances'
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) <= parseInt(instances) || 'Can\'t be higher than initial instances'
               ]" required v-on:change="validateFields"
             ></v-text-field>
           </v-flex>
@@ -61,10 +61,9 @@
           <v-flex xs4>
             <v-text-field type="number" ref="instancesField" label="Initial instances" v-model="instances" mask='####'
               v-bind:rules="[
-                (v) => !!v || 'Instance number is required',
-                (v) => v>0 || 'Must be higher than 0',
-                (v) => v>=this.minInstances || 'Can\'t be less than MinInstances',
-                (v) => v<=this.maxInstances || 'Can\'t be more than MaxInstances'
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) >= parseInt(minInstances) || 'Can\'t be less than MinInstances',
+                (v) => parseInt(v) <= parseInt(maxInstances) || 'Can\'t be more than MaxInstances'
               ]" required v-on:change="validateFields"
               ></v-text-field>
           </v-flex>
@@ -73,9 +72,8 @@
           <v-flex xs4>
             <v-text-field type="number" ref="maxInstancesField" label="MaxInstances" v-model="maxInstances" mask='####'
               v-bind:rules="[
-                (v) => !!v || 'A maximum number of instances is required',
-                (v) => v > 0 || 'Must be higher than 0',
-                (v) => v >= this.instances || 'Can\'t be less than initial instances'
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) >= parseInt(instances) || 'Can\'t be less than initial instances'
               ]" required v-on:change="validateFields"
           ></v-text-field>
           </v-flex>
@@ -107,7 +105,7 @@ import SSGetters from "../store/stampstate/getters";
 })
 export default class NewHTTPEntrypointView extends Vue {
   valid: boolean = false;
-  selectedDomain: string = null;
+  selectedDomain: Domain = null;
   selectedCertificate: string = null;
   requireClientCertificates: boolean = false;
   minInstances: number = 1;
@@ -162,8 +160,8 @@ export default class NewHTTPEntrypointView extends Vue {
   submit(): void {
     if ((<any>this.$refs.form).validate()) {
       let resourcesConfig = {
-        server_cert: this.certificates.length > 0 ? this.certificates : null,
-        vhost: this.selectedDomain
+        server_cert: this.certificates.length > 0 ? this.selectedCertificate : null,
+        vhost: this.selectedDomain.url
       };
 
       let config = {
@@ -188,7 +186,7 @@ export default class NewHTTPEntrypointView extends Vue {
       roles["sep"] = new Deployment.Role(
         "sep", // id
         "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
-        { domain: this.selectedDomain }, // configuration
+        { domain: this.selectedDomain._uri }, // configuration
         1, //cpu
         1, //memory
         0, //ioperf
@@ -200,13 +198,11 @@ export default class NewHTTPEntrypointView extends Vue {
         this.maxInstances // maxInstances
       );
 
-      console.debug("The entrypoint is created");
-      /*
         this.$store.dispatch(
           "addDeployment",
           new Deployment(
             "slap://domain/deployments/date/this_will_be_overrited", // uri
-            name, // name
+            this.selectedDomain.url, // name
             config, // parameters
             EntryPoint.TYPE.HTTP_INBOUND, //service
             roles, // roles
@@ -216,7 +212,6 @@ export default class NewHTTPEntrypointView extends Vue {
         );
 
         this.$router.push("/");
-      */
     }
   }
 }
