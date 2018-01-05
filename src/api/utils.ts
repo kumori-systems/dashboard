@@ -2,9 +2,11 @@ import {
   AdmissionEvent as EcloudEvent, Deployment as EcloudDeployment, EcloudEventType
 } from 'admission-client';
 import {
-  Certificate, Channel, Component, Connector, DependedChannel, Deployment,
-  Domain, FullConnector, HTTPEntryPoint, LoadBalancerConnector, ProvidedChannel,
-  PublishSubscribeConnector, Resource, Runtime, Service, Volume
+  BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
+  Deployment, Domain, FullConnector, HTTPEntryPoint, IntegerParameter,
+  JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
+  Parameter, ProvidedChannel, PublishSubscribeConnector, Resource, Runtime,
+  Service, StringParameter, Volume
 } from '../store/stampstate/classes';
 
 export function transformEcloudDeploymentToDeployment(
@@ -117,7 +119,7 @@ export function transformManifestToService(manifest: {
   name: string,
   configuration: {
     resources: Array<{ name: string, type: string }>,
-    parameters: Array<any>
+    parameters: Array<{ name: string, type: string }>
   },
   roles: [{
     name: string,
@@ -145,12 +147,45 @@ export function transformManifestToService(manifest: {
     }]
   }]
 }): Service {
+
+  // Collecting service resources
   let resources: { [resourceId: string]: string } = {};
   for (let i = 0; i < manifest.configuration.resources.length; i++) {
     resources[manifest.configuration.resources[i].name] =
       manifest.configuration.resources[i].type;
   }
 
+  // Collecting service parameters
+  let parameters: { [parameter: string]: Parameter } = {};
+  for (let paramIndex in manifest.configuration.parameters) {
+    let par: Parameter;
+    switch (manifest.configuration.parameters[paramIndex].type) {
+      case 'eslap://eslap.cloud/parameter/boolean/1_0_0':
+        par = new BooleanParameter();
+        break;
+      case 'eslap://eslap.cloud/parameter/integer/1_0_0':
+        par = new IntegerParameter();
+        break;
+      case 'eslap://eslap.cloud/parameter/json/1_0_0':
+        par = new JsonParameter();
+        break;
+      case 'eslap://eslap.cloud/parameter/list/1_0_0':
+        par = new ListParameter();
+        break;
+      case 'eslap://eslap.cloud/parameter/number/1_0_0':
+        par = new NumberParameter();
+        break;
+      case 'eslap://eslap.cloud/parameter/string/1_0_0':
+        par = new StringParameter();
+        break;
+      default:
+        console.error('Parameter type not recognized: ',
+          manifest.configuration.parameters[paramIndex].type);
+    }
+    parameters[manifest.configuration.parameters[paramIndex].name] = par;
+  }
+
+  // Collecting service roles
   let roles: { [rolId: string]: Service.Role } = {};
   for (let i = 0; i < manifest.roles.length; i++) {
     roles[manifest.roles[i].name] = new Service.Role(
@@ -158,9 +193,9 @@ export function transformManifestToService(manifest: {
       manifest.roles[i].parameters, // parameters
       manifest.roles[i].resources // resources
     );
-
   }
 
+  // Collecting service provided channels
   let proChannels: { [channelId: string]: ProvidedChannel } = {};
   for (let i = 0; i < manifest.channels.provides.length; i++) {
     let res: ProvidedChannel;
@@ -221,6 +256,7 @@ export function transformManifestToService(manifest: {
     proChannels[manifest.channels.provides[i].name] = res;
   }
 
+  // Collectinc service depended channels
   let depChannels: { [channelId: string]: DependedChannel } = {};
   for (let i = 0; i < manifest.channels.requires.length; i++) {
     let res: DependedChannel;
@@ -282,7 +318,7 @@ export function transformManifestToService(manifest: {
     depChannels[manifest.channels.requires[i].name] = res;
   }
 
-
+  // Collecting service connectors
   let connectors: Array<Connector> = [];
   for (let conn in manifest.connectors) {
     let res: Connector;
@@ -312,10 +348,11 @@ export function transformManifestToService(manifest: {
     connectors.push(res);
   }
 
+  // Creating the service
   return new Service(
     manifest.name, // uri:string
     resources, // resources: Array<string>,
-    manifest.configuration.parameters, // parameters: Array<string>,
+    parameters, // {[parameter:string]: Parameter},
     roles, // roles: { [rolId: string]: Service.Rol },
     proChannels, // proChannels: { [channelId: string]: Service.Rol.Channel },
     depChannels, // reqChannels: { [channelId: string]: Service.Rol.Channel },
@@ -730,6 +767,10 @@ export function transformDeploymentToManifest(deployment: Deployment) {
   for (let rolId in deployment.roles) {
     manifestRoles[rolId] = {};
     manifestRoles[rolId].resources = {};
+    manifestRoles[rolId].resources['__mininstances'] =
+      (<Deployment.Role>deployment.roles[rolId]).minInstances;
+    manifestRoles[rolId].resources['__maxinstances'] =
+      (<Deployment.Role>deployment.roles[rolId]).maxInstances;
     manifestRoles[rolId].resources['__instances'] =
       (<Deployment.Role>deployment.roles[rolId]).actualInstances;
     manifestRoles[rolId].resources['__cpu'] =
@@ -746,13 +787,10 @@ export function transformDeploymentToManifest(deployment: Deployment) {
       (<Deployment.Role>deployment.roles[rolId]).resilience;
   }
 
-  // TODO: deployments must have a parameter 'name'. This will fixed in a future
-  // ticket
-  console.warn('No name can be added to a deployment on it\'s creation');
   return {
     'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
     'servicename': deployment.service,
-    // 'name': deployment.name,
+    'nickname': deployment.name,
     'interconnection': true,
     'configuration': {
       'resources': deployment.resourcesConfig,

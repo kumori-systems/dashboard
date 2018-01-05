@@ -200,46 +200,57 @@ export module Deployment {
    * Instance of a role defined in this deployment's service.
    */
   export class Role {
+
     /** <string> Readable text which identifies this role in this deployment. */
     readonly name: string;
+
     /** <string> Component which implements the role. */
     readonly component: string;
+
     /** <any> Innitial settings for a role. */
     configuration: any = null;
+
     /** <number> Amount of CPU units available. Default 1. */
     cpu: number = 1;
+
     /**
      * <number> Amount of main memory units needed by this rol. Each unit
      * corresponds to a certain amount of physical RAM plus swap. Default 1.
      */
     memory: number = 1;
+
     /**
      * <number> Amount of I/O performance units available. Each IOperf unit
      * corresponds to a specific disk bandwidth rate and to a specific tare of
      * disk operations per second (IOPS) the role can perform. Default 1.
      */
     ioperf: number = 1;
+
     /**
      * <boolean> Indicates that the component is especially I/O intensive in
      * terms of IOPS. When the value is true, the rate of disk operations per
      * second included per I/O performance unit will be higher. Default false.
      */
     iopsintensive: boolean = false;
+
     /** <number> Maximum rate (in Mbps) of data transmission through network
      * interfaces. Default 1.
      */
     bandwidth: number = 1;
+
     /**
      * <number> Number of failures needed to take down all instances of a
      * component. The resilience is specified by levels, but thye indicate
      * various types of failures by likelihood. Default 1.
      */
     resilience: number = 1;
+
     /**
      * <{ [instance: string]: Role.Instance }>Instances of the role to be
      * mantained running.
      */
     instances: { [instance: string]: Role.Instance } = {};
+
     /** <number> Actual number of connected instances for this rol. */
     get actualInstances(): number {
       let res: number = 0;
@@ -252,14 +263,17 @@ export module Deployment {
       }
       return res;
     };
+
     /**
-     * <number> Minim amount of instances running at the same time. Default 0.
+     * <number> Minim amount of instances running at the same time. Default 1.
      */
-    minInstances: number = 0;
+    minInstances: number = 1;
+
     /**
-     * <number> Maximum amount of instances running at the same time. Default 0.
+     * <number> Maximum amount of instances running at the same time. Default 1.
      */
-    maxInstances: number = 0;
+    maxInstances: number = 1;
+
     /**
      * <Role.STATE> Represents the state of the conjuntion of the instances.If
      * all instances are connected the state will be GOOD, if all instances are
@@ -334,6 +348,7 @@ export module Deployment {
       bandwidth: number, resilience: number,
       instances: { [instanceId: string]: Role.Instance }, minInstances: number,
       maxInstances: number) {
+
       if (!name || name.length === 0)
         throw new Error('Invalid name for Role: ' + name);
       this.name = name;
@@ -348,9 +363,18 @@ export module Deployment {
       if (bandwidth && bandwidth > 0) this.bandwidth = bandwidth;
       if (resilience && resilience > 0) this.resilience = resilience;
       if (instances) this.instances = instances;
-      if (minInstances && minInstances > 0) this.minInstances = minInstances;
-      if (maxInstances && maxInstances >= minInstances)
-        this.maxInstances = maxInstances;
+      if (minInstances) {
+        if (minInstances > 0) { this.minInstances = minInstances; }
+        else { throw new Error('MinInstances must be higher than 0'); }
+      }
+      if (maxInstances) {
+        if (maxInstances >= minInstances) {
+          this.maxInstances = maxInstances;
+        } else {
+          throw new
+            Error('MaxInstances must be equal or higher than minInstances');
+        }
+      }
     };
   }
 
