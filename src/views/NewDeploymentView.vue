@@ -269,6 +269,16 @@ export default class NewDeploymentView extends Vue {
       this.roleMaxInstances = new Array<number>(numRoles);
       this.roleResilence = new Array<number>(numRoles);
 
+      for (let i = 0; i < numRoles; i++) {
+        this.roleMem[i] = 1;
+        this.roleCPU[i] = 1;
+        this.roleNet[i] = 1;
+        this.roleMinInstances[i] = 1;
+        this.roleInstances[i] = 1;
+        this.roleMaxInstances[i] = 1;
+        this.roleResilence[i] = 1;
+      }
+
       let numResources: number = 0;
       for (let resource in ser.resources) {
         numResources++;
@@ -388,7 +398,7 @@ export default class NewDeploymentView extends Vue {
       JSON.parse(v);
       return true;
     } catch (err) {
-     return err.toString();
+      return err.toString();
     }
   }
 
@@ -461,7 +471,6 @@ export default class NewDeploymentView extends Vue {
       this.$router.push("/");
     }
   }
-
 }
 </script>
 <style lang="scss" scoped>
