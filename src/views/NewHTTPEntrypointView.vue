@@ -1,5 +1,5 @@
 <template>
-  <v-form v-model="valid" ref="form" lazy-validation>
+  <v-form v-model="valid" ref="form">
     <v-card id="add-htt-entrypoint-view">
 
       <!-- Card tittle -->
@@ -32,25 +32,59 @@
 
           <!-- Domain list-->
           <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
-            item-value="_uri" v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
+            v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
 
           <!-- Certificate -->
-          <v-layout>
-            <v-checkbox label="Accept TLS/SSL" v-model="acceptTLSSSL" disabled></v-checkbox>
-            <v-select label="Certificate" v-model="selectedCertificate" v-bind:items="certificates" v-bind:rules="[v => !!v || 'A domain is required']" disabled autocomplete></v-select>
-          </v-layout>
+          <v-flex xs4 md6>
+            <v-select
+              label="TLS/SSL Certificate"
+              placeholder="No SSL"
+              clearable
+              v-model="selectedCertificate"
+              v-bind:items="certificates"
+              item-text="_version"
+              item-value="_uri"
+              autocomplete
+            ></v-select>
+          </v-flex>
 
           <!-- Client certificate -->
-          <v-checkbox label="Require client certificates" v-model="requireClientCertificates" disabled></v-checkbox>
+          <v-checkbox label="Require client certificates" v-model="requireClientCertificates"></v-checkbox>
 
           <!-- Number of instances -->
           <v-flex xs4>
-            <v-text-field label="Instances" v-model="instances" mask='####' v-bind:rules="[v => !!v || 'Instance number is required']" required></v-text-field>
+            <v-text-field type="number" ref="minInstancesField" label="MinInstances" v-model="minInstances" mask='####'
+              v-bind:rules="[(v) => !!v || 'A minimum number of Instances is required',
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) <= parseInt(instances) || 'Can\'t be higher than initial instances'
+              ]" required v-on:change="validateFields"
+            ></v-text-field>
+          </v-flex>
+
+          <!-- Number of instances -->
+          <v-flex xs4>
+            <v-text-field type="number" ref="instancesField" label="Initial instances" v-model="instances" mask='####'
+              v-bind:rules="[
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) >= parseInt(minInstances) || 'Can\'t be less than MinInstances',
+                (v) => parseInt(v) <= parseInt(maxInstances) || 'Can\'t be more than MaxInstances'
+              ]" required v-on:change="validateFields"
+              ></v-text-field>
+          </v-flex>
+
+          <!-- Number of instances -->
+          <v-flex xs4>
+            <v-text-field type="number" ref="maxInstancesField" label="MaxInstances" v-model="maxInstances" mask='####'
+              v-bind:rules="[
+                (v) => parseInt(v) > 0 || 'Must be higher than 0',
+                (v) => parseInt(v) >= parseInt(instances) || 'Can\'t be less than initial instances'
+              ]" required v-on:change="validateFields"
+          ></v-text-field>
           </v-flex>
 
           <!-- Resilience level-->
           <v-flex xs4>
-            <v-text-field label="Resilience" v-model="resilience" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
+            <v-text-field label="Resilience" type="number" v-model="resilience" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
           </v-flex>   
 
       </v-container>
@@ -60,7 +94,12 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
-import { EntryPoint, Deployment, Domain } from "../store/stampstate/classes";
+import {
+  Certificate,
+  EntryPoint,
+  Deployment,
+  Domain
+} from "../store/stampstate/classes";
 
 import SSGetters from "../store/stampstate/getters";
 
@@ -70,11 +109,12 @@ import SSGetters from "../store/stampstate/getters";
 })
 export default class NewHTTPEntrypointView extends Vue {
   valid: boolean = false;
-  selectedDomain: string = "";
-  selectedCertificate: string = "";
-  acceptTLSSSL: boolean = false;
+  selectedDomain: Domain = null;
+  selectedCertificate: string = null;
   requireClientCertificates: boolean = false;
+  minInstances: number = 1;
   instances: number = 1;
+  maxInstances: number = 1;
   resilience: number = 1;
 
   /** Gets all domains. A filter is applicated to show only free domains. */
@@ -95,63 +135,88 @@ export default class NewHTTPEntrypointView extends Vue {
     return domainList;
   }
 
-  get certificates() {
-    // return this.$store.getters.certificates;
-    return [];
+  /** Gets all domains. A filter is applicated to show only free domains. */
+  get certificates(): Certificate[] {
+    let certificates = ((<SSGetters>this.$store.getters)
+      .certificates as any) as {
+      [uri: string]: Certificate;
+    };
+    let certificatesList: Certificate[] = [];
+    for (let certificateUri in certificates) {
+      if (certificates[certificateUri]) {
+        if (certificates[certificateUri].usedBy.length === 0) {
+          certificatesList.push(certificates[certificateUri]);
+        }
+      } else {
+        this.$store.dispatch("getElementInfo", certificateUri);
+      }
+    }
+    return certificatesList;
+  }
+
+  /** Validates the instances fields when another instance field is changed */
+  validateFields(): void {
+    (<any>this.$refs.minInstancesField).validate();
+    (<any>this.$refs.instancesField).validate();
+    (<any>this.$refs.maxInstancesField).validate();
   }
 
   submit(): void {
-    let resourcesConfig = {
-      server_cert: this.certificates.length > 0 ? this.certificates : null,
-      vhost: this.selectedDomain
-    };
-    let config = {
-      TLS: this.acceptTLSSSL,
-      clientcert: this.requireClientCertificates
-    };
+    if ((<any>this.$refs.form).validate()) {
+      let resourcesConfig = {
+        server_cert: this.selectedCertificate,
+        vhost: this.selectedDomain._uri
+      };
 
-    let instanceList = {};
-    for (let counter = 0; counter < this.instances; counter++) {
-      instanceList[counter] = new Deployment.Role.Instance(
-        counter.toString(),
-        null,
-        null,
-        null,
-        null
+      let config = {
+        TLS: this.selectedCertificate !== null,
+        clientcert: this.requireClientCertificates
+      };
+
+      let instanceList = {};
+
+      for (let counter = 0; counter < this.instances; counter++) {
+        instanceList[counter] = new Deployment.Role.Instance(
+          counter.toString(),
+          null,
+          null,
+          null,
+          null
+        );
+      }
+
+      let roles = {};
+
+      roles["sep"] = new Deployment.Role(
+        "sep", // id
+        "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
+        { domain: this.selectedDomain._uri }, // configuration
+        1, //cpu
+        1, //memory
+        0, //ioperf
+        false, //iopsensitive
+        1, //bandwidth
+        this.resilience, //resilience
+        instanceList, // Instances
+        this.minInstances, // minInstances
+        this.maxInstances // maxInstances
       );
+
+        this.$store.dispatch(
+          "addDeployment",
+          new Deployment(
+            "slap://domain/deployments/date/this_will_be_overrited", // uri
+            this.selectedDomain.url, // name
+            config, // parameters
+            EntryPoint.TYPE.HTTP_INBOUND, //service
+            roles, // roles
+            resourcesConfig, // resourcesConfig
+            {} // channels
+          )
+        );
+
+        this.$router.push("/");
     }
-
-    let roles = {};
-
-    roles["sep"] = new Deployment.Role(
-      "sep", // id
-      "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
-      { domain: this.selectedDomain }, // configuration
-      1, //cpu
-      1, //memory
-      0, //ioperf
-      false, //iopsensitive
-      1, //bandwidth
-      1, //resilience
-      instanceList, // Instances
-      this.instances, // minInstances
-      this.instances // maxInstances
-    );
-
-    this.$store.dispatch(
-      "addDeployment",
-      new Deployment(
-        "slap://domain/deployments/date/this_will_be_overrited", // uri
-        name, // name
-        config, // parameters
-        EntryPoint.TYPE.HTTP_INBOUND, //service
-        roles, // roles
-        resourcesConfig, // resourcesConfig
-        {} // channels
-      )
-    );
-
-    this.$router.push("/");
   }
 }
 </script>

@@ -68,6 +68,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
+
     connection.addDeployment(deployment).catch((error) => {
       console.error('Error deploying a service', error);
     });
@@ -134,7 +135,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.aplyChangesToDeployment(deploymentURN, rolNumInstances,
       killInstances).catch((error) => {
         console.error('Error modifying deployment. ',
-        deploymentURN, rolNumInstances, killInstances, error);
+          deploymentURN, rolNumInstances, killInstances, error);
       });
   }
 

@@ -6,7 +6,8 @@ import PriorityQueue from 'priorityqueue';
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
-  EntryPoint, HTTPEntryPoint, Metric, ProvidedChannel, Runtime, Service
+  EntryPoint, HTTPEntryPoint, Metric, ProvidedChannel, Runtime, Service,
+  Volume
 } from './classes';
 
 /**
@@ -158,15 +159,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.services;
   }
 
-  servicesList = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): string[] => {
-    let res: string[] = [];
-    for (let ser in state.services) {
-      res.push(ser);
-    }
-    return res;
-  }
-
   service = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (serviceURI: string) => Service => {
     return (serviceURI: string) => {
@@ -214,19 +206,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       if (state.services[serviceUri]) {
         res = state.services[serviceUri].usedBy;
       }
-      return res;
-    };
-  }
-
-  getServiceRoles = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (serviceURI: string) =>
-      string[] => {
-    return (serviceURI: string) => {
-      let res: Array<string> = [];
-      if ((<Service>state.services[serviceURI]))
-        for (let role in (<Service>state.services[serviceURI]).roles) {
-          res.push(role);
-        }
       return res;
     };
   }
@@ -398,19 +377,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
-  getServiceResources = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (serviceURI: string) => string[] => {
-    return (serviceId: string) => {
-      let res: Array<string> = [];
-      if (state.services[serviceId] && state.services[serviceId].resources)
-        for (let resourceIndex in state.services[serviceId].resources) {
-          if (state.services[serviceId].resources[resourceIndex])
-            res.push(state.services[serviceId].resources[resourceIndex]);
-        }
-      return res;
-    };
-  }
-
   runtimes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [uri: string]: Runtime } => {
     return state.runtimes;
@@ -458,6 +424,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+  }
+  volumes = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): { [uri: string]: Volume } => {
+    return state.volumes;
   }
 
   domains = (state?: State, getters?: Getters, rootState?: any,

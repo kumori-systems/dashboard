@@ -51,7 +51,7 @@ export default class SignInView extends Vue {
      * @returns <boolean> true  if there is a background process running.
      */
   get loading(): Boolean {
-    return ((<PSGetters>this.$store.getters).loading as any) as Boolean;
+    return (<PSGetters>this.$store.getters).loading as any as Boolean;
   }
 
   /**
@@ -86,7 +86,7 @@ export default class SignInView extends Vue {
   get friendlyMessageClass() {
     let res: string = "";
     try {
-      switch ((this.lastAction.state as any) as BackgroundAction.State) {
+      switch (this.lastAction.state as any as BackgroundAction.State) {
         case BackgroundAction.State.FAIL:
           res = "red--text";
           break;
