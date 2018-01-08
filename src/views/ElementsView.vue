@@ -71,8 +71,8 @@
                           <div>
                             <span class="yellow">in use by:</span>
                           </div>
-                          <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index">
-                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{deploymentInfo(usedBy).name}}</router-link>
+                          <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
+                            <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>
                         </div>
                         <div v-else>not in use</div>
@@ -118,8 +118,8 @@
                           <div>
                             <span class="yellow">in use by:</span>
                           </div>
-                          <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index">
-                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{deploymentInfo(usedBy).name}}</router-link>
+                          <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
+                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>
                         </div>
                         <div v-else>not in use</div>
@@ -164,10 +164,8 @@
                       <v-flex xs6>
                         <div v-if="serviceUsedBy(service).length>0">
                           <div><span class="yellow">in use by:</span></div>
-                          <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index">
-                            <router-link  v-bind:to="deploymentInfo(usedBy)._path">
-                              {{deploymentInfo(usedBy).name}}
-                            </router-link>
+                          <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
+                            <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>
                         </div>
                         <div v-else>not in use</div>

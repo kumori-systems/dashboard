@@ -35,14 +35,18 @@
             v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
 
           <!-- Certificate -->
-          <v-select
-            label="TLS/SSL Certificate"
-            v-model="selectedCertificate"
-            v-bind:items="certificates"
-            item-text="_version"
-            item-value="_uri"
-            autocomplete
-          ></v-select>
+          <v-flex xs4 md6>
+            <v-select
+              label="TLS/SSL Certificate"
+              placeholder="No SSL"
+              clearable
+              v-model="selectedCertificate"
+              v-bind:items="certificates"
+              item-text="_version"
+              item-value="_uri"
+              autocomplete
+            ></v-select>
+          </v-flex>
 
           <!-- Client certificate -->
           <v-checkbox label="Require client certificates" v-model="requireClientCertificates"></v-checkbox>
@@ -160,8 +164,8 @@ export default class NewHTTPEntrypointView extends Vue {
   submit(): void {
     if ((<any>this.$refs.form).validate()) {
       let resourcesConfig = {
-        server_cert: this.certificates.length > 0 ? this.selectedCertificate : null,
-        vhost: this.selectedDomain.url
+        server_cert: this.selectedCertificate,
+        vhost: this.selectedDomain._uri
       };
 
       let config = {

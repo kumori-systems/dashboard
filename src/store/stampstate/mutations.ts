@@ -23,13 +23,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
         if (state.services[serv].usedBy.indexOf(dep) < 0)
           state.services[serv].usedBy.push(dep);
       }
-
-      // If deployment is using any resorce, it's marked as usedby
-      for (let res in payload[dep].resourcesConfig) {
-        if (payload[dep].resourcesConfig[res] instanceof Domain) {
-          console.debug('MUTATIONS: Domain resource found');
-        }
-      }
     }
 
     state.deployments = { ...state.deployments, ...payload };
@@ -43,6 +36,16 @@ export default class Mutations implements Vuex.MutationTree<State> {
         let index = state.domains[dom].usedBy.indexOf(deploymentURI);
         if (index !== -1) {
           state.domains[dom].usedBy.splice(index, 1);
+        }
+      }
+    }
+
+    // remove this deployment from all certificates
+    for (let cert in state.certificates) {
+      if (state.certificates[cert]) {
+        let index = state.certificates[cert].usedBy.indexOf(deploymentURI);
+        if (index !== -1) {
+          state.certificates[cert].usedBy.splice(index, 1);
         }
       }
     }

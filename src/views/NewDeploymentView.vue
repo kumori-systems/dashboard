@@ -317,17 +317,23 @@ export default class NewDeploymentView extends Vue {
 
   get serviceResourcesList(): [string, string][] {
     let resourcesList: [string, string][] = [];
-    for (let res in this.service.resources) {
+    if(this.service){
+      for (let res in this.service.resources) {
       resourcesList.push([res, this.service.resources[res]]);
+    }
     }
     return resourcesList;
   }
 
   get serviceRolesList(): string[] {
     let roleList: string[] = [];
-    for (let role in this.service.roles) {
-      roleList.push(role);
+
+    if(this.service){
+      for (let role in this.service.roles) {
+        roleList.push(role);
+      }
     }
+
     return roleList;
   }
 
