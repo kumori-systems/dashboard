@@ -103,7 +103,6 @@ class ProxyConnection extends EventEmitter {
   login(username: string, password: string) {
     this.acs = new EcloudAcsClient(ACS_URI);
     return this.acs.login(username, password).then(({ accessToken, user }) => {
-
       this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
 
       this.admission.onConnected(() => {
@@ -111,9 +110,13 @@ class ProxyConnection extends EventEmitter {
       });
 
       this.admission.onEcloudEvent((event: EcloudEvent) => {
+        let startTime, endTime;
         console.warn('Event under development: %s / %s event received:',
           event.strType, event.strName, event);
-        const timeStart = performance.now();
+        
+          // For performance monitorization
+        startTime = performance.now();
+
         switch (event.type) {
           case EcloudEventType.service:
             switch (event.name) {
@@ -225,7 +228,6 @@ class ProxyConnection extends EventEmitter {
                 break;
               case EcloudEventName.scale:
               case EcloudEventName.status:
-                console.warn('Event under development');
               case EcloudEventName.undeploying:
                 break;
               default:
@@ -272,8 +274,10 @@ class ProxyConnection extends EventEmitter {
           case EcloudEventType.metrics:
             switch (event.name) {
               case EcloudEventName.service:
-                this.emit(this.onAddMetrics,
-                  transformEcloudEventDataToMetrics(event));
+                this.emit(
+                  this.onAddMetrics,
+                  transformEcloudEventDataToMetrics(event)
+                );
                 break;
               default:
                 console.error('Not espected ecloud event name: %s/%s',
@@ -284,10 +288,14 @@ class ProxyConnection extends EventEmitter {
             console.error('Not espected ecloud event type: %s',
               event.strType, event);
         }
-        const timeEnd = performance.now();
-        const totalTime = timeEnd - timeStart;
-        console.debug('Event handler took %dms for %s:%s', totalTime,
-          event.strType, event.strName);
+
+        // For performance monitorization
+        endTime = performance.now();
+
+        console.debug(
+          'Event handler took %dms for %s:%s.',
+          endTime - startTime, event.strType, event.strName
+        );
       });
 
       this.admission.onError((error: any) => {

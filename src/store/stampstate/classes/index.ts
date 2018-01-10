@@ -7,7 +7,6 @@ import { Deployment } from './deployment';
 import { EcloudElement } from './ecloudelement';
 import { EntryPoint, HTTPEntryPoint } from './entrypoint';
 import { Manifest } from './manifest';
-import { Measurable, Metric } from './measurable';
 import {
   BooleanParameter, IntegerParameter, JsonParameter, ListParameter,
   NumberParameter, Parameter, StringParameter
@@ -21,7 +20,6 @@ export {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
   Deployment, Domain, EcloudElement, EntryPoint, FullConnector, HTTPEntryPoint,
   IntegerParameter, JsonParameter, ListParameter, LoadBalancerConnector,
-  Manifest, Measurable, Metric, NumberParameter, Parameter, Protocol,
-  ProvidedChannel, PublishSubscribeConnector, Resource, Runtime, Service,
-  StringParameter, Volume
+  Manifest, NumberParameter, Parameter, Protocol, ProvidedChannel,
+  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter, Volume
 };

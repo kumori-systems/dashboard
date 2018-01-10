@@ -179,12 +179,7 @@ import {
   ChartComponentOptions,
   ChartComponentUtils
 } from "../components";
-import {
-  Channel,
-  Deployment,
-  Metric,
-  Service
-} from "../store/stampstate/classes";
+import { Channel, Deployment, Service } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -283,25 +278,40 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get deploymentMetrics() {
-    let metrics: [
-      Date,
-      {
-        data: Metric;
+    let metrics: {
+      [deploymentId: string]: {
+        data: {
+          [property: string]: number | string;
+        };
         roles: {
-          [roleId: string]: {
-            data: Metric;
-            instances: { [instanceId: string]: Metric };
+          [rolId: string]: {
+            data: {
+              [property: string]: number | string;
+            };
+            instances: {
+              [instanceId: string]: {
+                [property: string]: number | string;
+              };
+            };
           };
         };
-      }
-    ][] = this.deployment.metrics;
+      }[];
+    } = this.$store.getters.metrics[this.deployment._uri];
 
     let res: {
-      data: Metric[];
+      data: {
+        [property: string]: number | string;
+      }[];
       roles: {
         [roleId: string]: {
-          data: Metric;
-          instances: { [instanceId: string]: Metric };
+          data: {
+            [property: string]: number | string;
+          };
+          instances: {
+            [instanceId: string]: {
+              [property: string]: number | string;
+            };
+          };
         };
       }[];
     } = {
@@ -323,8 +333,14 @@ export default class DetailedDeploymentView extends Vue {
 
   get roleMetrics(): {
     [roleId: string]: {
-      data: Metric;
-      instances: { [instanceId: string]: Metric };
+      data: {
+        [property: string]: number | string;
+      };
+      instances: {
+        [instanceId: string]: {
+          [property: string]: number | string;
+        };
+      };
     };
   }[] {
     return this.deploymentMetrics.roles;
@@ -522,11 +538,10 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   loadDeploymentConnections(dep: Deployment, ser: Service) {
-      for (let chan in this.serviceNewDependedConnections)
-        this.serviceNewDependedConnections[chan] = [];
-      for (let chan in this.serviceNewProvidedConnections)
-        this.serviceNewProvidedConnections[chan] = [];
-
+    for (let chan in this.serviceNewDependedConnections)
+      this.serviceNewDependedConnections[chan] = [];
+    for (let chan in this.serviceNewProvidedConnections)
+      this.serviceNewProvidedConnections[chan] = [];
 
     if (dep && ser) {
       for (let chann in dep.channels) {

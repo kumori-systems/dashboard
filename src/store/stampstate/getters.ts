@@ -6,8 +6,7 @@ import PriorityQueue from 'priorityqueue';
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
-  EntryPoint, HTTPEntryPoint, Metric, ProvidedChannel, Runtime, Service,
-  Volume
+  EntryPoint, HTTPEntryPoint, ProvidedChannel, Runtime, Service, Volume
 } from './classes';
 
 /**
@@ -59,28 +58,28 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
-  deploymentMetricList = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (deploymentURI: string) => [Date, {
-      'data': Metric,
-      'roles': {
-        [roleId: string]: {
-          'data': Metric, 'instances': {
-            [instanceId: string]: Metric
+  metrics = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): {
+      [deploymentId: string]: {
+        'data': {
+          [property: string]: number | string
+        },
+        'roles': {
+          [rolId: string]: {
+            'data': {
+              [property: string]: number | string
+            },
+            'instances': {
+              [instanceId: string]: {
+                [property: string]: number | string
+              }
+
+            }
           }
         }
-      }
-    }][] => {
-    return (deploymentId: string): [Date, {
-      'data': Metric, 'roles': {
-        [roleId: string]: {
-          'data': Metric, 'instances': {
-            [instanceId: string]: Metric
-          }
-        }
-      }
-    }][] => {
-      return (<Deployment>state.deployments[deploymentId]).metrics;
-    };
+      }[]
+    } => {
+    return state.metrics;
   }
 
   deploymentFromPath = (state?: State, getters?: Getters, rootState?: any,
@@ -367,7 +366,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                 if (res.indexOf(elem) === -1) {
                   res.push(elem); // Lo añadimos
                 }
-                
+
               }
             }
           }

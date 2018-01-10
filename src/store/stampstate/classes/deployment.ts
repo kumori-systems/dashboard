@@ -1,6 +1,5 @@
 import urlencode from 'urlencode';
 import { Service } from './index';
-import { Measurable } from './measurable';
 
 /**
  * Checks the format of the URI and returns the domain and the name of the
@@ -30,7 +29,7 @@ function rightURIformat(URI): [string, string] {
 /**
  * Instance of a service.
  */
-export class Deployment extends Measurable {
+export class Deployment {
   /** <string> Uniform Resource Identifier for this deployment. */
   readonly _uri: string;
   /** <string> Where this deployment belongs to. */
@@ -124,7 +123,7 @@ export class Deployment extends Measurable {
       [originChannel: string]:
       { destinyChannelId: string, destinyDeploymentId: string }[]
     }) {
-    super();
+
     // Check URI and assign results
     [this._domain, {}] = rightURIformat(uri);
     this._uri = uri;

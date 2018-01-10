@@ -15,8 +15,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
 
+  /** Signs the user out of the page. */
   signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
-    // Signs the user out of the page
     injectee.commit('signOut');
   }
 

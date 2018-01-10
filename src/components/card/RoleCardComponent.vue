@@ -109,8 +109,7 @@ import {
   Connector,
   Deployment,
   Service,
-  Channel,
-  Metric
+  Channel
 } from "../../store/stampstate/classes";
 
 /* Theese components are loaded separatedly to avoid recursivity problems. */
@@ -165,8 +164,10 @@ export default class RoleCardComponent extends Vue {
 
   get onRoleMetricsUpdate() {
     let res: {
-      data: Metric[];
-      instances: { [instanceId: string]: Metric }[];
+      data: { [property: string]: number | string }[];
+      instances: {
+        [instanceId: string]: { [property: string]: number | string };
+      }[];
     } = {
       data: [],
       instances: []

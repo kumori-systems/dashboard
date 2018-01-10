@@ -3,10 +3,23 @@ import Vuex from 'vuex';
 import State from './state';
 
 import {
-  Certificate, Component, Deployment, Domain, Metric, Runtime, Service, Volume
+  Certificate, Component, Deployment, Domain, Runtime, Service, Volume
 } from './classes';
 /**
  * Mutations to handle the representation of the stamp state easier.
+ * 
+ * IMPORTANT BEFORE EDITING. A little research has been done to check the
+ * impact of a each function in the process time. Observed functions are;
+ * Vue.set(), Destructurator ...{} and Array.push()
+ * 
+ * The result of the research showed than;
+ * Destructurator is better than vue.set by 2 cases.
+ * The mean of time of Destructurator is more or less 2ms less than
+ * vue.set's mean.
+ * 
+ * The case of array.push() is not clear. Sometimes it semms to deppend on the
+ * size of the array and sometimes it seems it's depending on the work of
+ * the browser. But both arent always true.
  */
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
@@ -23,6 +36,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
         if (state.services[serv].usedBy.indexOf(dep) < 0)
           state.services[serv].usedBy.push(dep);
       }
+
+      // Initialitze deployment metrics
+      if (!state.metrics[dep])
+        state.metrics[dep] = [];
     }
 
     state.deployments = { ...state.deployments, ...payload };
@@ -69,6 +86,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       'instance': Deployment.Role.Instance
     }
   ): void => {
+    // TODO could be change to improve performance for Deconstructor
     Vue.set((<Deployment>state.deployments[payload.deploymentId])
       .roles[payload.roleId].instances, payload.instanceId, payload.instance);
   }
@@ -102,7 +120,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       }
     }
-
 
     // add services to the state
     state.services = { ...state.services, ...payload };
@@ -216,20 +233,22 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more certificates to the state */
   addMetrics = (state: State, metricBundle: {
-    [deploymentId: string]:
-    {
-      'data': Metric, 'roles': {
+    [deploymentId: string]: {
+      'data': { [property: string]: string | number; },
+      'roles': {
         [rolId: string]:
-        { 'data': Metric, 'instances': { [instanceId: string]: Metric } }
+        {
+          'data': { [property: string]: number | string },
+          'instances': {
+            [instanceId: string]: { [property: string]: number | string }
+          }
+        }
       }
     }
   }) => {
     for (let deploymentId in metricBundle) { // This will only happen once
-      if (state.deployments[deploymentId]) {
-        state.deployments[deploymentId].metrics.push([
-          metricBundle[deploymentId].data.timestamp,
-          metricBundle[deploymentId]
-        ]);
+      if (state.metrics[deploymentId]) {
+        state.metrics[deploymentId].push(metricBundle[deploymentId]);
       }
     }
   }

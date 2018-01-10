@@ -41,7 +41,7 @@ import VueClassComponent from "vue-class-component";
 
 // Components
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
-import { Deployment, Metric } from "../../store/stampstate/classes";
+import { Deployment } from "../../store/stampstate/classes";
 
 import ChartComponent from "./../chart";
 
@@ -72,7 +72,7 @@ export default class InstanceCardComponent extends Vue {
 
   get onInstanceMetricsUpdate() {
     let res: {
-      data: Metric[];
+      data: { [property: string]: number | string }[];
     } = {
       data: []
     };
