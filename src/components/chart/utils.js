@@ -19,6 +19,8 @@ const color = {
 console.warn('bandwith_input and bandwith_output typo');
 
 export function prepareData(data) {
+  // 'data': { [property: string]: string | number }
+  
   var res = {
     labels: [],
     datasets: []

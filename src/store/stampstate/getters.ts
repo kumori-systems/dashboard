@@ -59,27 +59,27 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   metrics = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): {
-      [deploymentId: string]: {
-        'data': {
-          [property: string]: number | string
-        },
-        'roles': {
-          [rolId: string]: {
-            'data': {
+    rootGetters?: any): (deploymentId: string) => {
+      'data': {
+        [property: string]: number | string
+      },
+      'roles': {
+        [rolId: string]: {
+          'data': {
+            [property: string]: number | string
+          },
+          'instances': {
+            [instanceId: string]: {
               [property: string]: number | string
-            },
-            'instances': {
-              [instanceId: string]: {
-                [property: string]: number | string
-              }
-
             }
+
           }
         }
-      }[]
-    } => {
-    return state.metrics;
+      }
+    }[] => {
+    return (deploymentId: string) => {
+      return state.metrics[deploymentId];
+    };
   }
 
   deploymentFromPath = (state?: State, getters?: Getters, rootState?: any,

@@ -142,7 +142,7 @@
         <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
           <role-card-component v-for="(rolContent, rolId) in deployment.roles"
           v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
-          v-bind:roleMetrics="roleMetrics"
+          v-bind:roleMetrics="deploymentMetrics.roles"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
@@ -180,6 +180,8 @@ import {
   ChartComponentUtils
 } from "../components";
 import { Channel, Deployment, Service } from "../store/stampstate/classes";
+
+import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -220,8 +222,10 @@ export default class DetailedDeploymentView extends Vue {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
+  /* // No longer needed because it's loaded on user's load
   mounted() {
     // Retrieve all actually deployed services
+    
     for (let dep in this.$store.getters.deployments) {
       if (
         !this.$store.getters.service(
@@ -234,8 +238,32 @@ export default class DetailedDeploymentView extends Vue {
         );
       }
     }
+    
+  }
+  */
+
+  get deployment(): Deployment {
+    return ((<SSGetters>this.$store.getters).deploymentFromPath as Function)(
+      this.$route.path
+    );
   }
 
+  /** Required to obtain additional information of a role. */
+  get service(): Service {
+    let ser: Service = ((<SSGetters>this.$store.getters).service as Function)(
+      this.deployment.service
+    );
+    if (!ser) {
+      this.$store.dispatch("getElementInfo", this.deployment.service);
+    } else {
+      this.cancelChanges();
+      this.loadDeploymentConnections(this.deployment, ser);
+    }
+
+    return ser;
+  }
+
+  /** Dep */
   get state(): string {
     let res: string;
     switch (this.deployment.state) {
@@ -254,49 +282,48 @@ export default class DetailedDeploymentView extends Vue {
     return res;
   }
 
-  get deployment(): Deployment {
-    return this.$store.getters.deploymentFromPath(this.$route.path);
-  }
-
+  /*
   get searchDeployment(): (uri: string) => Deployment {
     return (uri: string) => {
       return this.$store.getters.deployment(uri);
     };
   }
+  */
 
-  /** Required to obtain additional information of a role. */
-  get service(): Service {
-    let ser: Service = this.$store.getters.service(this.deployment.service);
-    if (!ser) {
-      this.$store.dispatch("getElementInfo", this.deployment.service);
-    } else {
-      this.cancelChanges();
-      this.loadDeploymentConnections(this.deployment, ser);
-    }
-
-    return ser;
-  }
-
-  get deploymentMetrics() {
-    let metrics: {
-      [deploymentId: string]: {
+  get deploymentMetrics(): {
+    data: {
+      [property: string]: number | string;
+    }[];
+    roles: {
+      [roleId: string]: {
         data: {
           [property: string]: number | string;
         };
-        roles: {
-          [rolId: string]: {
-            data: {
+        instances: {
+          [instanceId: string]: {
+            [property: string]: number | string;
+          };
+        };
+      };
+    }[];
+  } {
+    let metrics: {
+      data: {
+        [property: string]: number | string;
+      };
+      roles: {
+        [rolId: string]: {
+          data: {
+            [property: string]: number | string;
+          };
+          instances: {
+            [instanceId: string]: {
               [property: string]: number | string;
-            };
-            instances: {
-              [instanceId: string]: {
-                [property: string]: number | string;
-              };
             };
           };
         };
-      }[];
-    } = this.$store.getters.metrics[this.deployment._uri];
+      };
+    }[] = this.$store.getters.metrics(this.deployment._uri);
 
     let res: {
       data: {
@@ -320,8 +347,8 @@ export default class DetailedDeploymentView extends Vue {
     };
 
     for (let i in metrics) {
-      res.data.push(metrics[i][1].data);
-      res.roles.push(metrics[i][1].roles);
+      res.data.push(metrics[i].data);
+      res.roles.push(metrics[i].roles);
     }
 
     return res;
@@ -329,21 +356,6 @@ export default class DetailedDeploymentView extends Vue {
 
   get deploymentChartData(): { labels: string[]; datasets: any[] } {
     return ChartComponentUtils.prepareData(this.deploymentMetrics.data);
-  }
-
-  get roleMetrics(): {
-    [roleId: string]: {
-      data: {
-        [property: string]: number | string;
-      };
-      instances: {
-        [instanceId: string]: {
-          [property: string]: number | string;
-        };
-      };
-    };
-  }[] {
-    return this.deploymentMetrics.roles;
   }
 
   get totalProvidedDeploymentChannels() {
@@ -532,17 +544,21 @@ export default class DetailedDeploymentView extends Vue {
     if (this.haveChanges) {
       this.rolNumInstances = {};
       this.instanceKill = {};
+
+      // Clean links
+      for (let chan in this.serviceNewDependedConnections) {
+        this.serviceNewDependedConnections[chan] = [];
+      }
+      for (let chan in this.serviceNewProvidedConnections) {
+        this.serviceNewProvidedConnections[chan] = [];
+      }
+
       this.clear = true;
       this.haveChanges = false;
     }
   }
 
   loadDeploymentConnections(dep: Deployment, ser: Service) {
-    for (let chan in this.serviceNewDependedConnections)
-      this.serviceNewDependedConnections[chan] = [];
-    for (let chan in this.serviceNewProvidedConnections)
-      this.serviceNewProvidedConnections[chan] = [];
-
     if (dep && ser) {
       for (let chann in dep.channels) {
         for (let conn in dep.channels[chann]) {
@@ -590,8 +606,9 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   handleKillInstanceChange([tempRol, tempInst, value]) {
-    if (this.instanceKill[tempRol] === undefined)
+    if (this.instanceKill[tempRol] === undefined) {
       this.instanceKill[tempRol] = {};
+    }
     this.instanceKill[tempRol][tempInst] = value;
     this.haveChanges = true;
   }

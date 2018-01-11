@@ -47,7 +47,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Removes one deployment from the state */
   removeDeployment = (state: State, deploymentURI: string): void => {
-    // remove this deployment from all domains
+
+    // Remove this deployment from all domains
     for (let dom in state.domains) {
       if (state.domains[dom]) {
         let index = state.domains[dom].usedBy.indexOf(deploymentURI);
@@ -57,7 +58,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
     }
 
-    // remove this deployment from all certificates
+    // Remove this deployment from all certificates
     for (let cert in state.certificates) {
       if (state.certificates[cert]) {
         let index = state.certificates[cert].usedBy.indexOf(deploymentURI);
@@ -67,15 +68,19 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
     }
 
-    // remove this deployment from the service
+    // Remove this deployment from the service
     let ser = state.deployments[deploymentURI].service;
     if (state.services[ser]) {
       let index = state.services[ser].usedBy.indexOf(deploymentURI);
       state.services[ser].usedBy.splice(index, 1);
     }
 
-    /// remove this deployment from the state
+    // Remove deployment metrics
+    Vue.delete(state.metrics, deploymentURI);
+
+    // Remove this deployment from the state
     Vue.delete(state.deployments, deploymentURI);
+
   }
 
   addInstance = (state: State,
@@ -86,9 +91,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
       'instance': Deployment.Role.Instance
     }
   ): void => {
-    // TODO could be change to improve performance for Deconstructor
-    Vue.set((<Deployment>state.deployments[payload.deploymentId])
-      .roles[payload.roleId].instances, payload.instanceId, payload.instance);
+
+    (<Deployment>state.deployments[payload.deploymentId])
+      .roles[payload.roleId].instances = {
+        ...(<Deployment>state.deployments[payload.deploymentId])
+          .roles[payload.roleId].instances,
+        [payload.instanceId]: payload.instance
+      };
+
   }
 
   /** Adds one or more services to the state */
@@ -125,12 +135,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.services = { ...state.services, ...payload };
   }
 
-  /** Removes one service from the state */
+  /**
+   * Removes one service from the state. The stamp will only allow this
+   * operation when there are no deployments from this service
+   */
   removeService = (state: State, serviceURI: string): void => {
-    // This service wont be removed if any deployment is using it
 
     // Remove this service from the state
     Vue.delete(state.services, serviceURI);
+
   }
 
   /** Adds one or more components to the state */
@@ -158,19 +171,23 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
 
     state.components = { ...state.components, ...payload };
+    
   }
 
   /** Removes one component from the state */
   removeComponent = (state: State, componentURI: string): void => {
+
     // When a component is erased from the state, all deployments using it
     // are previously undeployed
 
     // Remove component from the state
     Vue.delete(state.components, componentURI);
+
   }
 
   /** Adds one or more runtimes to the state */
   addRuntime = (state: State, payload: { [uri: string]: Runtime }): void => {
+
     // Check for all components using this runtime
     for (let runt in payload) {
 
@@ -189,6 +206,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     // Add runtimes to the state
     state.runtimes = { ...state.runtimes, ...payload };
+
   }
 
   /** Removes one runtime from the state */
@@ -234,7 +252,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   /** Adds one or more certificates to the state */
   addMetrics = (state: State, metricBundle: {
     [deploymentId: string]: {
-      'data': { [property: string]: string | number; },
+      'data': { [property: string]: string | number },
       'roles': {
         [rolId: string]:
         {
@@ -253,12 +271,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   }
 
+  /** Links two services */
   link = (state: State,
     { deploymentOne, channelOne, deploymentTwo, channelTwo }): void => {
+
     let conn = {
       'destinyDeploymentId': deploymentTwo,
       'destinyChannelId': channelTwo
     };
+
     // if deployment and channel, both exists in the state
     if (state.deployments[deploymentOne]) {
       if (!state.deployments[deploymentOne].channels[channelOne]) {
@@ -294,6 +315,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   }
 
+  /** Unlinks two services */
   unlink = (state: State,
     { deploymentOne, channelOne, deploymentTwo, channelTwo }): void => {
     let index;
