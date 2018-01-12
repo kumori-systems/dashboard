@@ -14,6 +14,9 @@ import JSZip from 'jszip';
 import { EventEmitter, Listener } from 'typed-event-emitter';
 
 import {
+  User
+} from '../store/pagestate/classes';
+import {
   Certificate, Component, Deployment, Domain, HTTPEntryPoint, Resource, Runtime,
   Service, Volume
 } from '../store/stampstate/classes';
@@ -97,208 +100,227 @@ class ProxyConnection extends EventEmitter {
   /**
    * Login authentifies the user and redirects all events received from the
    * stamp.
+   * If the user has got a token, that means it was authenticated in any other
+   * way
    * @param username User's name
    * @param password User's password
+   * @param userId User's id
+   * @param token User's token
    */
-  login(username: string, password: string) {
-    this.acs = new EcloudAcsClient(ACS_URI);
-    return this.acs.login(username, password).then(({ accessToken, user }) => {
+  login(username: string, password: string, userId?: string, token?: string) {
+    let signin:
+      Promise<User>;
+    if (!token) {
+      this.acs = new EcloudAcsClient(ACS_URI);
 
-      this.admission = new EcloudAdmissionClient(ADMISSION_URI, accessToken);
+      signin = this.acs.login(username, password)
+        .then(({ accessToken, user }) => {
+          return new User(user.id, user.name,
+            User.State.AUTHENTICATED, accessToken);
+        });
 
-      this.admission.onConnected(() => {
-        console.info('Successfully connected to the platform');
-      });
+    } else {
+      console.log('Detectado un socket');
+      signin = Promise.resolve<User>(
+        new User(userId, username, User.State.AUTHENTICATED, token));
+    }
 
-      this.admission.onEcloudEvent((event: EcloudEvent) => {
-        console.warn('Event under development: %s / %s event received:',
-          event.strType, event.strName, event);
-        const timeStart = performance.now();
-        switch (event.type) {
-          case EcloudEventType.service:
-            switch (event.name) {
-              case EcloudEventName.deploying:
+    return Promise.resolve()
+      .then(() => signin)
+      .then((user) => {
 
-                // Depending on the service, it's created a deployment or an
-                // entrypoint
+        this.admission = new EcloudAdmissionClient(ADMISSION_URI, user.token);
 
-                if (isServiceEntrypoint(event.entity['serviceApp'])) {
-                  // Entrypoint deployment
-                  this.emit(
-                    this.onAddDeployment, // Metodo
-                    event.entity['service'], // DeploymentID
-                    new HTTPEntryPoint(
-                      event.entity['service'], // uri
-                      null, // parameters
-                      null, // roles
-                      null, // resourcesConfig
-                      null, // links
-                    ) // Deployment
-                  );
-                }
-                else { // Common deployment
-                  this.emit(
-                    this.onAddDeployment, // Metodo
-                    event.entity['service'], // DeploymentID
-                    new Deployment(
-                      event.entity['service'], // uri
-                      null, // name
-                      null, // parameters
-                      event.entity['serviceApp'], // service
-                      null, // roles
-                      null, // resourcesConfig
-                      null, // links
-                    ) // Deployment
-                  );
-                }
+        this.admission.onConnected(() => {
+          console.info('Successfully connected to the platform');
+        });
 
-                break;
-              case EcloudEventName.deployed:
-                let roles: { [rolId: string]: Deployment.Role } = {};
-                for (let instance in event.data.instances) {
-                  roles[event.data.instances[instance].role] =
-                    new Deployment.Role(
-                      event.data.instances[instance].role, // name
-                      event.data.instances[instance].component, // component
-                      null, // configuration
-                      null, // cpu
-                      null, // memory
-                      null, // ioperf
-                      null, // iopsintensive
-                      null, // bandwidth
-                      null, // resilience
-                      null, // instanceList
-                      null, // mininstances
-                      null // maxinstances
+        this.admission.onEcloudEvent((event: EcloudEvent) => {
+          console.warn('Event under development: %s / %s event received:',
+            event.strType, event.strName, event);
+          const timeStart = performance.now();
+          switch (event.type) {
+            case EcloudEventType.service:
+              switch (event.name) {
+                case EcloudEventName.deploying:
+
+                  // Depending on the service, it's created a deployment or an
+                  // entrypoint
+
+                  if (isServiceEntrypoint(event.entity['serviceApp'])) {
+                    // Entrypoint deployment
+                    this.emit(
+                      this.onAddDeployment, // Metodo
+                      event.entity['service'], // DeploymentID
+                      new HTTPEntryPoint(
+                        event.entity['service'], // uri
+                        null, // parameters
+                        null, // roles
+                        null, // resourcesConfig
+                        null, // links
+                      ) // Deployment
                     );
-                }
-                if (isServiceEntrypoint(event.entity['serviceApp'])) {
-                  this.emit(
-                    this.onAddDeployment, // Metodo
-                    event.entity['service'], // DeploymentID
-                    new HTTPEntryPoint(
-                      event.entity['service'], // uri
-                      null, // parameters
-                      roles, // roles
-                      null, // resourcesConfig
-                      null, // links
-                    ) // Deployment
-                  );
-                }
-                else {
-                  this.emit(
-                    this.onAddDeployment, // Metodo
-                    event.entity['service'], // DeploymentID
-                    new Deployment(
-                      event.entity['service'], // uri
-                      null, // name
-                      null, // parameters
-                      event.entity['serviceApp'], // service
-                      roles, // roles
-                      null, // resourcesConfig
-                      null // links
-                    ) // Deployment
-                  );
-                }
-                this.getDeployment(event.entity['service']);
-                break;
-              case EcloudEventName.undeployed:
-                this.emit(this.onRemoveDeployment, event.entity['service']);
-                break;
-              case EcloudEventName.link:
-                this.emit(this.onLink,
-                  {
+                  }
+                  else { // Common deployment
+                    this.emit(
+                      this.onAddDeployment, // Metodo
+                      event.entity['service'], // DeploymentID
+                      new Deployment(
+                        event.entity['service'], // uri
+                        null, // name
+                        null, // parameters
+                        event.entity['serviceApp'], // service
+                        null, // roles
+                        null, // resourcesConfig
+                        null, // links
+                      ) // Deployment
+                    );
+                  }
+                  break;
+                case EcloudEventName.deployed:
+                  let roles: { [rolId: string]: Deployment.Role } = {};
+                  for (let instance in event.data.instances) {
+                    roles[event.data.instances[instance].role] =
+                      new Deployment.Role(
+                        event.data.instances[instance].role, // name
+                        event.data.instances[instance].component, // component
+                        null, // configuration
+                        null, // cpu
+                        null, // memory
+                        null, // ioperf
+                        null, // iopsintensive
+                        null, // bandwidth
+                        null, // resilience
+                        null, // instanceList
+                        null, // mininstances
+                        null // maxinstances
+                      );
+                  }
+                  if (isServiceEntrypoint(event.entity['serviceApp'])) {
+                    this.emit(
+                      this.onAddDeployment, // Metodo
+                      event.entity['service'], // DeploymentID
+                      new HTTPEntryPoint(
+                        event.entity['service'], // uri
+                        null, // parameters
+                        roles, // roles
+                        null, // resourcesConfig
+                        null, // links
+                      ) // Deployment
+                    );
+                  }
+                  else {
+                    this.emit(
+                      this.onAddDeployment, // Metodo
+                      event.entity['service'], // DeploymentID
+                      new Deployment(
+                        event.entity['service'], // uri
+                        null, // name
+                        null, // parameters
+                        event.entity['serviceApp'], // service
+                        roles, // roles
+                        null, // resourcesConfig
+                        null // links
+                      ) // Deployment
+                    );
+                  }
+                  this.getDeployment(event.entity['service']);
+                  break;
+                case EcloudEventName.undeployed:
+                  this.emit(this.onRemoveDeployment, event.entity['service']);
+                  break;
+                case EcloudEventName.link:
+                  this.emit(this.onLink, {
                     'deploymentOne': event.data.endpoints[0].deployment,
                     'channelOne': event.data.endpoints[0].channel,
                     'deploymentTwo': event.data.endpoints[1].deployment,
                     'channelTwo': event.data.endpoints[1].channel
                   });
-                break;
-              case EcloudEventName.unlink:
-                this.emit(this.onUnlink,
-                  {
+                  break;
+                case EcloudEventName.unlink:
+                  this.emit(this.onUnlink, {
                     'deploymentOne': event.data.endpoints[0].deployment,
                     'channelOne': event.data.endpoints[0].channel,
                     'deploymentTwo': event.data.endpoints[1].deployment,
                     'channelTwo': event.data.endpoints[1].channel
                   });
-                break;
-              case EcloudEventName.scale:
-              case EcloudEventName.status:
-                console.warn('Event under development');
-              case EcloudEventName.undeploying:
-                break;
-              default:
-                console.error('Not espected ecloud event name: ' + event.strType
-                  + '/' + event.strName);
-            }
-            break;
-          case EcloudEventType.node:
-            console.error('Not espected ecloud event type: ' + event.strType +
-              '/' + event.strName);
-            break;
-          case EcloudEventType.instance:
-            switch (event.name) {
-              case EcloudEventName.status:
-                let inst = new Deployment.Role.Instance(
-                  event.entity['instance'], // cnid
-                  event.data.status === 'connected' ?
-                    Deployment.Role.Instance.STATE.CONNECTED :
-                    Deployment.Role.Instance.STATE.DISCONNECTED, // state
-                  null, // cpu
-                  null, // memory
-                  null, // bandwidth
-                  null, // volumes
-                  null // ports
-                ); // Instance
-                this.emit(
-                  this.onAddInstance, // Metodo
-                  event.entity['service'], // DeploymentID
-                  event.entity['role'], // roleId
-                  event.entity['instance'], // instanceId
-                  inst
-                );
-                break;
-              case EcloudEventName.realocate:
-              case EcloudEventName.restart:
-              case EcloudEventName.reconfig:
-                // Casos que hay que ignorar sin sacar error
-                break;
-              default:
-                console.error('Not espected ecloud event name: '
-                  + event.strType + '/' + event.strName);
-            }
-            break;
-          case EcloudEventType.metrics:
-            switch (event.name) {
-              case EcloudEventName.service:
-                this.emit(this.onAddMetrics,
-                  transformEcloudEventDataToMetrics(event));
-                break;
-              default:
-                console.error('Not espected ecloud event name: %s/%s',
-                  event.strType, event.strName, event);
-            }
-            break;
-          default:
-            console.error('Not espected ecloud event type: %s',
-              event.strType, event);
-        }
-        const timeEnd = performance.now();
-        const totalTime = timeEnd - timeStart;
-        console.debug('Event handler took %dms for %s:%s', totalTime,
-          event.strType, event.strName);
-      });
+                  break;
+                case EcloudEventName.scale:
+                case EcloudEventName.status:
+                  console.warn('Event under development');
+                case EcloudEventName.undeploying:
+                  break;
+                default:
+                  console.error('Not espected ecloud event name: '
+                    + event.strType + '/' + event.strName);
+              }
+              break;
+            case EcloudEventType.node:
+              console.error('Not espected ecloud event type: ' + event.strType +
+                '/' + event.strName);
+              break;
+            case EcloudEventType.instance:
+              switch (event.name) {
+                case EcloudEventName.status:
+                  let inst = new Deployment.Role.Instance(
+                    event.entity['instance'], // cnid
+                    event.data.status === 'connected' ?
+                      Deployment.Role.Instance.STATE.CONNECTED :
+                      Deployment.Role.Instance.STATE.DISCONNECTED, // state
+                    null, // cpu
+                    null, // memory
+                    null, // bandwidth
+                    null, // volumes
+                    null // ports
+                  ); // Instance
+                  this.emit(
+                    this.onAddInstance, // Metodo
+                    event.entity['service'], // DeploymentID
+                    event.entity['role'], // roleId
+                    event.entity['instance'], // instanceId
+                    inst
+                  );
+                  break;
+                case EcloudEventName.realocate:
+                case EcloudEventName.restart:
+                case EcloudEventName.reconfig:
+                  // Casos que hay que ignorar sin sacar error
+                  break;
+                default:
+                  console.error('Not espected ecloud event name: '
+                    + event.strType + '/' + event.strName);
+              }
+              break;
+            case EcloudEventType.metrics:
+              switch (event.name) {
+                case EcloudEventName.service:
+                  this.emit(this.onAddMetrics,
+                    transformEcloudEventDataToMetrics(event));
+                  break;
+                default:
+                  console.error('Not espected ecloud event name: %s/%s',
+                    event.strType, event.strName, event);
+              }
+              break;
+            default:
+              console.error('Not espected ecloud event type: %s',
+                event.strType, event);
+          }
+          const timeEnd = performance.now();
+          const totalTime = timeEnd - timeStart;
+          console.debug('Event handler took %dms for %s:%s',
+            totalTime, event.strType, event.strName);
+        });
 
-      this.admission.onError((error: any) => {
-        console.error('Error received from admission-client: '
-          + JSON.stringify(error));
-      });
+        this.admission.onError((error: any) => {
+          console.error('Error received from admission-client: '
+            + JSON.stringify(error));
+        });
 
-      return this.admission.init().then(() => {
-        return user;
+        return this.admission.init().then(() => {
+          return user;
+        });
       });
-    });
   }
 
   /**
