@@ -22,6 +22,7 @@
 
     <!-- Main content of the view-->
     <v-container fluid id="deployment-item-view">
+
       <!-- Deployment general info -->
       <v-container fluid id="deployment-item-view">
         <v-layout wrap>
@@ -208,21 +209,37 @@ import SSGetters from "../store/stampstate/getters";
   }
 })
 export default class DetailedDeploymentView extends Vue {
-  rolNumInstances: { [rolId: string]: number } = {};
+  
+  /** Temporary number of instances of a role. **/
+  roleNumInstances: { [rolId: string]: number } = {};
+
+  /** Signal to kill instances. */
   instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+  
+  /** Marks if there are changes to commit. */
   haveChanges: boolean = false;
+  
+  /** Marks if the state should be cleared. */
   clear: boolean = false;
+  
+  /** Show/Hide dialog undeploy element. */
   undeployElementDialog: boolean = false;
-  modalOkCallback: Function = function() {};
+
+  /** Vue wrapper for the Chart options. */
   chartOptions = ChartComponentOptions;
+
+  /** Temporary depended connections. */
   serviceNewDependedConnections: {
     [channel: string]: { text: string; value: string }[];
   } = {};
+
+  /** Temporary provided connections. */
   serviceNewProvidedConnections: {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
-  /* // No longer needed because it's loaded on user's load
+  /*
+  // No longer needed because it's loaded on user's load
   mounted() {
     // Retrieve all actually deployed services
     
@@ -520,9 +537,9 @@ export default class DetailedDeploymentView extends Vue {
     let changedNumInstances = false;
     for (let role in this.deployment.roles) {
       if (
-        this.rolNumInstances[role] &&
+        this.roleNumInstances[role] &&
         this.deployment.roles[role].actualInstances !==
-          this.rolNumInstances[role]
+          this.roleNumInstances[role]
       ) {
         changedNumInstances = true;
       }
@@ -532,7 +549,7 @@ export default class DetailedDeploymentView extends Vue {
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
         deploymentURN: this.deployment._uri,
-        rolNumInstances: this.rolNumInstances,
+        roleNumInstances: this.roleNumInstances,
         killInstances: this.instanceKill
       });
     }
@@ -542,7 +559,7 @@ export default class DetailedDeploymentView extends Vue {
 
   cancelChanges(): void {
     if (this.haveChanges) {
-      this.rolNumInstances = {};
+      this.roleNumInstances = {};
       this.instanceKill = {};
 
       // Clean links
@@ -614,7 +631,7 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   handleNumInstancesChange([tempRol, value]) {
-    this.rolNumInstances[tempRol] = value;
+    this.roleNumInstances[tempRol] = value;
     this.haveChanges = true;
   }
 
