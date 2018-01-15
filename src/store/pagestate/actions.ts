@@ -15,9 +15,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
 
+  /** Signs the user out of the page. */
   signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
-    // Signs the user out of the page
-    injectee.commit('signOut');
+
+    // If localstorage is available
+    if (typeof (Storage) !== 'undefined') {
+      // Removes the user form localstorage
+      localStorage.removeItem('user');
+    }
+
+    // Removes the user from vuex
+    injectee.commit('clearState');
+
   }
 
   /**
@@ -29,10 +38,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * respective background action.
    */
   signin = (injectee: Vuex.ActionContext<State, any>,
-    payload: { username: string, userpassword: string }): void => {
+    payload: {
+      username: string, userpassword: string, userid: string, token: {
+        accessToken: string,
+        expiresIn: number,
+        refreshToken: string,
+        tokenType: string
+      }
+    }): void => {
     // Update background action info
     const authenticationAction = new BackgroundAction('authentication',
       'User authentication in the system');
+
     const loadInfoAction = new BackgroundAction('loadInfo',
       'Action which loads data from the system');
 
@@ -41,62 +58,67 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       'id': authenticationAction.id,
       'details': 'Validating user'
     });
-    // Remove previous authentications or intents
-    injectee.dispatch('signout').then(() => {
 
-      // Launch background action
-      connection.login(payload.username, payload.userpassword).then((user) => {
-        injectee.commit('finishBackgroundAction', {
-          'id': authenticationAction.id,
-          'state': BackgroundAction.State.SUCCESS,
-          'details': 'Authentication sucessfull'
-        });
+    // Launch background action
+    connection.login(
+      payload.username, payload.userpassword, payload.userid, payload.token
+    ).then((user) => {
 
-        // Loading process
-        injectee.commit('addBackgroundAction', loadInfoAction);
-        injectee.commit('processingBackgroundAction', {
-          'id': loadInfoAction.id,
-          'details': 'Loading data..'
-        });
-
-        // Load all elements
-        return connection.getRegisteredElements().then(() => {
-          console.debug('Stored a reference to all elements from the platform');
-
-          // Load all deployments
-          return connection.getDeploymentList().then(() => {
-            console.debug('Retrieved all deployments from the platform');
-
-            injectee.commit('finishBackgroundAction', {
-              'id': loadInfoAction.id,
-              'state': BackgroundAction.State.SUCCESS,
-              'details': 'All data loaded'
-            });
-
-            injectee.commit('signIn', new User(user.id, user.name,
-              User.State.AUTHENTICATED));
-
-          });
-        }).catch((error) => {
-          if (!error.code || error.code !== '001') {
-            injectee.commit('finishBackgroundAction', {
-              'id': loadInfoAction.id,
-              'state': BackgroundAction.State.FAIL,
-              'details': 'Error loading data, please contact your administrator'
-            });
-            console.error('Error loading data: ', error);
-          }
-        });
-      }).catch((error) => {
-        injectee.commit('finishBackgroundAction',
-          {
-            'id': authenticationAction.id,
-            'state': BackgroundAction.State.FAIL,
-            'details': 'Authentication failure'
-          }
-        );
+      injectee.commit('finishBackgroundAction', {
+        'id': authenticationAction.id,
+        'state': BackgroundAction.State.SUCCESS,
+        'details': 'Authentication sucessfull'
       });
 
+      // Loading process
+      injectee.commit('addBackgroundAction', loadInfoAction);
+      injectee.commit('processingBackgroundAction', {
+        'id': loadInfoAction.id,
+        'details': 'Loading data..'
+      });
+
+      // Load all elements
+      return connection.getRegisteredElements().then(() => {
+        console.debug('Stored a reference to all elements from the platform');
+
+        // Load all deployments
+        return connection.getDeploymentList().then(() => {
+          console.debug('Retrieved all deployments from the platform');
+
+          injectee.commit('finishBackgroundAction', {
+            'id': loadInfoAction.id,
+            'state': BackgroundAction.State.SUCCESS,
+            'details': 'All data loaded'
+          });
+
+          // If localstorage is available
+          if (typeof (Storage) !== 'undefined') {
+            // Stores the item in local storage
+            localStorage.setItem('user',
+              JSON.stringify(user));
+          }
+
+          // Stores the item in vuex
+          user.state = User.State.AUTHENTICATED;
+          injectee.commit('signIn', user);
+
+        });
+      }).catch((error) => {
+        if (!error.code || error.code !== '001') {
+          injectee.commit('finishBackgroundAction', {
+            'id': loadInfoAction.id,
+            'state': BackgroundAction.State.FAIL,
+            'details': 'Error loading data, please contact your administrator'
+          });
+          console.error('Error loading data: ', error);
+        }
+      });
+    }).catch((error) => {
+      injectee.commit('finishBackgroundAction', {
+        'id': authenticationAction.id,
+        'state': BackgroundAction.State.FAIL,
+        'details': 'Authentication failure'
+      });
     });
 
     connection.onAddDeployment((deploymentId: string,
@@ -159,11 +181,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           commitString = 'addVolume';
           break;
         default:
-          console.error('Not expected resource type %s', type);
+          console.error('Not expected resource type at %s', resourceId);
       }
-      let val: { [id: string]: Resource } = {};
-      val[resourceId] = resource;
-      injectee.commit(commitString, val);
+      /**
+       * If the object is not known for the page it won't be added, but the page
+       * will keep loading.
+       * 
+       * TODO: This must be checked
+       */
+      if (type) {
+        let val: { [id: string]: Resource } = {};
+        val[resourceId] = resource;
+        injectee.commit(commitString, val);
+      }
     });
 
     connection.onRemoveResource((resourceId: string) => {

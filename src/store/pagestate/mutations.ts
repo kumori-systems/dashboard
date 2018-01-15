@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import { BackgroundAction, User } from './classes';
 import State from './state';
 
+import SSState from '../stampstate/state';
 
 /**
  * Mutations to handle this page's state easier.
@@ -20,10 +21,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   /**
-   * User signs out of the service.
+   * Clear the local state.
    */
-  signOut = (state: State): void => {
+  clearState = (state: State): void => {
     state.user = new User();
+    state.backgroundActions = [];
+    state.notifications = [];
+    state.pendingActions = 0;
   }
 
   /**

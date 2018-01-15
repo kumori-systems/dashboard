@@ -21,15 +21,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   /**
-   * Gets if the user is authenticated in the system.
-   * @return <boolean>authenticated
-   */
-  authenticated = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): boolean => {
-    return state.user.state === User.State.AUTHENTICATED;
-  }
-
-  /**
    * Gets if there are pending background actions.
    * @return <boolean>loading
    */

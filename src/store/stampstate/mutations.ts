@@ -11,6 +11,20 @@ import {
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
 
+  /**
+   * Clear the local state.
+   */
+  clearState = (state: State): void => {
+    state.certificates = {};
+    state.components = {};
+    state.deployments = {};
+    state.domains = {};
+    state.runtimes = {};
+    state.services = {};
+    state.volumes = {};
+  }
+
+
   /** Adds one or more deployments to the state */
   addDeployment = (state: State,
     payload: { [uri: string]: Deployment }): void => {
