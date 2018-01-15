@@ -107,29 +107,37 @@ class ProxyConnection extends EventEmitter {
    * @param userId User's id
    * @param token User's token
    */
-  login(username: string, password: string, userId?: string, token?: string) {
+  login(username: string, password: string, userId?: string, token?: {
+    accessToken: string, expiresIn: number, refreshToken: string,
+    tokenType: string
+  }) {
     let signin:
       Promise<User>;
     if (!token) {
       this.acs = new EcloudAcsClient(ACS_URI);
 
+      // User needs authentication
       signin = this.acs.login(username, password)
-        .then(({ accessToken, user }) => {
-          return new User(user.id, user.name,
-            User.State.AUTHENTICATED, accessToken);
+        .then((acsToken) => {
+
+          return new User(acsToken.user.id, acsToken.user.name,
+            User.State.AUTHENTICATED, acsToken);
+
         });
 
     } else {
-      console.log('Detectado un socket');
+      // Already authenticated user
       signin = Promise.resolve<User>(
         new User(userId, username, User.State.AUTHENTICATED, token));
+
     }
 
     return Promise.resolve()
       .then(() => signin)
       .then((user) => {
 
-        this.admission = new EcloudAdmissionClient(ADMISSION_URI, user.token);
+        this.admission = new EcloudAdmissionClient(ADMISSION_URI,
+          user.token.accessToken);
 
         this.admission.onConnected(() => {
           console.info('Successfully connected to the platform');

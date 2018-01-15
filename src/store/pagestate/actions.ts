@@ -39,7 +39,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   signin = (injectee: Vuex.ActionContext<State, any>,
     payload: {
-      username: string, userpassword: string, userid: string, token: string
+      username: string, userpassword: string, userid: string, token: {
+        accessToken: string,
+        expiresIn: number,
+        refreshToken: string,
+        tokenType: string
+      }
     }): void => {
     // Update background action info
     const authenticationAction = new BackgroundAction('authentication',

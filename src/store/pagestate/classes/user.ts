@@ -9,7 +9,13 @@ export class User {
   /** <string> Name representing the user. */
   name: string = null;
   /** <string> Token which autentifies the user. */
-  token: string = null;
+  token: {
+    accessToken: string,
+    expiresIn: number,
+    refreshToken: string,
+    tokenType: string
+  } = null;
+
   /**
    * <User.State> Represents if the user has been authenticated or is a guest
    * in the system.
@@ -26,7 +32,10 @@ export class User {
    * @param avatar <string> Url to user's avatar. Default
    * /static/default_user_avatar.png
    */
-  constructor(id?: string, name?: string, state?: User.State, token?: string,
+  constructor(id?: string, name?: string, state?: User.State, token?: {
+    accessToken: string, expiresIn: number, refreshToken: string,
+    tokenType: string
+  },
     avatar?: string) {
     if (id) this.id = id;
     if (name) this.name = name;

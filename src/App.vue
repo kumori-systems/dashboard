@@ -51,7 +51,7 @@ export default class App extends Vue {
   mounted() {
     // Check if there is a token in the url
 
-    console.log("El token almacenado en la query es", this.$route.query.token);
+    console.debug("Found a token stored in the url", this.$route.query.token);
 
     // Check if the user has been stored in localStorage
     if (typeof Storage !== "undefined") {
