@@ -1,12 +1,6 @@
 <template>
   <v-app id="kumori-dashboard">
-    <template v-if="!authenticated">
-      
-      <!-- Sign in view -->
-      <signin-view></signin-view>
-
-    </template>
-    <template v-else>
+    <template v-if="user.state === User.State.AUTHENTICATED">
       
       <!-- Left menu -->
       <navigation-component></navigation-component>
@@ -26,18 +20,22 @@
         <v-spacer></v-spacer>
         <span>&copy; 2017</span>
       </v-footer>
-    </template>
 
+    </template>
+    <template v-else>
+      
+      <!-- Sign in view -->
+      <signin-view></signin-view>
+
+    </template>
   </v-app>
 </template>
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import { SignInView } from "./views";
-import {
-  AppbarComponent,
-  NavigationComponent
-} from "./components";
+import { AppbarComponent, NavigationComponent } from "./components";
+import { User } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
 
 @VueClassComponent({
@@ -49,9 +47,32 @@ import PSGetters from "./store/pagestate/getters";
   }
 })
 export default class App extends Vue {
-  /** Gets if user is already authenticated */
-  get authenticated(): Boolean {
-    return ((<PSGetters>this.$store.getters).authenticated as any) as boolean;
+  User = User;
+  mounted() {
+    // Check if there is a token in the url
+
+    console.debug("Found a token stored in the url", this.$route.query.token);
+
+    // Check if the user has been stored in localStorage
+    if (typeof Storage !== "undefined") {
+      // Stores the item in local storage
+      let storedUser: string | User = localStorage.getItem("user");
+      if (storedUser) {
+        storedUser = JSON.parse(storedUser);
+
+        this.$store.dispatch("signin", {
+          username: (<User>storedUser).name,
+          userpassword: null,
+          userid: (<User>storedUser).id,
+          token: (<User>storedUser).token
+        });
+      }
+    }
+  }
+
+  /** Gets user state */
+  get user(): User {
+    return ((<PSGetters>this.$store.getters).user as any) as User;
   }
 }
 </script>
