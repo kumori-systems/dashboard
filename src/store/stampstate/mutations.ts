@@ -185,7 +185,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
 
     state.components = { ...state.components, ...payload };
-    
+
   }
 
   /** Removes one component from the state */
@@ -280,7 +280,35 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }) => {
     for (let deploymentId in metricBundle) { // This will only happen once
       if (state.metrics[deploymentId]) {
-        state.metrics[deploymentId].push(metricBundle[deploymentId]);
+
+        // Optimized way of adding metrics to the storage
+        state.metrics = {
+          ...state.metrics,
+          [deploymentId]:
+          state.metrics[deploymentId].concat([metricBundle[deploymentId]])
+        };
+        
+
+        /*
+        // This way spends more time
+        let list = state.metrics[deploymentId];
+        list.push(metricBundle[deploymentId]);
+        state.metrics = {
+          ...state.metrics,
+          [deploymentId]: list
+        };
+        */
+
+        /*
+        // This way spends more time
+        let list = state.metrics[deploymentId];
+        list.unshift(metricBundle[deploymentId]);
+        state.metrics = {
+          ...state.metrics,
+          [deploymentId]: list
+        };
+        */
+
       }
     }
   }
