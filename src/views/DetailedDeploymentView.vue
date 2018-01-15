@@ -181,7 +181,6 @@ import {
   ChartComponentUtils
 } from "../components";
 import { Channel, Deployment, Service } from "../store/stampstate/classes";
-
 import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
@@ -259,6 +258,7 @@ export default class DetailedDeploymentView extends Vue {
   }
   */
 
+  /** Obtains the deployment from the storage. */
   get deployment(): Deployment {
     return ((<SSGetters>this.$store.getters).deploymentFromPath as Function)(
       this.$route.path
@@ -271,6 +271,7 @@ export default class DetailedDeploymentView extends Vue {
       this.deployment.service
     );
     if (!ser) {
+      /* This will be reached when deploying new services with bundles. */
       this.$store.dispatch("getElementInfo", this.deployment.service);
     } else {
       this.cancelChanges();
@@ -280,7 +281,7 @@ export default class DetailedDeploymentView extends Vue {
     return ser;
   }
 
-  /** Dep */
+  /** Deployment state. */
   get state(): string {
     let res: string;
     switch (this.deployment.state) {
@@ -307,23 +308,8 @@ export default class DetailedDeploymentView extends Vue {
   }
   */
 
-  get deploymentMetrics(): {
-    data: {
-      [property: string]: number | string;
-    }[];
-    roles: {
-      [roleId: string]: {
-        data: {
-          [property: string]: number | string;
-        };
-        instances: {
-          [instanceId: string]: {
-            [property: string]: number | string;
-          };
-        };
-      };
-    }[];
-  } {
+  /** Obtains deployment metrics. */
+  get deploymentMetrics(): { labels: string[]; datasets: any[] }  {
     let metrics: {
       data: {
         [property: string]: number | string;
@@ -368,13 +354,10 @@ export default class DetailedDeploymentView extends Vue {
       res.roles.push(metrics[i].roles);
     }
 
-    return res;
+    return ChartComponentUtils.prepareData(res.data);
   }
 
-  get deploymentChartData(): { labels: string[]; datasets: any[] } {
-    return ChartComponentUtils.prepareData(this.deploymentMetrics.data);
-  }
-
+  /** Obtains all provided deployment channels of actual deployed services. */
   get totalProvidedDeploymentChannels() {
     return (service, channel) => {
       return this.$store.getters.getTotalProvidedDeploymentChannels(
@@ -384,6 +367,7 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /** Obtains all depended deployment channels of actual deployed services. */
   get totalDependedDeploymentChannels() {
     return (service, channel) => {
       return this.$store.getters.getTotalDependedDeploymentChannels(
@@ -395,7 +379,7 @@ export default class DetailedDeploymentView extends Vue {
 
   /**
    * Compares the temporary state with the real state and sends to the stamp
-   * the differences
+   * the differences.
    */
   applyChanges(): void {
     /*
@@ -557,6 +541,7 @@ export default class DetailedDeploymentView extends Vue {
     this.haveChanges = false;
   }
 
+  /** Cancells temporary changes. */
   cancelChanges(): void {
     if (this.haveChanges) {
       this.roleNumInstances = {};
@@ -575,6 +560,7 @@ export default class DetailedDeploymentView extends Vue {
     }
   }
 
+  /** Loads service available connections. */
   loadDeploymentConnections(dep: Deployment, ser: Service) {
     if (dep && ser) {
       for (let chann in dep.channels) {
@@ -613,15 +599,18 @@ export default class DetailedDeploymentView extends Vue {
     }
   }
 
+  /** Show/Hide undeploy modal. */
   showUndeployModal(): void {
     this.undeployElementDialog = true;
   }
 
+  /** Function called from undeploy modal when confirmation is done. */
   undeploy(): void {
     this.$store.dispatch("undeploy", this.deployment._uri);
     this.$router.push("/overview");
   }
 
+  /** Handles changes in kill instance parameter of role children. */
   handleKillInstanceChange([tempRol, tempInst, value]) {
     if (this.instanceKill[tempRol] === undefined) {
       this.instanceKill[tempRol] = {};
@@ -630,14 +619,17 @@ export default class DetailedDeploymentView extends Vue {
     this.haveChanges = true;
   }
 
+  /** Handles changes in the number of instances of role children. */
   handleNumInstancesChange([tempRol, value]) {
     this.roleNumInstances[tempRol] = value;
     this.haveChanges = true;
   }
 
+  /** Handles changes in the input event of children components. */
   handleInput(value) {
     if (!this.clear) this.haveChanges = true;
   }
+
 }
 </script>
 <style lang="scss" scoped>
