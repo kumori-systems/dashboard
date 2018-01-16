@@ -308,7 +308,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         'value': string, 'text': string
       }[] => {
     return (serviceId: string, channelId: string) => {
-      // Obtenemos el canal y miramos de qué tipo es
+      // Depending on the channel type, the search will be different
       let type: string = (<Service>state.services[serviceId])
         .providedChannels[channelId].type;
       let typeSearched: Channel.TYPE[] = [];
@@ -334,8 +334,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       for (let deploymentId in state.deployments) {
         if (
           state.deployments[deploymentId] instanceof HTTPEntryPoint
-          && state.deployments[deploymentId].channels['sep']
-          && state.deployments[deploymentId].channels['sep'].length > 0
+          && state.deployments[deploymentId].channels['frontend']
+          && state.deployments[deploymentId].channels['frontend'].length > 0
         ) {
           // If it's an entrypoint in use, it's not purposed for a new
           // connection
