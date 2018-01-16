@@ -12,7 +12,7 @@
         <v-card-actions>
           <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
           <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="manualCancelChanges">Cancel</v-btn>
         </v-card-actions>
       
     </v-card-title>
@@ -79,7 +79,7 @@
                   <th>
                     <v-select
                       v-model="serviceNewProvidedConnections[name]"
-                      v-bind:items="totalDependedDeploymentChannels(service, name)"
+                      v-bind:items="totalDependedDeploymentChannels(name)"
                       multiple chips v-on:input="handleInput" return-object autocomplete>
 
                       <!-- Chips config-->
@@ -100,7 +100,7 @@
                   <th>
                     <v-select
                       v-model="serviceNewDependedConnections[name]"
-                      v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                      v-bind:items="totalProvidedDeploymentChannels(name)"
                       multiple chips v-on:input="handleInput" return-object autocomplete>
                 
                         <!-- Chips config-->
@@ -235,9 +235,8 @@ export default class DetailedDeploymentView extends Vue {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
-  /*
-  // No longer needed because it's loaded on user's load
   mounted() {
+    /* No longer needed because it's loaded on user's load
     // Retrieve all actually deployed services
     
     for (let dep in this.$store.getters.deployments) {
@@ -251,10 +250,12 @@ export default class DetailedDeploymentView extends Vue {
           this.$store.getters.deployments[dep].service
         );
       }
-    }
-    
+    }*/
+
+    this.$watch("$route.path", val => {
+      this.automatedCancelChanges();
+    });
   }
-  */
 
   /** Obtains the deployment from the storage. */
   get deployment(): Deployment {
@@ -272,7 +273,6 @@ export default class DetailedDeploymentView extends Vue {
       /* This will be reached when deploying new services with bundles. */
       this.$store.dispatch("getElementInfo", this.deployment.service);
     } else {
-      this.cancelChanges();
       this.loadDeploymentConnections(this.deployment, ser);
     }
 
@@ -360,7 +360,7 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Obtains all provided deployment channels of actual deployed services. */
   get totalProvidedDeploymentChannels() {
-    return (service, channel) => {
+    return channel => {
       return this.$store.getters.getTotalProvidedDeploymentChannels(
         this.deployment.service,
         channel
@@ -370,7 +370,7 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Obtains all depended deployment channels of actual deployed services. */
   get totalDependedDeploymentChannels() {
-    return (service, channel) => {
+    return channel => {
       return this.$store.getters.getTotalDependedDeploymentChannels(
         this.deployment.service,
         channel
@@ -531,30 +531,51 @@ export default class DetailedDeploymentView extends Vue {
     }
 
     if (changedNumInstances) {
+      
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
         deploymentURN: this.deployment._uri,
         roleNumInstances: this.roleNumInstances,
         killInstances: this.instanceKill
       });
+
     }
+
     // Marc as there are no changes
     this.haveChanges = false;
+
   }
 
-  /** Cancells temporary changes. */
-  cancelChanges(): void {
+  automatedCancelChanges(): void {
     if (this.haveChanges) {
       this.roleNumInstances = {};
       this.instanceKill = {};
 
       // Clean links
-      for (let chan in this.serviceNewDependedConnections) {
-        this.serviceNewDependedConnections[chan] = [];
+      this.serviceNewDependedConnections = {};
+      this.serviceNewProvidedConnections = {};
+
+      this.clear = true;
+      this.haveChanges = false;
+    }
+  }
+
+  /** Cancells temporary changes. */
+  manualCancelChanges(): void {
+    if (this.haveChanges) {
+      this.roleNumInstances = {};
+      this.instanceKill = {};
+
+      // Clean links
+      for (let role in this.serviceNewDependedConnections){
+        this.serviceNewDependedConnections[role] = [];
       }
-      for (let chan in this.serviceNewProvidedConnections) {
-        this.serviceNewProvidedConnections[chan] = [];
+      
+      for (let role in this.serviceNewProvidedConnections){
+        this.serviceNewProvidedConnections[role] = [];
       }
+
+      this.loadDeploymentConnections(this.deployment, this.service);
 
       this.clear = true;
       this.haveChanges = false;
@@ -630,6 +651,7 @@ export default class DetailedDeploymentView extends Vue {
   handleInput(value): void {
     if (!this.clear) this.haveChanges = true;
   }
+
 }
 </script>
 <style lang="scss" scoped>

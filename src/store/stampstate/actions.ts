@@ -128,15 +128,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   aplyingChangesToDeployment = (injectee: Vuex.ActionContext<State, any>, {
-    deploymentURN, rolNumInstances, killInstances
+    deploymentURN, roleNumInstances, killInstances
   }):
     void => {
 
-    connection.aplyChangesToDeployment(deploymentURN, rolNumInstances,
+    connection.aplyChangesToDeployment(deploymentURN, roleNumInstances,
       killInstances).catch((error) => {
         console.error('Error modifying deployment. ',
-          deploymentURN, rolNumInstances, killInstances, error);
+          deploymentURN, roleNumInstances, killInstances, error);
       });
+      
   }
 
   addNewBundle = (injectee: Vuex.ActionContext<State, any>, params):

@@ -608,12 +608,13 @@ class ProxyConnection extends EventEmitter {
   }
 
   aplyChangesToDeployment(deploymentId: string,
-    rolNumInstances: { [rolId: string]: number },
+    roleNumInstances: { [rolId: string]: number },
     killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
 
     let modification = new ScalingDeploymentModification();
     modification.deploymentURN = deploymentId;
-    modification.scaling = rolNumInstances;
+    modification.scaling = roleNumInstances;
+
     return this.admission.modifyDeployment(modification).then(() => {
       this.admission.findDeployments(deploymentId).then((deploymentList) => {
         for (let deploymentId in deploymentList) {
