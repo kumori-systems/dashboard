@@ -62,62 +62,62 @@
             <!-- Deployment links -->
             <v-layout wrap>
             
-                <span class="subheading">Connections</span>
+              <span class="subheading">Connections</span>
                 
-                <!-- Link table representation -->
-                <table>
+              <!-- Link table representation -->
+              <table>
 
-                  <!-- Heders-->
-                  <tr>
-                    <th>From</th>
-                    <th>To</th>
-                  </tr>
+                <!-- Heders-->
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                </tr>
 
-                  <!-- Provided Channels -->
-                  <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                    <th>
-                      <v-select
-                        v-model="serviceNewProvidedConnections[name]"
-                        v-bind:items="totalDependedDeploymentChannels(service, name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
+                <!-- Provided Channels -->
+                <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                  <th>
+                    <v-select
+                      v-model="serviceNewProvidedConnections[name]"
+                      v-bind:items="totalDependedDeploymentChannels(service, name)"
+                      multiple chips v-on:input="handleInput" return-object autocomplete>
 
-                        <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip
-                            @input="items.parent.selectItem(items.item)"
-                             close color="indigo lighten-4">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                        
-                      </v-select>
-                    </th>
-                  </tr>
-
-                  <!-- Depended channels -->
-                  <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                    <th>
-                      <v-select
-                        v-model="serviceNewDependedConnections[name]"
-                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
-                  
-                         <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip 
-                            @input="items.parent.selectItem(items.item)"
+                      <!-- Chips config-->
+                      <template slot="selection" scope="items">
+                        <v-chip
+                          @input="items.parent.selectItem(items.item)"
                             close color="indigo lighten-4">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                  
-                      </v-select>
-                    </th>
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                  </tr>
+                          {{ items.item.text }}
+                        </v-chip>
+                      </template>
+                      
+                    </v-select>
+                  </th>
+                </tr>
 
-                </table>
+                <!-- Depended channels -->
+                <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                  <th>
+                    <v-select
+                      v-model="serviceNewDependedConnections[name]"
+                      v-bind:items="totalProvidedDeploymentChannels(service, name)"
+                      multiple chips v-on:input="handleInput" return-object autocomplete>
+                
+                        <!-- Chips config-->
+                      <template slot="selection" scope="items">
+                        <v-chip 
+                          @input="items.parent.selectItem(items.item)"
+                          close color="indigo lighten-4">
+                          {{ items.item.text }}
+                        </v-chip>
+                      </template>
+                
+                    </v-select>
+                  </th>
+                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                </tr>
+
+              </table>
               
             </v-layout>
 
@@ -128,14 +128,13 @@
 
           <!-- Deployment chart -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentMetrics.data"
               v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
             </deployment-chart-component>
           </v-flex>
 
         </v-layout>
 
-         
       </v-container>
 
       <!-- Deployment roles -->
@@ -208,19 +207,18 @@ import SSGetters from "../store/stampstate/getters";
   }
 })
 export default class DetailedDeploymentView extends Vue {
-  
   /** Temporary number of instances of a role. **/
   roleNumInstances: { [rolId: string]: number } = {};
 
   /** Signal to kill instances. */
   instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
-  
+
   /** Marks if there are changes to commit. */
   haveChanges: boolean = false;
-  
+
   /** Marks if the state should be cleared. */
   clear: boolean = false;
-  
+
   /** Show/Hide dialog undeploy element. */
   undeployElementDialog: boolean = false;
 
@@ -309,7 +307,10 @@ export default class DetailedDeploymentView extends Vue {
   */
 
   /** Obtains deployment metrics. */
-  get deploymentMetrics(): { labels: string[]; datasets: any[] }  {
+  get deploymentMetrics(): {
+    data: { labels: any[]; datasets: any[] };
+    roles: any;
+  } {
     let metrics: {
       data: {
         [property: string]: number | string;
@@ -354,7 +355,7 @@ export default class DetailedDeploymentView extends Vue {
       res.roles.push(metrics[i].roles);
     }
 
-    return ChartComponentUtils.prepareData(res.data);
+    return ChartComponentUtils.prepareDeploymentData(res);
   }
 
   /** Obtains all provided deployment channels of actual deployed services. */
@@ -561,7 +562,7 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   /** Loads service available connections. */
-  loadDeploymentConnections(dep: Deployment, ser: Service) {
+  loadDeploymentConnections(dep: Deployment, ser: Service): void {
     if (dep && ser) {
       for (let chann in dep.channels) {
         for (let conn in dep.channels[chann]) {
@@ -611,7 +612,7 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   /** Handles changes in kill instance parameter of role children. */
-  handleKillInstanceChange([tempRol, tempInst, value]) {
+  handleKillInstanceChange([tempRol, tempInst, value]): void {
     if (this.instanceKill[tempRol] === undefined) {
       this.instanceKill[tempRol] = {};
     }
@@ -620,16 +621,15 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   /** Handles changes in the number of instances of role children. */
-  handleNumInstancesChange([tempRol, value]) {
+  handleNumInstancesChange([tempRol, value]): void {
     this.roleNumInstances[tempRol] = value;
     this.haveChanges = true;
   }
 
   /** Handles changes in the input event of children components. */
-  handleInput(value) {
+  handleInput(value): void {
     if (!this.clear) this.haveChanges = true;
   }
-
 }
 </script>
 <style lang="scss" scoped>

@@ -29,7 +29,7 @@
 
       <!-- Instance chart data -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-        <chart-component v-bind:chartData="instanceChartData" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
+        <chart-component v-bind:chartData="instanceChartData.data" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
       </v-flex>
 
     </v-layout>
@@ -83,7 +83,7 @@ export default class InstanceCardComponent extends Vue {
   }
 
   get instanceChartData() {
-    return ChartComponentUtils.prepareData(this.onInstanceMetricsUpdate.data);
+    return ChartComponentUtils.prepareInstanceData(this.onInstanceMetricsUpdate);
   }
 
   get state(): string {

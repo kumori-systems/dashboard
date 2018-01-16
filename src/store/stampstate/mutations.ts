@@ -286,8 +286,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
           ...state.metrics,
           [deploymentId]:
           state.metrics[deploymentId].concat([metricBundle[deploymentId]])
-        };
-        
+        };        
 
         /*
         // This way spends more time
