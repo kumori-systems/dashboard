@@ -328,6 +328,7 @@ class ProxyConnection extends EventEmitter {
         return this.admission.init().then(() => {
           return user;
         });
+
       });
   }
 
@@ -436,7 +437,37 @@ class ProxyConnection extends EventEmitter {
   }
 
   addNewBundle(file: File) {
-    this.sendBundle(file);
+    this.sendBundle(file).then((registrationResult) => {
+
+      console.debug('The result of the registration is', registrationResult);
+      /* // When registering a persisten volume
+      {
+        errors: [],
+        links:undefined,
+        successful:[
+          "Registered element: eslap://volumesexample.examples.ecloud/
+          resources/volumes/persistent"
+        ],
+        testToken:undefined,
+        tests:undefined
+      }
+      */
+      /*
+      // When registering dashboard parametros
+      {
+        errors:[],
+        links:undefined,
+        successful:[
+          "Registered element: eslap://eslap.cloud/components/dashboard/0_0_1",
+          "Registered element: eslap://eslap.cloud/services/dashboard/0_0_2"
+        ],
+      testToken:undefined,
+      tests:undefined
+      }
+      */
+
+      // this.emit(this.onAddResource, uri, res);
+    });
   }
 
   // @param elementId: Elemento o lista de elementos
@@ -600,11 +631,10 @@ class ProxyConnection extends EventEmitter {
   }
 
   addDeployment(deployment: Deployment) {
-    return this.admission.deploy(new FileStream(
-      new Blob(
-        [JSON.stringify(transformDeploymentToManifest(deployment))]
-      )
-    ));
+
+    return this.admission.deploy(new FileStream(new Blob([
+      JSON.stringify(transformDeploymentToManifest(deployment))
+    ])));
   }
 
   aplyChangesToDeployment(deploymentId: string,

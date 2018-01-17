@@ -45,41 +45,42 @@
           </v-flex>
         </v-layout>
 
-        <!-- Deployment roles -->
-        <div v-if="selectedService && selectedService.length > 0">
+        <!-- Page form -->
+        <div v-if="service">
+
+          <!-- Deployment roles -->
           <span class="headline">Roles</span>
           
           <v-flex xs5 v-for="(roleName, index) in serviceRolesList" v-bind:key="roleName">
-            
             <v-flex ma-1 xs4>
               <strong class="title">{{ roleName }}</strong>
             </v-flex>
             
             <v-flex ma-1 xs4>
-              <v-text-field  label="MEM" type="number" v-model="roleMem[index]"
-                mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
-                required
-              ></v-text-field>
-            </v-flex>
-            
-            <v-flex ma-1 xs4>
-              <v-text-field label="CPU" type="number" v-model="roleCPU[index]"
+              <v-text-field  label="MEM"  v-model="roleMem[index]"
                 mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
                 required
               ></v-text-field>
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="NET" type="number" v-model="roleNet[index]"
+              <v-text-field label="CPU" v-model="roleCPU[index]"
                 mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
                 required
               ></v-text-field>
             </v-flex>
-            
+
+            <v-flex ma-1 xs4>
+              <v-text-field label="NET" v-model="roleNet[index]"
+                mask='####' v-bind:rules="[v => parseInt(v)>0 || 'Must be higher than 0']"
+                required
+              ></v-text-field>
+            </v-flex>
+
             <!-- Number of Instance fields -->
             <v-flex ma-1 xs4>
               <v-text-field
-                label="Minimum Instances" type="number" ref="minInstancesField"
+                label="Minimum Instances" 
                 mask='####' required v-on:change="validateFields" v-model="roleMinInstances[index]"
                 v-bind:rules="[
                   (v) => parseInt(v) > 0 || 'Must be higher than 0',
@@ -90,8 +91,8 @@
 
             <v-flex ma-1 xs4>
               <v-text-field
-                label="Initial Instances" type="number" ref="instancesField"
-                mask='####' required v-on:change="validateFields" v-model="roleInstances[index]" 
+                label="Initial Instances"
+                mask='####' required v-on:change="validateFields" v-model="roleInstances[index]"
                 v-bind:rules="[
                   (v) => parseInt(v) > 0 || 'Must be higher than 0',
                   (v) => parseInt(v) >= parseInt(roleMinInstances[index]) || 'Can\'t be less than MinInstances',
@@ -102,8 +103,7 @@
 
             <v-flex ma-1 xs4>
               <v-text-field
-              label="Maximum Instances" type="number" ref="maxInstancesField"
-                mask='####' required v-on:change="validateFields" v-model="roleMaxInstances[index]" 
+              label="Maximum Instances" mask='####' required v-on:change="validateFields" v-model="roleMaxInstances[index]" 
                 v-bind:rules="[
                   (v) => parseInt(v) > 0 || 'Must be higher than 0',
                   (v) => parseInt(v) >= parseInt(roleInstances[index]) || 'Can\'t be less than initial instances'
@@ -112,14 +112,13 @@
             </v-flex>
 
             <v-flex ma-1 xs4>
-              <v-text-field label="Resilence" type="number" v-model="roleResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
+              <v-text-field label="Resilence" v-model="roleResilence[index]" mask='####' v-bind:rules="[v => !!v || 'Resilience number is required']" required></v-text-field>
             </v-flex>
               
           </v-flex>
-        </div>
         
-        <!-- Deployment resources -->
-        <div v-if="selectedService && selectedService.length > 0">
+        
+          <!-- Deployment resources -->      
           <span class="headline" v-if="serviceResourcesList.length > 0">Resources configuration</span>
           <v-flex v-for="(resource, index) in serviceResourcesList" v-bind:key="resource[0]">
 
@@ -148,17 +147,17 @@
             ></v-select>
 
           </v-flex>
-        </div>
+        
 
-        <!-- Deployment config -->
-        <div v-if="selectedService && selectedService.length > 0">
+          <!-- Deployment config -->
           <span class="headline">Service configuration</span>
           <v-text-field
             v-model="serviceConfig" placeholder="text/json" multi-line
             type="text/json"
             v-bind:rules="[(v) => parseable(v)]"
           ></v-text-field>
-        </div>
+
+        </div> <!-- Page form end -->
 
       </v-container>
       
@@ -194,14 +193,14 @@ import SSGetters from "../store/stampstate/getters";
 export default class NewDeploymentView extends Vue {
   selectedService: string = null;
   deploymentName: string = null;
-  roleMem: Array<number> = [];
-  roleCPU: Array<number> = [];
-  roleNet: Array<number> = [];
-  roleMinInstances: Array<number> = [];
-  roleInstances: Array<number> = [];
-  roleMaxInstances: Array<number> = [];
-  roleResilence: Array<number> = [];
-  resourceConfig: Array<string> = [];
+  roleMem: string[] = [];
+  roleCPU: string[] = [];
+  roleNet: string[] = [];
+  roleMinInstances: string[] = [];
+  roleInstances: string[] = [];
+  roleMaxInstances: string[] = [];
+  roleResilence: string[] = [];
+  resourceConfig: string[] = [];
   serviceConfig: string = null;
   valid: boolean = false;
 
@@ -218,6 +217,7 @@ export default class NewDeploymentView extends Vue {
   }
 
   get service(): Service {
+
     let ser: Service = ((<SSGetters>this.$store.getters).service as any)(
       this.selectedService
     );
@@ -256,34 +256,23 @@ export default class NewDeploymentView extends Vue {
       skeleton += "\n}";
       this.serviceConfig = skeleton;
 
-      let numRoles: number = 0;
-      for (let role in ser.roles) {
-        numRoles++;
+      // Done this way to avoid ui input problems
+      let defaultList = [];
+      for (let numRol in ser.roles) {
+        defaultList.push('1');
       }
 
-      this.roleMem = new Array<number>(numRoles);
-      this.roleCPU = new Array<number>(numRoles);
-      this.roleNet = new Array<number>(numRoles);
-      this.roleMinInstances = new Array<number>(numRoles);
-      this.roleInstances = new Array<number>(numRoles);
-      this.roleMaxInstances = new Array<number>(numRoles);
-      this.roleResilence = new Array<number>(numRoles);
+      // Initialitze arrangement
+      this.roleMem = defaultList.concat([]);
+      this.roleCPU = defaultList.concat([]);
+      this.roleNet = defaultList.concat([]);
+      this.roleMinInstances = defaultList.concat([]);
+      this.roleInstances = defaultList.concat([]);
+      this.roleMaxInstances = defaultList.concat([]);
+      this.roleResilence = defaultList.concat([]);
 
-      for (let i = 0; i < numRoles; i++) {
-        this.roleMem[i] = 1;
-        this.roleCPU[i] = 1;
-        this.roleNet[i] = 1;
-        this.roleMinInstances[i] = 1;
-        this.roleInstances[i] = 1;
-        this.roleMaxInstances[i] = 1;
-        this.roleResilence[i] = 1;
-      }
-
-      let numResources: number = 0;
-      for (let resource in ser.resources) {
-        numResources++;
-      }
-      this.resourceConfig = new Array<string>(numResources);
+      // Initialitze resources config
+      this.resourceConfig = [];
     }
 
     return ser;
@@ -317,27 +306,36 @@ export default class NewDeploymentView extends Vue {
 
   get serviceResourcesList(): [string, string][] {
     let resourcesList: [string, string][] = [];
-    if(this.service){
-      for (let res in this.service.resources) {
-      resourcesList.push([res, this.service.resources[res]]);
-    }
+    if (this.selectedService) {
+      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+        this.selectedService
+      );
+      if (service) {
+        for (let res in service.resources) {
+          resourcesList.push([res, service.resources[res]]);
+        }
+      }
     }
     return resourcesList;
   }
 
   get serviceRolesList(): string[] {
     let roleList: string[] = [];
-
-    if(this.service){
-      for (let role in this.service.roles) {
-        roleList.push(role);
+    if (this.selectedService) {
+      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+        this.selectedService
+      );
+      if (service) {
+        for (let role in service.roles) {
+          roleList.push(role);
+        }
       }
     }
-
     return roleList;
   }
 
   get totalResourceConfig() {
+
     return resourceId => {
       return ((<SSGetters>this.$store.getters).getFreeResource as any)(
         resourceId
@@ -364,32 +362,31 @@ export default class NewDeploymentView extends Vue {
   }
 
   get allSelected() {
-    if (!this.selectedService || this.selectedService === null) return false;
-    if (this.deploymentName == null || this.deploymentName.length < 1)
-      return false;
+    if (!this.selectedService) return false;
+    if (!this.deploymentName) return false;
     for (let index in this.roleMem) {
-      if (this.roleMem[index] === undefined) return false;
+      if (this.roleMem[index].length <= 0) return false;
     }
     for (let index in this.roleCPU) {
-      if (this.roleCPU[index] === undefined) return false;
+      if (this.roleCPU[index].length <= 0) return false;
     }
     for (let index in this.roleNet) {
-      if (this.roleNet[index] === undefined) return false;
+      if (this.roleNet[index].length <= 0) return false;
     }
     for (let index in this.roleInstances) {
-      if (this.roleMinInstances[index] === undefined) return false;
+      if (this.roleMinInstances[index].length <= 0) return false;
     }
     for (let index in this.roleInstances) {
-      if (this.roleInstances[index] === undefined) return false;
+      if (this.roleInstances[index].length <= 0) return false;
     }
     for (let index in this.roleInstances) {
-      if (this.roleMaxInstances[index] === undefined) return false;
+      if (this.roleMaxInstances[index].length <= 0) return false;
     }
     for (let index in this.roleResilence) {
-      if (this.roleResilence[index] === undefined) return false;
+      if (this.roleResilence[index].length <= 0) return false;
     }
     for (let index in this.resourceConfig) {
-      if (this.resourceConfig[index] === undefined) return false;
+      if (this.resourceConfig[index].length <= 0) return false;
     }
     return true;
   }
@@ -416,7 +413,7 @@ export default class NewDeploymentView extends Vue {
         instances = {};
         for (
           let counter = 0;
-          counter < this.roleInstances[roleIndex];
+          counter < parseInt(this.roleInstances[roleIndex]);
           counter++
         ) {
           instances[counter] = new Deployment.Role.Instance(
@@ -434,15 +431,15 @@ export default class NewDeploymentView extends Vue {
             this.serviceRolesList[roleIndex]
           ].component, //component
           null, // configuration
-          this.roleCPU[roleIndex], // cpu
-          this.roleMem[roleIndex], // memory
+          parseInt(this.roleCPU[roleIndex]), // cpu
+          parseInt(this.roleMem[roleIndex]), // memory
           null, // ioperf
           null, // iopsintensive
-          this.roleNet[roleIndex], // bandwidht
-          this.roleResilence[roleIndex], //resilience
+          parseInt(this.roleNet[roleIndex]), // bandwidht
+          parseInt(this.roleResilence[roleIndex]), //resilience
           instances, // instances
-          null, // mininstances
-          null // maxInstances
+          parseInt(this.roleMinInstances[roleIndex]), // mininstances
+          parseInt(this.roleMaxInstances[roleIndex]) // maxInstances
         );
       }
 
