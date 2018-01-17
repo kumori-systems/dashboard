@@ -171,6 +171,9 @@
                         <div v-else>not in use</div>
                       </v-flex>
                       <v-flex xs2>
+                        <v-btn color="green" icon v-on:click="deployService(service)">
+                          <v-icon class="white--text">play_arrow</v-icon>
+                        </v-btn>
                         <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
                           <v-icon class="white--text">info_outline</v-icon>
                         </v-btn>
@@ -254,7 +257,8 @@ import {
   Component,
   Service,
   Runtime,
-  Deployment
+  Deployment,
+  EntryPoint
 } from "../store/stampstate/classes";
 
 @VueClassComponent({
@@ -274,9 +278,11 @@ export default class ElementsView extends Vue {
   mounted() {
     // Retrieve all actually deployed services
     for (let dep in this.$store.getters.deployments) {
-      if (!this.$store.getters.service(
-        this.$store.getters.deployments[dep].service
-      )) {
+      if (
+        !this.$store.getters.service(
+          this.$store.getters.deployments[dep].service
+        )
+      ) {
         this.$store.dispatch(
           "getElementInfo",
           this.$store.getters.deployments[dep].service
@@ -426,6 +432,26 @@ export default class ElementsView extends Vue {
     this.selectedRuntimes = [];
 
     this.deleteGroupDialog = false;
+  }
+
+  deployService(service) {
+    // Keep the service in the state
+    this.$store.dispatch("selectedService", service);
+
+    // Depending on the type of service, a view must be loaded
+    let route;
+    switch (service) {
+
+      case EntryPoint.TYPE.HTTP_INBOUND:
+        route = "addHTTPEntrypoint";
+        break;
+
+      default: // Not entrypoint
+        route = "addDeployment";
+
+    }
+
+    this.$router.push(route);
   }
 }
 </script>

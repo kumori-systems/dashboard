@@ -464,4 +464,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
+  selectedService = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): string => {
+    return state.selectedService;
+  }
+
 };

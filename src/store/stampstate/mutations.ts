@@ -285,8 +285,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
         state.metrics = {
           ...state.metrics,
           [deploymentId]:
-          state.metrics[deploymentId].concat([metricBundle[deploymentId]])
-        };        
+            state.metrics[deploymentId].concat([metricBundle[deploymentId]])
+        };
 
         /*
         // This way spends more time
@@ -387,5 +387,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
         state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
       }
     }
+  }
+
+  selectedService = (state: State, serviceURI: string): void => {
+    state.selectedService = serviceURI;
   }
 };

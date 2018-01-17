@@ -155,4 +155,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.unlink(params);
   }
 
+  selectedService = (injectee: Vuex.ActionContext<State, any>, serviceURI):
+  void => {
+    injectee.commit('selectedService', serviceURI);
+}
+
 };

@@ -207,7 +207,7 @@ export default class NewDeploymentView extends Vue {
   mounted() {
     // Si venimos desde la ventana elements con un servicio preseleccionado, lo
     // ponemos
-    this.selectedService = this.$store.getters.getSelectedService || null;
+    this.selectedService = this.$store.getters.selectedService || null;
   }
 
   get deployments(): { [uri: string]: Deployment } {

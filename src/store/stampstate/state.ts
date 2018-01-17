@@ -50,6 +50,9 @@ export default class State {
     }[]
   } = {};
 
+  /** Selected service in elements view to deploy */
+  selectedService: string = null;
+
   /** Constructor of the state. */
   constructor() { }
 }
