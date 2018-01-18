@@ -3,31 +3,71 @@
 
     <!-- Resizes the view -->
     <v-flex class="mt-5" xs12 sm6 offset-sm3 md4 offset-md4 lg4 offset-lg4 xl2 offset-xl5 v-on:keyup.enter="signIn" wrap>
+        
+        <!-- Signin form view -->
         <v-card class="elevation-10" v-if="!loading">
+        
+          <!-- Logo image -->
           <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
+        
+          <!-- Card title -->
           <v-card-title primary-title>
+        
             <div>
               <h3 class="headline">Sign in</h3>
               <p class="subheading grey--text">to continue to Ecloud's dashboard</p>
             </div>
+        
           </v-card-title>
+          
+          <!-- Card body-->
           <v-card-text >
-            <v-form ref="form">  
+
+            <v-form ref="form">
+
+              <!-- Username text field -->
               <v-text-field autocomplete="username" v-model="userName" v-bind:disabled="loading" prepend-icon="person" label="Enter your User" autofocus></v-text-field>
+              
+              <!-- Current password text field -->
               <v-text-field autocomplete="current-password" v-model="userPassword" v-bind:disabled="loading" prepend-icon="lock" label="Enter your password" min="1" v-bind:append-icon="viewPassword ? 'visibility' : 'visibility_off'" v-bind:append-icon-cb="() => (viewPassword = !viewPassword)" :type="viewPassword ? 'text' : 'password'"></v-text-field>
-            <v-card-actions>
-            <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
-              Continue
-            </v-btn>
-          </v-card-actions>
+            
+              <!-- Card actions -->
+              <v-card-actions>
+                
+                <!-- Friendly result message -->
+                <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
+                
+                <!-- Adds space between components -->
+                <v-spacer></v-spacer>
+
+                <!-- Main button -->
+                <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
+                  Continue
+                </v-btn>
+
+              </v-card-actions>
+
             </v-form>
+
+            <!-- Sign in with google -->
+            <a id="googleoauth" href="http://jvalero-acs.test.kumori.cloud/acs/auth/google?redirectOnSuccessUrl=https://elpais.com/&redirectOnFailureUrl=http://http://www.elmundo.es/">
+              <v-btn class="elevation-0" color="blue" block v-on:click="googleOauth">
+                <v-icon color="white" left>mdi-google</v-icon>
+                <span class="white--text">Sign in with google</span>
+              </v-btn>
+            </a>
+            
           </v-card-text>
+
         </v-card>
 
+        <!-- Loading view -->
         <v-card class="elevation-10" v-else>
+
+          <!-- Logo image -->
           <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
+
+          <!-- Card title -->
           <v-card-title primary-title>
 
               <h3 class="headline">Accesing to Ecloud Dashboard</h3>
@@ -37,6 +77,7 @@
               </div>
               
           </v-card-title>
+
         </v-card>
 
     </v-flex>
@@ -123,6 +164,7 @@ export default class SignInView extends Vue {
       userpassword: this.userPassword
     });
   }
+
 }
 </script>
 <style>
@@ -161,4 +203,9 @@ export default class SignInView extends Vue {
     transform: rotate(360deg);
   }
 }
+
+#googleoauth{
+  text-decoration: initial;
+}
+
 </style>

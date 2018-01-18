@@ -635,6 +635,7 @@ class ProxyConnection extends EventEmitter {
     return this.admission.deploy(new FileStream(new Blob([
       JSON.stringify(transformDeploymentToManifest(deployment))
     ])));
+    
   }
 
   aplyChangesToDeployment(deploymentId: string,
