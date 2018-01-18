@@ -601,6 +601,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     }
   }
 } {
+  
   let res: {
     [deploymentId: string]: {
       'data': {
@@ -621,6 +622,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
       }
     }
   } = {};
+
   // Inicializamos el deployment
   res[ecloudEvent.data.deploymentUrn] = { 'data': {}, 'roles': {} };
 

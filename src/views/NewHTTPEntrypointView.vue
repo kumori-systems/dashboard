@@ -187,8 +187,8 @@ export default class NewHTTPEntrypointView extends Vue {
 
       let roles = {};
 
-      roles["sep"] = new Deployment.Role(
-        "sep", // id
+      roles["frontend"] = new Deployment.Role(
+        "frontend", // id
         "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
         { domain: this.selectedDomain._uri }, // configuration
         1, //cpu

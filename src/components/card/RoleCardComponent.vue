@@ -73,7 +73,7 @@
         
         <!-- Role chart -->
         <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-          <role-chart-component class="role-chart" v-bind:chartData="rolChartData"
+          <role-chart-component class="role-chart" v-bind:chartData="roleChartData.data"
             v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
           </role-chart-component>
         </v-flex>
@@ -88,7 +88,7 @@
               <div slot="header">Instances</div>
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
                   v-bind:key="instanceId" v-bind:instance="instanceContent"
-                  v-bind:instanceMetrics="instanceMetrics"
+                  v-bind:instanceMetrics="roleChartData.instances"
                   v-on:killInstanceChange="handleKillInstanceChange"
                   v-bind:clear="onClearHandler">
                 </instance-card-component>
@@ -109,8 +109,7 @@ import {
   Connector,
   Deployment,
   Service,
-  Channel,
-  Metric
+  Channel
 } from "../../store/stampstate/classes";
 
 /* Theese components are loaded separatedly to avoid recursivity problems. */
@@ -165,8 +164,10 @@ export default class RoleCardComponent extends Vue {
 
   get onRoleMetricsUpdate() {
     let res: {
-      data: Metric[];
-      instances: { [instanceId: string]: Metric }[];
+      data: { [property: string]: number | string }[];
+      instances: {
+        [instanceId: string]: { [property: string]: number | string };
+      }[];
     } = {
       data: [],
       instances: []
@@ -176,15 +177,12 @@ export default class RoleCardComponent extends Vue {
       res.data.push(this.roleMetrics[i][this.role.name].data);
       res.instances.push(this.roleMetrics[i][this.role.name].instances);
     }
+
     return res;
   }
 
-  get rolChartData() {
-    return ChartComponentUtils.prepareData(this.onRoleMetricsUpdate.data);
-  }
-
-  get instanceMetrics() {
-    return this.onRoleMetricsUpdate.instances;
+  get roleChartData() {
+    return ChartComponentUtils.prepareRoleData(this.onRoleMetricsUpdate);
   }
 
   get state(): string {

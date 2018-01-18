@@ -12,7 +12,7 @@
         <v-card-actions>
           <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
           <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="manualCancelChanges">Cancel</v-btn>
         </v-card-actions>
       
     </v-card-title>
@@ -22,6 +22,7 @@
 
     <!-- Main content of the view-->
     <v-container fluid id="deployment-item-view">
+
       <!-- Deployment general info -->
       <v-container fluid id="deployment-item-view">
         <v-layout wrap>
@@ -61,62 +62,62 @@
             <!-- Deployment links -->
             <v-layout wrap>
             
-                <span class="subheading">Connections</span>
+              <span class="subheading">Connections</span>
                 
-                <!-- Link table representation -->
-                <table>
+              <!-- Link table representation -->
+              <table>
 
-                  <!-- Heders-->
-                  <tr>
-                    <th>From</th>
-                    <th>To</th>
-                  </tr>
+                <!-- Heders-->
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                </tr>
 
-                  <!-- Provided Channels -->
-                  <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                    <th>
-                      <v-select
-                        v-model="serviceNewProvidedConnections[name]"
-                        v-bind:items="totalDependedDeploymentChannels(service, name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
+                <!-- Provided Channels -->
+                <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                  <th>
+                    <v-select
+                      v-model="serviceNewProvidedConnections[name]"
+                      v-bind:items="totalDependedDeploymentChannels(name)"
+                      multiple chips v-on:input="handleInput" return-object autocomplete>
 
-                        <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip
-                            @input="items.parent.selectItem(items.item)"
-                             close color="indigo lighten-4">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                        
-                      </v-select>
-                    </th>
-                  </tr>
-
-                  <!-- Depended channels -->
-                  <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                    <th>
-                      <v-select
-                        v-model="serviceNewDependedConnections[name]"
-                        v-bind:items="totalProvidedDeploymentChannels(service, name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
-                  
-                         <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip 
-                            @input="items.parent.selectItem(items.item)"
+                      <!-- Chips config-->
+                      <template slot="selection" scope="items">
+                        <v-chip
+                          @input="items.parent.selectItem(items.item)"
                             close color="indigo lighten-4">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                  
-                      </v-select>
-                    </th>
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                  </tr>
+                          {{ items.item.text }}
+                        </v-chip>
+                      </template>
+                      
+                    </v-select>
+                  </th>
+                </tr>
 
-                </table>
+                <!-- Depended channels -->
+                <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                  <th>
+                    <v-select
+                      v-model="serviceNewDependedConnections[name]"
+                      v-bind:items="totalProvidedDeploymentChannels(name)"
+                      multiple chips v-on:input="handleInput" return-object autocomplete>
+                
+                        <!-- Chips config-->
+                      <template slot="selection" scope="items">
+                        <v-chip 
+                          @input="items.parent.selectItem(items.item)"
+                          close color="indigo lighten-4">
+                          {{ items.item.text }}
+                        </v-chip>
+                      </template>
+                
+                    </v-select>
+                  </th>
+                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                </tr>
+
+              </table>
               
             </v-layout>
 
@@ -127,14 +128,13 @@
 
           <!-- Deployment chart -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentChartData"
+            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentMetrics.data"
               v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
             </deployment-chart-component>
           </v-flex>
 
         </v-layout>
 
-         
       </v-container>
 
       <!-- Deployment roles -->
@@ -142,7 +142,7 @@
         <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
           <role-card-component v-for="(rolContent, rolId) in deployment.roles"
           v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
-          v-bind:roleMetrics="roleMetrics"
+          v-bind:roleMetrics="deploymentMetrics.roles"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
@@ -179,12 +179,8 @@ import {
   ChartComponentOptions,
   ChartComponentUtils
 } from "../components";
-import {
-  Channel,
-  Deployment,
-  Metric,
-  Service
-} from "../store/stampstate/classes";
+import { Channel, Deployment, Service } from "../store/stampstate/classes";
+import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -211,22 +207,38 @@ import {
   }
 })
 export default class DetailedDeploymentView extends Vue {
-  rolNumInstances: { [rolId: string]: number } = {};
+  /** Temporary number of instances of a role. **/
+  roleNumInstances: { [rolId: string]: number } = {};
+
+  /** Signal to kill instances. */
   instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+
+  /** Marks if there are changes to commit. */
   haveChanges: boolean = false;
+
+  /** Marks if the state should be cleared. */
   clear: boolean = false;
+
+  /** Show/Hide dialog undeploy element. */
   undeployElementDialog: boolean = false;
-  modalOkCallback: Function = function() {};
+
+  /** Vue wrapper for the Chart options. */
   chartOptions = ChartComponentOptions;
+
+  /** Temporary depended connections. */
   serviceNewDependedConnections: {
     [channel: string]: { text: string; value: string }[];
   } = {};
+
+  /** Temporary provided connections. */
   serviceNewProvidedConnections: {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
   mounted() {
+    /* No longer needed because it's loaded on user's load
     // Retrieve all actually deployed services
+    
     for (let dep in this.$store.getters.deployments) {
       if (
         !this.$store.getters.service(
@@ -238,9 +250,36 @@ export default class DetailedDeploymentView extends Vue {
           this.$store.getters.deployments[dep].service
         );
       }
-    }
+    }*/
+
+    this.$watch("$route.path", val => {
+      this.automatedCancelChanges();
+    });
   }
 
+  /** Obtains the deployment from the storage. */
+  get deployment(): Deployment {
+    return ((<SSGetters>this.$store.getters).deploymentFromPath as Function)(
+      this.$route.path
+    );
+  }
+
+  /** Required to obtain additional information of a role. */
+  get service(): Service {
+    let ser: Service = ((<SSGetters>this.$store.getters).service as Function)(
+      this.deployment.service
+    );
+    if (!ser) {
+      /* This will be reached when deploying new services with bundles. */
+      this.$store.dispatch("getElementInfo", this.deployment.service);
+    } else {
+      this.loadDeploymentConnections(this.deployment, ser);
+    }
+
+    return ser;
+  }
+
+  /** Deployment state. */
   get state(): string {
     let res: string;
     switch (this.deployment.state) {
@@ -259,49 +298,51 @@ export default class DetailedDeploymentView extends Vue {
     return res;
   }
 
-  get deployment(): Deployment {
-    return this.$store.getters.deploymentFromPath(this.$route.path);
-  }
-
+  /*
   get searchDeployment(): (uri: string) => Deployment {
     return (uri: string) => {
       return this.$store.getters.deployment(uri);
     };
   }
+  */
 
-  /** Required to obtain additional information of a role. */
-  get service(): Service {
-    let ser: Service = this.$store.getters.service(this.deployment.service);
-    if (!ser) {
-      this.$store.dispatch("getElementInfo", this.deployment.service);
-    } else {
-      this.cancelChanges();
-      this.loadDeploymentConnections(this.deployment, ser);
-    }
-
-    return ser;
-  }
-
-  get deploymentMetrics() {
-    let metrics: [
-      Date,
-      {
-        data: Metric;
-        roles: {
-          [roleId: string]: {
-            data: Metric;
-            instances: { [instanceId: string]: Metric };
+  /** Obtains deployment metrics. */
+  get deploymentMetrics(): {
+    data: { labels: any[]; datasets: any[] };
+    roles: any;
+  } {
+    let metrics: {
+      data: {
+        [property: string]: number | string;
+      };
+      roles: {
+        [rolId: string]: {
+          data: {
+            [property: string]: number | string;
+          };
+          instances: {
+            [instanceId: string]: {
+              [property: string]: number | string;
+            };
           };
         };
-      }
-    ][] = this.deployment.metrics;
+      };
+    }[] = this.$store.getters.metrics(this.deployment._uri);
 
     let res: {
-      data: Metric[];
+      data: {
+        [property: string]: number | string;
+      }[];
       roles: {
         [roleId: string]: {
-          data: Metric;
-          instances: { [instanceId: string]: Metric };
+          data: {
+            [property: string]: number | string;
+          };
+          instances: {
+            [instanceId: string]: {
+              [property: string]: number | string;
+            };
+          };
         };
       }[];
     } = {
@@ -310,28 +351,16 @@ export default class DetailedDeploymentView extends Vue {
     };
 
     for (let i in metrics) {
-      res.data.push(metrics[i][1].data);
-      res.roles.push(metrics[i][1].roles);
+      res.data.push(metrics[i].data);
+      res.roles.push(metrics[i].roles);
     }
 
-    return res;
+    return ChartComponentUtils.prepareDeploymentData(res);
   }
 
-  get deploymentChartData(): { labels: string[]; datasets: any[] } {
-    return ChartComponentUtils.prepareData(this.deploymentMetrics.data);
-  }
-
-  get roleMetrics(): {
-    [roleId: string]: {
-      data: Metric;
-      instances: { [instanceId: string]: Metric };
-    };
-  }[] {
-    return this.deploymentMetrics.roles;
-  }
-
+  /** Obtains all provided deployment channels of actual deployed services. */
   get totalProvidedDeploymentChannels() {
-    return (service, channel) => {
+    return channel => {
       return this.$store.getters.getTotalProvidedDeploymentChannels(
         this.deployment.service,
         channel
@@ -339,8 +368,9 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /** Obtains all depended deployment channels of actual deployed services. */
   get totalDependedDeploymentChannels() {
-    return (service, channel) => {
+    return channel => {
       return this.$store.getters.getTotalDependedDeploymentChannels(
         this.deployment.service,
         channel
@@ -350,7 +380,7 @@ export default class DetailedDeploymentView extends Vue {
 
   /**
    * Compares the temporary state with the real state and sends to the stamp
-   * the differences
+   * the differences.
    */
   applyChanges(): void {
     /*
@@ -492,42 +522,68 @@ export default class DetailedDeploymentView extends Vue {
     let changedNumInstances = false;
     for (let role in this.deployment.roles) {
       if (
-        this.rolNumInstances[role] &&
+        this.roleNumInstances[role] &&
         this.deployment.roles[role].actualInstances !==
-          this.rolNumInstances[role]
+          this.roleNumInstances[role]
       ) {
         changedNumInstances = true;
       }
     }
 
     if (changedNumInstances) {
+      
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
         deploymentURN: this.deployment._uri,
-        rolNumInstances: this.rolNumInstances,
+        roleNumInstances: this.roleNumInstances,
         killInstances: this.instanceKill
       });
+
     }
+
     // Marc as there are no changes
     this.haveChanges = false;
+
   }
 
-  cancelChanges(): void {
+  automatedCancelChanges(): void {
     if (this.haveChanges) {
-      this.rolNumInstances = {};
+      this.roleNumInstances = {};
       this.instanceKill = {};
+
+      // Clean links
+      this.serviceNewDependedConnections = {};
+      this.serviceNewProvidedConnections = {};
+
       this.clear = true;
       this.haveChanges = false;
     }
   }
 
-  loadDeploymentConnections(dep: Deployment, ser: Service) {
-      for (let chan in this.serviceNewDependedConnections)
-        this.serviceNewDependedConnections[chan] = [];
-      for (let chan in this.serviceNewProvidedConnections)
-        this.serviceNewProvidedConnections[chan] = [];
+  /** Cancells temporary changes. */
+  manualCancelChanges(): void {
+    if (this.haveChanges) {
+      this.roleNumInstances = {};
+      this.instanceKill = {};
 
+      // Clean links
+      for (let role in this.serviceNewDependedConnections){
+        this.serviceNewDependedConnections[role] = [];
+      }
+      
+      for (let role in this.serviceNewProvidedConnections){
+        this.serviceNewProvidedConnections[role] = [];
+      }
 
+      this.loadDeploymentConnections(this.deployment, this.service);
+
+      this.clear = true;
+      this.haveChanges = false;
+    }
+  }
+
+  /** Loads service available connections. */
+  loadDeploymentConnections(dep: Deployment, ser: Service): void {
     if (dep && ser) {
       for (let chann in dep.channels) {
         for (let conn in dep.channels[chann]) {
@@ -565,30 +621,37 @@ export default class DetailedDeploymentView extends Vue {
     }
   }
 
+  /** Show/Hide undeploy modal. */
   showUndeployModal(): void {
     this.undeployElementDialog = true;
   }
 
+  /** Function called from undeploy modal when confirmation is done. */
   undeploy(): void {
     this.$store.dispatch("undeploy", this.deployment._uri);
     this.$router.push("/overview");
   }
 
-  handleKillInstanceChange([tempRol, tempInst, value]) {
-    if (this.instanceKill[tempRol] === undefined)
+  /** Handles changes in kill instance parameter of role children. */
+  handleKillInstanceChange([tempRol, tempInst, value]): void {
+    if (this.instanceKill[tempRol] === undefined) {
       this.instanceKill[tempRol] = {};
+    }
     this.instanceKill[tempRol][tempInst] = value;
     this.haveChanges = true;
   }
 
-  handleNumInstancesChange([tempRol, value]) {
-    this.rolNumInstances[tempRol] = value;
+  /** Handles changes in the number of instances of role children. */
+  handleNumInstancesChange([tempRol, value]): void {
+    this.roleNumInstances[tempRol] = value;
     this.haveChanges = true;
   }
 
-  handleInput(value) {
+  /** Handles changes in the input event of children components. */
+  handleInput(value): void {
     if (!this.clear) this.haveChanges = true;
   }
+
 }
 </script>
 <style lang="scss" scoped>

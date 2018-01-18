@@ -6,8 +6,7 @@ import PriorityQueue from 'priorityqueue';
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
-  EntryPoint, HTTPEntryPoint, Metric, ProvidedChannel, Runtime, Service,
-  Volume
+  EntryPoint, HTTPEntryPoint, ProvidedChannel, Runtime, Service, Volume
 } from './classes';
 
 /**
@@ -59,27 +58,27 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
-  deploymentMetricList = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (deploymentURI: string) => [Date, {
-      'data': Metric,
+  metrics = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): (deploymentId: string) => {
+      'data': {
+        [property: string]: number | string
+      },
       'roles': {
-        [roleId: string]: {
-          'data': Metric, 'instances': {
-            [instanceId: string]: Metric
+        [rolId: string]: {
+          'data': {
+            [property: string]: number | string
+          },
+          'instances': {
+            [instanceId: string]: {
+              [property: string]: number | string
+            }
+
           }
         }
       }
-    }][] => {
-    return (deploymentId: string): [Date, {
-      'data': Metric, 'roles': {
-        [roleId: string]: {
-          'data': Metric, 'instances': {
-            [instanceId: string]: Metric
-          }
-        }
-      }
-    }][] => {
-      return (<Deployment>state.deployments[deploymentId]).metrics;
+    }[] => {
+    return (deploymentId: string) => {
+      return state.metrics[deploymentId];
     };
   }
 
@@ -309,7 +308,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         'value': string, 'text': string
       }[] => {
     return (serviceId: string, channelId: string) => {
-      // Obtenemos el canal y miramos de qué tipo es
+      // Depending on the channel type, the search will be different
       let type: string = (<Service>state.services[serviceId])
         .providedChannels[channelId].type;
       let typeSearched: Channel.TYPE[] = [];
@@ -335,8 +334,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       for (let deploymentId in state.deployments) {
         if (
           state.deployments[deploymentId] instanceof HTTPEntryPoint
-          && state.deployments[deploymentId].channels['sep']
-          && state.deployments[deploymentId].channels['sep'].length > 0
+          && state.deployments[deploymentId].channels['frontend']
+          && state.deployments[deploymentId].channels['frontend'].length > 0
         ) {
           // If it's an entrypoint in use, it's not purposed for a new
           // connection
@@ -367,7 +366,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                 if (res.indexOf(elem) === -1) {
                   res.push(elem); // Lo añadimos
                 }
-                
+
               }
             }
           }
@@ -425,6 +424,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       return res;
     };
   }
+  
   volumes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [uri: string]: Volume } => {
     return state.volumes;
@@ -463,6 +463,11 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+  }
+
+  selectedService = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): string => {
+    return state.selectedService;
   }
 
 };
