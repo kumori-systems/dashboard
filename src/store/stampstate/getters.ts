@@ -424,6 +424,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       return res;
     };
   }
+  
   volumes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [uri: string]: Volume } => {
     return state.volumes;

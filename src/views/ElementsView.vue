@@ -265,17 +265,33 @@ import {
   name: "ElementsView"
 })
 export default class ElementsView extends Vue {
+
+  /** Selected components to make groupal actions. */
   selectedComponents: string[] = [];
+
+  /** Selected services to make groupal actions. */
   selectedServices: string[] = [];
+
+  /** Selected runtimes to make groupal actions. */
   selectedRuntimes: string[] = [];
+
+  /** Search filter. */
   search: string = null;
-  // Modal Arguments
+
+  /** Show/Hide delete element dialog. */
   deleteElementDialog: boolean = false;
+
+  /** Show/Hide delete group dialog. */
   deleteGroupDialog: boolean = false;
+
+  /** Show/Hide info element dialog. */
   infoElementDialog: boolean = false;
+
+  /** Selected element for dialogs. */
   selectedElement: string = null;
 
   mounted() {
+
     // Retrieve all actually deployed services
     for (let dep in this.$store.getters.deployments) {
       if (
@@ -289,9 +305,11 @@ export default class ElementsView extends Vue {
         );
       }
     }
+
   }
 
   get someoneSelected() {
+
     if (
       this.selectedComponents.length > 0 ||
       this.selectedServices.length > 0 ||
@@ -299,73 +317,88 @@ export default class ElementsView extends Vue {
     )
       return true;
     return false;
+
   }
 
   get deploymentInfo() {
+
     return (uri: string) => {
       return this.$store.getters.deployment(uri);
     };
+
   }
 
   get componentsByOwner(): {
     [owner: string]: { [name: string]: { [version: string]: Component } };
   } {
+
     return ((<SSGetters>this.$store.getters).componentsByOwner as any)(
       this.search
     ) as {
       [owner: string]: { [name: string]: { [version: string]: Component } };
     };
+
   }
 
   get componentUsedBy(): Function {
+
     return (uri): string[] => {
       return (((<SSGetters>this.$store.getters).componentUsedBy as Function)(
         uri
       ) as any) as string[];
     };
+
   }
 
   get servicesByOwner(): {
     [owner: string]: { [name: string]: { [version: string]: Service } };
   } {
+
     return ((<SSGetters>this.$store.getters).servicesByOwner as any)(
       this.search
     ) as {
       [owner: string]: { [name: string]: { [version: string]: Service } };
     };
+
   }
 
   get serviceUsedBy(): Function {
+
     return (uri): string[] => {
       return (((<SSGetters>this.$store.getters).serviceUsedBy as Function)(
         uri
       ) as any) as string[];
     };
+
   }
 
   get runtimesByOwner(): {
     [owner: string]: { [name: string]: { [version: string]: Runtime } };
   } {
+
     return ((<SSGetters>this.$store.getters).runtimesByOwner as any)(
       this.search
     ) as {
       [owner: string]: { [name: string]: { [version: string]: Runtime } };
     };
+
   }
 
   get runtimeUsedBy(): Function {
+
     return (uri): string[] => {
       return (((<SSGetters>this.$store.getters).runtimeUsedBy as Function)(
         uri
       ) as any) as string[];
     };
+
   }
 
   /**
-   * This returns all stored info about the element. The dialog must publish
-   * all related info.
+   * Shows all stored info related to the selected element.
    */
   get selectedElementInfo(): any {
+
     let res = {};
     if (this.selectedElement) {
       res = this.$store.getters.elementInfo(this.selectedElement);
@@ -374,31 +407,41 @@ export default class ElementsView extends Vue {
       }
     }
     return res;
+
   }
 
   showDeleteElementDialog(element: string) {
+
     this.selectedElement = element;
     this.deleteElementDialog = true;
+
   }
 
   deleteElement() {
+
     this.$store.dispatch("deleteElement", this.selectedElement);
     this.deleteElementDialog = false;
     this.selectedElement = null;
+
   }
 
   showInfoElementDialog(element: string) {
+
     this.selectedElement = element;
     this.infoElementDialog = true;
+
   }
 
   showElementInfo() {
+
     this.$store.dispatch("downloadManifest", this.selectedElement);
     this.infoElementDialog = false;
     this.selectedElement = null;
+
   }
 
   downloadSelected() {
+
     for (let serv in this.selectedServices) {
       this.$store.dispatch("downloadManifest", this.selectedServices[serv]);
     }
@@ -408,13 +451,17 @@ export default class ElementsView extends Vue {
     for (let runt in this.selectedRuntimes) {
       this.$store.dispatch("downloadManifest", this.selectedServices[runt]);
     }
+
   }
 
   ShowDeleteGroupDialog() {
+
     this.deleteGroupDialog = true;
+
   }
 
   deleteGroup() {
+
     let deleteList: string[] = [];
     for (let index in this.selectedComponents) {
       this.$store.dispatch("deleteElement", this.selectedComponents[index]);
@@ -432,9 +479,11 @@ export default class ElementsView extends Vue {
     this.selectedRuntimes = [];
 
     this.deleteGroupDialog = false;
+
   }
 
   deployService(service) {
+
     // Keep the service in the state
     this.$store.dispatch("selectedService", service);
 
@@ -452,6 +501,8 @@ export default class ElementsView extends Vue {
     }
 
     this.$router.push(route);
+
   }
+
 }
 </script>
