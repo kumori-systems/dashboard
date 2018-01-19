@@ -37,6 +37,7 @@ import { SignInView } from "./views";
 import { AppbarComponent, NavigationComponent } from "./components";
 import { User } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
+import PSActions from "./store/pagestate/actions";
 
 @VueClassComponent({
   name: "App",
@@ -52,6 +53,53 @@ export default class App extends Vue {
     // Check if there is a token in the url
 
     console.debug("Found a token stored in the url", this.$route.query.token);
+
+    let status = this.$route.query.status;
+/*
+    if (status && status == 'error'){
+
+      //(<PSActions>this.$store.dispatch)
+
+       const authenticationAction = new BackgroundAction('authentication',
+      'User authentication in the system');
+
+        injectee.commit('addBackgroundAction', authenticationAction);
+    injectee.commit('processingBackgroundAction', {
+      'id': authenticationAction.id,
+      'details': 'Validating user'
+    });
+
+       injectee.commit('finishBackgroundAction', {
+            'id': loadInfoAction.id,
+            'state': BackgroundAction.State.FAIL,
+            'details': 'Error loading data, please contact your administrator'
+          });
+          console.error('Error loading data: ', error);
+
+      // Set state friendly message to this.$route.query.error
+      // this.$store.  friendlymessage =  this.$route.query.error;
+    }
+    */
+
+    if (status && status == 'success'){
+      localStorage.setItem(
+      "user",
+      JSON.stringify(
+        new User(
+          this.$route.query.user_id,
+          this.$route.query.user_name,
+          User.State.UNAUTHENTICATED,
+          {
+            accessToken: this.$route.query.access_token,
+            expiresIn: parseInt(this.$route.query.ttl),
+            refreshToken: this.$route.query.refresh_token,
+            tokenType: this.$route.query.token_type
+          }
+        )
+      )
+    );
+    }
+    
 
     // Check if the user has been stored in localStorage
     if (typeof Storage !== "undefined") {

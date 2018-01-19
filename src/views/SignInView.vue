@@ -47,17 +47,13 @@
 
               </v-card-actions>
 
-            </v-form>
-
-            <!-- Sign in with google -->
-            <a id="googleoauth" href="http://jvalero-acs.test.kumori.cloud/acs/auth/google?redirectOnSuccessUrl=https://elpais.com/&redirectOnFailureUrl=http://http://www.elmundo.es/">
-              <v-btn class="elevation-0" color="blue" block v-on:click="googleOauth">
-                <v-icon color="white" left>mdi-google</v-icon>
-                <span class="white--text">Sign in with google</span>
-              </v-btn>
-            </a>
-            
+            </v-form>            
           </v-card-text>
+
+          <!-- Sign in with google -->
+          <a v-bind:href="googleOauthURN">
+            <img src="/static/btn_google_signin_light_normal_web.png">
+          </a>
 
         </v-card>
 
@@ -90,10 +86,13 @@ import VueClassComponent from "vue-class-component";
 import PSGetters from "./../store/pagestate/getters";
 import { BackgroundAction } from "../store/pagestate/classes";
 
+import { ACS_URI } from "../api/config";
+
 @VueClassComponent({
   name: "sign-in-view"
 })
 export default class SignInView extends Vue {
+  
   /** <string> User's id. */
   userName: string = "";
 
@@ -102,6 +101,15 @@ export default class SignInView extends Vue {
 
   /** <boolean> Enables the visibility of the password. */
   viewPassword: boolean = false;
+
+  /** URL where the browser is redirected to procceed to google's oauth. */
+  googleOauthURN:string = null;
+
+  /** Mounted hook. */
+  mounted(){
+    // Set redirection path for google oauth
+    this.googleOauthURN = ACS_URI + "/auth/google?redirectOnSuccessUrl=" + 'www.google.es' + "&redirectOnFailureUrl=" + location.href;
+  }
 
   /**
    * Returns true if there is a background process running.
@@ -164,7 +172,6 @@ export default class SignInView extends Vue {
       userpassword: this.userPassword
     });
   }
-
 }
 </script>
 <style>
@@ -204,8 +211,7 @@ export default class SignInView extends Vue {
   }
 }
 
-#googleoauth{
+#googleoauth {
   text-decoration: initial;
 }
-
 </style>
