@@ -51,9 +51,12 @@
           </v-card-text>
 
           <!-- Sign in with google -->
-          <a v-bind:href="googleOauthURN">
-            <img src="/static/btn_google_signin_light_normal_web.png">
-          </a>
+          <v-layout>
+            <v-spacer></v-spacer>
+            <a class="ma-3" v-bind:href="googleOauthURN">
+              <img src="/static/btn_google_signin_light_normal_web.png">
+            </a>
+          </v-layout>
 
         </v-card>
 
@@ -85,6 +88,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import PSGetters from "./../store/pagestate/getters";
 import { BackgroundAction } from "../store/pagestate/classes";
+import urlencode from 'urlencode';
 
 import { ACS_URI } from "../api/config";
 
@@ -107,8 +111,10 @@ export default class SignInView extends Vue {
 
   /** Mounted hook. */
   mounted(){
+
     // Set redirection path for google oauth
-    this.googleOauthURN = ACS_URI + "/auth/google?redirectOnSuccessUrl=" + 'www.google.es' + "&redirectOnFailureUrl=" + location.href;
+    this.googleOauthURN = ACS_URI + "/auth/google?redirectOnSuccessUrl=" + urlencode(location.origin+"/#/overview") + "&redirectOnFailureUrl=" + urlencode(location.origin+"/#/overview");
+
   }
 
   /**

@@ -15,5 +15,5 @@
 // export const ADMISSION_URI = "";
 
 // jferrer config
-export const ACS_URI = "http://acs-oauth1069.test.kumori.cloud/acs";
-export const ADMISSION_URI = "http://admission-oauth1069.test.kumori.cloud/acs/admission";
+export const ACS_URI = "http://acs-oauth.test.kumori.cloud/acs";
+export const ADMISSION_URI = "http://admission-oauth.test.kumori.cloud/admission";
