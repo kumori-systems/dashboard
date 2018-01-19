@@ -35,8 +35,9 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import { SignInView } from "./views";
 import { AppbarComponent, NavigationComponent } from "./components";
-import { User } from "./store/pagestate/classes";
+import { User, BackgroundAction } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
+import PSActions from "./store/pagestate/actions";
 
 @VueClassComponent({
   name: "App",
@@ -51,7 +52,50 @@ export default class App extends Vue {
   mounted() {
     // Check if there is a token in the url
 
-    console.debug("Found a token stored in the url", this.$route.query.token);
+    let status = this.$route.query.status;
+
+    if (status && status == "error") {
+      //(<PSActions>this.$store.dispatch)
+
+      let authenticationAction = new BackgroundAction(
+        "authentication",
+        "Validating user in the platform"
+      );
+
+      this.$store.dispatch("addBackgroundAction", authenticationAction);
+      
+      this.$store.dispatch("processingBackgroundAction", {
+        id: authenticationAction.id,
+        details: "Validating user"
+      });
+
+      this.$store.dispatch("finishBackgroundAction", {
+        id: authenticationAction.id,
+        state: BackgroundAction.State.FAIL,
+        details: this.$route.query.error
+      });
+
+    }
+
+    if (status && status == "success") {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(
+          new User(
+            this.$route.query.user_id,
+            this.$route.query.user_name,
+            User.State.UNAUTHENTICATED,
+            {
+              accessToken: this.$route.query.access_token,
+              expiresIn: parseInt(this.$route.query.ttl),
+              refreshToken: this.$route.query.refresh_token,
+              tokenType: this.$route.query.token_type
+            }
+          )
+        )
+      );
+      this.$router.push("/");
+    }
 
     // Check if the user has been stored in localStorage
     if (typeof Storage !== "undefined") {

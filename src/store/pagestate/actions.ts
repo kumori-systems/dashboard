@@ -14,6 +14,20 @@ import { BackgroundAction, User } from './classes';
 export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
+  addBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
+    action): void => {
+    injectee.commit('addBackgroundAction', action);
+  }
+
+  processingBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
+    { id, details }): void => {
+    injectee.commit('processingBackgroundAction', { id, details });
+  }
+
+  finishBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
+    { id, state, details }): void => {
+    injectee.commit('finishBackgroundAction', { id, state, details });
+  }
 
   /** Signs the user out of the page. */
   signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
@@ -53,8 +67,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     const loadInfoAction = new BackgroundAction('loadInfo',
       'Action which loads data from the system');
 
-    injectee.commit('addBackgroundAction', authenticationAction);
-    injectee.commit('processingBackgroundAction', {
+    injectee.dispatch('addBackgroundAction', authenticationAction);
+    injectee.dispatch('processingBackgroundAction', {
       'id': authenticationAction.id,
       'details': 'Validating user'
     });
@@ -64,15 +78,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       payload.username, payload.userpassword, payload.userid, payload.token
     ).then((user) => {
 
-      injectee.commit('finishBackgroundAction', {
+      injectee.dispatch('finishBackgroundAction', {
         'id': authenticationAction.id,
         'state': BackgroundAction.State.SUCCESS,
         'details': 'Authentication sucessfull'
       });
 
       // Loading process
-      injectee.commit('addBackgroundAction', loadInfoAction);
-      injectee.commit('processingBackgroundAction', {
+      injectee.dispatch('addBackgroundAction', loadInfoAction);
+      injectee.dispatch('processingBackgroundAction', {
         'id': loadInfoAction.id,
         'details': 'Loading data..'
       });
@@ -85,7 +99,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         return connection.getDeploymentList().then(() => {
           console.debug('Retrieved all deployments from the platform');
 
-          injectee.commit('finishBackgroundAction', {
+          injectee.dispatch('finishBackgroundAction', {
             'id': loadInfoAction.id,
             'state': BackgroundAction.State.SUCCESS,
             'details': 'All data loaded'
@@ -105,7 +119,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         });
       }).catch((error) => {
         if (!error.code || error.code !== '001') {
-          injectee.commit('finishBackgroundAction', {
+          injectee.dispatch('finishBackgroundAction', {
             'id': loadInfoAction.id,
             'state': BackgroundAction.State.FAIL,
             'details': 'Error loading data, please contact your administrator'
@@ -114,7 +128,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
       });
     }).catch((error) => {
-      injectee.commit('finishBackgroundAction', {
+      injectee.dispatch('finishBackgroundAction', {
         'id': authenticationAction.id,
         'state': BackgroundAction.State.FAIL,
         'details': 'Authentication failure'
@@ -139,8 +153,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     });
 
     connection.onModifyDeployment((value) => {
-      console.warn('Received event onModifyDeployment, which is still under'
-        + ' development', value);
+      // console.warn('Received event onModifyDeployment, which is still under'
+        // + ' development', value);
       // connection.getDeployment()
     });
 

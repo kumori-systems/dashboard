@@ -67,7 +67,7 @@
               <!-- Link table representation -->
               <table>
 
-                <!-- Heders-->
+                <!-- Headers-->
                 <tr>
                   <th>From</th>
                   <th>To</th>

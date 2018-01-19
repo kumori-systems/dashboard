@@ -137,7 +137,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         console.error('Error modifying deployment. ',
           deploymentURN, roleNumInstances, killInstances, error);
       });
-      
+
   }
 
   addNewBundle = (injectee: Vuex.ActionContext<State, any>, params):
@@ -156,8 +156,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   selectedService = (injectee: Vuex.ActionContext<State, any>, serviceURI):
-  void => {
+    void => {
     injectee.commit('selectedService', serviceURI);
-}
+  }
 
 };
