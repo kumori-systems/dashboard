@@ -3,7 +3,9 @@ import State from './state';
 
 import { connection } from '../../api';
 import * as utils from '../../api/utils';
+import { Notification } from '../pagestate/classes';
 import { Deployment } from './classes';
+
 
 /**
  * Actions to handle the representation of the stamp state easier.
@@ -12,8 +14,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
   /**
-   * Sets if the navigation pannel should be shown.
-   * @requires payload <boolean>
+   * Obtains information from a stamp element.
+   * @requires elementURI <string> Element identification.
    */
   getElementInfo = (injectee: Vuex.ActionContext<State, any>,
     elementURI: string): void => {
@@ -63,39 +65,58 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   /**
-   * Adds a new deployment to the stamp
-   * @requires deployment <Deployment> Deployment to add in the stamp
+   * Adds a new deployment to the stamp.
+   * @requires deployment <Deployment> Deployment to add in the stamp.
    */
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
 
     connection.addDeployment(deployment).catch((error) => {
-      console.error('Error deploying a service', error);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error deploying',
+          'Error deploying ' + deployment._uri + ': ' + error)
+      );
+
     });
   }
 
   /**
-   * Removes a deployment from the stamp
-   * @requires deploymentURN <string> urn of the deployment to remove
+   * Removes a deployment from the stamp.
+   * @requires deploymentURN <string> URN of the deployment to remove.
    */
-  undeploy = (injectee: Vuex.ActionContext<State, any>,
-    deploymentURN: string): void => {
+  undeploy = (injectee: Vuex.ActionContext<State, any>, deploymentURN: string):
+    void => {
     connection.undeployDeployment(deploymentURN).catch((error) => {
-      console.error('The deployment ' + deploymentURN +
-        ' could not be undeployed: ' + error);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error undeploying',
+          'Error undeploying ' + deploymentURN + ': ' + error)
+      );
+
     });
   }
 
   /**
-   * Adds a new domain to the stamp
+   * Adds a new domain to the stamp.
+   * @requires domain <string> Domain name to be added to the stamp.
    */
-  addNewDomain = (injectee: Vuex.ActionContext<State, any>,
-    domain: string): void => {
-    connection.addDomain(domain);
+  addNewDomain = (injectee: Vuex.ActionContext<State, any>, domain: string):
+    void => {
+    connection.addDomain(domain).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error registering a domain',
+          'Error registering a domain ' + domain + ': ' + err)
+      );
+
+    });
   }
 
   /**
-   * Removes an element from the stamp
+   * Removes an element from the stamp.
+   * @requires elementId <string> Element identification to be removed form the
+   *  stamp.
    */
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
@@ -116,48 +137,128 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       }
 
       injectee.commit(action, elementId);
-    }).catch((error) => {
-      console.error('Error erasing element %s', elementId, error);
+    }).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error removing an element',
+          'Error removing element ' + elementId + ': ' + err)
+      );
+
     });
   }
 
+  /**
+   * Downloads a manifest from the stamp.
+   * @requires elementURN <string> Identification of the element to be removed
+   *  from the stamp.
+   */
   downloadManifest = (injectee: Vuex.ActionContext<State, any>,
     elementURN: string):
     void => {
-    connection.downloadManifest(elementURN);
+    connection.downloadManifest(elementURN).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error downloading manifest',
+          'Error downloading manifest from ' + elementURN + ': ' + err)
+      );
+
+    });
   }
 
+  /**
+   * Changes the state of a deployment.
+   * @requires Object <{deploymentURN, roleNumInstances, killInstances}> Object
+   *  representing the changes to be made on the deployment.
+   */
   aplyingChangesToDeployment = (injectee: Vuex.ActionContext<State, any>, {
     deploymentURN, roleNumInstances, killInstances
-  }):
-    void => {
+  }): void => {
 
-    connection.aplyChangesToDeployment(deploymentURN, roleNumInstances,
-      killInstances).catch((error) => {
-        console.error('Error modifying deployment. ',
-          deploymentURN, roleNumInstances, killInstances, error);
-      });
+    connection.aplyChangesToDeployment(
+      deploymentURN, roleNumInstances, killInstances
+    ).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR,
+          'Error modifying deployment',
+          'Error modifying deployment' + deploymentURN + ': ' + err)
+      );
+
+    });
 
   }
 
-  addNewBundle = (injectee: Vuex.ActionContext<State, any>, params):
+  /**
+   * Adds a new bundle in the stamp.
+   * @requires file <File> File to be sended to the stamp.
+   */
+  addNewBundle = (injectee: Vuex.ActionContext<State, any>, file: File):
     void => {
-    connection.addNewBundle(params);
+
+    connection.addNewBundle(file).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error uploading a bundle',
+          'Error: ' + err)
+      );
+
+    });
+
   }
 
-  link = (injectee: Vuex.ActionContext<State, any>, params):
-    void => {
-    connection.link(params);
+  /**
+   * Links two deployments in the stamp.
+   * @requires params <{ deploymentOne: string, channelOne: string,
+   *  deploymentTwo: string, channelTwo: string }> Object with the deploymentss
+   *  and the channels to link.
+   */
+  link = (injectee: Vuex.ActionContext<State, any>, params: {
+    deploymentOne: string, channelOne: string, deploymentTwo: string,
+    channelTwo: string
+  }): void => {
+
+    connection.link(params).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error linking deployments',
+          'Error linking deployments: ' + err)
+      );
+
+    });
+
   }
 
-  unlink = (injectee: Vuex.ActionContext<State, any>, params):
-    void => {
-    connection.unlink(params);
+  /**
+  * Unlinks two deployments in the stamp.
+  * @requires params <{ deploymentOne: string, channelOne: string,
+  *  deploymentTwo: string, channelTwo: string }> Object with the deployments
+  *  and the channels to unlink.
+  */
+  unlink = (injectee: Vuex.ActionContext<State, any>, params): void => {
+
+    connection.unlink(params).catch((err) => {
+
+      injectee.dispatch('addNotification',
+        new Notification(
+          Notification.LEVEL.ERROR, 'Error unlinking deployments',
+          'Error unlinking deployments: ' + err
+        )
+      );
+
+    });
+
   }
 
-  selectedService = (injectee: Vuex.ActionContext<State, any>, serviceURI):
-    void => {
+  /**
+   * Stores in the state the selected service on elements view to be able
+   * to show it on addDeploymentView.
+   * @requires serviceURI <string> Id of the service.
+   */
+  selectedService = (injectee: Vuex.ActionContext<State, any>,
+    serviceURI: string): void => {
+
     injectee.commit('selectedService', serviceURI);
+
   }
 
 };

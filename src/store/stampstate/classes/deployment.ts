@@ -6,8 +6,9 @@ import { Service } from './index';
  * element. If the format is not corret it throws an Error.
  */
 function rightURIformat(URI): [string, string] {
-  // Check the URI format
+
   try {
+
     if (!URI) throw new Error();
     let splitted = URI.split('/');
     // Check two first static pieces
@@ -21,49 +22,62 @@ function rightURIformat(URI): [string, string] {
       name += '/' + splitted[i];
     }
     return [domain, name];
-  } catch (e) {
+
+  } catch (err) {
+
     throw new Error('URI format error: ' + URI);
+
   }
+
 }
 
 /**
  * Instance of a service.
  */
 export class Deployment {
+
   /** <string> Uniform Resource Identifier for this deployment. */
   readonly _uri: string;
+
   /** <string> Where this deployment belongs to. */
   readonly _domain: string;
+
   /** <string> Path for this deployment based on his URI. */
   readonly _path: string;
+
   /** <string> Friendly readable text to identify this deployment. */
   name: string = null;
+
   /** <string> URI of the service which defines this deployment. */
   service: string = null;
+
   /**
    * <{[resource:string]:string}> Set of parameters configuring the resources
    * used by this deployment.
    */
   resourcesConfig: { [resource: string]: any } = {};
+
   /** <any> Set of parameters passed to the initialitzation of this service. */
   parameters: any = null;
+
   /**
    * { [role: string]: Deployment.Role } Set of behaviours and properties for a
    * component.
    */
   roles: { [role: string]: Deployment.Role } = {};
+
   /** <Deployment.Link> Connections with this deployment. MUST NOT BE EDITED. */
   channels: {
     [originChannel: string]:
     { destinyChannelId: string, destinyDeploymentId: string }[]
   };
+
   /**
    * <Deployment.Role.STATE> Represents the state of the conjuntion of the
    * instances. If all instances are connected the state will be GOOD, if all
    * instances are disconnected the state will be ERROR, and if some instances
    * are disconnected but at least one is connected the state will be WARNING.
    */
-
   get state(): Deployment.Role.STATE {
     let res: Deployment.Role.STATE = Deployment.Role.STATE.UNKOWN;
     let success: number = 0;
@@ -115,7 +129,8 @@ export class Deployment {
    * rol.
    * @param resourcesConfig <{[resource:string]:string}> Set of parameters
    * configuring the resources used by this deployment.
-   * @param links <Deployment.Link> Connections with this deployment.
+   * @param channels <{[originChannel: string]:{ destinyChannelId: string,
+   * destinyDeploymentId: string }[]> Connections with this deployment.
    */
   constructor(uri: string, name: string, parameters: any, service: string,
     roles: { [rol: string]: Deployment.Role },
@@ -148,52 +163,8 @@ export class Deployment {
     if (channels) this.channels = channels;
   }
 
-  /**
-   * Adds a link tho this deployment.
-   * @param l <Deployment.Link> Connection to be added to this deployment.
-   */
-  addLink(l: Deployment.Link): void {
-    throw new Error('addLink still to be developed');
-  }
-
-  /**
-   * Removes a link on this deployment.
-   * @param l <Deployment.Link> Connection to be removed from this deployment.
-   */
-  removeLink(l: Deployment.Link): void {
-    throw new Error('removeLink still to be developed');
-  }
 }
 export module Deployment {
-  /**
-   * Connection with another deployment.
-   */
-  export class Link {
-    /**
-     * <string> Channel from this deployment which is involved into the
-     * connection.
-     */
-    fromChannel: string = null;
-    /** <string> Deployment connected to. */
-    toDeployment: string = null;
-    /** <string> Channel from the connected deploment. */
-    toChannel: string = null;
-
-    /**
-     * Connection with another deployment.
-     * @param fromChannel <string> Channel from this deployment which is
-     * involved into the connection.
-     * @param toDeployment <string> Deployment connected to.
-     * @param toChannel <string> Channel from the connected deploment.
-     */
-    constructor(fromChannel: string, toDeployment: string, toChannel: string) {
-      if (fromChannel) this.fromChannel = fromChannel;
-      // Check toDeployment format
-      rightURIformat(toDeployment);
-      if (toDeployment) this.toDeployment = toDeployment;
-      if (toChannel) this.toChannel = toChannel;
-    }
-  }
 
   /**
    * Instance of a role defined in this deployment's service.
@@ -378,6 +349,7 @@ export module Deployment {
   }
 
   export module Role {
+
     /** Represents the state of the conjuntion of the instances. If all
      * instances are connected the state will be GOOD, if all instances are
      * disconnected the state will be ERROR, and if some instances are
@@ -387,36 +359,44 @@ export module Deployment {
       SUCCESS = 'success', WARNING = 'warning', DANGER = 'danger',
       UNKOWN = 'unkown'
     };
+
     /**
      * Instance of a component, running as a role, defined in this deployment's
      *  service.
      */
     export class Instance {
+
       /** <string> Identificatior of the instance in Ecloud. */
       cnid: string = null;
+
       /**
        * <number> Amount of main memory units needed by this instance. Each
        * unit corresponds to a certain amount of physical RAM plus swap.
        * Default 1.
        */
       cpu: number = 1;
+
       /**
        * <number> Amount of main memory units needed by this rol. Each unit
        * corresponds to a certain amount of physical RAM plus swap. Default 1.
        */
       memory: number = 1;
+
       /**
        * <number> Maximum rate (in Mbps) of data transmission through network
        * interfaces. Default 1.
        */
       bandwidth: number = 1;
+
       /**
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
       volumes: { [volume: string]: string; } = {};
+
       /** <{ [port: string]: string; }> Logical ports implied into this role. */
       ports: { [port: string]: string; } = {};
+
       /**
        * <Instance.STATE> Represents the availability of the instance. Default
        * UNKOWN.
@@ -455,14 +435,17 @@ export module Deployment {
         if (volumes) this.volumes = volumes;
         if (ports) this.ports = ports;
       }
+
     }
 
     export module Instance {
+
       /** Represents the availability of the instance. */
       export enum STATE {
         CONNECTED = 'connected', DISCONNECTED = 'disconnected',
         UNKOWN = 'unkown'
       };
+
     }
   }
 }

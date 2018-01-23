@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { BackgroundAction, User } from './classes';
+import { BackgroundAction, Notification, User } from './classes';
 import State from './state';
 
 import SSState from '../stampstate/state';
@@ -79,6 +79,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.backgroundActions[i].details = payload.details;
 
     state.pendingActions--;
+  }
+
+  /**
+   * Stores a notification in the state.
+   */
+  addNotification = (state: State, notification: Notification): void => {
+
+    if (state.user.state === User.State.AUTHENTICATED) {
+      state.notifications.push(notification);
+    }
+
   }
 
 };

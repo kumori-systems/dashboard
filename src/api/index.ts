@@ -3,9 +3,9 @@ import {
 } from 'acs-client';
 import {
   AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent,
-  EcloudEventName, EcloudEventType, Endpoint, FileStream,
-  ReconfigDeploymentModification,
-  RegistrationResult, ScalingDeploymentModification
+  DeploymentInstanceInfo, DeploymentList, EcloudEventName, EcloudEventType,
+  Endpoint, FileStream, ReconfigDeploymentModification, RegistrationResult,
+  ScalingDeploymentModification
 } from 'admission-client';
 
 
@@ -59,7 +59,6 @@ class ProxyConnection extends EventEmitter {
 
   private requestedElements: string[];
 
-
   // Constructor
   constructor() {
     super();
@@ -110,7 +109,7 @@ class ProxyConnection extends EventEmitter {
   login(username: string, password: string, userId?: string, token?: {
     accessToken: string, expiresIn: number, refreshToken: string,
     tokenType: string
-  }) {
+  }): Promise<any> {
     let signin:
       Promise<User>;
     if (!token) {
@@ -333,9 +332,9 @@ class ProxyConnection extends EventEmitter {
   }
 
   /**
-   * Obtains all registered elements in th estamp
+   * Obtains all registered elements in the stamp.
    */
-  getRegisteredElements() {
+  getRegisteredElements(): Promise<any> {
     return this.admission.findStorage().then((registeredElements) => {
       for (let i = 0; i < registeredElements.length; i++) {
         switch (getElementType(registeredElements[i])) {
@@ -378,7 +377,10 @@ class ProxyConnection extends EventEmitter {
    * @param uri 
    */
   getElementInfo(uri: string): Promise<any> {
+
+    // Retrieves the information from the stamp
     return Promise.resolve().then(() => {
+
       let res: Promise<any>;
       if (this.requestedElements.indexOf(uri) < 0) {
         this.requestedElements.push(uri);
@@ -387,7 +389,9 @@ class ProxyConnection extends EventEmitter {
         res = Promise.reject({ 'msg': 'Request already done', 'code': '001' });
       }
       return res;
+
     }).then((element) => {
+
       let res: Promise<any> = Promise.resolve();
 
       switch (getElementType(uri)) {
@@ -433,61 +437,82 @@ class ProxyConnection extends EventEmitter {
       }
 
       return res;
+
     });
+
   }
 
-  addNewBundle(file: File) {
-    this.sendBundle(file).then((registrationResult) => {
+  addNewBundle(file: File): Promise<any> {
+    return this.sendBundle(file)
+      .then((registrationResult) => {
 
-      console.debug('The result of the registration is', registrationResult);
-      /* // When registering a persisten volume
-      {
-        errors: [],
-        links:undefined,
-        successful:[
-          "Registered element: eslap://volumesexample.examples.ecloud/
-          resources/volumes/persistent"
-        ],
+        console.debug('The result of the registration is', registrationResult);
+        /* // When registering a persisten volume
+        {
+          errors: [],
+          links:undefined,
+          successful:[
+            "Registered element: eslap://volumesexample.examples.ecloud/
+            resources/volumes/persistent"
+          ],
+          testToken:undefined,
+          tests:undefined
+        }
+        */
+        /*
+        // When registering dashboard parametros
+        {
+          errors:[],
+          links:undefined,
+          successful:[
+            "Registered element:
+              eslap://eslap.cloud/components/dashboard/0_0_1",
+            "Registered element: eslap://eslap.cloud/services/dashboard/0_0_2"
+          ],
         testToken:undefined,
         tests:undefined
-      }
-      */
-      /*
-      // When registering dashboard parametros
-      {
-        errors:[],
-        links:undefined,
-        successful:[
-          "Registered element: eslap://eslap.cloud/components/dashboard/0_0_1",
-          "Registered element: eslap://eslap.cloud/services/dashboard/0_0_2"
-        ],
-      testToken:undefined,
-      tests:undefined
-      }
-      */
+        }
+        */
 
-      // this.emit(this.onAddResource, uri, res);
-    });
+        // Elements which can be registered here:
+        // ----------------------------------
+        // Deployments -> Own event
+        // Links -> Own event
+        // Services
+        // Components
+        // Runtimes
+        // Volumes
+        // Vhosts
+        // Certificates
+
+        // this.emit(this.onAddResource, uri, res);
+      });
   }
 
-  // @param elementId: Elemento o lista de elementos
-  deleteElement(elementId) {
+  /**
+   * Removes elements from the stamp.
+   * @param elementId <string | string[]> Element or list of elements to remove.
+   */
+  deleteElement(elementId: string): Promise<any> {
     return this.admission.removeStorage(elementId);
   }
 
   // @param elementId: Elemento o lista de elementos
-  downloadManifest(elementId) {
-    this.admission.getStorageManifest(elementId).then((manifest) => {
+  downloadManifest(elementId): Promise<any> {
+
+    // Requests the manifest from the stamp
+    return this.admission.getStorageManifest(elementId).then((manifest) => {
+
+      // Stores the manifest in a local file
       FileSaver.saveAs(
         new Blob([
           JSON.stringify(manifest) + '\n'
         ], { type: 'application/json;charset=utf-8' }),
-        'Manifest.json'
+        'Manifest.' + elementId + '.json'
       );
 
-    }).catch((error) => {
-      console.error('Error obtaining a manifest', error);
     });
+
   }
 
   /* DEPLOYMENTS */
@@ -564,8 +589,8 @@ class ProxyConnection extends EventEmitter {
     return pro;
   }
 
-  getDeployment(uri: string) {
-    this.admission.findDeployments(uri).then((deploymentList) => {
+  getDeployment(uri: string): Promise<any> {
+    return this.admission.findDeployments(uri).then((deploymentList) => {
       for (let deploymentId in deploymentList) {
 
         let deployment: Deployment = transformEcloudDeploymentToDeployment(
@@ -626,21 +651,32 @@ class ProxyConnection extends EventEmitter {
     });
   }
 
-  undeployDeployment(deploymentURN: string) {
+  /**
+   * Undeploys a deployed service from the stamp.
+   * @param deploymentURN <string> Deployment identification.
+   */
+  undeployDeployment(deploymentURN: string): Promise<DeploymentInstanceInfo[]> {
+
     return this.admission.undeploy(deploymentURN);
+
   }
 
-  addDeployment(deployment: Deployment) {
+  /**
+   * Deploys a registered service in the stamp.
+   * @param deployment <Deployment> Service with depoying options.
+   */
+  addDeployment(deployment: Deployment): Promise<DeploymentList> {
 
     return this.admission.deploy(new FileStream(new Blob([
       JSON.stringify(transformDeploymentToManifest(deployment))
     ])));
-    
+
   }
 
-  aplyChangesToDeployment(deploymentId: string,
-    roleNumInstances: { [rolId: string]: number },
-    killInstances: { [rolid: string]: { [instanceId: string]: boolean } }) {
+  aplyChangesToDeployment(
+    deploymentId: string, roleNumInstances: { [rolId: string]: number },
+    killInstances: { [rolid: string]: { [instanceId: string]: boolean } }
+  ): Promise<any> {
 
     let modification = new ScalingDeploymentModification();
     modification.deploymentURN = deploymentId;
@@ -709,69 +745,77 @@ class ProxyConnection extends EventEmitter {
   }
 
   /* RESOURCES */
-  addDomain(webdomain: string) {
-    const manifest = transformDomainToManifest(webdomain);
+  addDomain(webdomain: string): Promise<any> {
     let zip = new JSZip();
-    let content: string = JSON.stringify(manifest) + '\n';
+    let content: string = JSON.stringify(transformDomainToManifest(webdomain))
+      + '\n';
     zip.file('Manifest.json', content);
-    /* var img = zip.folder("images");
-    img.file("smile.gif", imgData, { base64: true });
-    api:https://stuk.github.io/jszip/documentation/api_jszip/generate_async.html
-    type: base64 | binarystring | unit8array | arraybuffer | blob | nodebuffer
-    */
-    let instance = this;
-    zip.generateAsync({
+    /*
+     * var img = zip.folder("images");
+     * img.file("smile.gif", imgData, { base64: true });
+     * api:https://stuk.github.io/jszip/documentation/api_jszip/
+     *  generate_async.html
+     * type: base64 | binarystring | unit8array | arraybuffer | blob |
+     *  nodebuffer
+     */
+
+    // Generates the zip asynchronously
+    return zip.generateAsync({
       type: 'arraybuffer', mimeType: 'application/zip', streamFiles: true
-    })
-      .then((content) => {
-        let file = new File([content], 'Bundle.zip', {
-          type: 'application/zip'
-        });
+    }).then((content) => {
 
-        instance.sendBundle(file).then((value) => {
-          let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-          let res = transformManifestToResource({
-            'spec': 'eslap://eslap.cloud/resource/vhost/1_0_0',
-            'name': uri,
-            'parameters': {
-              'vhost': webdomain
-            }
-          });
-          this.emit(this.onAddResource, uri, res);
-        }).catch((error) => {
-          console.error('Error registering a webdomain', error);
-        });
-      }).catch((error) => {
-        console.error(
-          'Error creating a bundle for a webdomain manifest', error
-        );
+      // Sends the bundle to the stamp
+      return this.sendBundle(new File([content], 'Bundle.zip', {
+        type: 'application/zip'
+      }));
+
+    }).then((value) => {
+
+      // If the bundle was successfully registered, the vhost is added to the
+      // state
+      let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
+      let res = transformManifestToResource({
+        'spec': 'eslap://eslap.cloud/resource/vhost/1_0_0',
+        'name': uri,
+        'parameters': {
+          'vhost': webdomain
+        }
       });
+      this.emit(this.onAddResource, uri, res);
+
+    });
   }
 
-  addDataVolume(params) {
-    console.error('Datavolume creation is under development');
+  addDataVolume(params): void {
+
+    console.warn(
+      '########################################\n\
+      Datavolume creation is under development\n\
+      ########################################'
+    );
+
   }
 
-  link({ deploymentOne, channelOne, deploymentTwo, channelTwo }) {
-    this.admission.linkDeployments([
+  link({ deploymentOne, channelOne, deploymentTwo, channelTwo }): Promise<any> {
+    return this.admission.linkDeployments([
       new Endpoint(deploymentOne, channelOne),
       new Endpoint(deploymentTwo, channelTwo)
     ]);
   }
 
-  unlink({ deploymentOne, channelOne, deploymentTwo, channelTwo }) {
-    this.admission.unlinkDeployments([
+  unlink(
+    { deploymentOne, channelOne, deploymentTwo, channelTwo }
+  ): Promise<any> {
+    return this.admission.unlinkDeployments([
       new Endpoint(deploymentOne, channelOne),
       new Endpoint(deploymentTwo, channelTwo)
     ]);
   }
 
-  private sendBundle(file: File) {
-    return this.admission.sendBundle(new FileStream(file))
-      .catch((error) => {
-        console.error('Error uploading a bundle', error);
-      });
+  private sendBundle(file: File): Promise<RegistrationResult> {
+    return this.admission.sendBundle(new FileStream(file));
   }
+
 };
 
 export const connection: ProxyConnection = new ProxyConnection();

@@ -6,7 +6,7 @@ import { getResourceType, ResourceType } from '../../api/utils';
 import {
   Component, Deployment, Resource, Runtime, Service
 } from '../stampstate/classes';
-import { BackgroundAction, User } from './classes';
+import { BackgroundAction, Notification, User } from './classes';
 
 /**
  * Actions to handle this page's state easier.
@@ -16,17 +16,30 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   addBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
     action): void => {
+
     injectee.commit('addBackgroundAction', action);
+
   }
 
   processingBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
     { id, details }): void => {
+
     injectee.commit('processingBackgroundAction', { id, details });
+
   }
 
   finishBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
     { id, state, details }): void => {
+
     injectee.commit('finishBackgroundAction', { id, state, details });
+
+  }
+
+  addNotification = (injectee: Vuex.ActionContext<State, any>,
+    notification: Notification): void => {
+
+    injectee.commit('addNotification', notification);
+
   }
 
   /** Signs the user out of the page. */
@@ -51,15 +64,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * If the user is not authenticated the error message can be seen in the
    * respective background action.
    */
-  signin = (injectee: Vuex.ActionContext<State, any>,
-    payload: {
-      username: string, userpassword: string, userid: string, token: {
-        accessToken: string,
-        expiresIn: number,
-        refreshToken: string,
-        tokenType: string
-      }
-    }): void => {
+  signin = (injectee: Vuex.ActionContext<State, any>, payload: {
+    username: string, userpassword: string, userid: string, token: {
+      accessToken: string, expiresIn: number, refreshToken: string,
+      tokenType: string
+    }
+  }): void => {
+
     // Update background action info
     const authenticationAction = new BackgroundAction('authentication',
       'User authentication in the system');
@@ -93,10 +104,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       // Load all elements
       return connection.getRegisteredElements().then(() => {
+
         console.debug('Stored a reference to all elements from the platform');
 
         // Load all deployments
         return connection.getDeploymentList().then(() => {
+
           console.debug('Retrieved all deployments from the platform');
 
           injectee.dispatch('finishBackgroundAction', {
@@ -117,7 +130,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           injectee.commit('signIn', user);
 
         });
+
       }).catch((error) => {
+
         if (!error.code || error.code !== '001') {
           injectee.dispatch('finishBackgroundAction', {
             'id': loadInfoAction.id,
@@ -126,61 +141,104 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           });
           console.error('Error loading data: ', error);
         }
+
       });
+
     }).catch((error) => {
+
       injectee.dispatch('finishBackgroundAction', {
         'id': authenticationAction.id,
         'state': BackgroundAction.State.FAIL,
         'details': 'Authentication failure'
       });
+
     });
 
     connection.onAddDeployment((deploymentId: string,
       deployment: Deployment) => {
+
       let val: { [id: string]: Deployment } = {};
       val[deploymentId] = deployment;
       injectee.commit('addDeployment', val);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Added deployment',
+          'New deployment added ' + deploymentId));
+
     });
 
     connection.onAddInstance((deploymentId: string, roleId: string,
       instanceId: string, instance: Deployment.Role.Instance) => {
+
       injectee.commit('addInstance', {
         'deploymentId': deploymentId,
         'roleId': roleId,
         'instanceId': instanceId,
         'instance': instance
       });
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Added instance',
+          'New instance added ' + instanceId));
+
     });
 
     connection.onModifyDeployment((value) => {
-      // console.warn('Received event onModifyDeployment, which is still under'
-        // + ' development', value);
-      // connection.getDeployment()
+
+      // Unused event
+
     });
 
     connection.onRemoveDeployment((deploymentId) => {
+
       injectee.commit('removeDeployment', deploymentId);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Undeployed service',
+          'Removed service ' + deploymentId)
+      );
+
     });
 
     connection.onAddService((serviceId: string, service: Service) => {
+
       let val: { [id: string]: Service } = {};
       val[serviceId] = service;
       injectee.commit('addService', val);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Registered service',
+          'Registered service ' + serviceId)
+      );
+
     });
 
     connection.onAddComponent((componentId: string, component: Component) => {
+
       let val: { [id: string]: Component } = {};
       val[componentId] = component;
       injectee.commit('addComponent', val);
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Registered component',
+          'Registered component ' + componentId)
+      );
+
     });
 
     connection.onAddRuntime((runtimeId: string, runtime: Runtime) => {
+
       let val: { [id: string]: Runtime } = {};
       val[runtimeId] = runtime;
       injectee.commit('addRuntime', val);
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Registered runtime',
+          'Registered runtime ' + runtimeId)
+      );
+
     });
 
     connection.onAddResource((resourceId: string, resource: Resource) => {
+
       // Obtenemos el tipo de resource del que estamos hablando
       let type: ResourceType = getResourceType(resourceId);
       let commitString: string;
@@ -197,6 +255,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         default:
           console.error('Not expected resource type at %s', resourceId);
       }
+
       /**
        * If the object is not known for the page it won't be added, but the page
        * will keep loading.
@@ -204,26 +263,56 @@ export default class Actions implements Vuex.ActionTree<State, any> {
        * TODO: This must be checked
        */
       if (type) {
+
         let val: { [id: string]: Resource } = {};
         val[resourceId] = resource;
         injectee.commit(commitString, val);
+        injectee.dispatch('addNotification',
+          new Notification(Notification.LEVEL.INFO, 'Registered resource',
+            'Registered resurce ' + resourceId)
+        );
+
       }
+
     });
 
     connection.onRemoveResource((resourceId: string) => {
+
       injectee.commit('removeResource', resourceId);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Removed resource',
+          'Removed resurce ' + resourceId)
+      );
+
     });
 
     connection.onAddMetrics((metrics) => {
+
       injectee.commit('addMetrics', metrics);
+
     });
 
     connection.onLink((params) => {
+
       injectee.commit('link', params);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Linked deployments',
+          'Linked deployments')
+      );
+
     });
 
     connection.onUnlink((params) => {
+
       injectee.commit('unlink', params);
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.INFO, 'Unlinked deployments',
+          'Unlinked deployments')
+      );
+
     });
   }
 };
