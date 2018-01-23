@@ -446,46 +446,29 @@ class ProxyConnection extends EventEmitter {
     return this.sendBundle(file)
       .then((registrationResult) => {
 
-        console.debug('The result of the registration is', registrationResult);
-        /* // When registering a persisten volume
-        {
-          errors: [],
-          links:undefined,
-          successful:[
-            "Registered element: eslap://volumesexample.examples.ecloud/
-            resources/volumes/persistent"
-          ],
-          testToken:undefined,
-          tests:undefined
-        }
-        */
-        /*
-        // When registering dashboard parametros
-        {
-          errors:[],
-          links:undefined,
-          successful:[
-            "Registered element:
-              eslap://eslap.cloud/components/dashboard/0_0_1",
-            "Registered element: eslap://eslap.cloud/services/dashboard/0_0_2"
-          ],
-        testToken:undefined,
-        tests:undefined
-        }
-        */
+        for (let successful in registrationResult.successful) {
 
-        // Elements which can be registered here:
-        // ----------------------------------
-        // Deployments -> Own event
-        // Links -> Own event
-        // Services
-        // Components
-        // Runtimes
-        // Volumes
-        // Vhosts
-        // Certificates
+          let uri: string = (<string>registrationResult.successful[successful])
+            .substring(20);
 
-        // this.emit(this.onAddResource, uri, res);
+          switch (getElementType(uri)) {
+            case ElementType.component:
+            case ElementType.resource:
+            case ElementType.runtime:
+            case ElementType.service:
+              this.getElementInfo(uri);
+              break;
+
+            default:
+            // Other elements have their own event
+          }
+
+        }
+
+        if (registrationResult.errors && registrationResult.errors.length > 0) {
+          return Promise.reject(registrationResult.errors);
+        }
+
       });
   }
 
