@@ -14,7 +14,7 @@ export class Notification {
 
   /** <Date> Time where the notification was received. */
   time: Date = null;
-  
+
   /**
    * Notification for the user.
    * @param title <string> Text sumerizing the notification.
@@ -32,5 +32,7 @@ export class Notification {
 }
 
 export module Notification {
-  export enum LEVEL { ERROR, WARNING, INFO, DEBUG };
+  export enum LEVEL {
+    ERROR = 'red', WARNING = 'yellow', INFO = 'blue', DEBUG = 'grey'
+  };
 }

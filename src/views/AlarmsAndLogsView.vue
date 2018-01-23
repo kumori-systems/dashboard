@@ -24,6 +24,7 @@
       <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions  v-bind:search="search">
 
         <template slot="items" scope="props">
+          <td v-bind:class="props.item.level" width=20px></td>
           <td class="text-xs-left">
             {{ props.item.time.getMonth() + 1 }}-{{ props.item.time.getDate() }}-{{ props.item.time.getFullYear() }}
             {{ props.item.time.getHours() }}:{{ props.item.time.getMinutes() }}
@@ -50,6 +51,12 @@ import { Notification } from "../store/pagestate/classes";
 export default class AlarmsAndLogsView extends Vue {
   search: string = "";
   headers: any[] = [
+    {
+      text: "",
+      align: "left",
+      sortable: false,
+      value: "time"
+    },
     {
       text: "Date",
       align: "left",

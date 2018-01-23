@@ -196,7 +196,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     void => {
 
     connection.addNewBundle(file).catch((err) => {
-
+      
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error uploading a bundle',
           'Error: ' + err)
