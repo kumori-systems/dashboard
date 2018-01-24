@@ -46,11 +46,11 @@
         <v-card>
           <v-card-title class="headline">Log info</v-card-title>
           <v-card-text>
-            {{data}}
+            <v-flex ma-1 xs12>{{ data | jsonparsing }}</v-flex>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn flat="flat" v-on:click.native="logInfoDialog = false">Cancel</v-btn>
+            <v-btn flat="flat" v-on:click.native="logInfoDialog = false">Done</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -64,7 +64,20 @@ import VueClassComponent from "vue-class-component";
 import { Notification } from "../store/pagestate/classes";
 
 @VueClassComponent({
-  name: "alarms-and-logs-view"
+  name: "alarms-and-logs-view",
+  filters: {
+    jsonparsing: function(text: string) {
+      while (text.indexOf(",") >= 0){
+        text = text.replace(",", () => "%2C");
+      }
+
+      while (text.indexOf("%2C") >= 0){
+        text = text.replace("%2C", () => ",\n");
+      }
+
+      return text;
+    }
+  }
 })
 export default class AlarmsAndLogsView extends Vue {
   logInfoDialog: boolean = false;
