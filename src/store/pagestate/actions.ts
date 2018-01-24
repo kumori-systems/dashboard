@@ -262,21 +262,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.commit('link', params);
 
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Linked deployments',
-          'Linked deployments', JSON.stringify(params))
-      );
-
     });
 
     connection.onUnlink((params) => {
 
       injectee.commit('unlink', params);
-
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Unlinked deployments',
-          'Unlinked deployments', JSON.stringify(params))
-      );
 
     });
 
