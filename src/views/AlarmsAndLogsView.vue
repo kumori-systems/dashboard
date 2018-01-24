@@ -31,11 +31,29 @@
           </td>
           <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.text }}</td>
+          <td class="text-xs-right">
+            <v-btn color="blue darken-1" flat v-on:click="showLogInfoDialog(props.item.data)">
+              <v-icon>info</v-icon>
+            </v-btn>
+            </td>
         </template>
 
       </v-data-table>
 
     </v-container>
+
+      <v-dialog v-model="logInfoDialog" max-width="800px">
+        <v-card>
+          <v-card-title class="headline">Log info</v-card-title>
+          <v-card-text>
+            {{data}}
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn flat="flat" v-on:click.native="logInfoDialog = false">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
   </v-card>
 </template>
@@ -49,6 +67,8 @@ import { Notification } from "../store/pagestate/classes";
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
+  logInfoDialog: boolean = false;
+  data: string = "";
   search: string = "";
   headers: any[] = [
     {
@@ -79,6 +99,11 @@ export default class AlarmsAndLogsView extends Vue {
 
   get logs() {
     return this.$store.getters.notifications;
+  }
+
+  showLogInfoDialog(data: string) {
+    this.data = data;
+    this.logInfoDialog = true;
   }
 }
 </script>
