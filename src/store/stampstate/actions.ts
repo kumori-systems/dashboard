@@ -55,10 +55,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // If the element isn't stored in the state, info is requested to the
     // platform
     if (!res && res !== null) {
-      connection.getElementInfo(elementURI).catch((error) => {
-        if (error.code !== '001')
-          console.error('Error getting info from element %s', elementURI,
-            error);
+      connection.getElementInfo(elementURI).catch((err) => {
+        if (err.code !== '001')
+          console.error('Error getting info from element %s', elementURI, err);
       });
     }
 
@@ -71,11 +70,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
 
-    connection.addDeployment(deployment).catch((error) => {
+    connection.addDeployment(deployment).catch((err) => {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error deploying',
-          'Error deploying ' + deployment._uri + ': ' + error)
+          'Error deploying ' + deployment._uri, JSON.stringify(err))
       );
 
     });
@@ -87,11 +86,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   undeploy = (injectee: Vuex.ActionContext<State, any>, deploymentURN: string):
     void => {
-    connection.undeployDeployment(deploymentURN).catch((error) => {
+    connection.undeployDeployment(deploymentURN).catch((err) => {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error undeploying',
-          'Error undeploying ' + deploymentURN + ': ' + error)
+          'Error undeploying ' + deploymentURN, JSON.stringify(err))
       );
 
     });
@@ -107,7 +106,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error registering a domain',
-          'Error registering a domain ' + domain + ': ' + err)
+          'Error registering a domain ' + domain, JSON.stringify(err))
       );
 
     });
@@ -141,7 +140,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error removing an element',
-          'Error removing element ' + elementId + ': ' + err)
+          'Error removing element ' + elementId, JSON.stringify(err))
       );
 
     });
@@ -159,7 +158,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error downloading manifest',
-          'Error downloading manifest from ' + elementURN + ': ' + err)
+          'Error downloading manifest from ' + elementURN, JSON.stringify(err))
       );
 
     });
@@ -181,7 +180,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR,
           'Error modifying deployment',
-          'Error modifying deployment' + deploymentURN + ': ' + err)
+          'Error modifying deployment' + deploymentURN, JSON.stringify(err))
       );
 
     });
@@ -196,10 +195,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     void => {
 
     connection.addNewBundle(file).catch((err) => {
-      
+
       injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.ERROR, 'Error uploading a bundle',
-          'Error: ' + err)
+        new Notification(Notification.LEVEL.ERROR, 'Error uploading bundle',
+          'Error uploading bundle', JSON.stringify(err))
       );
 
     });
@@ -221,7 +220,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error linking deployments',
-          'Error linking deployments: ' + err)
+          'Error linking deployed services', JSON.stringify(err))
       );
 
     });
@@ -241,8 +240,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.dispatch('addNotification',
         new Notification(
           Notification.LEVEL.ERROR, 'Error unlinking deployments',
-          'Error unlinking deployments: ' + err
-        )
+          'Error unlinking deployed services', JSON.stringify(err))
       );
 
     });

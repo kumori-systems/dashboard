@@ -163,7 +163,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Added deployment',
-          'New deployment added ' + deploymentId));
+          'New deployment added ' + deploymentId, JSON.stringify(deployment)));
 
     });
 
@@ -179,13 +179,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Added instance',
-          'New instance added ' + instanceId));
-
-    });
-
-    connection.onModifyDeployment((value) => {
-
-      // Unused event
+          'New instance added ' + instanceId, JSON.stringify({
+            'deploymentId': deploymentId,
+            'roleId': roleId,
+            'instanceId': instanceId,
+            'instance': instance
+          })));
 
     });
 
@@ -195,7 +194,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Undeployed service',
-          'Removed service ' + deploymentId)
+          'Removed service ' + deploymentId, JSON.stringify(deploymentId))
       );
 
     });
@@ -208,7 +207,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Registered service',
-          'Registered service ' + serviceId)
+          'Registered service ' + serviceId, JSON.stringify(val))
       );
 
     });
@@ -220,7 +219,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.commit('addComponent', val);
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Registered component',
-          'Registered component ' + componentId)
+          'Registered component ' + componentId, JSON.stringify(component))
       );
 
     });
@@ -232,7 +231,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.commit('addRuntime', val);
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Registered runtime',
-          'Registered runtime ' + runtimeId)
+          'Registered runtime ' + runtimeId, JSON.stringify(runtime))
       );
 
     });
@@ -269,7 +268,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         injectee.commit(commitString, val);
         injectee.dispatch('addNotification',
           new Notification(Notification.LEVEL.INFO, 'Registered resource',
-            'Registered resurce ' + resourceId)
+            'Registered resurce ' + resourceId, JSON.stringify(resource))
         );
 
       }
@@ -282,7 +281,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Removed resource',
-          'Removed resurce ' + resourceId)
+          'Removed resurce ' + resourceId, JSON.stringify(resourceId))
       );
 
     });
@@ -299,7 +298,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Linked deployments',
-          'Linked deployments')
+          'Linked deployments', JSON.stringify(params))
       );
 
     });
@@ -310,7 +309,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.INFO, 'Unlinked deployments',
-          'Unlinked deployments')
+          'Unlinked deployments', JSON.stringify(params))
       );
 
     });

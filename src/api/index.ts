@@ -20,6 +20,9 @@ import {
   Certificate, Component, Deployment, Domain, HTTPEntryPoint, Resource, Runtime,
   Service, Volume
 } from '../store/stampstate/classes';
+
+import { Notification } from '../store/pagestate/classes';
+
 import { ACS_URI, ADMISSION_URI } from './config.js';
 import {
   ElementType, getElementType, getResourceType, isServiceEntrypoint,
@@ -43,7 +46,6 @@ class ProxyConnection extends EventEmitter {
   public onLogin: Function;
   public onAddDeployment: Function;
   public onAddInstance: Function;
-  public onModifyDeployment: Function;
   public onRemoveDeployment: Function;
   public onAddService: Function;
   public onRemoveService: Function;
@@ -56,6 +58,7 @@ class ProxyConnection extends EventEmitter {
   public onAddMetrics: Function;
   public onLink: Function;
   public onUnlink: Function;
+  public onAddNotification: Function;
 
   private requestedElements: string[];
 
@@ -63,24 +66,23 @@ class ProxyConnection extends EventEmitter {
   constructor() {
     super();
     this.onAddComponent =
-      this.registerEvent<(componentId: string, component: Component) => any>();
+      this.registerEvent<(componentId: string, component: Component) => void>();
     this.onAddDeployment =
       this.registerEvent<(deploymentId: string,
-        deployment: Deployment) => any>();
+        deployment: Deployment) => void>();
     this.onAddInstance =
       this.registerEvent<(deploymentId: string, rolId: string,
-        instanceId: string, instance: Deployment.Role.Instance) => any>();
+        instanceId: string, instance: Deployment.Role.Instance) => void>();
     this.onAddMetrics = this.registerEvent<(value) => any>();
     this.onAddResource =
-      this.registerEvent<(resourceId: string, resource: Resource) => any>();
+      this.registerEvent<(resourceId: string, resource: Resource) => void>();
     this.onAddRuntime =
-      this.registerEvent<(runtimeId: string, runtime: Runtime) => any>();
+      this.registerEvent<(runtimeId: string, runtime: Runtime) => void>();
     this.onAddService =
-      this.registerEvent<(serviceId: string, service: Service) => any>();
+      this.registerEvent<(serviceId: string, service: Service) => void>();
     this.onLogin =
       this.registerEvent<(username: string,
         userpassword: string) => EcloudAcsUser>();
-    this.onModifyDeployment = this.registerEvent<(value) => any>();
     this.onRemoveComponent =
       this.registerEvent<(componentURN: string) => void>();
     this.onRemoveDeployment =
@@ -88,8 +90,16 @@ class ProxyConnection extends EventEmitter {
     this.onRemoveService = this.registerEvent<(serviceURN: string) => void>();
     this.onRemoveRuntime = this.registerEvent<(runtimeURN: string) => void>();
     this.onRemoveResource = this.registerEvent<(resourceURN: string) => void>();
-    this.onLink = this.registerEvent<(value) => any>();
-    this.onUnlink = this.registerEvent<(value) => any>();
+    this.onLink = this.registerEvent<(params: {
+      deploymentOne: string, channelOne: string, deploymentTwo: string,
+      channelTwo: string
+    }) => void>();
+    this.onUnlink = this.registerEvent<(params: {
+      deploymentOne: string, channelOne: string, deploymentTwo: string,
+      channelTwo: string
+    }) => void>();
+    this.onAddNotification =
+      this.registerEvent<(notification: Notification) => void>();
 
     this.requestedElements = [];
   }
@@ -183,6 +193,16 @@ class ProxyConnection extends EventEmitter {
                       ) // Deployment
                     );
                   }
+
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.INFO,
+                      'Deploying service',
+                      'The service ' + event.entity['serviceApp'] + 'is beeing '
+                      + 'deployed as ' + event.entity['service'],
+                      JSON.stringify(event)
+                    )
+                  );
                   break;
                 case EcloudEventName.deployed:
                   let roles: { [rolId: string]: Deployment.Role } = {};
@@ -232,6 +252,15 @@ class ProxyConnection extends EventEmitter {
                     );
                   }
                   this.getDeployment(event.entity['service']);
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.INFO,
+                      'Deployed service',
+                      'The service ' + event.entity['serviceApp'] + 'has been '
+                      + 'deployed as ' + event.entity['service'],
+                      JSON.stringify(event)
+                    )
+                  );
                   break;
                 case EcloudEventName.undeployed:
                   this.emit(this.onRemoveDeployment, event.entity['service']);
@@ -243,6 +272,18 @@ class ProxyConnection extends EventEmitter {
                     'deploymentTwo': event.data.endpoints[1].deployment,
                     'channelTwo': event.data.endpoints[1].channel
                   });
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.INFO,
+                      'Linked services',
+                      'Service ' + event.data.endpoints[0].deployment
+                      + ':' + event.data.endpoints[0].channel
+                      + ' has been linked with '
+                      + event.data.endpoints[0].deployment
+                      + ':' + event.data.endpoints[0].channel,
+                      JSON.stringify(event)
+                    )
+                  );
                   break;
                 case EcloudEventName.unlink:
                   this.emit(this.onUnlink, {
@@ -251,6 +292,18 @@ class ProxyConnection extends EventEmitter {
                     'deploymentTwo': event.data.endpoints[1].deployment,
                     'channelTwo': event.data.endpoints[1].channel
                   });
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.INFO,
+                      'Unlinked services',
+                      'Services ' + event.data.endpoints[0].deployment
+                      + ':' + event.data.endpoints[0].channel
+                      + ' has been unlinked from '
+                      + event.data.endpoints[0].deployment
+                      + ':' + event.data.endpoints[0].channel,
+                      JSON.stringify(event)
+                    )
+                  );
                   break;
                 case EcloudEventName.scale:
                 case EcloudEventName.status:
@@ -287,6 +340,19 @@ class ProxyConnection extends EventEmitter {
                     event.entity['instance'], // instanceId
                     inst
                   );
+
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.INFO,
+                      'Added instance',
+                      'Added instance'
+                      + 'Instance ' + event.entity['instance']
+                      + ' from Role ' + event.entity['role']
+                      + ' from Service' + event.entity['service'],
+                      JSON.stringify(event)
+                    )
+                  );
+
                   break;
                 case EcloudEventName.realocate:
                 case EcloudEventName.restart:
@@ -303,6 +369,17 @@ class ProxyConnection extends EventEmitter {
                 case EcloudEventName.service:
                   this.emit(this.onAddMetrics,
                     transformEcloudEventDataToMetrics(event));
+
+                  this.emit(
+                    this.onAddNotification,
+                    new Notification(Notification.LEVEL.DEBUG,
+                      'Added metrics',
+                      'Added metrics from'
+                      + event.entity['service'],
+                      JSON.stringify(event)
+                    )
+                  );
+
                   break;
                 default:
                   console.error('Not espected ecloud event name: %s/%s',

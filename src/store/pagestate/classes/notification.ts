@@ -12,6 +12,9 @@ export class Notification {
   /** <string> Long text explaining the notification. */
   text: string = null;
 
+  /** <string> Complete data received by the event message. */
+  data: string = null;
+
   /** <Date> Time where the notification was received. */
   time: Date = null;
 
@@ -21,11 +24,13 @@ export class Notification {
    * @param text <string> Long text explaining the notification.
    */
   constructor(
-    level: Notification.LEVEL, title: string, text: string, time?: Date
+    level: Notification.LEVEL, title: string, text: string, data: string,
+    time?: Date
   ) {
     if (level) this.level = level;
     if (title) this.title = title;
     if (text) this.text = text;
+    if (data) this.data = data;
     if (time) this.time = time;
     else this.time = new Date();
   }
