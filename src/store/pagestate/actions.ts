@@ -161,10 +161,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       val[deploymentId] = deployment;
       injectee.commit('addDeployment', val);
 
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Added deployment',
-          'New deployment added ' + deploymentId, JSON.stringify(deployment)));
-
     });
 
     connection.onAddInstance((deploymentId: string, roleId: string,
@@ -177,25 +173,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'instance': instance
       });
 
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Added instance',
-          'New instance added ' + instanceId, JSON.stringify({
-            'deploymentId': deploymentId,
-            'roleId': roleId,
-            'instanceId': instanceId,
-            'instance': instance
-          })));
-
     });
 
     connection.onRemoveDeployment((deploymentId) => {
 
       injectee.commit('removeDeployment', deploymentId);
-
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Undeployed service',
-          'Removed service ' + deploymentId, JSON.stringify(deploymentId))
-      );
 
     });
 
@@ -204,11 +186,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let val: { [id: string]: Service } = {};
       val[serviceId] = service;
       injectee.commit('addService', val);
-
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Registered service',
-          'Registered service ' + serviceId, JSON.stringify(val))
-      );
 
     });
 
@@ -313,5 +290,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       );
 
     });
+
+    connection.onAddNotification((notification: Notification) => {
+      injectee.dispatch('addNotification', notification);
+    });
+    
   }
 };
