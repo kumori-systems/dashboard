@@ -30,6 +30,14 @@ export module EntryPoint {
 /** Deployment which gives conectivity outside the stamp via http. */
 export class HTTPEntryPoint extends EntryPoint {
   websites: string[] = [];
+  /**
+   * Constructor of the HTTPEntryPoint class.
+   * @param URI id of the service.
+   * @param parameters parameters for the service.
+   * @param roles service roles.
+   * @param resourcesConfig service resources config.
+   * @param channels service channel unions.
+   */
   constructor(URI: string, parameters: any,
     roles: { [roleURI: string]: Deployment.Role }, resourcesConfig: any,
     channels: {

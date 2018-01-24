@@ -102,6 +102,7 @@ import {
 } from "../store/stampstate/classes";
 
 import SSGetters from "../store/stampstate/getters";
+import { HTTPEntryPoint } from "../store/stampstate/classes/entrypoint";
 
 @VueClassComponent({
   name: "new-http-entrypoint-view",
@@ -116,6 +117,10 @@ export default class NewHTTPEntrypointView extends Vue {
   instances: number = 1;
   maxInstances: number = 1;
   resilience: number = 1;
+
+  mounted() {
+    this.$store.dispatch("getElementInfo", EntryPoint.TYPE.HTTP_INBOUND);
+  }
 
   /** Gets all domains. A filter is applicated to show only free domains. */
   get domains() {
@@ -164,9 +169,13 @@ export default class NewHTTPEntrypointView extends Vue {
   submit(): void {
     if ((<any>this.$refs.form).validate()) {
       let resourcesConfig = {
-        server_cert: this.selectedCertificate,
         vhost: this.selectedDomain._uri
       };
+      if (this.selectedCertificate) {
+        resourcesConfig["server_cert"] = this.selectedCertificate;
+      } else {
+        resourcesConfig["server_cert"] = null;
+      }
 
       let config = {
         TLS: this.selectedCertificate !== null,
@@ -187,8 +196,8 @@ export default class NewHTTPEntrypointView extends Vue {
 
       let roles = {};
 
-      roles["frontend"] = new Deployment.Role(
-        "frontend", // id
+      roles["sep"] = new Deployment.Role(
+        "sep", // id
         "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
         { domain: this.selectedDomain._uri }, // configuration
         1, //cpu
@@ -202,20 +211,18 @@ export default class NewHTTPEntrypointView extends Vue {
         this.maxInstances // maxInstances
       );
 
-        this.$store.dispatch(
-          "addDeployment",
-          new Deployment(
-            "slap://domain/deployments/date/this_will_be_overrited", // uri
-            this.selectedDomain.url, // name
-            config, // parameters
-            EntryPoint.TYPE.HTTP_INBOUND, //service
-            roles, // roles
-            resourcesConfig, // resourcesConfig
-            {} // channels
-          )
-        );
+      this.$store.dispatch(
+        "addDeployment",
+        new HTTPEntryPoint(
+          "slap://domain/deployments/date/this_will_be_overrited", // uri
+          config,
+          roles,
+          resourcesConfig,
+          {}
+        )
+      );
 
-        this.$router.push("/");
+      this.$router.push("/");
     }
   }
 }
