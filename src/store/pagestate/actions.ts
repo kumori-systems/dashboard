@@ -194,10 +194,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let val: { [id: string]: Component } = {};
       val[componentId] = component;
       injectee.commit('addComponent', val);
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Registered component',
-          'Registered component ' + componentId, JSON.stringify(component))
-      );
 
     });
 
@@ -206,10 +202,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let val: { [id: string]: Runtime } = {};
       val[runtimeId] = runtime;
       injectee.commit('addRuntime', val);
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Registered runtime',
-          'Registered runtime ' + runtimeId, JSON.stringify(runtime))
-      );
 
     });
 
@@ -243,10 +235,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         let val: { [id: string]: Resource } = {};
         val[resourceId] = resource;
         injectee.commit(commitString, val);
-        injectee.dispatch('addNotification',
-          new Notification(Notification.LEVEL.INFO, 'Registered resource',
-            'Registered resurce ' + resourceId, JSON.stringify(resource))
-        );
 
       }
 
