@@ -10,9 +10,7 @@ export default class State {
   pendingActions: number;
   constructor() {
     this.user = new User();
-    this.notifications = [
-      new Notification('Notification Title', 'Notification Text')
-    ];
+    this.notifications = [];
     this.backgroundActions = [];
     this.pendingActions = 0;
   }

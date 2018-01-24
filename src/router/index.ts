@@ -2,9 +2,9 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 import {
-  DetailedDeploymentView, DomainsView, ElementsView, NewBundleView,
-  NewDeploymentView, NewDomainView, NewHTTPEntrypointView, OverviewView,
-  SignInView
+  AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
+  NewBundleView, NewDeploymentView, NewDomainView, NewHTTPEntrypointView,
+  OverviewView, SignInView
 } from '../views';
 
 Vue.use(Router);
@@ -35,7 +35,7 @@ export default new Router({
     },
     {
       path: '/alarmsAndLogs',
-      component: null
+      component: AlarmsAndLogsView
     },
     {
       path: '/help',

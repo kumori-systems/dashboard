@@ -251,12 +251,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       let typeSearched: Channel.TYPE[] = [];
       switch (type) {
         case Channel.TYPE.ENDPOINT_REQUEST:
-          console.warn('deprecated channel URI \'endpoint\'');
+          // console.warn('deprecated channel URI \'endpoint\'');
         case Channel.TYPE.REQUEST:
           typeSearched = [Channel.TYPE.REPLY, Channel.TYPE.ENDPOINT_REPLY];
           break;
         case Channel.TYPE.ENDPOINT_REPLY:
-          console.warn('deprecated channel URI \'endpoint\'');
+          // console.warn('deprecated channel URI \'endpoint\'');
         case Channel.TYPE.REPLY:
           typeSearched = [Channel.TYPE.REQUEST, Channel.TYPE.ENDPOINT_REQUEST];
           break;

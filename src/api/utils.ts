@@ -682,7 +682,6 @@ export function getElementType(uri: string): ElementType {
   // realocated to the left
   switch (splitted[i]) {
     case 'runtime':
-      console.warn('deprecated element type \'runtime\': %s', uri);
     case 'runtimes':
       res = ElementType.runtime;
       break;
