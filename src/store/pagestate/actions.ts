@@ -252,17 +252,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onRemoveResource((resourceId: string) => {
-
-      injectee.commit('removeResource', resourceId);
-
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.INFO, 'Removed resource',
-          'Removed resurce ' + resourceId, JSON.stringify(resourceId))
-      );
-
-    });
-
     connection.onAddMetrics((metrics) => {
 
       injectee.commit('addMetrics', metrics);
