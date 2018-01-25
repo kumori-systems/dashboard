@@ -194,10 +194,11 @@ class ProxyConnection extends EventEmitter {
                       'Deploying service',
                       'The service ' + event.entity['serviceApp'] + 'is beeing '
                       + 'deployed as ' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 case EcloudEventName.deployed:
                   let roles: { [rolId: string]: Deployment.Role } = {};
                   for (let instance in event.data.instances) {
@@ -252,20 +253,22 @@ class ProxyConnection extends EventEmitter {
                       'Deployed service',
                       'The service ' + event.entity['serviceApp'] + 'has been '
                       + 'deployed as ' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 case EcloudEventName.undeploying:
                   this.emit(
                     this.onAddNotification,
                     new Notification(Notification.LEVEL.WARNING,
                       'Undeploying service',
                       'Undeploying service ' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, 2)
                     )
                   );
                   break;
+
                 case EcloudEventName.undeployed:
                   this.emit(this.onRemoveDeployment, event.entity['service']);
                   this.emit(
@@ -273,10 +276,11 @@ class ProxyConnection extends EventEmitter {
                     new Notification(Notification.LEVEL.WARNING,
                       'Undeployed service',
                       'Undeployed service ' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, 2)
                     )
                   );
                   break;
+
                 case EcloudEventName.link:
                   this.emit(this.onLink, {
                     'deploymentOne': event.data.endpoints[0].deployment,
@@ -293,10 +297,11 @@ class ProxyConnection extends EventEmitter {
                       + ' has been linked with '
                       + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel,
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 case EcloudEventName.unlink:
                   this.emit(this.onUnlink, {
                     'deploymentOne': event.data.endpoints[0].deployment,
@@ -313,10 +318,11 @@ class ProxyConnection extends EventEmitter {
                       + ' has been unlinked from '
                       + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel,
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 case EcloudEventName.scale:
                   this.emit(
                     this.onAddNotification,
@@ -324,22 +330,26 @@ class ProxyConnection extends EventEmitter {
                       'Scaling service',
                       'Scaling service '
                       + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 case EcloudEventName.status:
                   // Unused event
                   break;
+
                 default:
                   console.error('Not espected ecloud event name: '
                     + event.strType + '/' + event.strName);
               }
               break;
+
             case EcloudEventType.node:
               console.error('Not espected ecloud event type: ' + event.strType +
                 '/' + event.strName);
               break;
+
             case EcloudEventType.instance:
               switch (event.name) {
                 case EcloudEventName.status:
@@ -370,11 +380,12 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
 
                   break;
+
                 case EcloudEventName.realocate:
                   this.emit(
                     this.onAddNotification,
@@ -384,11 +395,11 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
-
                   break;
+
                 case EcloudEventName.restart:
                   this.emit(
                     this.onAddNotification,
@@ -398,11 +409,12 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
 
                   break;
+
                 case EcloudEventName.reconfig:
                   this.emit(
                     this.onAddNotification,
@@ -412,15 +424,17 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event)
+                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
                     )
                   );
                   break;
+
                 default:
                   console.error('Not espected ecloud event name: '
                     + event.strType + '/' + event.strName);
               }
               break;
+
             case EcloudEventType.metrics:
               switch (event.name) {
                 case EcloudEventName.service:
@@ -428,11 +442,13 @@ class ProxyConnection extends EventEmitter {
                     transformEcloudEventDataToMetrics(event));
 
                   break;
+
                 default:
                   console.error('Not espected ecloud event name: %s/%s',
                     event.strType, event.strName, event);
               }
               break;
+
             default:
               console.error('Not espected ecloud event type: %s',
                 event.strType, event);
@@ -471,6 +487,7 @@ class ProxyConnection extends EventEmitter {
               undefined
             );
             break;
+
           case ElementType.service:
 
             this.emit(
@@ -480,12 +497,14 @@ class ProxyConnection extends EventEmitter {
             );
 
             break;
+
           case ElementType.component:
             this.emit(this.onAddComponent,
               registeredElements[i],
               undefined
             );
             break;
+
           case ElementType.resource:
             this.emit(
               this.onAddResource,
@@ -493,6 +512,7 @@ class ProxyConnection extends EventEmitter {
               undefined
             );
             break;
+
           default:
             console.error('Unkown element: ', registeredElements[i]);
         }
@@ -537,7 +557,6 @@ class ProxyConnection extends EventEmitter {
               JSON.stringify(element)
             )
           );
-
           break;
 
         case ElementType.service:
@@ -559,7 +578,6 @@ class ProxyConnection extends EventEmitter {
               JSON.stringify(element)
             )
           );
-
           break;
 
         case ElementType.component:
@@ -578,7 +596,6 @@ class ProxyConnection extends EventEmitter {
               JSON.stringify(element)
             )
           );
-
           break;
 
         case ElementType.resource:
@@ -597,7 +614,6 @@ class ProxyConnection extends EventEmitter {
               JSON.stringify(element)
             )
           );
-
           break;
 
         default:
@@ -692,6 +708,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+
               case ResourceType.domain:
                 this.emit(
                   this.onAddResource,
@@ -704,6 +721,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+
               case ResourceType.volume:
                 this.emit(
                   this.onAddResource,
@@ -714,6 +732,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+
               default:
                 console.error('Unkown resource type: %s', resource);
             }
@@ -766,6 +785,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+
               case ResourceType.domain:
                 this.emit(
                   this.onAddResource,
@@ -778,6 +798,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+
               case ResourceType.volume:
                 this.emit(
                   this.onAddResource,
@@ -788,6 +809,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
+                
               default:
                 console.error('Unkown resource type: %s', resource);
             }

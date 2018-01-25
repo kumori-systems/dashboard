@@ -46,7 +46,7 @@
         <v-card>
           <v-card-title class="headline">Log info</v-card-title>
           <v-card-text>
-            <v-flex ma-1 xs12>{{ data | jsonparsing }}</v-flex>
+            <v-flex ma-1 xs12><pre>{{ data }}</pre></v-flex>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
