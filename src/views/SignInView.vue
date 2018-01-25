@@ -69,7 +69,7 @@
           <!-- Card title -->
           <v-card-title primary-title>
 
-              <h3 class="headline">Accesing to Ecloud Dashboard</h3>
+              <h3 class="headline">Accessing Ecloud Dashboard</h3>
               <div>
                 <v-btn color="primary" flat loading></v-btn>
                 <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
