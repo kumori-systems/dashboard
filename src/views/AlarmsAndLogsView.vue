@@ -4,22 +4,29 @@
 
       <!-- View title -->
       <h3 class="headline mb-0">Alarms &amp; logs</h3>
-     
-      <!-- Applies spaces between elements -->
-      <v-spacer></v-spacer>
-
-      <!-- View actions -->
-      <v-card-actions>
-
-        <!-- Search -->
-        
-        <v-text-field label="Search" v-model="search" prepend-icon="search">
-        </v-text-field>
-        
-      </v-card-actions>
 
     </v-card-title>
+
+    <!-- Divides different sections of the view -->
+    <v-divider></v-divider>
+
     <v-container>
+      <v-layout>
+
+        <!-- Level filter -->
+        <v-flex xs12 md2 lg2>
+          <v-select label="Minimum log level" v-model="selectedLogLevel" v-bind:items="logLevels"></v-select>
+        </v-flex>
+
+        <v-spacer></v-spacer>
+        
+        <!-- Search filter -->
+        <v-flex xs12 md4 lg4>
+          <v-text-field label="Search" v-model="search" prepend-icon="search">
+          </v-text-field>
+        </v-flex>
+
+      </v-layout>
 
       <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions  v-bind:search="search">
 
@@ -64,22 +71,11 @@ import VueClassComponent from "vue-class-component";
 import { Notification } from "../store/pagestate/classes";
 
 @VueClassComponent({
-  name: "alarms-and-logs-view",
-  filters: {
-    jsonparsing: function(text: string) {
-      while (text.indexOf(",") >= 0){
-        text = text.replace(",", () => "%2C");
-      }
-
-      while (text.indexOf("%2C") >= 0){
-        text = text.replace("%2C", () => ",\n");
-      }
-
-      return text;
-    }
-  }
+  name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
+  logLevels: string[] = ["Debug", "Info", "Warning", "Error"];
+  selectedLogLevel: string = "Debug";
   logInfoDialog: boolean = false;
   data: string = "";
   search: string = "";
@@ -87,7 +83,7 @@ export default class AlarmsAndLogsView extends Vue {
     {
       text: "",
       align: "left",
-      sortable: true,
+      sortable: false,
       value: "time"
     },
     {
@@ -111,7 +107,29 @@ export default class AlarmsAndLogsView extends Vue {
   ];
 
   get logs() {
-    return this.$store.getters.notifications;
+    let logs = this.$store.getters.notifications;
+    let res = logs.filter((n, index, arrayfun) => {
+      switch (this.selectedLogLevel) {
+        case "Info":
+          return (
+            n.level === Notification.LEVEL.INFO ||
+            n.level === Notification.LEVEL.WARNING ||
+            n.level === Notification.LEVEL.ERROR
+          );
+
+        case "Warning":
+          return (
+            n.level === Notification.LEVEL.WARNING ||
+            n.level === Notification.LEVEL.ERROR
+          );
+        case "Error":
+          return n.level === Notification.LEVEL.ERROR;
+
+        default:
+          return true;
+      }
+    }, this);
+    return res;
   }
 
   showLogInfoDialog(data: string) {
