@@ -144,10 +144,10 @@ class ProxyConnection extends EventEmitter {
         });
 
         this.admission.onEcloudEvent((event: EcloudEvent) => {
-          
+
           /* console.warn('Event under development: %s / %s event received:',
             event.strType, event.strName, event); */
-          
+
           // const timeStart = performance.now();
 
           switch (event.type) {
@@ -427,16 +427,6 @@ class ProxyConnection extends EventEmitter {
                   this.emit(this.onAddMetrics,
                     transformEcloudEventDataToMetrics(event));
 
-                  this.emit(
-                    this.onAddNotification,
-                    new Notification(Notification.LEVEL.DEBUG,
-                      'Added metrics',
-                      'Added metrics from'
-                      + event.entity['service'],
-                      JSON.stringify(event)
-                    )
-                  );
-
                   break;
                 default:
                   console.error('Not espected ecloud event name: %s/%s',
@@ -447,7 +437,7 @@ class ProxyConnection extends EventEmitter {
               console.error('Not espected ecloud event type: %s',
                 event.strType, event);
           }
-          
+
           /* const timeEnd = performance.now();
           const totalTime = timeEnd - timeStart;
           console.debug('Event handler took %dms for %s:%s',
