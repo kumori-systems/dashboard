@@ -87,25 +87,25 @@ export default class AlarmsAndLogsView extends Vue {
     {
       text: "",
       align: "left",
-      sortable: false,
+      sortable: true,
       value: "time"
     },
     {
       text: "Date",
       align: "left",
-      sortable: false,
+      sortable: true,
       value: "time"
     },
     {
       text: "Title",
       align: "left",
-      sortable: false,
+      sortable: true,
       value: "title"
     },
     {
       text: "Text",
       align: "left",
-      sortable: false,
+      sortable: true,
       value: "text"
     }
   ];
