@@ -26,7 +26,7 @@
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
           <td class="text-xs-left">
-            {{ props.item.time.getMonth() + 1 }}-{{ props.item.time.getDate() }}-{{ props.item.time.getFullYear() }}
+            {{ props.item.time.getDate() }}-{{ props.item.time.getMonth() + 1 }}-{{ props.item.time.getFullYear() }}
             {{ props.item.time.getHours() }}:{{ props.item.time.getMinutes() }}
           </td>
           <td class="text-xs-left">{{ props.item.title }}</td>
