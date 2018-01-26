@@ -61,7 +61,7 @@ export default new Router({
       path: '/uploadbundle',
       component: NewBundleView
     },
-    // Global redirect for 404
+    // If not found, go to main view
     { path: '*', redirect: '/overview' }
   ]
 });

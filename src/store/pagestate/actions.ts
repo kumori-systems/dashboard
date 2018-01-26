@@ -207,7 +207,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     connection.onAddResource((resourceId: string, resource: Resource) => {
 
-      // Obtenemos el tipo de resource del que estamos hablando
       let type: ResourceType = getResourceType(resourceId);
       let commitString: string;
       switch (type) {
@@ -221,14 +220,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           commitString = 'addVolume';
           break;
         default:
-          console.error('Not expected resource type at %s', resourceId);
+          console.error('Not expected resource type %s', resourceId);
       }
 
       /**
        * If the object is not known for the page it won't be added, but the page
        * will keep loading.
-       * 
-       * TODO: This must be checked
        */
       if (type) {
 

@@ -245,7 +245,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         'value': string, 'text': string
       }[] => {
     return (serviceId: string, channelId: string) => {
-      // Obtenemos el canal y miramos de qué tipo es
+      
       let type: string = (<Service>state.services[serviceId])
         .dependedChannels[channelId].type;
       let typeSearched: Channel.TYPE[] = [];
@@ -274,11 +274,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           if (state.services[serviceId]) { // if service exists
             for (let providedChannelId in
               state.services[serviceId].providedChannels) {
-              // Recorremos los canales required del servicio
+              
               if (typeSearched.indexOf(state.services[serviceId]
                 .providedChannels[providedChannelId].type) !== -1) {
-                // Si encaja con el tipo de canal que buscamos
-
+              
                 let elem: {
                   'value': string,
                   'text': string
@@ -292,7 +291,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                   };
 
                 if (res.indexOf(elem) === -1)
-                  res.push(elem); // Lo añadimos
+                  res.push(elem); 
               }
             }
           }
@@ -340,17 +339,16 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           // If it's an entrypoint in use, it's not purposed for a new
           // connection
         } else {
-          // Si es un entrypoint sin uso lo listamos
+          
           let serviceId: string = state.deployments[deploymentId].service;
           if (state.services[serviceId]) { // if service exists
             for (let requiredChannelId in
               state.services[serviceId].dependedChannels) {
 
-              // Recorremos los canales required del servicio
+              
               if (typeSearched.indexOf(state.services[serviceId]
                 .dependedChannels[requiredChannelId].type) !== -1) {
 
-                // Si encaja con el tipo de canal que buscamos
                 let elem: {
                   'value': string,
                   'text': string
@@ -364,7 +362,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                   };
 
                 if (res.indexOf(elem) === -1) {
-                  res.push(elem); // Lo añadimos
+                  res.push(elem);
                 }
 
               }

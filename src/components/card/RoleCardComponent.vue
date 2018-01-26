@@ -220,9 +220,8 @@ export default class RoleCardComponent extends Vue {
   }
 
   /**
-   * Éste método sirve para escuchar el evento 'killInstanceChange' de las instáncias y transmitirlo
-   * al deployment para que lo almacene en un estado temporal
-  */
+   * Handles a change in kill instances on children components.
+   */
   handleKillInstanceChange(payload) {
     this.$emit("killInstanceChange", [this.role.name, ...payload]);
   }

@@ -595,7 +595,7 @@ export default class DetailedDeploymentView extends Vue {
             text: dep.name + " ~ " + chann
           };
 
-          // Es el canal depended o provided?
+          // Is a depended or provided channel?
           if (ser.dependedChannels[chann]) {
             if (!this.serviceNewDependedConnections[chann]) {
               this.serviceNewDependedConnections[chann] = [];

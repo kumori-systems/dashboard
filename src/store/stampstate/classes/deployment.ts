@@ -350,7 +350,8 @@ export module Deployment {
 
   export module Role {
 
-    /** Represents the state of the conjuntion of the instances. If all
+    /**
+     * Represents the state of the conjuntion of the instances. If all
      * instances are connected the state will be GOOD, if all instances are
      * disconnected the state will be ERROR, and if some instances are
      * disconnected but at least one is connected the state will be WARNING.
@@ -362,7 +363,7 @@ export module Deployment {
 
     /**
      * Instance of a component, running as a role, defined in this deployment's
-     *  service.
+     * service.
      */
     export class Instance {
 

@@ -14,7 +14,7 @@ export default {
       },*/
       time: {
         /**
-         * Al definir para todos el mismo formato evitamos que las gráficas cambien de tamaño
+         * Defining the same format for all, the size won't change
          */
         displayFormats: {
           millisecond: 'hh:mm:ss a',

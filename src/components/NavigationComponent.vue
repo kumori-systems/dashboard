@@ -43,8 +43,8 @@ import SSGetters from "../store/stampstate/getters";
 })
 export default class NavigationComponent extends Vue {
   /**
-    * Items in the navigation component.
-    */
+   * Items in the navigation component.
+   */
   get items(): NavigationItem[] {
     return [
       new NavigationItem("dashboard", "Overview", "/overview"),
@@ -63,8 +63,8 @@ export default class NavigationComponent extends Vue {
   }
 
   /**
-    * Services deployed to show in the menu.
-    */
+   * Services deployed to show in the menu.
+   */
   get deployedServices(): NavigationItem[] {
     let entrypointDeployments: NavigationItem[] = [];
     let commonDeployments: NavigationItem[] = [];

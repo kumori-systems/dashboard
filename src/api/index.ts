@@ -33,16 +33,15 @@ import {
 } from './utils';
 
 /**
- * Esta clase está preparada para lanzar eventos que la página leerá y podrá
- * actuar acorde al evento que lea. Los eventos se lanzan a partir de llamar a
- * los distintos métodos.
- */
+   * This class connects with the platform and transform messages into
+   * recognizable events for the page.
+   */
 class ProxyConnection extends EventEmitter {
-  // Atributos
+  // Atributes
   private admission: EcloudAdmissionClient;
   private acs: EcloudAcsClient;
 
-  // Eventos
+  // Events
   public onLogin: Function;
   public onAddDeployment: Function;
   public onAddInstance: Function;
@@ -58,7 +57,10 @@ class ProxyConnection extends EventEmitter {
 
   private requestedElements: string[];
 
-  // Constructor
+  /**
+   * This class connects with the platform and transform messages into
+   * recognizable events for the page.
+   */
   constructor() {
     super();
     this.onAddComponent =
@@ -233,8 +235,8 @@ class ProxyConnection extends EventEmitter {
                   }
                   else {
                     this.emit(
-                      this.onAddDeployment, // Metodo
-                      event.entity['service'], // DeploymentID
+                      this.onAddDeployment, // Method
+                      event.entity['service'], // DeploymentId
                       new Deployment(
                         event.entity['service'], // uri
                         null, // name
@@ -664,7 +666,7 @@ class ProxyConnection extends EventEmitter {
     return this.admission.removeStorage(elementId);
   }
 
-  // @param elementId: Elemento o lista de elementos
+  // @param elementId: Element or element list
   downloadManifest(elementId): Promise<any> {
 
     // Requests the manifest from the stamp
@@ -692,8 +694,6 @@ class ProxyConnection extends EventEmitter {
           transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
 
         for (let resource in deployment.resourcesConfig) {
-          // There are actually two certificates which dont have the same
-          // structure
 
           if (deployment.resourcesConfig[resource].name) {
             switch (getResourceType(deployment.resourcesConfig[resource]
@@ -768,8 +768,6 @@ class ProxyConnection extends EventEmitter {
 
 
         for (let resource in deployment.resourcesConfig) {
-          // There are actually two certificates which dont have the same
-          // structure
 
           if (deployment.resourcesConfig[resource].name) {
             switch (

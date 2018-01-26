@@ -16,8 +16,6 @@ const color = {
   ws_size_out_per_second: '#ff33ff'
 };
 
-console.warn('bandwith_input and bandwith_output typo');
-
 export function prepareDeploymentData(metrics) {
 
   var res = {
@@ -29,22 +27,19 @@ export function prepareDeploymentData(metrics) {
     for (let prop in metrics.data[index]) {
       if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
     || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Descartamos estas propiedades
+        // Discarting properties
       }
       else if (prop === 'timestamp')
         res.labels.push(moment(metrics.data[index].timestamp));
       else {
-        // Recorremos el dataset buscando la posición de uno ya existente. Si existe guardamos su pos
+        // Searching existent prop
         let position = res.datasets.findIndex((p) => {
-          // console.debug('Dentro del find, p vale', p);
           if (p['label'] === prop) return p;
         })
-        // console.debug('La posición del elemento es', position);
-        if (position !== -1) { // Si ya existe, lo añadimos al objeto correspondiente
-          // console.debug('Actualizamos una propiedad');
+        if (position !== -1) { // If prop exists, add corresponding object
           res.datasets[position].data.push(metrics.data[index][prop]);
         }
-        else { // Si no existe, hacemos un nuevo push
+        else { // If prop doesn't exist, create it
           res.datasets.push(
             {
               'label': prop,
@@ -81,22 +76,21 @@ export function prepareRoleData(metrics) {
     for (let prop in metrics.data[index]) {
       if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
     || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Descartamos estas propiedades
+        // Discarting properties
       }
       else if (prop === 'timestamp')
         res.labels.push(moment(metrics.data[index].timestamp));
       else {
-        // Recorremos el dataset buscando la posición de uno ya existente. Si existe guardamos su pos
+        // Search for an existing prop
         let position = res.datasets.findIndex((p) => {
-          // console.debug('Dentro del find, p vale', p);
           if (p['label'] === prop) return p;
         })
-        // console.debug('La posición del elemento es', position);
-        if (position !== -1) { // Si ya existe, lo añadimos al objeto correspondiente
-          // console.debug('Actualizamos una propiedad');
+        
+        if (position !== -1) { // If exists, add the new object to it
+        
           res.datasets[position].data.push(metrics.data[index][prop]);
         }
-        else { // Si no existe, hacemos un nuevo push
+        else { // If not exists, create a new one
           res.datasets.push(
             {
               'label': prop,
@@ -133,22 +127,19 @@ export function prepareInstanceData(metrics) {
     for (let prop in metrics.data[index]) {
       if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
     || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Descartamos estas propiedades
+        // Discartin properties
       }
       else if (prop === 'timestamp')
         res.labels.push(moment(metrics.data[index].timestamp));
       else {
-        // Recorremos el dataset buscando la posición de uno ya existente. Si existe guardamos su pos
+        // Searching existent prop
         let position = res.datasets.findIndex((p) => {
-          // console.debug('Dentro del find, p vale', p);
           if (p['label'] === prop) return p;
         })
-        // console.debug('La posición del elemento es', position);
-        if (position !== -1) { // Si ya existe, lo añadimos al objeto correspondiente
-          // console.debug('Actualizamos una propiedad');
+        if (position !== -1) { // If exists, add the new object
           res.datasets[position].data.push(metrics.data[index][prop]);
         }
-        else { // Si no existe, hacemos un nuevo push
+        else { // If not exists, create a new object
           res.datasets.push(
             {
               'label': prop,
