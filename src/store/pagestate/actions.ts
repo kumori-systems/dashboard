@@ -45,10 +45,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   /** Signs the user out of the page. */
   signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
 
-    // If localstorage is available
+    // If sessionstorage is available
     if (typeof (Storage) !== 'undefined') {
-      // Removes the user form localstorage
-      localStorage.removeItem('user');
+      // Removes the user form sessionstorage
+      sessionStorage.removeItem('user');
     }
 
     // Removes the user from vuex
@@ -118,10 +118,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             'details': 'All data loaded'
           });
 
-          // If localstorage is available
+          // If sessionstorage is available
           if (typeof (Storage) !== 'undefined') {
             // Stores the item in local storage
-            localStorage.setItem('user',
+            sessionStorage.setItem('user',
               JSON.stringify(user));
           }
 

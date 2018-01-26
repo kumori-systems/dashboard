@@ -120,8 +120,6 @@ export default class AlarmsAndLogsView extends Vue {
     // Switch the page
     this.numPages = logs.length / NUM_ITEMS_PER_PAGE;
 
-    // logs.
-
     return logs
       .slice(
         (this.actualPage-1) * NUM_ITEMS_PER_PAGE,
@@ -154,5 +152,6 @@ export default class AlarmsAndLogsView extends Vue {
     this.data = data;
     this.logInfoDialog = true;
   }
+
 }
 </script>

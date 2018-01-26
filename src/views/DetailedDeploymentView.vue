@@ -12,7 +12,7 @@
         <v-card-actions>
           <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
           <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="manualCancelChanges">Cancel</v-btn>
+          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
         </v-card-actions>
       
     </v-card-title>
@@ -253,7 +253,7 @@ export default class DetailedDeploymentView extends Vue {
     }*/
 
     this.$watch("$route.path", val => {
-      this.automatedCancelChanges();
+      this.cancelChanges();
     });
   }
 
@@ -372,6 +372,7 @@ export default class DetailedDeploymentView extends Vue {
   get totalDependedDeploymentChannels() {
     return channel => {
       return this.$store.getters.getTotalDependedDeploymentChannels(
+        this.deployment._uri,
         this.deployment.service,
         channel
       );
@@ -531,55 +532,28 @@ export default class DetailedDeploymentView extends Vue {
     }
 
     if (changedNumInstances) {
-      
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
         deploymentURN: this.deployment._uri,
         roleNumInstances: this.roleNumInstances,
         killInstances: this.instanceKill
       });
-
     }
 
     // Marc as there are no changes
     this.haveChanges = false;
-
   }
 
-  automatedCancelChanges(): void {
-    if (this.haveChanges) {
-      this.roleNumInstances = {};
-      this.instanceKill = {};
+  cancelChanges(): void {
+    this.roleNumInstances = {};
+    this.instanceKill = {};
 
-      // Clean links
-      this.serviceNewDependedConnections = {};
-      this.serviceNewProvidedConnections = {};
+    // Clean links
+    this.serviceNewDependedConnections = {};
+    this.serviceNewProvidedConnections = {};
 
-      this.clear = true;
-      this.haveChanges = false;
-    }
-  }
-
-  /** Cancells temporary changes. */
-  manualCancelChanges(): void {
-    if (this.haveChanges) {
-      this.roleNumInstances = {};
-      this.instanceKill = {};
-
-      // Clean links
-      for (let role in this.serviceNewDependedConnections){
-        this.serviceNewDependedConnections[role] = [];
-      }
-      
-      for (let role in this.serviceNewProvidedConnections){
-        this.serviceNewProvidedConnections[role] = [];
-      }
-
-      this.loadDeploymentConnections(this.deployment, this.service);
-
-      this.clear = true;
-      this.haveChanges = false;
-    }
+    this.clear = true;
+    this.haveChanges = false;
   }
 
   /** Loads service available connections. */
@@ -607,10 +581,24 @@ export default class DetailedDeploymentView extends Vue {
             }
           }
 
+          console.log("El channel que analizamos es: ", chann);
+          console.log("La conexion: ", conn);
+          console.log("El elemento", element);
+
+          console.log(
+            "El servicio posee el canal?",
+            ser.providedChannels[chann] ? true : false
+          );
+
           if (ser.providedChannels[chann]) {
             if (!this.serviceNewProvidedConnections[chann]) {
               this.serviceNewProvidedConnections[chann] = [];
             }
+
+            console.log(
+              "Las nuevas conexiones son",
+              this.serviceNewProvidedConnections
+            );
             if (
               this.serviceNewProvidedConnections[chann].indexOf(element) === -1
             )
@@ -651,7 +639,6 @@ export default class DetailedDeploymentView extends Vue {
   handleInput(value): void {
     if (!this.clear) this.haveChanges = true;
   }
-
 }
 </script>
 <style lang="scss" scoped>

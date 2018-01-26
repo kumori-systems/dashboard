@@ -78,7 +78,7 @@ export default class App extends Vue {
     }
 
     if (status && status == "success") {
-      localStorage.setItem(
+      sessionStorage.setItem(
         "user",
         JSON.stringify(
           new User(
@@ -97,10 +97,10 @@ export default class App extends Vue {
       this.$router.push("/");
     }
 
-    // Check if the user has been stored in localStorage
+    // Check if the user has been stored in sessionStorage
     if (typeof Storage !== "undefined") {
       // Stores the item in local storage
-      let storedUser: string | User = localStorage.getItem("user");
+      let storedUser: string | User = sessionStorage.getItem("user");
       if (storedUser) {
         storedUser = JSON.parse(storedUser);
 

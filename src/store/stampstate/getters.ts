@@ -245,18 +245,18 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         'value': string, 'text': string
       }[] => {
     return (serviceId: string, channelId: string) => {
-      
+
       let type: string = (<Service>state.services[serviceId])
         .dependedChannels[channelId].type;
       let typeSearched: Channel.TYPE[] = [];
       switch (type) {
         case Channel.TYPE.ENDPOINT_REQUEST:
-          // console.warn('deprecated channel URI \'endpoint\'');
+        // console.warn('deprecated channel URI \'endpoint\'');
         case Channel.TYPE.REQUEST:
           typeSearched = [Channel.TYPE.REPLY, Channel.TYPE.ENDPOINT_REPLY];
           break;
         case Channel.TYPE.ENDPOINT_REPLY:
-          // console.warn('deprecated channel URI \'endpoint\'');
+        // console.warn('deprecated channel URI \'endpoint\'');
         case Channel.TYPE.REPLY:
           typeSearched = [Channel.TYPE.REQUEST, Channel.TYPE.ENDPOINT_REQUEST];
           break;
@@ -274,10 +274,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           if (state.services[serviceId]) { // if service exists
             for (let providedChannelId in
               state.services[serviceId].providedChannels) {
-              
+
               if (typeSearched.indexOf(state.services[serviceId]
                 .providedChannels[providedChannelId].type) !== -1) {
-              
+
                 let elem: {
                   'value': string,
                   'text': string
@@ -291,7 +291,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
                   };
 
                 if (res.indexOf(elem) === -1)
-                  res.push(elem); 
+                  res.push(elem);
               }
             }
           }
@@ -302,11 +302,11 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   getTotalDependedDeploymentChannels = (state?: State, getters?: Getters,
-    rootState?: any, rootGetters?: any): (serviceURI: string,
-      channelId: string) => {
+    rootState?: any, rootGetters?: any): (deploymentURI: string,
+      serviceURI: string, channelId: string) => {
         'value': string, 'text': string
       }[] => {
-    return (serviceId: string, channelId: string) => {
+    return (myDeploymentId: string, serviceId: string, channelId: string) => {
       // Depending on the channel type, the search will be different
       let type: string = (<Service>state.services[serviceId])
         .providedChannels[channelId].type;
@@ -335,17 +335,19 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           state.deployments[deploymentId] instanceof HTTPEntryPoint
           && state.deployments[deploymentId].channels['frontend']
           && state.deployments[deploymentId].channels['frontend'].length > 0
+          && state.deployments[deploymentId].channels['frontend'][0]
+            .destinyDeploymentId !== myDeploymentId
         ) {
-          // If it's an entrypoint in use, it's not purposed for a new
-          // connection
+          // If it's an entrypoint in use, and I'm not using it,
+          // it's not in the list of possibles
         } else {
-          
+
           let serviceId: string = state.deployments[deploymentId].service;
           if (state.services[serviceId]) { // if service exists
             for (let requiredChannelId in
               state.services[serviceId].dependedChannels) {
 
-              
+
               if (typeSearched.indexOf(state.services[serviceId]
                 .dependedChannels[requiredChannelId].type) !== -1) {
 
@@ -422,7 +424,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       return res;
     };
   }
-  
+
   volumes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [uri: string]: Volume } => {
     return state.volumes;
