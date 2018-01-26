@@ -47,20 +47,24 @@
 
       </v-data-table>
 
+      <div class="text-xs-center">
+        <v-pagination v-if="numPages>1" v-bind:length="numPages" v-model="actualPage"></v-pagination>
+      </div>
+
     </v-container>
 
-      <v-dialog v-model="logInfoDialog" max-width="800px">
-        <v-card>
-          <v-card-title class="headline">Log info</v-card-title>
-          <v-card-text>
-            <v-flex ma-1 xs12><pre>{{ data }}</pre></v-flex>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn flat="flat" v-on:click.native="logInfoDialog = false">Done</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    <v-dialog v-model="logInfoDialog" max-width="800px">
+      <v-card>
+        <v-card-title class="headline">Log info</v-card-title>
+        <v-card-text>
+          <v-flex ma-1 xs12><pre>{{ data }}</pre></v-flex>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat="flat" v-on:click.native="logInfoDialog = false">Done</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </v-card>
 </template>
@@ -70,12 +74,16 @@ import VueClassComponent from "vue-class-component";
 
 import { Notification } from "../store/pagestate/classes";
 
+const NUM_ITEMS_PER_PAGE = 20;
+
 @VueClassComponent({
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
   logLevels: string[] = ["Debug", "Info", "Warning", "Error"];
   selectedLogLevel: string = "Debug";
+  numPages: number = 1;
+  actualPage: number = 1;
   logInfoDialog: boolean = false;
   data: string = "";
   search: string = "";
@@ -107,29 +115,39 @@ export default class AlarmsAndLogsView extends Vue {
   ];
 
   get logs() {
-    let logs = this.$store.getters.notifications;
-    let res = logs.filter((n, index, arrayfun) => {
-      switch (this.selectedLogLevel) {
-        case "Info":
-          return (
-            n.level === Notification.LEVEL.INFO ||
-            n.level === Notification.LEVEL.WARNING ||
-            n.level === Notification.LEVEL.ERROR
-          );
+    let logs: Notification[] = this.$store.getters.notifications;
 
-        case "Warning":
-          return (
-            n.level === Notification.LEVEL.WARNING ||
-            n.level === Notification.LEVEL.ERROR
-          );
-        case "Error":
-          return n.level === Notification.LEVEL.ERROR;
+    // Switch the page
+    this.numPages = logs.length / NUM_ITEMS_PER_PAGE;
 
-        default:
-          return true;
-      }
-    }, this);
-    return res;
+    // logs.
+
+    return logs
+      .slice(
+        (this.actualPage-1) * NUM_ITEMS_PER_PAGE,
+        (this.actualPage-1) * NUM_ITEMS_PER_PAGE + NUM_ITEMS_PER_PAGE
+      )
+      .filter((n, index, arrayfun) => {
+        switch (this.selectedLogLevel) {
+          case "Info":
+            return (
+              n.level === Notification.LEVEL.INFO ||
+              n.level === Notification.LEVEL.WARNING ||
+              n.level === Notification.LEVEL.ERROR
+            );
+
+          case "Warning":
+            return (
+              n.level === Notification.LEVEL.WARNING ||
+              n.level === Notification.LEVEL.ERROR
+            );
+          case "Error":
+            return n.level === Notification.LEVEL.ERROR;
+
+          default:
+            return true;
+        }
+      }, this);
   }
 
   showLogInfoDialog(data: string) {
