@@ -581,24 +581,11 @@ export default class DetailedDeploymentView extends Vue {
             }
           }
 
-          console.log("El channel que analizamos es: ", chann);
-          console.log("La conexion: ", conn);
-          console.log("El elemento", element);
-
-          console.log(
-            "El servicio posee el canal?",
-            ser.providedChannels[chann] ? true : false
-          );
-
           if (ser.providedChannels[chann]) {
             if (!this.serviceNewProvidedConnections[chann]) {
               this.serviceNewProvidedConnections[chann] = [];
             }
 
-            console.log(
-              "Las nuevas conexiones son",
-              this.serviceNewProvidedConnections
-            );
             if (
               this.serviceNewProvidedConnections[chann].indexOf(element) === -1
             )
