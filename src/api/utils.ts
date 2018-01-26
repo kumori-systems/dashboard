@@ -61,7 +61,7 @@ export function transformEcloudDeploymentToDeployment(
       resourcesConfig[ecloudDeployment.resources[res].resource.name] =
         ecloudDeployment.resources[res].resource;
     } else {
-      console.warn('found resource not following structure: ', res);
+      // console.warn('found resource not following structure: ', res);
     }
   }
 
@@ -711,7 +711,7 @@ export function getResourceType(uri: string): ResourceType {
   // realocated to the left
   switch (splitted[i]) {
     case 'volume':
-      console.warn('deprecated resource type \'volume\': %s', uri);
+     // console.warn('deprecated resource type \'volume\': %s', uri);
     case 'volumes':
       res = ResourceType.volume;
       break;
