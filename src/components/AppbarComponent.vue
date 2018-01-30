@@ -10,9 +10,17 @@
     <v-spacer></v-spacer>
 
     <!-- Bell icon -->
-    <v-btn icon>
-      <v-icon>notifications</v-icon>
-    </v-btn>
+    <v-menu offset-y>
+      <v-badge class="mr-3" slot="activator" overlap color="red">
+        <span slot="badge" dark v-if="alarms.length > 0">{{ alarms.length }}</span>
+        <v-icon large color="grey lighten-1">notifications</v-icon>
+      </v-badge>
+      <v-list v-if="alarms.length > 0">
+        <v-list-tile v-for="(alarm, index) in alarms" v-bind:key="index">
+          <v-list-tile-content v-on:click="toAlarmsAndLogs">{{ alarm.title }}</v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
 
     <!-- User's avatar -->
     <v-avatar size="40px" class="mr-1">
@@ -48,7 +56,6 @@ import { User, Notification } from "../store/pagestate/classes";
   components: {}
 })
 export default class AppbarComponent extends Vue {
-
   /** Gets the user authenticated in the system */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
@@ -57,6 +64,19 @@ export default class AppbarComponent extends Vue {
   /** Signs out the user from the system */
   signout() {
     this.$store.dispatch("signout");
+  }
+
+  get alarms(): Notification[] {
+    return this.$store.getters.notifications.filter((item, index, arrayfun) => {
+      return (
+        (<Notification>item).level === Notification.LEVEL.ERROR &&
+        !(<Notification>item).readed
+      );
+    });
+  }
+
+  toAlarmsAndLogs() {
+    this.$router.push("alarmsAndLogs");
   }
 }
 </script>

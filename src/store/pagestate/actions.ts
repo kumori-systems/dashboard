@@ -258,6 +258,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.onAddNotification((notification: Notification) => {
       injectee.dispatch('addNotification', notification);
     });
-    
+
   }
+
+  /** Marks a notification as readed. */
+  readNotification = (injectee: Vuex.ActionContext<State, any>, payload):
+    void => {
+    injectee.commit('readNotification', payload);
+  }
+
 };

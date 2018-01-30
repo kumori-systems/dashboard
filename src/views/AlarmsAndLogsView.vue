@@ -92,7 +92,8 @@
       </v-layout>
 
       <!-- Log table -->
-      <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions  v-bind:search="search">
+      <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions 
+      v-bind:search="search" v-bind:pagination.sync="defaultPagination">
 
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
@@ -145,13 +146,18 @@ const NUM_ITEMS_PER_PAGE = 20;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
+  defaultPagination = {
+    sortBy: "time",
+    descending: true
+  };
+
   /** Table headers. */
   headers: any[] = [
     {
       text: "",
       align: "left",
       sortable: false,
-      value: "time"
+      value: "level"
     },
     {
       text: "Date",
@@ -215,12 +221,12 @@ export default class AlarmsAndLogsView extends Vue {
   toTime: string = null;
 
   get logs() {
-    let logs: Notification[] = this.$store.getters.notifications;
+    let loglist: Notification[] = this.$store.getters.notifications;
 
     // Switch the page
-    this.numPages = logs.length / NUM_ITEMS_PER_PAGE;
+    this.numPages = loglist.length / NUM_ITEMS_PER_PAGE;
 
-    return logs
+    loglist = loglist
       .filter((item, index, arrayfun) => {
         // fromDate
         if (this.fromDate && this.fromDate !== "") {
@@ -259,7 +265,7 @@ export default class AlarmsAndLogsView extends Vue {
       .filter((item, index, arrayfun) => {
         // toTime
         if (this.toTime && this.toTime !== "") {
-            let date = this.toTime.split(":");
+          let date = this.toTime.split(":");
           return (
             item.time.getHours() <= parseInt(date[0]) &&
             item.time.getMinutes() <= parseInt(date[1])
@@ -292,6 +298,17 @@ export default class AlarmsAndLogsView extends Vue {
         (this.actualPage - 1) * NUM_ITEMS_PER_PAGE,
         (this.actualPage - 1) * NUM_ITEMS_PER_PAGE + NUM_ITEMS_PER_PAGE
       );
+
+    loglist.forEach((item: Notification, index, arrayfun) => {
+      if (item.level === Notification.LEVEL.ERROR && !item.readed) {
+        this.$store.dispatch("readNotification", {
+          time: item.time,
+          title: item.title
+        });
+      }
+    });
+
+    return loglist;
   }
 
   formatDate(date) {
@@ -311,16 +328,6 @@ export default class AlarmsAndLogsView extends Vue {
     const [day, month, year] = date.split("-");
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
-
-  /*
-  get formatedSelectedFromDate() {
-    return (this.selectedFromDate || "") + " " + (this.fromTime || "");
-  }
-
-  get formatedSelectedToDate() {
-    return (this.selectedToDate || "") + " " + (this.toTime || "");
-  }
-*/
 
   showLogInfoDialog(data: string) {
     this.data = data;

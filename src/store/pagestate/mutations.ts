@@ -100,4 +100,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
+  readNotification = (state: State, { time, title }): void => {
+
+    for (let not in state.notifications) {
+      if (state.notifications[not].time === time
+        && state.notifications[not].title === title) {
+        state.notifications[not].readed = true;
+      }
+    }
+
+  }
+
 };
