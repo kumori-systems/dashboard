@@ -550,15 +550,6 @@ class ProxyConnection extends EventEmitter {
             this.onAddRuntime,
             uri,
             transformManifestToRuntime(element));
-
-          this.emit(
-            this.onAddNotification,
-            new Notification(Notification.LEVEL.INFO,
-              'Registered runtime',
-              'Registered runtime ' + uri,
-              JSON.stringify(element)
-            )
-          );
           break;
 
         case ElementType.service:
@@ -571,15 +562,6 @@ class ProxyConnection extends EventEmitter {
               return this.getElementInfo(ser.roles[role].component);
             });
           }
-
-          this.emit(
-            this.onAddNotification,
-            new Notification(Notification.LEVEL.INFO,
-              'Registered service',
-              'Registered service ' + ser._uri,
-              JSON.stringify(element)
-            )
-          );
           break;
 
         case ElementType.component:
@@ -589,15 +571,6 @@ class ProxyConnection extends EventEmitter {
           res = res.then(() => {
             return this.getElementInfo(comp.runtime);
           });
-
-          this.emit(
-            this.onAddNotification,
-            new Notification(Notification.LEVEL.INFO,
-              'Registered component',
-              'Registered component ' + uri,
-              JSON.stringify(element)
-            )
-          );
           break;
 
         case ElementType.resource:
@@ -605,16 +578,6 @@ class ProxyConnection extends EventEmitter {
             this.onAddResource,
             uri,
             transformManifestToResource(element)
-          );
-
-
-          this.emit(
-            this.onAddNotification,
-            new Notification(Notification.LEVEL.INFO,
-              'Registered resource',
-              'Registered resource ' + uri,
-              JSON.stringify(element)
-            )
           );
           break;
 
@@ -652,8 +615,19 @@ class ProxyConnection extends EventEmitter {
         }
 
         if (registrationResult.errors && registrationResult.errors.length > 0) {
-          return Promise.reject(registrationResult.errors);
+          return Promise.reject(
+            new Error(JSON.stringify(registrationResult))
+          );
         }
+
+        this.emit(
+          this.onAddNotification,
+          new Notification(Notification.LEVEL.INFO,
+            'Registered bundle',
+            'Correclty registered bundle',
+            JSON.stringify(registrationResult, null, 4)
+          )
+        );
 
       });
   }
@@ -807,7 +781,7 @@ class ProxyConnection extends EventEmitter {
                   )
                 );
                 break;
-                
+
               default:
                 console.error('Unkown resource type: %s', resource);
             }

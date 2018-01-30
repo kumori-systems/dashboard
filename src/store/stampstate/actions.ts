@@ -74,7 +74,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error deploying',
-          'Error deploying ' + deployment.name, err.message)
+          'Error deploying ' + deployment.name,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -90,7 +91,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error undeploying',
-          'Error undeploying ' + deploymentURN, err.message)
+          'Error undeploying ' + deploymentURN,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -106,7 +108,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error registering a domain',
-          'Error registering a domain ' + domain, err.message)
+          'Error registering a domain ' + domain,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -140,7 +143,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error removing an element',
-          'Error removing element ' + elementId, err.message)
+          'Error removing element ' + elementId,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -158,7 +162,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error downloading manifest',
-          'Error downloading manifest from ' + elementURN, err.message)
+          'Error downloading manifest from ' + elementURN,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -180,7 +185,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR,
           'Error modifying deployment',
-          'Error modifying deployment' + deploymentURN, err.message)
+          'Error modifying deployment' + deploymentURN,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -198,7 +204,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error uploading bundle',
-          'Error uploading bundle', err.message)
+          'Error uploading bundle',
+          JSON.stringify(JSON.parse(err.message), null, 4)
+        )
       );
 
     });
@@ -222,7 +230,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         new Notification(Notification.LEVEL.ERROR, 'Error linking deployments',
           'Error linking deployed services'
           + params.deploymentOne + ':' + params.channelOne
-          + params.deploymentTwo + ':' + params.channelTwo, err.message)
+          + params.deploymentTwo + ':' + params.channelTwo,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
@@ -248,7 +257,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           Notification.LEVEL.ERROR, 'Error unlinking deployments',
           'Error unlinking deployed services'
           + params.deploymentOne + ':' + params.channelOne
-          + params.deploymentTwo + ':' + params.channelTwo, err.message)
+          + params.deploymentTwo + ':' + params.channelTwo,
+          JSON.stringify(err.message, null, 4))
       );
 
     });
