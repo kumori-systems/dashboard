@@ -3,9 +3,8 @@ import State from './state';
 
 import { connection } from '../../api';
 import * as utils from '../../api/utils';
-import { Notification } from '../pagestate/classes';
+import { BackgroundAction, Notification } from '../pagestate/classes';
 import { Deployment } from './classes';
-
 
 /**
  * Actions to handle the representation of the stamp state easier.
@@ -69,6 +68,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.DEPLOY_SERVICE)
+    );
 
     connection.addDeployment(deployment).catch((err: Error) => {
 

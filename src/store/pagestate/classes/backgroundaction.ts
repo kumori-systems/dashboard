@@ -1,23 +1,33 @@
-// Used as identifier for BackgroundActions
-let backgroundActionCounter: number = 0;
+/**
+ * Clausure of the function which gives the identifier of the background action
+ */
+let getBrackgroundActionId = (() => {
+  let counter: number = 0;
+  return () => {
+    return 'ba_' + counter++;
+  };
+})();
 /**
  * Action executed in the background and eventually solved. Be carefull when
  * creating or editing this object, thus a wrong value can produce unexpected
  * malfunctions.
  */
 export class BackgroundAction {
+
   /** <string> Unique id representing the action. */
   readonly id: string;
-  /** <string> Readable short name. */
-  readonly name: string;
+
+  /** <BackgroundAction.TYPE> Defines the kind of background action. */
+  readonly type: BackgroundAction.TYPE;
+
   /**
    * <BackgroundAction.State> Marks if the action is waiting, on process or has
    * finished. Can't be null
    */
-  state: BackgroundAction.State = BackgroundAction.State.WAITING;
+  state: BackgroundAction.STATE = BackgroundAction.STATE.ON_PROCESS;
+
   /**
-   * <string> Description message. Used to explain what is the action doing or
-   * the result of the action.
+   * <string> Detailed information of the BackgroundAction.
    */
   details: string = null;
 
@@ -27,21 +37,38 @@ export class BackgroundAction {
    * when the action is finished.
    * @param name <string> Readable action name. Cant be undefined or null and
    * length must be higher than 0.
-   * @param details <string> Description message. Used to explain what is the
-   * action doing or the result of the action.
    */
-  constructor(name: string, details?: string) {
-    if (!name || name.length === 0)
-      throw new Error('Invalid name for BackgroundAction: ' + name);
-    this.name = name;
+  constructor(type: BackgroundAction.TYPE, details?: string) {
+
+    // Assign the background type
+    if (!type) {
+      throw new Error('A type is required to create a BackgroundAction');
+    }
+    this.type = type;
+
+    // Assign the id
+    this.id = getBrackgroundActionId();
+
     if (details) this.details = details;
-    this.id = 'ba_' + ++backgroundActionCounter;
+
   }
 }
 export module BackgroundAction {
-  /** Marks if the action is blocked, on process or has finished */
-  export enum State {
-    FAIL = 'fail', ON_PROCESS = 'on_process', SUCCESS = 'success',
-    WAITING = 'waiting'
-  };
+  /** Marks if the action is on process or has finished. */
+  export enum STATE { ON_PROCESS, FAIL, SUCCESS };
+
+  /** Marks the background action type. */
+  export enum TYPE {
+    LOGIN = 'login',
+    DEPLOY_SERVICE = 'deploy service',
+    UNDEPLOY_SERVICE = 'undeploy service',
+    SCALE_SERVICE = 'scale service',
+    REGISTER_BUNDLE = 'register bundle',
+    UNREGISTER_RUNTIME = 'unregister runtime',
+    UNREGISTER_COMPONENT = 'unregister component',
+    UNREGISTER_SERVICE = 'unregister service',
+    LINK_SERVICES = 'link services',
+    UNLINK_SERVICES = 'unlink services',
+    LOADING_DATA = 'loading data'
+  }
 }

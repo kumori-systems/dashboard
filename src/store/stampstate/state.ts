@@ -8,25 +8,25 @@ import {
 export default class State {
 
   /** Map of deployments. */
-  deployments: { [uri: string]: Deployment } = {};
+  deployments: { [uri: string]: Deployment };
 
   /** Map of services. */
-  services: { [uri: string]: Service } = {};
+  services: { [uri: string]: Service };
 
   /** Map of components. */
-  components: { [uri: string]: Component } = {};
+  components: { [uri: string]: Component };
 
   /** Map of runtimes. */
-  runtimes: { [uri: string]: Runtime } = {};
+  runtimes: { [uri: string]: Runtime };
 
   /** Map of volumes. */
-  volumes: { [uri: string]: Volume } = {};
+  volumes: { [uri: string]: Volume };
 
   /** Map of certificates. */
-  certificates: { [uri: string]: Certificate } = {};
+  certificates: { [uri: string]: Certificate };
 
   /** Map of domains. */
-  domains: { [uri: string]: Domain } = {};
+  domains: { [uri: string]: Domain };
 
   /** Map of metrics. */
   metrics: {
@@ -48,11 +48,21 @@ export default class State {
         }
       }
     }[]
-  } = {};
+  };
 
   /** Selected service in elements view to deploy */
-  selectedService: string = null;
+  selectedService: string;
 
   /** Constructor of the state. */
-  constructor() { }
+  constructor() {
+    this.deployments = {};
+    this.services = {};
+    this.components = {};
+    this.runtimes = {};
+    this.volumes = {};
+    this.certificates = {};
+    this.domains = {};
+    this.metrics = {};
+    this.selectedService = null;
+  }
 }

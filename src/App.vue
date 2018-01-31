@@ -1,6 +1,6 @@
 <template>
   <v-app id="kumori-dashboard">
-    <template v-if="user.state === User.State.AUTHENTICATED">
+    <template v-if="user && user.state === User.State.AUTHENTICATED">
       
       <!-- Left menu -->
       <navigation-component></navigation-component>
@@ -57,24 +57,16 @@ export default class App extends Vue {
     if (status && status == "error") {
       //(<PSActions>this.$store.dispatch)
 
-      let authenticationAction = new BackgroundAction(
-        "authentication",
-        "Validating user in the platform"
+      this.$store.dispatch(
+        "addBackgroundAction",
+        new BackgroundAction(BackgroundAction.TYPE.LOGIN)
       );
 
-      this.$store.dispatch("addBackgroundAction", authenticationAction);
-      
-      this.$store.dispatch("processingBackgroundAction", {
-        id: authenticationAction.id,
-        details: "Validating user"
-      });
-
       this.$store.dispatch("finishBackgroundAction", {
-        id: authenticationAction.id,
-        state: BackgroundAction.State.FAIL,
+        type: BackgroundAction.TYPE.LOGIN,
+        state: BackgroundAction.STATE.FAIL,
         details: this.$route.query.error
       });
-
     }
 
     if (status && status == "success") {
