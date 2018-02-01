@@ -24,8 +24,8 @@
 
     <!-- Notifications -->
     <v-menu offset-y>
-      <v-badge class="mr-3" slot="activator" overlap color="danger">
-        <span slot="badge" dark v-if="alarms.length > 0">{{ alarms.length }}</span>
+      <v-badge class="mr-3" slot="activator" overlap color="error">
+        <span slot="badge" v-if="alarms.length > 0">{{ alarms.length }}</span>
         <v-icon large color="grey lighten-1">notifications</v-icon>
       </v-badge>
       <v-list v-if="alarms.length > 0">
@@ -83,10 +83,7 @@ export default class AppbarComponent extends Vue {
     return (((<PSGetters>this.$store.getters)
       .notifications as any) as Notification[]).filter(
       (item, index, arrayfun) => {
-        return (
-          (<Notification>item).level === Notification.LEVEL.ERROR &&
-          !(<Notification>item).readed
-        );
+        return item.level === Notification.LEVEL.ERROR && !item.readed;
       }
     );
   }
