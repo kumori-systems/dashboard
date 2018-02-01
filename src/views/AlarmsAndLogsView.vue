@@ -93,7 +93,7 @@
 
       <!-- Log table -->
       <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions 
-      v-bind:search="search" v-bind:pagination.sync="defaultPagination">
+      v-bind:search="search">
 
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
@@ -140,7 +140,7 @@ import VueClassComponent from "vue-class-component";
 
 import { Notification } from "../store/pagestate/classes";
 
-const NUM_ITEMS_PER_PAGE = 20;
+const NUM_ITEMS_PER_PAGE = 10;
 
 @VueClassComponent({
   name: "alarms-and-logs-view"
@@ -224,7 +224,7 @@ export default class AlarmsAndLogsView extends Vue {
     let loglist: Notification[] = this.$store.getters.notifications;
 
     // Switch the page
-    this.numPages = loglist.length / NUM_ITEMS_PER_PAGE;
+    this.numPages = Math.trunc((loglist.length / NUM_ITEMS_PER_PAGE) + 1);
 
     loglist = loglist
       .filter((item, index, arrayfun) => {
