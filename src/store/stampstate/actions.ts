@@ -141,20 +141,20 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     injectee.dispatch(
       'addBackgroundAction',
-      new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_DOMAIN)
+      new BackgroundAction(BackgroundAction.TYPE.REGISTER_DOMAIN)
     );
 
     connection.addDomain(domain).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'type': BackgroundAction.TYPE.REGISTER_DOMAIN,
         'state': BackgroundAction.STATE.SUCCESS
       });
 
     }).catch((err: Error) => {
 
       injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'type': BackgroundAction.TYPE.REGISTER_DOMAIN,
         'state': BackgroundAction.STATE.FAIL
       });
 
