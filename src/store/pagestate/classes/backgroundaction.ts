@@ -64,6 +64,8 @@ export module BackgroundAction {
     UNDEPLOY_SERVICE = 'undeploy service',
     SCALE_SERVICE = 'scale service',
     REGISTER_BUNDLE = 'register bundle',
+    REGISTER_DOMAIN = 'register domain',
+    UNREGISTER_DOMAIN = 'unregister domain',
     UNREGISTER_RUNTIME = 'unregister runtime',
     UNREGISTER_COMPONENT = 'unregister component',
     UNREGISTER_SERVICE = 'unregister service',

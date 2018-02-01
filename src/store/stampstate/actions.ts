@@ -68,12 +68,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   addDeployment = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
+
     injectee.dispatch(
       'addBackgroundAction',
       new BackgroundAction(BackgroundAction.TYPE.DEPLOY_SERVICE)
     );
 
-    connection.addDeployment(deployment).catch((err: Error) => {
+    connection.addDeployment(deployment).then(() => {
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error deploying',
@@ -90,7 +102,25 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   undeploy = (injectee: Vuex.ActionContext<State, any>, deploymentURN: string):
     void => {
-    connection.undeployDeployment(deploymentURN).catch((err: Error) => {
+
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.UNDEPLOY_SERVICE)
+    );
+
+    connection.undeployDeployment(deploymentURN).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error undeploying',
@@ -107,7 +137,25 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   addNewDomain = (injectee: Vuex.ActionContext<State, any>, domain: string):
     void => {
-    connection.addDomain(domain).catch((err: Error) => {
+
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_DOMAIN)
+    );
+
+    connection.addDomain(domain).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error registering a domain',
@@ -125,17 +173,53 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
+
+    switch (utils.getElementType(elementId)) {
+      case utils.ElementType.component:
+        injectee.dispatch(
+          'addBackgroundAction',
+          new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_COMPONENT)
+        );
+        break;
+      case utils.ElementType.service:
+        injectee.dispatch(
+          'addBackgroundAction',
+          new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_SERVICE)
+        );
+        break;
+      case utils.ElementType.runtime:
+        injectee.dispatch(
+          'addBackgroundAction',
+          new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_RUNTIME)
+        );
+        break;
+      default:
+      // console.error('Error deleting element: Unknown type of element');
+    }
+
     connection.deleteElement(elementId).then(() => {
       let action: string;
       switch (utils.getElementType(elementId)) {
         case utils.ElementType.component:
           action = 'removeComponent';
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_COMPONENT,
+            'state': BackgroundAction.STATE.SUCCESS
+          });
           break;
         case utils.ElementType.service:
           action = 'removeService';
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_SERVICE,
+            'state': BackgroundAction.STATE.SUCCESS
+          });
           break;
         case utils.ElementType.runtime:
           action = 'removeRuntime';
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_RUNTIME,
+            'state': BackgroundAction.STATE.SUCCESS
+          });
           break;
         default:
           console.error('Error deleting element: Unknown type of element');
@@ -143,6 +227,29 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       injectee.commit(action, elementId);
     }).catch((err: Error) => {
+
+      switch (utils.getElementType(elementId)) {
+        case utils.ElementType.component:
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_COMPONENT,
+            'state': BackgroundAction.STATE.FAIL
+          });
+          break;
+        case utils.ElementType.service:
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_SERVICE,
+            'state': BackgroundAction.STATE.FAIL
+          });
+          break;
+        case utils.ElementType.runtime:
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.UNREGISTER_RUNTIME,
+            'state': BackgroundAction.STATE.FAIL
+          });
+          break;
+        default:
+        // console.error('Error deleting element: Unknown type of element');
+      }
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error removing an element',
@@ -159,8 +266,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    *  from the stamp.
    */
   downloadManifest = (injectee: Vuex.ActionContext<State, any>,
-    elementURN: string):
-    void => {
+    elementURN: string): void => {
+
     connection.downloadManifest(elementURN).catch((err: Error) => {
 
       injectee.dispatch('addNotification',
@@ -181,9 +288,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     deploymentURN, roleNumInstances, killInstances
   }): void => {
 
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.SCALE_SERVICE)
+    );
+
     connection.aplyChangesToDeployment(
       deploymentURN, roleNumInstances, killInstances
-    ).catch((err: Error) => {
+    ).then(() => {
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.SCALE_SERVICE,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.SCALE_SERVICE,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR,
@@ -203,7 +325,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   addNewBundle = (injectee: Vuex.ActionContext<State, any>, file: File):
     void => {
 
-    connection.addNewBundle(file).catch((err: Error) => {
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.REGISTER_BUNDLE)
+    );
+
+    connection.addNewBundle(file).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_BUNDLE,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_BUNDLE,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error uploading bundle',
@@ -227,7 +366,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     channelTwo: string
   }): void => {
 
-    connection.link(params).catch((err: Error) => {
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.LINK_SERVICES)
+    );
+
+    connection.link(params).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.LINK_SERVICES,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.LINK_SERVICES,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(Notification.LEVEL.ERROR, 'Error linking deployments',
@@ -253,7 +409,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       channelTwo: string
     }): void => {
 
-    connection.unlink(params).catch((err: Error) => {
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.UNLINK_SERVICES)
+    );
+
+    connection.unlink(params).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNLINK_SERVICES,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.UNLINK_SERVICES,
+        'state': BackgroundAction.STATE.FAIL
+      });
 
       injectee.dispatch('addNotification',
         new Notification(

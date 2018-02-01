@@ -94,8 +94,8 @@ export default class AppbarComponent extends Vue {
   /** Obtains a list of active background actions. */
   get actions(): BackgroundAction[] {
     let pending = this.$store.getters.pendingBackgroundActions;
-    let res = [];
-    for(let key in pending){
+    let res: BackgroundAction[] = [];
+    for (let key in pending) {
       res = res.concat(pending[key]);
     }
     return res;
