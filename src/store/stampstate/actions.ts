@@ -75,15 +75,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     );
 
     connection.addDeployment(deployment).then(() => {
+      
       injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'type': BackgroundAction.TYPE.DEPLOY_SERVICE,
         'state': BackgroundAction.STATE.SUCCESS
       });
 
     }).catch((err: Error) => {
 
       injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
+        'type': BackgroundAction.TYPE.DEPLOY_SERVICE,
         'state': BackgroundAction.STATE.FAIL
       });
 
