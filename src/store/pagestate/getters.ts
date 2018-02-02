@@ -13,7 +13,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   /**
    * Gets the user saved in the state.
-   * @return <User>user
+   * @return < User > user
    */
   user = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): User => {
@@ -21,35 +21,28 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   /**
-   * Gets if there are pending background actions.
-   * @return <boolean>loading
+   * Gets the list of background actions in the state.
+   * @return < { [type: number]: BackgroundAction[] } > background actions.
    */
-  loading = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): Boolean => {
-    return state.pendingActions > 0;
+  pendingBackgroundActions = (
+    state?: State, getters?: Getters, rootState?: any, rootGetters?: any
+  ): { [type: number]: BackgroundAction[] } => {
+    return state.pendingBackgroundActions;
   }
 
-  /**
-   * Gets the last action in background. This can be used to read the state of
-   * the action or the details.
-   * @return <BackgroundAction>lastAction
-   */
-  lastAction = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): BackgroundAction => {
-    let res: BackgroundAction = null;
-    let size: number = state.backgroundActions.length;
-    if (size > 0)
-      res = state.backgroundActions[size - 1];
-    return res;
+
+  finishedBackgroundActions = (state?: State, getters?: Getters,
+    rootState?: any, rootGetters?: any): BackgroundAction[] => {
+    return state.finishedBackgroundActions;
   }
 
   /**
    * Gets the notifications stored in the state.
-   * @return <Notification[]>notifications
+   * @return < Notification [] > notifications.
    */
   notifications = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): Notification[] => {
     return state.notifications;
   }
-  
+
 };

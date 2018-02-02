@@ -18,6 +18,9 @@ export class Notification {
   /** <Date> Time where the notification was received. */
   time: Date = null;
 
+  /** <boolean> Marks if the user has readed the notification. */
+  readed: boolean = false;
+
   /**
    * Notification for the user.
    * @param title <string> Text sumerizing the notification.

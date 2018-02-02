@@ -9,10 +9,31 @@
     <!-- Separator -->
     <v-spacer></v-spacer>
 
-    <!-- Bell icon -->
-    <v-btn icon>
-      <v-icon>notifications</v-icon>
-    </v-btn>
+    <!-- Background actions -->
+    <v-menu offset-y open-on-hover>
+      <v-badge class="mr-3" bottom slot="activator" overlap color="info">
+        <span slot="badge" dark v-if="actions.length > 0">{{ actions.length }}</span>
+        <v-icon large color="grey lighten-1">swap_vert</v-icon>
+      </v-badge>
+      <v-list v-if="actions.length > 0">
+        <v-list-tile v-for="(action, index) in actions" v-bind:key="index">
+          <v-list-tile-content>{{ action.type }}</v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+
+    <!-- Notifications -->
+    <v-menu offset-y>
+      <v-badge class="mr-3" slot="activator" overlap color="error">
+        <span slot="badge" v-if="alarms.length > 0">{{ alarms.length }}</span>
+        <v-icon large color="grey lighten-1">notifications</v-icon>
+      </v-badge>
+      <v-list v-if="alarms.length > 0">
+        <v-list-tile v-for="(alarm, index) in alarms" v-bind:key="index">
+          <v-list-tile-content v-on:click="toAlarmsAndLogs">{{ alarm.title }}</v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
 
     <!-- User's avatar -->
     <v-avatar size="40px" class="mr-1">
@@ -41,22 +62,50 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 import PSGetters from "../store/pagestate/getters";
-import { User, Notification } from "../store/pagestate/classes";
+import {
+  User,
+  Notification,
+  BackgroundAction
+} from "../store/pagestate/classes";
 
 @VueClassComponent({
   name: "appbar-component",
   components: {}
 })
 export default class AppbarComponent extends Vue {
-
-  /** Gets the user authenticated in the system */
+  /** Gets the user authenticated in the system. */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
+  }
+
+  /** Obtains a list of notifications with level error not readed by the user. */
+  get alarms(): Notification[] {
+    return (((<PSGetters>this.$store.getters)
+      .notifications as any) as Notification[]).filter(
+      (item, index, arrayfun) => {
+        return item.level === Notification.LEVEL.ERROR && !item.readed;
+      }
+    );
+  }
+
+  /** Obtains a list of active background actions. */
+  get actions(): BackgroundAction[] {
+    let pending = this.$store.getters.pendingBackgroundActions;
+    let res: BackgroundAction[] = [];
+    for (let key in pending) {
+      res = res.concat(pending[key]);
+    }
+    return res;
   }
 
   /** Signs out the user from the system */
   signout() {
     this.$store.dispatch("signout");
+  }
+
+  /** Changes the actual view to alarmsAndLogs view */
+  toAlarmsAndLogs() {
+    this.$router.push("alarmsAndLogs");
   }
 }
 </script>

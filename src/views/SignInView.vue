@@ -69,7 +69,7 @@
           <!-- Card title -->
           <v-card-title primary-title>
 
-              <h3 class="headline">Accesing to Ecloud Dashboard</h3>
+              <h3 class="headline">Accessing Ecloud Dashboard</h3>
               <div>
                 <v-btn color="primary" flat loading></v-btn>
                 <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
@@ -88,7 +88,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import PSGetters from "./../store/pagestate/getters";
 import { BackgroundAction } from "../store/pagestate/classes";
-import urlencode from 'urlencode';
+import urlencode from "urlencode";
 
 import { ACS_URI } from "../api/config";
 
@@ -96,7 +96,9 @@ import { ACS_URI } from "../api/config";
   name: "sign-in-view"
 })
 export default class SignInView extends Vue {
-  
+  /** Says if there is a process loading the user. */
+  loading: boolean = false;
+  friendlyMessageClass: string = "";
   /** <string> User's id. */
   userName: string = "";
 
@@ -107,32 +109,17 @@ export default class SignInView extends Vue {
   viewPassword: boolean = false;
 
   /** URL where the browser is redirected to procceed to google's oauth. */
-  googleOauthURN:string = null;
+  googleOauthURN: string = null;
 
   /** Mounted hook. */
-  mounted(){
-
+  mounted() {
     // Set redirection path for google oauth
-    this.googleOauthURN = ACS_URI + "/auth/google?redirectOnSuccessUrl=" + urlencode(location.origin+"/#/overview") + "&redirectOnFailureUrl=" + urlencode(location.origin+"/#/overview");
-
-  }
-
-  /**
-   * Returns true if there is a background process running.
-   * @returns <boolean> true  if there is a background process running.
-   */
-  get loading(): Boolean {
-    return ((<PSGetters>this.$store.getters).loading as any) as Boolean;
-  }
-
-  /**
-   * Gets the last BackgroundAction. If no BackgroundAction is found a new
-   * null BackgrounAction is returned.
-   * @return <BackgroundAction> Background process.
-   */
-  get lastAction(): BackgroundAction {
-    return ((<PSGetters>this.$store.getters)
-      .lastAction as any) as BackgroundAction;
+    this.googleOauthURN =
+      ACS_URI +
+      "/auth/google?redirectOnSuccessUrl=" +
+      urlencode(location.origin + "/#/overview") +
+      "&redirectOnFailureUrl=" +
+      urlencode(location.origin + "/#/overview");
   }
 
   /**
@@ -141,32 +128,41 @@ export default class SignInView extends Vue {
    * @return <string> text explaining the action or the result of the action.
    */
   get friendlyMessage(): string {
-    let res: string = "";
-    try {
-      res = this.lastAction.details;
-    } finally {
-      return res;
-    }
-  }
+    let pendingActions: {
+      [type: number]: BackgroundAction[];
+    } = ((<PSGetters>this.$store.getters).pendingBackgroundActions as any) as {
+      [type: number]: BackgroundAction[];
+    };
 
-  /**
-   * Returns the color of the text depending on the state of the action in
-   * background process.
-   * @return <string> color to mark info text or danger text.
-   */
-  get friendlyMessageClass() {
-    let res: string = "";
-    try {
-      switch ((this.lastAction.state as any) as BackgroundAction.State) {
-        case BackgroundAction.State.FAIL:
-          res = "red--text";
-          break;
-        default:
-          res = "blue--text";
+    let finishedActions: BackgroundAction[] = ((<PSGetters>this.$store.getters)
+      .finishedBackgroundActions as any) as BackgroundAction[];
+
+    if (pendingActions[BackgroundAction.TYPE.LOADING_DATA].length > 0) {
+      this.friendlyMessageClass = "blue--text";
+      this.loading = true;
+      return pendingActions[BackgroundAction.TYPE.LOADING_DATA][0].details;
+    } else if (pendingActions[BackgroundAction.TYPE.LOGIN].length > 0) {
+      this.friendlyMessageClass = "blue--text";
+      this.loading = true;
+      return pendingActions[BackgroundAction.TYPE.LOGIN][0].details;
+    } else if (finishedActions.length > 0) {
+      if (
+        finishedActions[finishedActions.length - 1].state ===
+        BackgroundAction.STATE.SUCCESS
+      ) {
+        this.friendlyMessageClass = "blue--text";
+        this.loading = true;
+      } else if (
+        finishedActions[finishedActions.length - 1].state ===
+        BackgroundAction.STATE.FAIL
+      ) {
+        this.friendlyMessageClass = "red--text";
+        this.loading = false;
       }
-    } finally {
-      return res;
+      return finishedActions[finishedActions.length - 1].details;
     }
+
+    return "";
   }
 
   /**

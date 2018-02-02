@@ -278,14 +278,21 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
     }
   }) => {
+
+    const METRICS_BUFFER_SIZE: number = 100;
+
     for (let deploymentId in metricBundle) { // This will only happen once
       if (state.metrics[deploymentId]) {
+
+        let metrics =
+          state.metrics[deploymentId].concat([metricBundle[deploymentId]]);
+
+        while (metrics.length > METRICS_BUFFER_SIZE) { metrics.shift(); }
 
         // Optimized way of adding metrics to the storage
         state.metrics = {
           ...state.metrics,
-          [deploymentId]:
-            state.metrics[deploymentId].concat([metricBundle[deploymentId]])
+          [deploymentId]: metrics
         };
 
         /*

@@ -32,7 +32,7 @@
 
           <!-- Domain list-->
           <v-select label="Domain" v-model="selectedDomain" v-bind:items="domains" item-text="url"
-            v-bind:rules="[v => !!v || 'A domain is required']" required autocomplete></v-select>
+            autocomplete></v-select>
 
           <!-- Certificate -->
           <v-flex xs4 md6>
@@ -169,12 +169,15 @@ export default class NewHTTPEntrypointView extends Vue {
   submit(): void {
     if ((<any>this.$refs.form).validate()) {
       let resourcesConfig = {
-        vhost: this.selectedDomain._uri
+        server_cert: null,
+        vhost: null
       };
+      if (this.selectedDomain) {
+        resourcesConfig.vhost = this.selectedDomain._uri;
+      }
+
       if (this.selectedCertificate) {
-        resourcesConfig["server_cert"] = this.selectedCertificate;
-      } else {
-        resourcesConfig["server_cert"] = null;
+        resourcesConfig.server_cert = this.selectedCertificate;
       }
 
       let config = {
@@ -199,7 +202,7 @@ export default class NewHTTPEntrypointView extends Vue {
       roles["sep"] = new Deployment.Role(
         "sep", // id
         "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
-        { domain: this.selectedDomain._uri }, // configuration
+        this.selectedDomain ? { domain: this.selectedDomain._uri } : null, // configuration
         1, //cpu
         1, //memory
         0, //ioperf

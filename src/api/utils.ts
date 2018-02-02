@@ -61,7 +61,7 @@ export function transformEcloudDeploymentToDeployment(
       resourcesConfig[ecloudDeployment.resources[res].resource.name] =
         ecloudDeployment.resources[res].resource;
     } else {
-      console.warn('found resource not following structure: ', res);
+      // console.warn('found resource not following structure: ', res);
     }
   }
 
@@ -353,9 +353,9 @@ export function transformManifestToService(manifest: {
     manifest.name, // uri:string
     resources, // resources: Array<string>,
     parameters, // {[parameter:string]: Parameter},
-    roles, // roles: { [rolId: string]: Service.Rol },
-    proChannels, // proChannels: { [channelId: string]: Service.Rol.Channel },
-    depChannels, // reqChannels: { [channelId: string]: Service.Rol.Channel },
+    roles, // roles: { [roleId: string]: Service.Role },
+    proChannels, // proChannels: { [channelId: string]: Service.Role.Channel },
+    depChannels, // reqChannels: { [channelId: string]: Service.Role.Channel },
     connectors
   );
 }
@@ -526,8 +526,8 @@ export function transformManifestToComponent(manifest: {
     manifest.runtime, // runtime: string
     resources, // resourcesConfig: { [resourceName: string]: string }
     manifest.configuration.parameters, // parameters: Object
-    proChannels, // proChannels: { [channelId: string]: Service.Rol.Channel }
-    depChannels // depChannels: { [channelId: string]: Service.Rol.Channel }
+    proChannels, // proChannels: { [channelId: string]: Service.Role.Channel }
+    depChannels // depChannels: { [channelId: string]: Service.Role.Channel }
   );
 }
 export function transformManifestToResource(manifest: {
@@ -601,7 +601,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     }
   }
 } {
-  
+
   let res: {
     [deploymentId: string]: {
       'data': {
@@ -623,23 +623,23 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     }
   } = {};
 
-  // Inicializamos el deployment
+  // Deployment initialization
   res[ecloudEvent.data.deploymentUrn] = { 'data': {}, 'roles': {} };
 
-  // Obtenemos los datos de los deployment
+  // Obtaining deployment data
   for (let property in ecloudEvent.data.data) {
     res[ecloudEvent.data.deploymentUrn].data[property] =
       ecloudEvent.data.data[property].mean;
   }
   res[ecloudEvent.data.deploymentUrn].data['timestamp'] = ecloudEvent.timestamp;
 
-  // Inicializamos los roles
+  // Role initialization
   for (let rolId in ecloudEvent.data.roles) {
     res[ecloudEvent.data.deploymentUrn].roles[rolId] = {
       'data': {}, 'instances': {}
     };
 
-    // Obtenemos los datos de los roles
+    // Obtaining role data
     for (let property in ecloudEvent.data.roles[rolId].data) {
       res[ecloudEvent.data.deploymentUrn].roles[rolId].data[property] =
         ecloudEvent.data.roles[rolId].data[property].mean;
@@ -647,7 +647,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     res[ecloudEvent.data.deploymentUrn].roles[rolId].data['timestamp'] =
       ecloudEvent.timestamp;
 
-    // Obtenemos los datos de las instáncias
+    // Obtaining instance data
     for (let instanceId in ecloudEvent.data.roles[rolId].instances) {
       res[ecloudEvent.data.deploymentUrn].roles[rolId]
         .instances[instanceId] = {};
@@ -711,7 +711,7 @@ export function getResourceType(uri: string): ResourceType {
   // realocated to the left
   switch (splitted[i]) {
     case 'volume':
-      console.warn('deprecated resource type \'volume\': %s', uri);
+    // console.warn('deprecated resource type \'volume\': %s', uri);
     case 'volumes':
       res = ResourceType.volume;
       break;
@@ -800,13 +800,10 @@ export function transformDeploymentToManifest(deployment: Deployment) {
     'roles': manifestRoles
   };
 }
-export function transformDomainToManifest(domain: string) {
-  // TODO: This has to be fixed in a new ticket. The domain of the user has to
-  // bee chosen
-  console.warn('Creating element uri with default domain \'dashboard\'');
+export function transformDomainToManifest(uri: string, domain: string) {
   return {
     spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-    name: 'eslap://dashboard/resources/vhost/' + domain,
+    name: uri,
     parameters: {
       vhost: domain
     }

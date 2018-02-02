@@ -49,7 +49,7 @@ import ChartComponent from "./../chart";
   name: "instance-card-component",
   props: {
     instance: { required: true },
-    clear: { required: true, type: Boolean }, // Este parámetro se utiliza para limpiar 'kill Instance' cuando se cancelan los cambios
+    clear: { required: true, type: Boolean }, // Used to clean 'kill instances' when changes are canceled
     instanceMetrics: { required: true }
   },
   components: {
@@ -102,9 +102,9 @@ export default class InstanceCardComponent extends Vue {
   }
 
   /**
-     * Éste método se utiliza para enviar una notificación al componente superior para que lea que
-     * se ha cambiado el valor de 'kill instance'
-     */
+   * Sends a notification to the superiour component to be aware of a change
+   * in the value of kill instances
+   */
   killInstanceChange() {
     this.$emit("killInstanceChange", [this.instance.cnid, this.killInstance]);
   }

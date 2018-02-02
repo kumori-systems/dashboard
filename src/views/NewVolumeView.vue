@@ -45,12 +45,12 @@ export default class NewVolumeView extends Vue {
   }
 
   addDataVolume() {
-    this.size.shift(); // Eliminamos el 0 inicial
+    this.size.shift();
     let params = {
       prefix: this.prefix,
       chunks: this.size
     };
-    this.size = [0].concat(this.size); // Restauramos el 0 inicial
+    this.size = [0].concat(this.size);
     this.$store.dispatch("addDataVolume", params);
     this.$router.push("/dataVolumes");
   }

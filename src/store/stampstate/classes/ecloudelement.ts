@@ -37,10 +37,6 @@ export abstract class EcloudElement {
         || splitted[1] !== ''
       ) throw new Error();
       
-      if (splitted[0] === 'slap:') {
-        console.warn('deprecated protocol slap: at %s', URI);
-      }
-
       // Save domain
       this._domain = splitted[2];
       // Save type

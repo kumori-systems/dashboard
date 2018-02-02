@@ -205,8 +205,7 @@ export default class NewDeploymentView extends Vue {
   valid: boolean = false;
 
   mounted() {
-    // Si venimos desde la ventana elements con un servicio preseleccionado, lo
-    // ponemos
+    // If there is a preselected service, load it
     this.selectedService = this.$store.getters.selectedService || null;
   }
 
@@ -279,10 +278,7 @@ export default class NewDeploymentView extends Vue {
   }
 
   get services(): string[] {
-    // Para poder hacer los cálculos de los channel, y poder recomendar
-    // únicamente aquellos que encajan es necesario obtener todos los
-    // servicios de aquellos deployment que están desplegados
-    // This will provably be changed in a future ticket
+    // All deployed services must be loaded to show available channels
     for (let deploymentURI in this.deployments) {
       let service: Service = ((<SSGetters>this.$store.getters).service as any)(
         this.deployments[deploymentURI].service

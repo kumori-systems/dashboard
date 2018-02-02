@@ -21,17 +21,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   }
 
-  processingBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
-    { id, details }): void => {
-
-    injectee.commit('processingBackgroundAction', { id, details });
-
-  }
-
   finishBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
-    { id, state, details }): void => {
+    { type, state, details }): void => {
 
-    injectee.commit('finishBackgroundAction', { id, state, details });
+    injectee.commit('finishBackgroundAction', { type, state, details });
 
   }
 
@@ -45,10 +38,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   /** Signs the user out of the page. */
   signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
 
-    // If localstorage is available
+    // If sessionstorage is available
     if (typeof (Storage) !== 'undefined') {
-      // Removes the user form localstorage
-      localStorage.removeItem('user');
+      // Removes the user form sessionstorage
+      sessionStorage.removeItem('user');
     }
 
     // Removes the user from vuex
@@ -71,18 +64,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }): void => {
 
-    // Update background action info
-    const authenticationAction = new BackgroundAction('authentication',
-      'User authentication in the system');
+    console.debug('Entering at signin');
 
-    const loadInfoAction = new BackgroundAction('loadInfo',
-      'Action which loads data from the system');
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.LOGIN, 'Validating user')
+    );
 
-    injectee.dispatch('addBackgroundAction', authenticationAction);
-    injectee.dispatch('processingBackgroundAction', {
-      'id': authenticationAction.id,
-      'details': 'Validating user'
-    });
+    console.debug('Created new background action');
 
     // Launch background action
     connection.login(
@@ -90,17 +79,17 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     ).then((user) => {
 
       injectee.dispatch('finishBackgroundAction', {
-        'id': authenticationAction.id,
-        'state': BackgroundAction.State.SUCCESS,
-        'details': 'Authentication sucessfull'
+        'type': BackgroundAction.TYPE.LOGIN,
+        'state': BackgroundAction.STATE.SUCCESS
       });
 
-      // Loading process
-      injectee.dispatch('addBackgroundAction', loadInfoAction);
-      injectee.dispatch('processingBackgroundAction', {
-        'id': loadInfoAction.id,
-        'details': 'Loading data..'
-      });
+      injectee.dispatch(
+        'addBackgroundAction',
+        new BackgroundAction(
+          BackgroundAction.TYPE.LOADING_DATA,
+          'Loading data..'
+        )
+      );
 
       // Load all elements
       return connection.getRegisteredElements().then(() => {
@@ -112,16 +101,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
           console.debug('Retrieved all deployments from the platform');
 
-          injectee.dispatch('finishBackgroundAction', {
-            'id': loadInfoAction.id,
-            'state': BackgroundAction.State.SUCCESS,
-            'details': 'All data loaded'
-          });
-
-          // If localstorage is available
+          // If sessionstorage is available
           if (typeof (Storage) !== 'undefined') {
             // Stores the item in local storage
-            localStorage.setItem('user',
+            sessionStorage.setItem('user',
               JSON.stringify(user));
           }
 
@@ -129,17 +112,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           user.state = User.State.AUTHENTICATED;
           injectee.commit('signIn', user);
 
+          injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.LOADING_DATA,
+            'state': BackgroundAction.STATE.SUCCESS
+          });
+
         });
 
       }).catch((error) => {
-
-        if (!error.code || error.code !== '001') {
+        if (error.code && error.code === '001') {
+          // This kind of error can be ignored
+        } else {
+          console.error(error);
           injectee.dispatch('finishBackgroundAction', {
-            'id': loadInfoAction.id,
-            'state': BackgroundAction.State.FAIL,
-            'details': 'Error loading data, please contact your administrator'
+            'type': BackgroundAction.TYPE.LOADING_DATA,
+            'state': BackgroundAction.STATE.FAIL,
+            'details': 'Error loading data, retry and if the problem persists, '
+              + 'please contact your administrator'
           });
-          console.error('Error loading data: ', error);
         }
 
       });
@@ -147,8 +137,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }).catch((error) => {
 
       injectee.dispatch('finishBackgroundAction', {
-        'id': authenticationAction.id,
-        'state': BackgroundAction.State.FAIL,
+        'type': BackgroundAction.TYPE.LOGIN,
+        'state': BackgroundAction.STATE.FAIL,
         'details': 'Authentication failure'
       });
 
@@ -207,7 +197,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     connection.onAddResource((resourceId: string, resource: Resource) => {
 
-      // Obtenemos el tipo de resource del que estamos hablando
       let type: ResourceType = getResourceType(resourceId);
       let commitString: string;
       switch (type) {
@@ -221,14 +210,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           commitString = 'addVolume';
           break;
         default:
-          console.error('Not expected resource type at %s', resourceId);
+          console.error('Not expected resource type %s', resourceId);
       }
 
       /**
        * If the object is not known for the page it won't be added, but the page
        * will keep loading.
-       * 
-       * TODO: This must be checked
        */
       if (type) {
 
@@ -261,6 +248,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connection.onAddNotification((notification: Notification) => {
       injectee.dispatch('addNotification', notification);
     });
-    
+
   }
+
+  /** Marks a notification as readed. */
+  readNotification = (injectee: Vuex.ActionContext<State, any>, payload):
+    void => {
+    injectee.commit('readNotification', payload);
+  }
+
 };

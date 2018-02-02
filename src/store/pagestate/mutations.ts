@@ -24,10 +24,22 @@ export default class Mutations implements Vuex.MutationTree<State> {
    * Clear the local state.
    */
   clearState = (state: State): void => {
-    state.user = new User();
-    state.backgroundActions = [];
+    state.user = null;
     state.notifications = [];
-    state.pendingActions = 0;
+    state.pendingBackgroundActions = {
+      [BackgroundAction.TYPE.LOGIN]: [],
+      [BackgroundAction.TYPE.DEPLOY_SERVICE]: [],
+      [BackgroundAction.TYPE.UNDEPLOY_SERVICE]: [],
+      [BackgroundAction.TYPE.SCALE_SERVICE]: [],
+      [BackgroundAction.TYPE.LINK_SERVICES]: [],
+      [BackgroundAction.TYPE.UNLINK_SERVICES]: [],
+      [BackgroundAction.TYPE.REGISTER_BUNDLE]: [],
+      [BackgroundAction.TYPE.UNREGISTER_COMPONENT]: [],
+      [BackgroundAction.TYPE.UNREGISTER_RUNTIME]: [],
+      [BackgroundAction.TYPE.UNREGISTER_SERVICE]: [],
+      [BackgroundAction.TYPE.LOADING_DATA]: [],
+    };
+    state.finishedBackgroundActions = [];
   }
 
   /**
@@ -36,49 +48,34 @@ export default class Mutations implements Vuex.MutationTree<State> {
    * @description The action will start as pending and will be eventually
    * solved.
    */
-  addBackgroundAction = (state: State, ba: BackgroundAction): void => {
-    state.backgroundActions.push(ba);
-    state.pendingActions++;
+  addBackgroundAction = (state: State, bA: BackgroundAction): void => {
+    state.pendingBackgroundActions[bA.type].push(bA);
   }
-
-  /**
-   * Changes the state of an action from 'waiting' to 'on process' and updates
-   * the details.
-   * @requires payload <{ 'id': string, 'details': string }>
-   */
-  processingBackgroundAction = (state: State, payload: {
-    'id': string,
-    'details': string
-  }): void => {
-    let i = state.backgroundActions
-      .findIndex(action => { return action.id === payload.id; });
-    state.backgroundActions[i].state = BackgroundAction.State.ON_PROCESS;
-    state.backgroundActions[i].details = payload.details;
-  }
-
 
   /**
    * Replaces the action for the same action with the new state. The action can
    * only finish with a SUCCESS or FAIL state. When an action finishes it's
    * removed from pending actions.
-   * @requires payload <{'id': string,'state': BackgroundAction.State,
-   * 'details': string}>
+   * @requires payload <{'type': BackgroundAction.TYPE,
+   * 'state': BackgroundAction.STATE.SUCCESS | BackgroundAction.STATE.FAIL,
+   * 'details': string
+   * }> Action to be finished, state and detailed info of the resolution.
    */
   finishBackgroundAction = (state: State, payload: {
-    'id': string, 'state': BackgroundAction.State, 'details': string
+    'type': BackgroundAction.TYPE,
+    'state': BackgroundAction.STATE.SUCCESS | BackgroundAction.STATE.FAIL,
+    'details': string
   }): void => {
-    if (payload.state !== BackgroundAction.State.SUCCESS &&
-      payload.state !== BackgroundAction.State.FAIL)
-      throw new Error('When finishing an action the state has to be SUCCESS or'
-        + 'FAIL. \nstate:' + payload.state);
 
-    // Update the properties in the state
-    let i = state.backgroundActions
-      .findIndex(action => { return action.id === payload.id; });
-    state.backgroundActions[i].state = payload.state;
-    state.backgroundActions[i].details = payload.details;
+    let action = state.pendingBackgroundActions[payload.type].shift();
+    if (!action) {
+      action = new BackgroundAction(payload.type);
+    }
+    action.state = payload.state;
+    if (payload.details) action.details = payload.details;
 
-    state.pendingActions--;
+    state.finishedBackgroundActions.push(action);
+
   }
 
   /**
@@ -86,8 +83,27 @@ export default class Mutations implements Vuex.MutationTree<State> {
    */
   addNotification = (state: State, notification: Notification): void => {
 
+    const NOTIFICATION_BUFFER_SIZE: number = 500;
+
     if (state.user.state === User.State.AUTHENTICATED) {
+
+      while (state.notifications.length >= NOTIFICATION_BUFFER_SIZE) {
+        state.notifications.shift(); // Removes the oldest notification
+      }
+
       state.notifications.push(notification);
+
+    }
+
+  }
+
+  readNotification = (state: State, { time, title }): void => {
+
+    for (let not in state.notifications) {
+      if (state.notifications[not].time === time
+        && state.notifications[not].title === title) {
+        state.notifications[not].readed = true;
+      }
     }
 
   }
