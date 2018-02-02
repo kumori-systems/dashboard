@@ -64,14 +64,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }): void => {
 
-    console.debug('Entering at signin');
-
     injectee.dispatch(
       'addBackgroundAction',
       new BackgroundAction(BackgroundAction.TYPE.LOGIN, 'Validating user')
     );
-
-    console.debug('Created new background action');
 
     // Launch background action
     connection.login(

@@ -202,7 +202,6 @@ export default class AlarmsAndLogsView extends Vue {
     return this._defPag;
   }
   set defaultPagination(value) {
-    console.log("the setted default pagination is", value);
     this._defPag = value;
   }
   /** Show/Hide from date selector. */
