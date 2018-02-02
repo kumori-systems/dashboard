@@ -890,11 +890,13 @@ class ProxyConnection extends EventEmitter {
   }
 
   /* RESOURCES */
-  addDomain(webdomain: string): Promise<any> {
+  addDomain(uri: string, webdomain: string): Promise<any> {
     let zip = new JSZip();
-    let content: string = JSON.stringify(transformDomainToManifest(webdomain))
-      + '\n';
-    zip.file('Manifest.json', content);
+    zip.file(
+    'Manifest.json',
+      JSON.stringify(transformDomainToManifest(uri, webdomain))
+      + '\n'
+    );
     /*
      * var img = zip.folder("images");
      * img.file("smile.gif", imgData, { base64: true });

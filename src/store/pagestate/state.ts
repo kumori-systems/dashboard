@@ -6,13 +6,14 @@ import { BackgroundAction, Notification, User } from './classes';
 export default class State {
   user: User;
   notifications: Notification[];
-  pendingBackgroundActions: { [type: number]: BackgroundAction[] };
+  pendingBackgroundActions: { [type: string]: BackgroundAction[] };
   finishedBackgroundActions: BackgroundAction[];
   constructor() {
     this.user = null;
     this.notifications = [];
     this.pendingBackgroundActions = {
       [BackgroundAction.TYPE.LOGIN]: [],
+      [BackgroundAction.TYPE.REGISTER_DOMAIN]: [],
       [BackgroundAction.TYPE.DEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.UNDEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.SCALE_SERVICE]: [],

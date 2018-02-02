@@ -601,7 +601,7 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
     }
   }
 } {
-  
+
   let res: {
     [deploymentId: string]: {
       'data': {
@@ -711,7 +711,7 @@ export function getResourceType(uri: string): ResourceType {
   // realocated to the left
   switch (splitted[i]) {
     case 'volume':
-     // console.warn('deprecated resource type \'volume\': %s', uri);
+    // console.warn('deprecated resource type \'volume\': %s', uri);
     case 'volumes':
       res = ResourceType.volume;
       break;
@@ -800,13 +800,10 @@ export function transformDeploymentToManifest(deployment: Deployment) {
     'roles': manifestRoles
   };
 }
-export function transformDomainToManifest(domain: string) {
-  // TODO: This has to be fixed in a new ticket. The domain of the user has to
-  // bee chosen
-  console.warn('Creating element uri with default domain \'dashboard\'');
+export function transformDomainToManifest(uri: string, domain: string) {
   return {
     spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-    name: 'eslap://dashboard/resources/vhost/' + domain,
+    name: uri,
     parameters: {
       vhost: domain
     }

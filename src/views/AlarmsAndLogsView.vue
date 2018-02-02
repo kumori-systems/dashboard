@@ -14,16 +14,16 @@
       <v-layout>
 
         <!-- Level filter -->
-        <v-flex xs12 md2>
+        <v-flex xs12 md1>
           <v-select label="Minimum log level" v-model="selectedLogLevel" v-bind:items="logLevels"></v-select>
         </v-flex>
 
         <!-- Date filter -->
         <v-flex xs12 md6>
-          <v-layout>
+          <v-layout class="mr-3 ml-3">
 
             <!-- From date picker -->
-            <v-flex xs12 md3 class="pl-3">
+            <v-flex xs12 md3>
               <v-menu lazy v-on:close-on-content-click="false" v-model="showFromDateMenu"
                 transition="scale-transition" offset-y full-width
                 v-on:nudge-right="40" max-width="290px" min-width="290px">
@@ -38,7 +38,7 @@
             </v-flex>
             
             <!-- From time picker -->
-            <v-flex xs12 md3 class="pr-1">
+            <v-flex xs12 md3 class="mr-2">
               <v-menu lazy v-model="showFromTimeMenu"
                 transition="scale-transition" offset-y full-width
                 v-on:nudge-right="40" max-width="290px" min-width="290px">
@@ -51,7 +51,7 @@
             </v-flex>
 
             <!-- To date picker -->
-            <v-flex xs12 md3  class="pl-1">
+            <v-flex xs12 md3 >
               <v-menu lazy v-on:close-on-content-click="false" v-model="showToDateMenu"
                 transition="scale-transition" offset-y full-width
                 v-on:nudge-right="40" max-width="290px" min-width="290px">
@@ -66,7 +66,7 @@
             </v-flex>
             
             <!-- To time picker -->
-            <v-flex xs12 md3  class="pr-3">
+            <v-flex xs12 md3>
               <v-menu lazy v-model="showToTimeMenu"
                 transition="scale-transition" offset-y full-width
                 v-on:nudge-right="40" max-width="290px" min-width="290px">
@@ -93,7 +93,7 @@
 
       <!-- Log table -->
       <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions 
-      v-bind:search="search">
+      v-bind:search="search" v-bind:pagination.sync="defaultPagination">
 
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
@@ -146,11 +146,6 @@ const NUM_ITEMS_PER_PAGE = 10;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
-  defaultPagination = {
-    sortBy: "time",
-    descending: true
-  };
-
   /** Table headers. */
   headers: any[] = [
     {
@@ -198,6 +193,18 @@ export default class AlarmsAndLogsView extends Vue {
   /** Actual page. */
   actualPage: number = 1;
 
+  _defPag = {
+    sortBy: "time",
+    descending: true
+  };
+
+  get defaultPagination() {
+    return this._defPag;
+  }
+  set defaultPagination(value) {
+    console.log("the setted default pagination is", value);
+    this._defPag = value;
+  }
   /** Show/Hide from date selector. */
   showFromDateMenu: boolean = false;
   /** Show/Hide from time selector. */
@@ -222,9 +229,6 @@ export default class AlarmsAndLogsView extends Vue {
 
   get logs() {
     let loglist: Notification[] = this.$store.getters.notifications;
-
-    // Switch the page
-    this.numPages = Math.trunc((loglist.length / NUM_ITEMS_PER_PAGE) + 1);
 
     loglist = loglist
       .filter((item, index, arrayfun) => {
@@ -298,6 +302,9 @@ export default class AlarmsAndLogsView extends Vue {
         (this.actualPage - 1) * NUM_ITEMS_PER_PAGE,
         (this.actualPage - 1) * NUM_ITEMS_PER_PAGE + NUM_ITEMS_PER_PAGE
       );
+
+    // Switch the page
+    this.numPages = Math.trunc(loglist.length / NUM_ITEMS_PER_PAGE + 1);
 
     loglist.forEach((item: Notification, index, arrayfun) => {
       if (item.level === Notification.LEVEL.ERROR && !item.readed) {

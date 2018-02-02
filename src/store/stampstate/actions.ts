@@ -75,7 +75,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     );
 
     connection.addDeployment(deployment).then(() => {
-      
+
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.DEPLOY_SERVICE,
         'state': BackgroundAction.STATE.SUCCESS
@@ -136,7 +136,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * Adds a new domain to the stamp.
    * @requires domain <string> Domain name to be added to the stamp.
    */
-  addNewDomain = (injectee: Vuex.ActionContext<State, any>, domain: string):
+  addNewDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
     void => {
 
     injectee.dispatch(
@@ -144,7 +144,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.REGISTER_DOMAIN)
     );
 
-    connection.addDomain(domain).then(() => {
+    connection.addDomain(uri, domain).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.REGISTER_DOMAIN,
