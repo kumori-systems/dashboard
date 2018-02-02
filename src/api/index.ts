@@ -496,7 +496,10 @@ class ProxyConnection extends EventEmitter {
               clearInterval(tokenExpiration);
             }
 
-          }, user.token.expiresIn - Math.trunc(user.token.expiresIn * 250));
+          },
+            (user.token.expiresIn * 1000)
+            - Math.trunc(user.token.expiresIn * 250)
+          );
 
           return user;
         });
