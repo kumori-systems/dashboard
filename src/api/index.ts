@@ -929,8 +929,8 @@ class ProxyConnection extends EventEmitter {
         }
       });
       this.emit(this.onAddResource, uri, res);
-      this.emit(
-        this.onAddNotification,
+
+      this.emit(this.onAddNotification,
         new Notification(Notification.LEVEL.INFO,
           'Registered domain',
           'Correclty registered domain' + webdomain,
