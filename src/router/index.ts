@@ -4,7 +4,7 @@ import Router from 'vue-router';
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
   NewBundleView, NewDeploymentView, NewDomainView, NewHTTPEntrypointView,
-  OverviewView, SignInView
+  OverviewView, SignInView, UserSettingsView
 } from '../views';
 
 Vue.use(Router);
@@ -60,6 +60,10 @@ export default new Router({
     {
       path: '/uploadbundle',
       component: NewBundleView
+    },
+    {
+      path: '/userSettings',
+      component: UserSettingsView
     },
     // If not found, go to main view
     { path: '*', redirect: '/overview' }

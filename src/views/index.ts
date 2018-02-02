@@ -10,10 +10,12 @@ import NewHTTPEntrypointView from './NewHTTPEntrypointView.vue';
 import NewVolumeView from './NewVolumeView.vue';
 import OverviewView from './OverviewView.vue';
 import SignInView from './SignInView.vue';
+import UserSettingsView from './UserSettingsView.vue';
 import VolumesView from './VolumesView.vue';
 
 export {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
   HelpView, NewBundleView, NewDeploymentView, NewDomainView,
-  NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView, VolumesView
+  NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
+  UserSettingsView, VolumesView
 }

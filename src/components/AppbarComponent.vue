@@ -49,6 +49,9 @@
         <v-icon>more_vert</v-icon>
       </v-btn>
       <v-list>
+        <v-list-tile to="/userSettings">
+          <v-list-tile-title>Settings</v-list-tile-title>
+        </v-list-tile>
         <v-list-tile v-on:click="signout">
           <v-list-tile-title>Sign out</v-list-tile-title>
         </v-list-tile>
