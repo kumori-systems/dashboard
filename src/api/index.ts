@@ -196,7 +196,7 @@ class ProxyConnection extends EventEmitter {
                       'Deploying service',
                       'The service ' + event.entity['serviceApp'] + 'is beeing '
                       + 'deployed as ' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -255,7 +255,7 @@ class ProxyConnection extends EventEmitter {
                       'Deployed service',
                       'The service ' + event.entity['serviceApp'] + 'has been '
                       + 'deployed as ' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -299,7 +299,7 @@ class ProxyConnection extends EventEmitter {
                       + ' has been linked with '
                       + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel,
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -320,7 +320,7 @@ class ProxyConnection extends EventEmitter {
                       + ' has been unlinked from '
                       + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel,
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -332,7 +332,7 @@ class ProxyConnection extends EventEmitter {
                       'Scaling service',
                       'Scaling service '
                       + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -382,7 +382,7 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
 
@@ -397,7 +397,7 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -411,7 +411,7 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
 
@@ -426,7 +426,7 @@ class ProxyConnection extends EventEmitter {
                       + 'Instance ' + event.entity['instance']
                       + ' from Role ' + event.entity['role']
                       + ' from Service' + event.entity['service'],
-                      JSON.stringify(event, null, '&nbsp; &nbsp; &nbsp; &nbsp;')
+                      JSON.stringify(event, null, 4)
                     )
                   );
                   break;
@@ -893,7 +893,7 @@ class ProxyConnection extends EventEmitter {
   addDomain(uri: string, webdomain: string): Promise<any> {
     let zip = new JSZip();
     zip.file(
-    'Manifest.json',
+      'Manifest.json',
       JSON.stringify(transformDomainToManifest(uri, webdomain))
       + '\n'
     );
@@ -929,6 +929,14 @@ class ProxyConnection extends EventEmitter {
         }
       });
       this.emit(this.onAddResource, uri, res);
+      this.emit(
+        this.onAddNotification,
+        new Notification(Notification.LEVEL.INFO,
+          'Registered domain',
+          'Correclty registered domain' + webdomain,
+          JSON.stringify(value, null, 4)
+        )
+      );
 
     });
   }
