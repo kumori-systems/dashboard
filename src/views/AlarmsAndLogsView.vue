@@ -104,10 +104,13 @@
           <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.text }}</td>
           <td class="text-xs-right">
+            <v-btn color="yellow darken-1" v-if="props.item.level===Notification.LEVEL.ERROR && !props.item.readed" flat v-on:click="markAlarmAsSeen(props.item)">
+              <v-icon>visibility</v-icon>
+            </v-btn>
             <v-btn color="blue darken-1" flat v-on:click="showLogInfoDialog(props.item.data)">
               <v-icon>info</v-icon>
             </v-btn>
-            </td>
+          </td>
         </template>
 
       </v-data-table>
@@ -146,6 +149,7 @@ const NUM_ITEMS_PER_PAGE = 10;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
+  Notification = Notification;
   /** Table headers. */
   headers: any[] = [
     {
@@ -305,15 +309,6 @@ export default class AlarmsAndLogsView extends Vue {
     // Switch the page
     this.numPages = Math.trunc(loglist.length / NUM_ITEMS_PER_PAGE + 1);
 
-    loglist.forEach((item: Notification, index, arrayfun) => {
-      if (item.level === Notification.LEVEL.ERROR && !item.readed) {
-        this.$store.dispatch("readNotification", {
-          time: item.time,
-          title: item.title
-        });
-      }
-    });
-
     return loglist;
   }
 
@@ -338,6 +333,13 @@ export default class AlarmsAndLogsView extends Vue {
   showLogInfoDialog(data: string) {
     this.data = data;
     this.logInfoDialog = true;
+  }
+
+  markAlarmAsSeen(item) {
+    this.$store.dispatch("readNotification", {
+      time: item.time,
+      title: item.title
+    });
   }
 }
 </script>
