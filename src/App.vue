@@ -110,6 +110,7 @@ export default class App extends Vue {
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
   }
+
 }
 </script>
 <style lang="stylus">

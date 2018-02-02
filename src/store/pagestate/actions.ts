@@ -47,6 +47,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // Removes the user from vuex
     injectee.commit('clearState');
 
+    // Closes all connections to the system.
+    connection.logout();
+
   }
 
   /**
@@ -136,6 +139,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'type': BackgroundAction.TYPE.LOGIN,
         'state': BackgroundAction.STATE.FAIL,
         'details': 'Authentication failure'
+      });
+
+    });
+
+    connection.onMustSignOut((reason: string) => {
+
+      injectee.dispatch('signout').then(() => {
+        injectee.dispatch('finishBackgroundAction', {
+          'type': BackgroundAction.TYPE.LOGIN,
+          'state': BackgroundAction.STATE.FAIL,
+          'details': reason
+        });
       });
 
     });

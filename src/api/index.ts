@@ -7,7 +7,7 @@ import {
   Endpoint, FileStream, ReconfigDeploymentModification, RegistrationResult,
   ScalingDeploymentModification
 } from 'admission-client';
-
+import { setInterval } from 'timers';
 
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
@@ -54,6 +54,7 @@ class ProxyConnection extends EventEmitter {
   public onLink: Function;
   public onUnlink: Function;
   public onAddNotification: Function;
+  public onMustSignOut: Function;
 
   private requestedElements: string[];
 
@@ -94,10 +95,20 @@ class ProxyConnection extends EventEmitter {
     this.onAddNotification =
       this.registerEvent<(notification: Notification) => void>();
 
+    this.onMustSignOut =
+      this.registerEvent<(notification: Notification) => void>();
+
     this.requestedElements = [];
   }
 
   /* GENERIC */
+
+  /**
+   * Closes the authenticated connections to the stamp.
+   */
+  logout(): void {
+    this.admission.close();
+  }
 
   /**
    * Login authentifies the user and redirects all events received from the
@@ -469,6 +480,24 @@ class ProxyConnection extends EventEmitter {
         });
 
         return this.admission.init().then(() => {
+
+          // Check if the token has expired
+          let tokenExpiration = setInterval(() => {
+            let err = true;
+
+            // this.acs.login()
+
+            // this.acs.login()
+
+            // this.acs.login()
+
+            if (err) {
+              this.emit(this.onMustSignOut, 'Authentication token expired');
+              clearInterval(tokenExpiration);
+            }
+
+          }, user.token.expiresIn - Math.trunc(user.token.expiresIn * 250));
+
           return user;
         });
 
