@@ -123,6 +123,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           // This kind of error can be ignored
         } else {
           console.error(error);
+          injectee.dispatch('signout');
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.LOADING_DATA,
             'state': BackgroundAction.STATE.FAIL,
