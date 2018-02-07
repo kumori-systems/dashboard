@@ -20,7 +20,7 @@
           </v-btn>
 
           <!-- Cancels the action -->
-          <v-btn outline to="-1">Cancel</v-btn>
+          <v-btn outline v-on:click="cancel">Cancel</v-btn>
           
         </v-card-actions>
       </v-card-title>
@@ -52,6 +52,10 @@ export default class NewBundleView extends Vue {
       this.$store.dispatch("addNewBundle", this.fileList.item(0));
       this.$router.push("/elements");
     }
+  }
+
+  cancel() {
+    this.$router.go(-1);
   }
 }
 </script>

@@ -21,13 +21,20 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   /**
+   * Updates the user token
+   */
+  refreshToken = (state: State, token: User.Token): void => {
+    state.user.token = token;
+  }
+
+  /**
    * Clear the local state.
    */
   clearState = (state: State): void => {
     state.user = null;
     state.notifications = [];
     state.pendingBackgroundActions = {
-      [BackgroundAction.TYPE.LOGIN]: [],
+      [BackgroundAction.TYPE.SIGNIN]: [],
       [BackgroundAction.TYPE.DEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.UNDEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.SCALE_SERVICE]: [],
@@ -49,7 +56,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
    * solved.
    */
   addBackgroundAction = (state: State, bA: BackgroundAction): void => {
-    state.pendingBackgroundActions[bA.type].push(bA);
+    let newArray = state.pendingBackgroundActions[bA.type];
+    newArray.push(bA);
+    Vue.set(state.pendingBackgroundActions, bA.type, newArray);
   }
 
   /**

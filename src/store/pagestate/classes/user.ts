@@ -9,12 +9,7 @@ export class User {
   /** <string> Name representing the user. */
   name: string = null;
   /** <string> Token which autentifies the user. */
-  token: {
-    accessToken: string,
-    expiresIn: number,
-    refreshToken: string,
-    tokenType: string
-  } = null;
+  token: User.Token = null;
 
   /**
    * <User.State> Represents if the user has been authenticated or is a guest
@@ -26,17 +21,16 @@ export class User {
    * If no parameters are passed default values are taken for each param.
    * @param id <string> User's id.
    * @param name <string> User's name.
-   * @param token <string> Token which autentifies the user.
+   * @param token <User.Token> Token which autentifies the user.
    * @param state <User.State> User's state Unauthorized | Authenticated |
    * On_validation. Default Unauthorized
    * @param avatar <string> Url to user's avatar. Default
    * /static/default_user_avatar.png
    */
-  constructor(id?: string, name?: string, state?: User.State, token?: {
-    accessToken: string, expiresIn: number, refreshToken: string,
-    tokenType: string
-  },
-    avatar?: string) {
+  constructor(
+    id?: string, name?: string, state?: User.State, token?: User.Token,
+    avatar?: string
+  ) {
     if (id) this.id = id;
     if (name) this.name = name;
     if (state && state !== null) this.state = state;
@@ -53,4 +47,44 @@ export module User {
     UNAUTHENTICATED = 'unauthenticated',
     AUTHENTICATED = 'authenticated'
   };
+
+  export class Token {
+    readonly accessToken: string;
+    readonly expiresIn: number;
+    readonly refreshToken: string;
+    readonly tokenType: string;
+    readonly creationDate: Date;
+
+    constructor(
+      accessToken: string, expiresIn: number, refreshToken: string,
+      tokenType: string
+    ) {
+      if (!accessToken) throw new Error('Required param accessToken');
+      this.accessToken = accessToken;
+      if (!expiresIn) throw new Error('Required param expiresIn');
+      this.expiresIn = expiresIn;
+      if (!refreshToken) throw new Error('Required param refreshToken');
+      this.refreshToken = refreshToken;
+      if (!tokenType) throw new Error('Required param tokenType');
+      this.tokenType = tokenType;
+
+      this.creationDate = new Date();
+    }
+
+    /**
+     * 
+     * @param creationDate date of creation of the token
+     * @param expiresIn seconds for the token to expire
+     */
+    static isTokenAlive(creationDate: Date, expiresIn: number): boolean {
+
+      const actualDate: Date = new Date();
+      const expirationDate: Date = new Date(
+        creationDate.getTime() + expiresIn * 1000
+      );
+
+      return expirationDate > actualDate;
+    }
+
+  }
 }

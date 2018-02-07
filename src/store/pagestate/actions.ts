@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers';
 import Vuex from 'vuex';
 import State from './state';
 
@@ -7,6 +8,12 @@ import {
   Component, Deployment, Resource, Runtime, Service
 } from '../stampstate/classes';
 import { BackgroundAction, Notification, User } from './classes';
+
+
+import PSGetters from './getters';
+
+
+let checktokeninterval = null;
 
 /**
  * Actions to handle this page's state easier.
@@ -28,6 +35,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   }
 
+  refreshToken = (injectee: Vuex.ActionContext<State, any>, token: User.Token):
+    void => {
+
+    injectee.commit('refreshToken', token);
+
+  }
+
+  /** Adds a notification in the local state. */
   addNotification = (injectee: Vuex.ActionContext<State, any>,
     notification: Notification): void => {
 
@@ -36,19 +51,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   /** Signs the user out of the page. */
-  signout = (injectee: Vuex.ActionContext<State, any>, payload): void => {
+  signOut = (injectee: Vuex.ActionContext<State, any>, payload): void => {
 
-    // If sessionstorage is available
+    // If localstorage is available
     if (typeof (Storage) !== 'undefined') {
-      // Removes the user form sessionstorage
-      sessionStorage.removeItem('user');
+
+      // Removes the user form localStorage
+      localStorage.removeItem('user');
+
     }
+
+    // Removes the token checking interval
+    clearInterval(checktokeninterval);
 
     // Removes the user from vuex
     injectee.commit('clearState');
 
     // Closes all connections to the system.
-    connection.logout();
+    connection.signOut();
 
   }
 
@@ -60,100 +80,169 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * If the user is not authenticated the error message can be seen in the
    * respective background action.
    */
-  signin = (injectee: Vuex.ActionContext<State, any>, payload: {
-    username: string, userpassword: string, userid: string, token: {
-      accessToken: string, expiresIn: number, refreshToken: string,
-      tokenType: string
-    }
+  signIn = (injectee: Vuex.ActionContext<State, any>, payload: {
+    username: string, userpassword: string, userid: string, token: User.Token
   }): void => {
 
     injectee.dispatch(
       'addBackgroundAction',
-      new BackgroundAction(BackgroundAction.TYPE.LOGIN, 'Validating user')
-    );
+      new BackgroundAction(BackgroundAction.TYPE.SIGNIN, 'Validating user')
+    ).then(() => { // Check correc id and password
 
-    // Launch background action
-    connection.login(
-      payload.username, payload.userpassword, payload.userid, payload.token
-    ).then((user) => {
+      return connection.signIn(
+        payload.username, payload.userpassword, payload.userid, payload.token
+      );
 
-      injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.LOGIN,
+    }).then((user) => { // Finish signIn action in the state
+
+      return injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.SIGNIN,
+        'state': BackgroundAction.STATE.SUCCESS
+      }).then(() => user);
+
+    }).then((user) => { // Start loading action in the state
+
+      return injectee.dispatch(
+        'addBackgroundAction',
+        new BackgroundAction(
+          BackgroundAction.TYPE.LOADING_DATA, 'Loading data..'
+        )
+      ).then(() => user);
+
+    }).then((user) => { // Load all elements
+
+      return connection.getRegisteredElements().then(() => {
+        console.debug('Stored a reference to all elements from the platform');
+        return user;
+      });
+
+    }).then((user) => { // Load all deployments
+
+      return connection.getDeploymentList().then(() => {
+        console.debug('Retrieved all deployments from the platform');
+        return user;
+      });
+
+    }).then((user) => { // Locally stores the user
+
+      // If localStorage is available
+      if (typeof (Storage) !== 'undefined') {
+        // Stores the item in local storage
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      // Stores the user in vuex
+      user.state = User.State.AUTHENTICATED;
+      injectee.commit('signIn', user);
+
+      return injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.LOADING_DATA,
         'state': BackgroundAction.STATE.SUCCESS
       });
 
-      injectee.dispatch(
-        'addBackgroundAction',
-        new BackgroundAction(
-          BackgroundAction.TYPE.LOADING_DATA,
-          'Loading data..'
-        )
-      );
+    }).then((user) => { // Sets the token check interval
 
-      // Load all elements
-      return connection.getRegisteredElements().then(() => {
+      const tokenCheckerTimeInterval = 1000 * 60 * 10; // 10 minutes
 
-        console.debug('Stored a reference to all elements from the platform');
+      checktokeninterval = setInterval(() => {
 
-        // Load all deployments
-        return connection.getDeploymentList().then(() => {
+        let actualToken = ((<PSGetters>injectee.getters).user as any as User)
+          .token;
 
-          console.debug('Retrieved all deployments from the platform');
+        // This is the last interval in which the token will be alive
+        if (new Date() > new Date(
+          new Date(actualToken.creationDate).getTime() 
+          + actualToken.expiresIn * 1000
+          - tokenCheckerTimeInterval
+        )) {
 
-          // If sessionstorage is available
-          if (typeof (Storage) !== 'undefined') {
-            // Stores the item in local storage
-            sessionStorage.setItem('user',
-              JSON.stringify(user));
-          }
+          connection.renewToken(actualToken)
+            .then((renewedToken) => {
+              injectee.commit('refreshToken', renewedToken);
+            }).catch((error) => {
 
-          // Stores the item in vuex
-          user.state = User.State.AUTHENTICATED;
-          injectee.commit('signIn', user);
+              // It was not possible to refresh the token
+              // So it's set a time out and when the timeout expires, the user
+              // Will automatically signout of the page
+              setTimeout(() => {
+                console.error('Error refreshing token', error);
+                injectee.dispatch('signOut').then(() => {
+                  injectee.dispatch('finishBackgroundAction', {
+                    'type': BackgroundAction.TYPE.SIGNIN,
+                    'state': BackgroundAction.STATE.FAIL,
+                    'details': 'Token refresh failed'
+                  });
+                });
+              },
+                new Date(
+                  new Date(actualToken.creationDate).getTime()
+                  + actualToken.expiresIn * 1000
+                ).getTime() - (new Date()).getTime()
+              );
+            });
 
-          injectee.dispatch('finishBackgroundAction', {
-            'type': BackgroundAction.TYPE.LOADING_DATA,
-            'state': BackgroundAction.STATE.SUCCESS
-          });
 
-        });
-
-      }).catch((error) => {
-        if (error.code && error.code === '001') {
-          // This kind of error can be ignored
         } else {
-          console.error(error);
-          injectee.dispatch('signout');
-          injectee.dispatch('finishBackgroundAction', {
-            'type': BackgroundAction.TYPE.LOADING_DATA,
-            'state': BackgroundAction.STATE.FAIL,
-            'details': 'Error loading data, retry and if the problem persists, '
-              + 'please contact your administrator'
-          });
+          // Not yet time to renew the token
         }
 
-      });
+      }, tokenCheckerTimeInterval);
 
-    }).catch((error) => {
 
-      injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.LOGIN,
-        'state': BackgroundAction.STATE.FAIL,
-        'details': 'Authentication failure'
-      });
+    }).catch((error: Error) => {
+      if (error.message === 'Duplicated request') {
+        // This just happens because vuex makes a lot of requests at the same
+        // time
+      }
+      else if (
+        error.message === 'Network Error'
+        || error.message === 'Connection error!'
+      ) {
+        injectee.dispatch('finishBackgroundAction', {
+          'type': BackgroundAction.TYPE.SIGNIN,
+          'state': BackgroundAction.STATE.FAIL,
+          'details': 'Network error'
+        });
+      }
+      else if (error.message === 'Element not covered') {
+
+        injectee.dispatch('signOut').then(() => {
+          console.error(error);
+          return injectee.dispatch('finishBackgroundAction', {
+            'type': BackgroundAction.TYPE.LOADING_DATA,
+            'state': BackgroundAction.STATE.FAIL,
+            'details': 'Error loading data, retry and if the problem '
+              + 'persists, please contact your administrator'
+          });
+        });
+
+      } else {
+
+        console.error(error);
+        injectee.dispatch('finishBackgroundAction', {
+          'type': BackgroundAction.TYPE.SIGNIN,
+          'state': BackgroundAction.STATE.FAIL,
+          'details': 'Authentication failure'
+        });
+
+      }
 
     });
 
     connection.onMustSignOut((reason: string) => {
 
-      injectee.dispatch('signout').then(() => {
+      injectee.dispatch('signOut').then(() => {
         injectee.dispatch('finishBackgroundAction', {
-          'type': BackgroundAction.TYPE.LOGIN,
+          'type': BackgroundAction.TYPE.SIGNIN,
           'state': BackgroundAction.STATE.FAIL,
           'details': reason
         });
       });
 
+    });
+
+    connection.onRefreshToken((token) => {
+      injectee.dispatch('refreshToken', token);
     });
 
     connection.onAddDeployment((deploymentId: string,

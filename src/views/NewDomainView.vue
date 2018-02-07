@@ -19,14 +19,14 @@
           </v-btn>
           
           <!-- Cancels the action -->
-          <v-btn outline to="-1">Cancel</v-btn>
+          <v-btn outline v-on:click="cancel">Cancel</v-btn>
 
         </v-card-actions>
       </v-card-title>
       <v-container>
 
         <!-- URL input-->
-        <v-flex xs4>
+        <v-flex xs12 md6>
           <v-text-field label="New domain" v-model="newDomain" v-bind:rules="[v => !!v && v.length > 0 || 'A name is required']" required></v-text-field>
         </v-flex>
 
@@ -56,13 +56,17 @@ export default class AddDomainView extends Vue {
   valid: boolean = false;
 
   submit() {
-    this.$store.dispatch("addNewDomain", {'uri':this.domainURI, 'domain':this.newDomain});
+    this.$store.dispatch("addDomain", {'uri':this.domainURI, 'domain':this.newDomain});
     this.$router.push("/domains");
   }
 
   checkUri(value: string) {
     // return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
     return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
+  }
+
+  cancel() {
+    this.$router.go(-1);
   }
 }
 </script>

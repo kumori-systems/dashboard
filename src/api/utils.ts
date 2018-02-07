@@ -9,6 +9,8 @@ import {
   Service, StringParameter, Volume
 } from '../store/stampstate/classes';
 
+import { User } from '../store/pagestate/classes';
+
 export function transformEcloudDeploymentToDeployment(
   ecloudDeployment: EcloudDeployment) {
 
@@ -114,6 +116,7 @@ export function transformEcloudDeploymentToDeployment(
   }
   return res;
 }
+
 export function transformManifestToService(manifest: {
   spec: string,
   name: string,
@@ -359,6 +362,7 @@ export function transformManifestToService(manifest: {
     connectors
   );
 }
+
 export function transformManifestToComponent(manifest: {
   code: string,
   profile: Object,
@@ -530,6 +534,7 @@ export function transformManifestToComponent(manifest: {
     depChannels // depChannels: { [channelId: string]: Service.Role.Channel }
   );
 }
+
 export function transformManifestToResource(manifest: {
   spec: string, name: string, parameters: any
 }): Resource {
@@ -552,6 +557,8 @@ export function transformManifestToResource(manifest: {
     case ResourceType.volume:
       res = new Volume(
         manifest.name,
+        manifest.parameters.fileSystem,
+        manifest.parameters.size,
         []
       );
       break;
@@ -560,6 +567,7 @@ export function transformManifestToResource(manifest: {
   }
   return res;
 }
+
 export function transformManifestToRuntime(manifest: {
   spec: string,
   name: string,
@@ -666,7 +674,6 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
   return res;
 }
 
-
 export enum ElementType { deployment, service, runtime, component, resource }
 
 export function getElementType(uri: string): ElementType {
@@ -699,6 +706,7 @@ export function getElementType(uri: string): ElementType {
   }
   return res;
 }
+
 export enum ResourceType { volume, certificate, domain }
 
 export function getResourceType(uri: string): ResourceType {
@@ -800,6 +808,7 @@ export function transformDeploymentToManifest(deployment: Deployment) {
     'roles': manifestRoles
   };
 }
+
 export function transformDomainToManifest(uri: string, domain: string) {
   return {
     spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
@@ -809,6 +818,17 @@ export function transformDomainToManifest(uri: string, domain: string) {
     }
   };
 }
-export function transformDataVolumeToManifest(params) {
-  console.error('DataVolume creation is under development');
+
+export function transformVolumeToManifest(uri: string,
+  filesystem: Volume.FILESYSTEM, size: number) {
+
+  return {
+    spec: 'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
+    name: uri,
+    parameters: {
+      filesystem,
+      size
+    }
+  };
+
 }

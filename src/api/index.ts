@@ -7,7 +7,6 @@ import {
   Endpoint, FileStream, ReconfigDeploymentModification, RegistrationResult,
   ScalingDeploymentModification
 } from 'admission-client';
-import { setInterval } from 'timers';
 
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
@@ -29,7 +28,8 @@ import {
   ResourceType, transformDeploymentToManifest, transformDomainToManifest,
   transformEcloudDeploymentToDeployment, transformEcloudEventDataToMetrics,
   transformManifestToComponent, transformManifestToResource,
-  transformManifestToRuntime, transformManifestToService
+  transformManifestToRuntime, transformManifestToService,
+  transformVolumeToManifest
 } from './utils';
 
 /**
@@ -42,7 +42,8 @@ class ProxyConnection extends EventEmitter {
   private acs: EcloudAcsClient;
 
   // Events
-  public onLogin: Function;
+  public onSignIn: Function;
+  public onRefreshToken: Function;
   public onAddDeployment: Function;
   public onAddInstance: Function;
   public onRemoveDeployment: Function;
@@ -79,7 +80,7 @@ class ProxyConnection extends EventEmitter {
       this.registerEvent<(runtimeId: string, runtime: Runtime) => void>();
     this.onAddService =
       this.registerEvent<(serviceId: string, service: Service) => void>();
-    this.onLogin =
+    this.onSignIn =
       this.registerEvent<(username: string,
         userpassword: string) => EcloudAcsUser>();
     this.onRemoveDeployment =
@@ -94,9 +95,9 @@ class ProxyConnection extends EventEmitter {
     }) => void>();
     this.onAddNotification =
       this.registerEvent<(notification: Notification) => void>();
-
     this.onMustSignOut =
       this.registerEvent<(notification: Notification) => void>();
+    this.onRefreshToken = this.registerEvent<(token) => void>();
 
     this.requestedElements = [];
   }
@@ -106,8 +107,24 @@ class ProxyConnection extends EventEmitter {
   /**
    * Closes the authenticated connections to the stamp.
    */
-  logout(): void {
+  signOut(): void {
     this.admission.close();
+  }
+
+  renewToken(previousToken: User.Token): Promise<User.Token> {
+    return this.acs.refreshToken(previousToken.accessToken).catch(
+      () => {
+        return this.acs.refreshToken(previousToken.accessToken).catch(() => {
+          return this.acs.refreshToken(previousToken.accessToken);
+        });
+      }
+    )
+      .then((acsToken) => {
+        return new User.Token(
+          acsToken.accessToken, acsToken.expiresIn, acsToken.refreshToken,
+          acsToken.tokenType
+        );
+      });
   }
 
   /**
@@ -120,34 +137,42 @@ class ProxyConnection extends EventEmitter {
    * @param userId User's id
    * @param token User's token
    */
-  login(username: string, password: string, userId?: string, token?: {
-    accessToken: string, expiresIn: number, refreshToken: string,
-    tokenType: string
-  }): Promise<any> {
-    let signin:
-      Promise<User>;
+  signIn(
+    username: string, password: string, userId?: string, token?: User.Token
+  ): Promise<any> {
+
+    // ACS will be used in both cases to refresh the token
+    this.acs = new EcloudAcsClient(ACS_URI);
+
+    let signIn: Promise<User>;
     if (!token) {
-      this.acs = new EcloudAcsClient(ACS_URI);
 
       // User needs authentication
-      signin = this.acs.login(username, password)
+      signIn = this.acs.login(username, password)
         .then((acsToken) => {
 
-          return new User(acsToken.user.id, acsToken.user.name,
-            User.State.AUTHENTICATED, acsToken);
-
+          return new User(
+            acsToken.user.id, acsToken.user.name, User.State.AUTHENTICATED,
+            new User.Token(
+              acsToken.accessToken, acsToken.expiresIn, acsToken.refreshToken,
+              acsToken.tokenType
+            )
+          );
         });
 
     } else {
       // Already authenticated user
-      signin = Promise.resolve<User>(
-        new User(userId, username, User.State.AUTHENTICATED, token));
+      signIn = Promise.resolve<User>(
+        new User(userId, username, User.State.AUTHENTICATED,
+          token
+        )
+      );
 
     }
 
     return Promise.resolve()
-      .then(() => signin)
-      .then((user) => {
+      .then(() => signIn)
+      .then((user: User) => {
 
         this.admission = new EcloudAdmissionClient(ADMISSION_URI,
           user.token.accessToken);
@@ -474,35 +499,15 @@ class ProxyConnection extends EventEmitter {
 
         });
 
+        this.admission.onDisconnected(() => {
+          console.error('Disconnected from the platform!!');
+        })
+
         this.admission.onError((error: any) => {
-          console.error('Error received from admission-client: '
-            + JSON.stringify(error));
+          console.error('Error received from admission-client: ', error);
         });
 
-        return this.admission.init().then(() => {
-
-          // Check if the token has expired
-          let tokenExpiration = setInterval(() => {
-            let err = true;
-
-            // this.acs.login()
-
-            // this.acs.login()
-
-            // this.acs.login()
-
-            if (err) {
-              this.emit(this.onMustSignOut, 'Authentication token expired');
-              clearInterval(tokenExpiration);
-            }
-
-          },
-            (user.token.expiresIn * 1000)
-            - Math.trunc(user.token.expiresIn * 250)
-          );
-
-          return user;
-        });
+        return this.admission.init().then(() => user);
 
       });
   }
@@ -568,7 +573,7 @@ class ProxyConnection extends EventEmitter {
         this.requestedElements.push(uri);
         res = this.admission.getStorageManifest(uri);
       } else {
-        res = Promise.reject({ 'msg': 'Request already done', 'code': '001' });
+        res = Promise.reject(new Error('Duplicated request'));
       }
       return res;
 
@@ -614,7 +619,7 @@ class ProxyConnection extends EventEmitter {
           break;
 
         default:
-          res = Promise.reject({ 'msg': 'Element not covered', 'code': '002' });
+          res = Promise.reject(new Error('Element not covered'));
       }
 
       return res;
@@ -734,6 +739,8 @@ class ProxyConnection extends EventEmitter {
                   deployment.resourcesConfig[resource].name,
                   new Volume(
                     deployment.resourcesConfig[resource].name,
+                    deployment.resourcesConfig[resource].parameters.fileSystem,
+                    deployment.resourcesConfig[resource].parameters.size,
                     [deployment._uri]
                   )
                 );
@@ -809,6 +816,8 @@ class ProxyConnection extends EventEmitter {
                   deployment.resourcesConfig[resource].name,
                   new Volume(
                     deployment.resourcesConfig[resource].name,
+                    deployment.resourcesConfig[resource].parameters.fileSystem,
+                    deployment.resourcesConfig[resource].parameters.size,
                     [deployment._uri]
                   )
                 );
@@ -900,6 +909,10 @@ class ProxyConnection extends EventEmitter {
                     deployment.resourcesConfig[resource].resource.name,
                     new Volume(
                       deployment.resourcesConfig[resource].resource.name,
+                      deployment.resourcesConfig[resource].resource.parameters
+                        .filesystem,
+                      deployment.resourcesConfig[resource].resource.parameters
+                        .size,
                       [deployment._uri]
                     )
                   );
@@ -973,14 +986,20 @@ class ProxyConnection extends EventEmitter {
     });
   }
 
-  addDataVolume(params): void {
+  addVolume(uri: string, filesystem: Volume.FILESYSTEM, size: number):
+    Promise<any> {
+
+    let manifest = transformVolumeToManifest(uri, filesystem, size);
+
+    // console.debug('The volume manifest', manifest);
 
     console.warn(
       '########################################\n\
-      Datavolume creation is under development\n\
+      Volume creation is under development. And nothing will be sended\n\
       ########################################'
     );
 
+    return Promise.resolve();
   }
 
   link({ deploymentOne, channelOne, deploymentTwo, channelTwo }): Promise<any> {

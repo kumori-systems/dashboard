@@ -50,58 +50,66 @@ import PSActions from "./store/pagestate/actions";
 export default class App extends Vue {
   User = User;
   mounted() {
-    // Check if there is a token in the url
-
     let status = this.$route.query.status;
-
     if (status && status == "error") {
-      //(<PSActions>this.$store.dispatch)
-
+      // If token in URL and state error
       this.$store.dispatch(
         "addBackgroundAction",
-        new BackgroundAction(BackgroundAction.TYPE.LOGIN)
+        new BackgroundAction(BackgroundAction.TYPE.SIGNIN)
       );
 
       this.$store.dispatch("finishBackgroundAction", {
-        type: BackgroundAction.TYPE.LOGIN,
+        type: BackgroundAction.TYPE.SIGNIN,
         state: BackgroundAction.STATE.FAIL,
         details: this.$route.query.error
       });
-    }
-
-    if (status && status == "success") {
-      sessionStorage.setItem(
+    } else if (status && status == "success") {
+      // If token in URL and state success
+      localStorage.setItem(
         "user",
         JSON.stringify(
           new User(
             this.$route.query.user_id,
             this.$route.query.user_name,
             User.State.UNAUTHENTICATED,
-            {
-              accessToken: this.$route.query.access_token,
-              expiresIn: parseInt(this.$route.query.ttl),
-              refreshToken: this.$route.query.refresh_token,
-              tokenType: this.$route.query.token_type
-            }
+            new User.Token(
+              this.$route.query.access_token,
+              parseInt(this.$route.query.ttl),
+              this.$route.query.refresh_token,
+              this.$route.query.token_type
+            )
           )
         )
       );
       this.$router.push("/");
-    }
+    } else if (typeof Storage !== "undefined") {
+      // Check if there is a token in localStorage
+      let unformattedStoredUser: string | User = localStorage.getItem("user");
+      if (unformattedStoredUser) {
+        unformattedStoredUser = JSON.parse(unformattedStoredUser);
+        let storedUser: User = new User(
+          (<User>unformattedStoredUser).id,
+          (<User>unformattedStoredUser).name,
+          null,
+          (<User>unformattedStoredUser).token,
+          (<User>unformattedStoredUser).avatar
+        );
 
-    // Check if the user has been stored in sessionStorage
-    if (typeof Storage !== "undefined") {
-      // Stores the item in local storage
-      let storedUser: string | User = sessionStorage.getItem("user");
-      if (storedUser) {
-        storedUser = JSON.parse(storedUser);
-
-        this.$store.dispatch("signin", {
-          username: (<User>storedUser).name,
-          userpassword: null,
-          userid: (<User>storedUser).id,
-          token: (<User>storedUser).token
-        });
+        if (
+          User.Token.isTokenAlive(
+            new Date(storedUser.token.creationDate),
+            storedUser.token.expiresIn
+          )
+        ) {
+          this.$store.dispatch("signIn", {
+            username: storedUser.name,
+            userpassword: null,
+            userid: storedUser.id,
+            token: storedUser.token
+          });
+        } else {
+          localStorage.removeItem("user");
+        }
       }
     }
   }
@@ -110,7 +118,6 @@ export default class App extends Vue {
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
   }
-
 }
 </script>
 <style lang="stylus">

@@ -17,7 +17,7 @@
           <v-btn class="elevation-0" color="primary"  v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
           
           <!-- Cancel button -->
-          <v-btn outline to="-1">Cancel</v-btn>
+          <v-btn outline v-on:click="cancel">Cancel</v-btn>
 
         </v-card-actions>
 
@@ -228,6 +228,11 @@ export default class NewHTTPEntrypointView extends Vue {
       this.$router.push("/");
     }
   }
+
+  cancel() {
+    this.$router.go(-1);
+  }
+  
 }
 </script>
 <style lang="scss" scoped>

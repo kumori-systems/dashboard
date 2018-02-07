@@ -96,9 +96,13 @@ import { ACS_URI } from "../api/config";
   name: "sign-in-view"
 })
 export default class SignInView extends Vue {
-  /** Says if there is a process loading the user. */
+
+  /** <boolean> Says if there is a process loading the user. */
   loading: boolean = false;
+
+  /** <string> Just to set the color of the friendly message. */
   friendlyMessageClass: string = "";
+
   /** <string> User's id. */
   userName: string = "";
 
@@ -108,7 +112,7 @@ export default class SignInView extends Vue {
   /** <boolean> Enables the visibility of the password. */
   viewPassword: boolean = false;
 
-  /** URL where the browser is redirected to procceed to google's oauth. */
+  /** <string> URL where the browser is redirected to procceed to google's oauth. */
   googleOauthURN: string = null;
 
   /** Mounted hook. */
@@ -141,10 +145,10 @@ export default class SignInView extends Vue {
       this.friendlyMessageClass = "blue--text";
       this.loading = true;
       return pendingActions[BackgroundAction.TYPE.LOADING_DATA][0].details;
-    } else if (pendingActions[BackgroundAction.TYPE.LOGIN].length > 0) {
+    } else if (pendingActions[BackgroundAction.TYPE.SIGNIN].length > 0) {
       this.friendlyMessageClass = "blue--text";
       this.loading = true;
-      return pendingActions[BackgroundAction.TYPE.LOGIN][0].details;
+      return pendingActions[BackgroundAction.TYPE.SIGNIN][0].details;
     } else if (finishedActions.length > 0) {
       if (
         finishedActions[finishedActions.length - 1].state ===
@@ -169,11 +173,12 @@ export default class SignInView extends Vue {
    * Function to sign in to the system.
    */
   signIn() {
-    this.$store.dispatch("signin", {
+    this.$store.dispatch("signIn", {
       username: this.userName,
       userpassword: this.userPassword
     });
   }
+
 }
 </script>
 <style>

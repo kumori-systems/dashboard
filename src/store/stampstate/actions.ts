@@ -133,10 +133,47 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   /**
-   * Adds a new domain to the stamp.
-   * @requires domain <string> Domain name to be added to the stamp.
+   * Adds a volume to the system.
+   * @requires uri string which represents the URI of the element.
+   * @requires filesystem filesystem selected for the volume.
+   * @requires size size of the volume in MB.
    */
-  addNewDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
+  addVolume = (injectee: Vuex.ActionContext<State, any>,
+    { uri, filesystem, size }): void => {
+
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.REGISTER_VOLUME)
+    );
+
+    connection.addVolume(uri, filesystem, size).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+        'state': BackgroundAction.STATE.FAIL
+      });
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error registering a volume',
+          'Error registering a volume ' + uri,
+          JSON.stringify(err.message, null, 4))
+      );
+
+    });
+  }
+
+  /**
+   * Adds a new domain to the system.
+   * @requires domain <string> Domain name to be added to the system.
+   */
+  addDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
     void => {
 
     injectee.dispatch(
@@ -278,6 +315,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       );
 
     });
+    
   }
 
   /**
