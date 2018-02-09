@@ -64,6 +64,7 @@ class ProxyConnection extends EventEmitter {
    * recognizable events for the page.
    */
   constructor() {
+
     super();
     this.onAddComponent =
       this.registerEvent<(componentId: string, component: Component) => void>();
@@ -98,8 +99,8 @@ class ProxyConnection extends EventEmitter {
     this.onMustSignOut =
       this.registerEvent<(notification: Notification) => void>();
     this.onRefreshToken = this.registerEvent<(token) => void>();
-
     this.requestedElements = [];
+
   }
 
   /* GENERIC */
@@ -108,10 +109,13 @@ class ProxyConnection extends EventEmitter {
    * Closes the authenticated connections to the stamp.
    */
   signOut(): void {
+
     this.admission.close();
+
   }
 
   renewToken(previousToken: User.Token): Promise<User.Token> {
+
     return this.acs.refreshToken(previousToken.accessToken).catch(
       () => {
         return this.acs.refreshToken(previousToken.accessToken).catch(() => {
@@ -120,11 +124,16 @@ class ProxyConnection extends EventEmitter {
       }
     )
       .then((acsToken) => {
+
+        // Updates admission-client token
+        this.admission.refreshToken(acsToken.accessToken);
+
         return new User.Token(
           acsToken.accessToken, acsToken.expiresIn, acsToken.refreshToken,
           acsToken.tokenType
         );
       });
+
   }
 
   /**
@@ -143,7 +152,6 @@ class ProxyConnection extends EventEmitter {
 
     // ACS will be used in both cases to refresh the token
     this.acs = new EcloudAcsClient(ACS_URI);
-
     let signIn: Promise<User>;
     if (!token) {
 
@@ -158,9 +166,11 @@ class ProxyConnection extends EventEmitter {
               acsToken.tokenType
             )
           );
+
         });
 
     } else {
+
       // Already authenticated user
       signIn = Promise.resolve<User>(
         new User(userId, username, User.State.AUTHENTICATED,
@@ -500,8 +510,10 @@ class ProxyConnection extends EventEmitter {
         });
 
         this.admission.onDisconnected(() => {
+
           console.error('Disconnected from the platform!!');
-        })
+
+        });
 
         this.admission.onError((error: any) => {
           console.error('Error received from admission-client: ', error);
@@ -510,16 +522,22 @@ class ProxyConnection extends EventEmitter {
         return this.admission.init().then(() => user);
 
       });
+
   }
 
   /**
    * Obtains all registered elements in the stamp.
    */
   getRegisteredElements(): Promise<any> {
+
     return this.admission.findStorage().then((registeredElements) => {
+
       for (let i = 0; i < registeredElements.length; i++) {
+
         switch (getElementType(registeredElements[i])) {
+
           case ElementType.runtime:
+
             this.emit(
               this.onAddRuntime,
               registeredElements[i],
@@ -534,10 +552,10 @@ class ProxyConnection extends EventEmitter {
               registeredElements[i],
               undefined
             );
-
             break;
 
           case ElementType.component:
+
             this.emit(this.onAddComponent,
               registeredElements[i],
               undefined
@@ -545,6 +563,7 @@ class ProxyConnection extends EventEmitter {
             break;
 
           case ElementType.resource:
+
             this.emit(
               this.onAddResource,
               registeredElements[i],
@@ -553,10 +572,13 @@ class ProxyConnection extends EventEmitter {
             break;
 
           default:
+
             console.error('Unkown element: ', registeredElements[i]);
+
         }
       }
     });
+
   }
 
   /**
@@ -674,7 +696,9 @@ class ProxyConnection extends EventEmitter {
    * @param elementId <string | string[]> Element or list of elements to remove.
    */
   deleteElement(elementId: string): Promise<any> {
+
     return this.admission.removeStorage(elementId);
+
   }
 
   // @param elementId: Element or element list
@@ -697,6 +721,7 @@ class ProxyConnection extends EventEmitter {
 
   /* DEPLOYMENTS */
   getDeploymentList(): Promise<any> {
+
     let pro: Promise<any> = this.admission.findDeployments();
     pro = pro.then((deploymentList) => {
       let promiseArray: Promise<any>[] = [];
@@ -770,9 +795,11 @@ class ProxyConnection extends EventEmitter {
         .then(() => { });
     });
     return pro;
+
   }
 
   getDeployment(uri: string): Promise<any> {
+
     return this.admission.findDeployments(uri).then((deploymentList) => {
       for (let deploymentId in deploymentList) {
 
@@ -835,6 +862,7 @@ class ProxyConnection extends EventEmitter {
         this.emit(this.onAddDeployment, deploymentId, deployment);
       }
     });
+
   }
 
   /**

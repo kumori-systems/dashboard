@@ -151,7 +151,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
         // This is the last interval in which the token will be alive
         if (new Date() > new Date(
-          new Date(actualToken.creationDate).getTime() 
+          new Date(actualToken.creationDate).getTime()
           + actualToken.expiresIn * 1000
           - tokenCheckerTimeInterval
         )) {
@@ -159,6 +159,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           connection.renewToken(actualToken)
             .then((renewedToken) => {
               injectee.commit('refreshToken', renewedToken);
+
+              // Update localstorage info
+              localStorage.setItem('user', injectee.getters.user);
+
             }).catch((error) => {
 
               // It was not possible to refresh the token
@@ -187,6 +191,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
 
       }, tokenCheckerTimeInterval);
+
 
 
     }).catch((error: Error) => {
