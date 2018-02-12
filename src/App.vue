@@ -37,7 +37,6 @@ import { SignInView } from "./views";
 import { AppbarComponent, NavigationComponent } from "./components";
 import { User, BackgroundAction } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
-import PSActions from "./store/pagestate/actions";
 
 @VueClassComponent({
   name: "App",
