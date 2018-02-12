@@ -393,7 +393,7 @@ export module Deployment {
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
-      volumes: { [volume: string]: string; } = {};
+      volumes: { [volume: string]: { id: string, urn: string } } = {};
 
       /** <{ [port: string]: string; }> Logical ports implied into this role. */
       ports: { [port: string]: string; } = {};
@@ -424,7 +424,8 @@ export module Deployment {
       this role.
       */
       constructor(cnid: string, state: Instance.STATE, cpu: number,
-        memory: number, bandwidth: number, volumes?: { [key: string]: string; },
+        memory: number, bandwidth: number,
+        volumes?: { [volume: string]: { id: string, urn: string } },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0)
           throw new Error('Invalid cnid for Instance: ' + cnid);
