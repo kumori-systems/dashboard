@@ -172,12 +172,13 @@ class ProxyConnection extends EventEmitter {
     } else {
 
       // Already authenticated user
-      signIn = Promise.resolve<User>(
-        new User(userId, username, User.State.AUTHENTICATED,
-          token
-        )
-      );
-
+      signIn = this.acs.refreshToken(token.accessToken)
+        .then((refreshedToken) => {
+          return new User(userId, username, User.State.AUTHENTICATED,
+            new User.Token(refreshedToken.accessToken, refreshedToken.expiresIn,
+              refreshedToken.refreshToken, refreshedToken.tokenType)
+          );
+        });
     }
 
     return Promise.resolve()
@@ -511,7 +512,7 @@ class ProxyConnection extends EventEmitter {
 
         this.admission.onDisconnected(() => {
 
-          console.error('Disconnected from the platform!!');
+          console.warn('Disconnected from the platform');
 
         });
 
@@ -538,28 +539,17 @@ class ProxyConnection extends EventEmitter {
 
           case ElementType.runtime:
 
-            this.emit(
-              this.onAddRuntime,
-              registeredElements[i],
-              undefined
-            );
+            this.emit(this.onAddRuntime, registeredElements[i], undefined);
             break;
 
           case ElementType.service:
 
-            this.emit(
-              this.onAddService,
-              registeredElements[i],
-              undefined
-            );
+            this.emit(this.onAddService, registeredElements[i], undefined);
             break;
 
           case ElementType.component:
 
-            this.emit(this.onAddComponent,
-              registeredElements[i],
-              undefined
-            );
+            this.emit(this.onAddComponent, registeredElements[i], undefined);
             break;
 
           case ElementType.resource:
@@ -605,39 +595,78 @@ class ProxyConnection extends EventEmitter {
 
       switch (getElementType(uri)) {
         case ElementType.runtime:
-          this.emit(
-            this.onAddRuntime,
-            uri,
-            transformManifestToRuntime(element));
+          let runtime: Runtime;
+          try {
+            runtime = transformManifestToRuntime(element);
+            this.emit(this.onAddRuntime, uri, runtime);
+          } catch (error) {
+            this.emit(this.onAddNotification,
+              new Notification(Notification.LEVEL.WARNING,
+                'Unrecognized runtime params', 'Unrecognized runtime params',
+                JSON.stringify(element, null, 4)
+              )
+            );
+          }
+
           break;
 
         case ElementType.service:
-          let ser = transformManifestToService(element);
-          this.emit(this.onAddService, uri, ser);
-
-          let promiseArray: Promise<any>[] = [];
-          for (let role in ser.roles) {
-            res = res.then(() => {
-              return this.getElementInfo(ser.roles[role].component);
-            });
+          let ser: Service;
+          try {
+            ser = transformManifestToService(element);
+            this.emit(this.onAddService, uri, ser);
+            let promiseArray: Promise<any>[] = [];
+            for (let role in ser.roles) {
+              res = res.then(() => {
+                return this.getElementInfo(ser.roles[role].component);
+              });
+            }
+          } catch (error) {
+            this.emit(this.onAddNotification,
+              new Notification(Notification.LEVEL.WARNING,
+                'Unrecognized service params', 'Unrecognized service params',
+                JSON.stringify(element, null, 4)
+              )
+            );
           }
           break;
 
         case ElementType.component:
-          let comp = transformManifestToComponent(element);
-          this.emit(this.onAddComponent, uri, comp);
+          let comp: Component;
+          try {
+            comp = transformManifestToComponent(element);
+            this.emit(this.onAddComponent, uri, comp);
 
-          res = res.then(() => {
-            return this.getElementInfo(comp.runtime);
-          });
+            res = res.then(() => {
+              return this.getElementInfo(comp.runtime);
+            });
+          } catch (error) {
+            this.emit(this.onAddNotification,
+              new Notification(Notification.LEVEL.WARNING,
+                'Unrecognized component params',
+                'Unrecognized component params',
+                JSON.stringify(element, null, 4)
+              )
+            );
+          }
           break;
 
         case ElementType.resource:
-          this.emit(
-            this.onAddResource,
-            uri,
-            transformManifestToResource(element)
-          );
+          let resource: Resource;
+          try {
+            resource = transformManifestToResource(element);
+            this.emit(
+              this.onAddResource, uri, resource
+            );
+          } catch (error) {
+            this.emit(this.onAddNotification,
+              new Notification(Notification.LEVEL.WARNING,
+                'Unrecognized resource params',
+                'Unrecognized resource params',
+                JSON.stringify(element, null, 4)
+              )
+            );
+          }
           break;
 
         default:
@@ -664,9 +693,10 @@ class ProxyConnection extends EventEmitter {
             case ElementType.resource:
             case ElementType.runtime:
             case ElementType.service:
-              this.getElementInfo(uri);
+              this.getElementInfo(uri).catch((err: Error) => {
+                if (err.message !== 'Duplicated request') console.error(err);
+              });
               break;
-
             default:
             // Other elements have their own event
           }
@@ -732,8 +762,9 @@ class ProxyConnection extends EventEmitter {
         for (let resource in deployment.resourcesConfig) {
 
           if (deployment.resourcesConfig[resource].name) {
-            switch (getResourceType(deployment.resourcesConfig[resource]
-              .name)) {
+            switch (
+            getResourceType(deployment.resourcesConfig[resource].name)
+            ) {
               case ResourceType.certificate:
                 this.emit(
                   this.onAddResource,
@@ -759,16 +790,30 @@ class ProxyConnection extends EventEmitter {
                 break;
 
               case ResourceType.volume:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Volume(
+                try {
+                  let vol: Volume = new Volume(
                     deployment.resourcesConfig[resource].name,
                     deployment.resourcesConfig[resource].parameters.fileSystem,
                     deployment.resourcesConfig[resource].parameters.size,
+                    null,
                     [deployment._uri]
-                  )
-                );
+                  );
+                  this.emit(
+                    this.onAddResource,
+                    deployment.resourcesConfig[resource].name, vol
+                  );
+                } catch (error) {
+                  this.emit(this.onAddNotification,
+                    new Notification(Notification.LEVEL.WARNING,
+                      'Unrecognized volume params',
+                      'Unrecognized volume params',
+                      JSON.stringify(
+                        deployment.resourcesConfig[resource], null, 4
+                      )
+                    )
+                  );
+                }
+
                 break;
 
               default:
@@ -838,16 +883,25 @@ class ProxyConnection extends EventEmitter {
                 break;
 
               case ResourceType.volume:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Volume(
+                try {
+                  let vol: Volume = new Volume(
                     deployment.resourcesConfig[resource].name,
                     deployment.resourcesConfig[resource].parameters.fileSystem,
                     deployment.resourcesConfig[resource].parameters.size,
-                    [deployment._uri]
-                  )
-                );
+                    null, [deployment._uri]);
+                  this.emit(this.onAddResource,
+                    deployment.resourcesConfig[resource].name, vol);
+                } catch (error) {
+                  this.emit(this.onAddNotification,
+                    new Notification(Notification.LEVEL.WARNING,
+                      'Unrecognized volume params',
+                      'Unrecognized volume params',
+                      JSON.stringify(
+                        deployment.resourcesConfig[resource], null, 4
+                      )
+                    )
+                  );
+                }
                 break;
 
               default:
@@ -932,18 +986,31 @@ class ProxyConnection extends EventEmitter {
                   );
                   break;
                 case ResourceType.volume:
-                  this.emit(
-                    this.onAddResource,
-                    deployment.resourcesConfig[resource].resource.name,
-                    new Volume(
+                  try {
+                    let vol: Volume = new Volume(
                       deployment.resourcesConfig[resource].resource.name,
                       deployment.resourcesConfig[resource].resource.parameters
                         .filesystem,
                       deployment.resourcesConfig[resource].resource.parameters
                         .size,
+                      null,
                       [deployment._uri]
-                    )
-                  );
+                    );
+                    this.emit(
+                      this.onAddResource,
+                      deployment.resourcesConfig[resource].resource.name,
+                      vol);
+                  } catch (error) {
+                    this.emit(this.onAddNotification,
+                      new Notification(Notification.LEVEL.WARNING,
+                        'Unrecognized volume params',
+                        'Unrecognized volume params',
+                        JSON.stringify(
+                          deployment.resourcesConfig[resource], null, 4
+                        )
+                      )
+                    );
+                  }
                   break;
                 default:
                   console.error('Unkown resource type: %s', resource);
@@ -1021,10 +1088,12 @@ class ProxyConnection extends EventEmitter {
 
     // console.debug('The volume manifest', manifest);
 
-    console.warn(
-      '########################################\n\
-      Volume creation is under development. And nothing will be sended\n\
-      ########################################'
+    console.warn('########################################\n'
+      + 'Volume creation is under development.\n'
+      + 'And nothing will be sended\n'
+      + 'MANIFEST:\n'
+      + JSON.stringify(manifest) + '\n'
+      + '########################################\n'
     );
 
     return Promise.resolve();

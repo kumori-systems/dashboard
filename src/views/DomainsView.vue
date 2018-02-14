@@ -45,7 +45,7 @@
         <v-card-title class="headline">Delete domain?</v-card-title>
         <v-card-text>
           This action <strong>CANNOT BE UNDONE</strong> and will
-          permanently delete the {{ selectedDomain }} domain.
+          permanently delete the {{ selectedDomain }} volume.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>

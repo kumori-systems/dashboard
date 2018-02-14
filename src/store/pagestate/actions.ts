@@ -110,7 +110,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
-
+      
       return connection.getRegisteredElements().then(() => {
         console.debug('Stored a reference to all elements from the platform');
         return user;

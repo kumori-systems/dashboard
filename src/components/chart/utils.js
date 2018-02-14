@@ -25,48 +25,60 @@ export function prepareDeploymentData(metrics) {
 
   for (let index in metrics.data) {
     for (let prop in metrics.data[index]) {
-      if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
-    || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Discarting properties
-      }
-      else if (prop === 'timestamp')
-        res.labels.push(moment(metrics.data[index].timestamp));
-      else {
-        // Searching existent prop
-        let position = res.datasets.findIndex((p) => {
-          if (p['label'] === prop) return p;
-        })
-        if (position !== -1) { // If prop exists, add corresponding object
-          res.datasets[position].data.push(metrics.data[index][prop]);
-        }
-        else { // If prop doesn't exist, create it
-          res.datasets.push(
-            {
-              'label': prop,
-              'backgroundColor': color[prop] || '#000000',
-              'borderColor': color[prop] || '#000000',
-              'fill': false,
-              'data': [metrics.data[index][prop]]
-            }
-          );
-        }
+      switch (prop) {
+        case 'timestamp':
+          res.labels.push(moment(metrics.data[index].timestamp));
+          break;
+        case 'cpu':
+        case 'mem':
+        case 'bandwith_input':
+        case 'bandwith_output':
+        case 'http_requests_per_second':
+        case 'http_errors_per_second':
+        case 'http_size_in_per_second':
+        case 'http_size_out_per_second':
+        case 'http_response_time':
+          // Searching existent prop
+          let position = res.datasets.findIndex((p) => {
+            if (p['label'] === prop) return p;
+          })
+          if (position !== -1) { // If prop exists, add corresponding object
+            res.datasets[position].data.push(metrics.data[index][prop]);
+          }
+          else { // If prop doesn't exist, create it
+            res.datasets.push(
+              {
+                'label': prop,
+                'backgroundColor': color[prop] || '#000000',
+                'borderColor': color[prop] || '#000000',
+                'fill': false,
+                'data': [metrics.data[index][prop]]
+              }
+            );
+          }
+          break;
+        default:
+        // Discarded properties
       }
     }
   }
 
   while (res.labels.length < 60) {
+
     res.labels.push(moment(res.labels[res.labels.length - 1]).add(1, 'm'));
+
   }
-  
+
   return {
     data: res,
     roles: metrics.roles
   };
+
 }
 
 export function prepareRoleData(metrics) {
   // 'data': { [property: string]: string | number }
-  
+
   var res = {
     labels: [],
     datasets: []
@@ -74,33 +86,38 @@ export function prepareRoleData(metrics) {
 
   for (let index in metrics.data) {
     for (let prop in metrics.data[index]) {
-      if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
-    || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Discarting properties
-      }
-      else if (prop === 'timestamp')
-        res.labels.push(moment(metrics.data[index].timestamp));
-      else {
-        // Search for an existing prop
-        let position = res.datasets.findIndex((p) => {
-          if (p['label'] === prop) return p;
-        })
-        
-        if (position !== -1) { // If exists, add the new object to it
-        
-          res.datasets[position].data.push(metrics.data[index][prop]);
-        }
-        else { // If not exists, create a new one
-          res.datasets.push(
-            {
+      switch (prop) {
+        case 'timestamp':
+          res.labels.push(moment(metrics.data[index].timestamp));
+          break;
+        case 'cpu':
+        case 'mem':
+        case 'bandwith_input':
+        case 'bandwith_output':
+        case 'http_requests_per_second':
+        case 'http_errors_per_second':
+        case 'http_size_in_per_second':
+        case 'http_size_out_per_second':
+        case 'http_response_time':
+          // Search for an existing prop
+          let position = res.datasets.findIndex((p) => {
+            if (p['label'] === prop) return p;
+          })
+          if (position !== -1) { // If exists, add the new object to it
+
+            res.datasets[position].data.push(metrics.data[index][prop]);
+          } else { // If not exists, create a new one
+            res.datasets.push({
               'label': prop,
               'backgroundColor': color[prop] || '#000000',
               'borderColor': color[prop] || '#000000',
               'fill': false,
               'data': [metrics.data[index][prop]]
-            }
-          );
-        }
+            });
+          }
+          break;
+        default:
+        // Discart properties
       }
     }
   }
@@ -108,16 +125,17 @@ export function prepareRoleData(metrics) {
   while (res.labels.length < 60) {
     res.labels.push(moment(res.labels[res.labels.length - 1]).add(1, 'm'));
   }
-  
+
   return {
     data: res,
     instances: metrics.instances
   };
+
 }
 
 export function prepareInstanceData(metrics) {
   // 'data': { [property: string]: string | number }
-  
+
   var res = {
     labels: [],
     datasets: []
@@ -125,31 +143,67 @@ export function prepareInstanceData(metrics) {
 
   for (let index in metrics.data) {
     for (let prop in metrics.data[index]) {
-      if( prop === 'timestamp_init' || prop === 'timestamp_end' || prop === 'elapsed_msec'
-    || prop === 'ws_chunk_in_per_second' || prop === 'ws_chunk_out_per_second'){
-        // Discartin properties
-      }
-      else if (prop === 'timestamp')
-        res.labels.push(moment(metrics.data[index].timestamp));
-      else {
-        // Searching existent prop
-        let position = res.datasets.findIndex((p) => {
-          if (p['label'] === prop) return p;
-        })
-        if (position !== -1) { // If exists, add the new object
-          res.datasets[position].data.push(metrics.data[index][prop]);
-        }
-        else { // If not exists, create a new object
-          res.datasets.push(
-            {
+      switch (prop) {
+        case 'timestamp':
+          res.labels.push(moment(metrics.data[index].timestamp));
+          break;
+        case 'volumes':
+          for (let vol in metrics.data[index]['volumes']) {
+            for (let volprop in metrics.data[index]['volumes'][vol]) {
+              switch (volprop) {
+                case 'usage':
+                  let position = res.datasets.findIndex((p) => {
+                    if (p['label'] === volprop) return p;
+                  })
+                  if (position !== -1) { // If exists, add the new object
+                    res.datasets[position].data.push(
+                      metrics.data[index]['volumes'][vol][volprop]
+                    );
+                  }
+                  else { // If not exists, create a new object
+                    res.datasets.push({
+                      'label': volprop,
+                      'backgroundColor': color[volprop] || '#000000',
+                      'borderColor': color[volprop] || '#000000',
+                      'fill': false,
+                      'data': [metrics.data[index]['volumes'][vol][volprop]]
+                    });
+                  }
+                  break;
+                default:
+                // Discard properties
+              }
+            }
+          }
+          break;
+        case 'cpu':
+        case 'mem':
+        case 'bandwith_input':
+        case 'bandwith_output':
+        case 'http_requests_per_second':
+        case 'http_errors_per_second':
+        case 'http_size_in_per_second':
+        case 'http_size_out_per_second':
+        case 'http_response_time':
+          // Searching existent prop
+          let position = res.datasets.findIndex((p) => {
+            if (p['label'] === prop) return p;
+          })
+          if (position !== -1) { // If exists, add the new object
+            res.datasets[position].data.push(metrics.data[index][prop]);
+          }
+          else { // If not exists, create a new object
+            res.datasets.push({
               'label': prop,
               'backgroundColor': color[prop] || '#000000',
               'borderColor': color[prop] || '#000000',
               'fill': false,
               'data': [metrics.data[index][prop]]
-            }
-          );
-        }
+            });
+          }
+          break;
+        default:
+        // discard properties
       }
     }
   }
@@ -157,8 +211,9 @@ export function prepareInstanceData(metrics) {
   while (res.labels.length < 60) {
     res.labels.push(moment(res.labels[res.labels.length - 1]).add(1, 'm'));
   }
-  
+
   return {
     data: res,
   };
+
 }

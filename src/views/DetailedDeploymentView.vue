@@ -59,66 +59,79 @@
               </v-flex>
             </v-layout>
 
+            <!-- Deployment volumes -->
+            <v-layout wrap>
+              <v-flex ma-1 xs12>
+                <span class="subheading">Volumes</span>
+                <div v-for="(vol, index) in deploymentVolumes" v-bind:key="index">
+                  <v-tooltip bottom>
+                    <span dark slot="activator"><v-icon>storage</v-icon> {{ vol._name }}</span>
+                    {{ vol._uri }}
+                  </v-tooltip>
+                </div>
+              </v-flex>
+            </v-layout>
+
             <!-- Deployment links -->
             <v-layout wrap>
-            
-              <span class="subheading">Connections</span>
-                
-              <!-- Link table representation -->
-              <table>
+              <v-flex ma-1 xs12>
+                <span class="subheading">Connections</span>
+                  
+                <!-- Link table representation -->
+                <table>
 
-                <!-- Headers-->
-                <tr>
-                  <th>From</th>
-                  <th>To</th>
-                </tr>
+                  <!-- Headers-->
+                  <tr>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
 
-                <!-- Provided Channels -->
-                <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                  <th>
-                    <v-select
-                      v-model="serviceNewProvidedConnections[name]"
-                      v-bind:items="totalDependedDeploymentChannels(name)"
-                      multiple chips v-on:input="handleInput" return-object autocomplete>
+                  <!-- Provided Channels -->
+                  <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                    <th>
+                      <v-select
+                        v-model="serviceNewProvidedConnections[name]"
+                        v-bind:items="totalDependedDeploymentChannels(name)"
+                        multiple chips v-on:input="handleInput" return-object autocomplete>
 
-                      <!-- Chips config-->
-                      <template slot="selection" scope="items">
-                        <v-chip
-                          @input="items.parent.selectItem(items.item)"
-                            close color="indigo lighten-4">
-                          {{ items.item.text }}
-                        </v-chip>
-                      </template>
-                      
-                    </v-select>
-                  </th>
-                </tr>
-
-                <!-- Depended channels -->
-                <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                  <th>
-                    <v-select
-                      v-model="serviceNewDependedConnections[name]"
-                      v-bind:items="totalProvidedDeploymentChannels(name)"
-                      multiple chips v-on:input="handleInput" return-object autocomplete>
-                
                         <!-- Chips config-->
-                      <template slot="selection" scope="items">
-                        <v-chip 
-                          @input="items.parent.selectItem(items.item)"
-                          close color="indigo lighten-4">
-                          {{ items.item.text }}
-                        </v-chip>
-                      </template>
-                
-                    </v-select>
-                  </th>
-                  <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
-                </tr>
+                        <template slot="selection" scope="items">
+                          <v-chip
+                            @input="items.parent.selectItem(items.item)"
+                              close color="indigo lighten-4">
+                            {{ items.item.text }}
+                          </v-chip>
+                        </template>
+                        
+                      </v-select>
+                    </th>
+                  </tr>
 
-              </table>
-              
+                  <!-- Depended channels -->
+                  <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                    <th>
+                      <v-select v-model="serviceNewDependedConnections[name]"
+                        v-bind:items="totalProvidedDeploymentChannels(name)"
+                        multiple chips v-on:input="handleInput" return-object
+                        autocomplete>
+                  
+                        <!-- Chips config-->
+                        <template slot="selection" scope="items">
+                          <v-chip 
+                            @input="items.parent.selectItem(items.item)"
+                            close color="indigo lighten-4">
+                            {{ items.item.text }}
+                          </v-chip>
+                        </template>
+                  
+                      </v-select>
+                    </th>
+                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                  </tr>
+
+                </table>
+              </v-flex>
             </v-layout>
 
           </v-flex>
@@ -179,7 +192,12 @@ import {
   ChartComponentOptions,
   ChartComponentUtils
 } from "../components";
-import { Channel, Deployment, Service } from "../store/stampstate/classes";
+import {
+  Channel,
+  Deployment,
+  Service,
+  Volume
+} from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
 
 @VueClassComponent({
@@ -262,6 +280,17 @@ export default class DetailedDeploymentView extends Vue {
     return ((<SSGetters>this.$store.getters).deploymentFromPath as Function)(
       this.$route.path
     );
+  }
+
+  get deploymentVolumes(): Volume[] {
+    let res: Volume[] = [];
+    let resources = this.deployment.resourcesConfig;
+    for (let key in resources) {
+      if (resources[key] instanceof Volume) {
+        res.push(resources[key]);
+      }
+    }
+    return res;
   }
 
   /** Required to obtain additional information of a role. */

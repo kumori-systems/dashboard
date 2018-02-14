@@ -1,5 +1,5 @@
 import urlencode from 'urlencode';
-import { Service } from './index';
+import { Service, Volume } from './index';
 
 /**
  * Checks the format of the URI and returns the domain and the name of the
@@ -393,7 +393,7 @@ export module Deployment {
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
-      volumes: { [volume: string]: { id: string, urn: string } } = {};
+      volumes: { [volume: string]: Volume.Instance } = {};
 
       /** <{ [port: string]: string; }> Logical ports implied into this role. */
       ports: { [port: string]: string; } = {};
@@ -425,7 +425,7 @@ export module Deployment {
       */
       constructor(cnid: string, state: Instance.STATE, cpu: number,
         memory: number, bandwidth: number,
-        volumes?: { [volume: string]: { id: string, urn: string } },
+        volumes?: { [volume: string]: Volume.Instance },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0)
           throw new Error('Invalid cnid for Instance: ' + cnid);

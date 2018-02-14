@@ -71,7 +71,7 @@ import { Volume } from "../store/stampstate/classes";
   components: {}
 })
 export default class NewVolumeView extends Vue {
-  uri: string = "eslap://<name_space>/resources/volume/<element_uri>/persistent";
+  uri: string = "eslap://<namespace>/resources/volume/<volume_name>/persistent";
   selectedFilesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
   size: number = 1024;
   valid: boolean = false;

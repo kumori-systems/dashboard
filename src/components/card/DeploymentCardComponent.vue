@@ -94,9 +94,19 @@
             </template>
 
             <!-- Volumes -->
-            <template v-if="false && !isHTTPEntryPoint">
-                <v-subheader><strong>VOLUMES</strong></v-subheader>
-                <!--<div v-if="deployment.volumes !== null && deployment.volumes.length>0"><div v-for="(volume, index) in deployment.volumes" v-bind:key="index" class="tile"><i class="fa fa-circle"></i><div>{{volume}}</div></div></div>-->
+            <template v-if="!isHTTPEntryPoint">
+              <v-subheader><strong>VOLUMES</strong></v-subheader>
+              <v-list-tile v-for="(vol, index) in deploymentVolumes" v-bind:key="index" tag="div">
+                <v-card-actions>
+                  <v-icon></v-icon>
+                </v-card-actions>
+                <v-list-tile-title>
+                  <v-tooltip bottom>
+                  <span dark slot="activator"><v-icon>storage</v-icon> {{ vol._name }}</span>
+                  {{ vol._uri }}
+                  </v-tooltip>
+                </v-list-tile-title>
+              </v-list-tile>
             </template>
 
             <!-- Websites -->
@@ -130,7 +140,12 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
-import { Deployment, HTTPEntryPoint } from "../../store/stampstate/classes";
+import {
+  Deployment,
+  HTTPEntryPoint,
+  Volume,
+  Resource
+} from "../../store/stampstate/classes";
 import SSGetters from "../../store/stampstate/getters";
 
 @VueClassComponent({
@@ -187,6 +202,17 @@ export default class Card extends Vue {
     return this.deployment instanceof HTTPEntryPoint;
   }
 
+  get deploymentVolumes(): Volume[] {
+    let res: Volume[] = [];
+    let resources = this.deployment.resourcesConfig;
+    for (let key in resources) {
+      if (resources[key] instanceof Volume) {
+        res.push(resources[key]);
+      }
+    }
+    return res;
+  }
+
   get stateColor() {
     let res: string = "light-blue";
     switch (this.deployment.state) {
@@ -204,6 +230,7 @@ export default class Card extends Vue {
     }
     return res + " lighten-2";
   }
+
   get state(): string {
     let res: string;
     switch (this.deployment.state) {

@@ -14,14 +14,32 @@
       
       <!-- Instance arrangement -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+
         <v-layout>
           <v-flex ma-1 xs2>{{ instance.memory }} MEM</v-flex>
           <v-flex ma-1 xs2>{{ instance.cpu }} CPU</v-flex>
           <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
         </v-layout>
+
         <v-layout>
           <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
         </v-layout>
+
+        <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
+
+          <v-card-actions>
+            <v-icon></v-icon>
+          </v-card-actions>
+
+          <v-list-tile-title>
+            <v-tooltip bottom>
+            <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
+            Total size: {{ volumes[vol.uri].size }} MB
+            </v-tooltip>
+          </v-list-tile-title>
+          
+        </v-list-tile>
+
       </v-flex>
       
       <!-- Applies spaces between components -->
@@ -41,7 +59,9 @@ import VueClassComponent from "vue-class-component";
 
 // Components
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
-import { Deployment } from "../../store/stampstate/classes";
+import { Deployment, Volume } from "../../store/stampstate/classes";
+
+import SSGetters from "../../store/stampstate/getters";
 
 import ChartComponent from "./../chart";
 
@@ -70,6 +90,22 @@ export default class InstanceCardComponent extends Vue {
     });
   }
 
+  get volumes(): { [volURN: string]: Volume } {
+    return ((<SSGetters>this.$store.getters).volumes as any) as {
+      [volURN: string]: Volume;
+    };
+  }
+
+  get instanceVolumes(): Volume.Instance[] {
+    let res: Volume.Instance[] = [];
+
+    for (let vol in this.instance.volumes) {
+      res.push(this.instance.volumes[vol]);
+    }
+
+    return res;
+  }
+
   get onInstanceMetricsUpdate() {
     let res: {
       data: { [property: string]: number | string }[];
@@ -83,7 +119,9 @@ export default class InstanceCardComponent extends Vue {
   }
 
   get instanceChartData() {
-    return ChartComponentUtils.prepareInstanceData(this.onInstanceMetricsUpdate);
+    return ChartComponentUtils.prepareInstanceData(
+      this.onInstanceMetricsUpdate
+    );
   }
 
   get state(): string {
