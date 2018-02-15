@@ -27,14 +27,10 @@
 
         <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
 
-          <v-card-actions>
-            <v-icon></v-icon>
-          </v-card-actions>
-
           <v-list-tile-title>
             <v-tooltip bottom>
             <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
-            Total size: {{ volumes[vol.uri].size }} MB
+            Total size: {{ volumes[vol.uri].size }} GB
             </v-tooltip>
           </v-list-tile-title>
           

@@ -63,10 +63,10 @@
             <v-layout wrap>
               <v-flex ma-1 xs12>
                 <span class="subheading">Volumes</span>
-                <div v-for="(vol, index) in deploymentVolumes" v-bind:key="index">
+                <div v-for="(volTuple, index) in deploymentVolumes" v-bind:key="index">
                   <v-tooltip bottom>
-                    <span dark slot="activator"><v-icon>storage</v-icon> {{ vol._name }}</span>
-                    {{ vol._uri }}
+                    <span dark slot="activator"><v-icon>storage</v-icon> {{ volTuple[0] }}</span>
+                    {{ volTuple[1]._uri }}
                   </v-tooltip>
                 </div>
               </v-flex>
@@ -282,12 +282,12 @@ export default class DetailedDeploymentView extends Vue {
     );
   }
 
-  get deploymentVolumes(): Volume[] {
-    let res: Volume[] = [];
-    let resources = this.deployment.resourcesConfig;
+  get deploymentVolumes(): [string, Volume][] {
+    let res: [string, Volume][] = [];
+    let resources = this.deployment.resources;
     for (let key in resources) {
       if (resources[key] instanceof Volume) {
-        res.push(resources[key]);
+        res.push([key, <Volume>resources[key]]);
       }
     }
     return res;
@@ -326,14 +326,6 @@ export default class DetailedDeploymentView extends Vue {
     }
     return res;
   }
-
-  /*
-  get searchDeployment(): (uri: string) => Deployment {
-    return (uri: string) => {
-      return this.$store.getters.deployment(uri);
-    };
-  }
-  */
 
   /** Obtains deployment metrics. */
   get deploymentMetrics(): {

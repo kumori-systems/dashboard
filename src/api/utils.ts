@@ -19,20 +19,85 @@ export function transformEcloudDeploymentToDeployment(
   let instances: { [instanceId: string]: Deployment.Role.Instance };
   let volumes: { [instanceId: string]: Volume.Instance } = {};
 
+
+
+  let resources: { [resource: string]: Resource } = {};
+
+  for (let res in ecloudDeployment.resources) {
+
+    switch (getResourceType(ecloudDeployment.resources[res].type)) {
+      case ResourceType.certificate:
+        // resources[res] = new Certificate();
+        console.warn('Certificates can\'t actually be represented');
+        break;
+      case ResourceType.domain:
+        resources[res] = new Domain(
+          ecloudDeployment.resources[res].resource.name,
+          ecloudDeployment.resources[res].resource.parameters.vhost,
+          Domain.STATE.SUCCESS,
+          [ecloudDeployment.urn]
+        );
+        break;
+      case ResourceType.volume:
+        if (!ecloudDeployment.resources[res].resource.name) {
+          console.warn('Volatile volumes actually can\'t be represented');
+        } else {
+          resources[res] = new Volume(
+            ecloudDeployment.resources[res].resource.name,
+            ecloudDeployment.resources[res].resource.parameters.size,
+            ecloudDeployment.resources[res].resource.parameters.filesystem
+            || Volume.FILESYSTEM.XFS
+          );
+        }
+
+        break;
+      default:
+        console.error(
+          'Resource not following structure', res,
+          ecloudDeployment.resources[res]
+        );
+    }
+  }
+
   for (let rolId in ecloudDeployment.roles) {
     instances = {};
     for (let instanceId in ecloudDeployment.roles[rolId].instances) {
 
+      console.debug('instance', instanceId,
+        ecloudDeployment.roles[rolId].instances[instanceId]);
+
       volumes = {};
-      for (
-        let vol in ecloudDeployment.roles[rolId].instances[instanceId].volumes
+
+      if (
+        ecloudDeployment.roles[rolId].instances[instanceId].configuration &&
+        ecloudDeployment.roles[rolId].instances[instanceId].configuration
+          .resources
       ) {
+        for (
+          let res in ecloudDeployment.roles[rolId].instances[instanceId]
+            .configuration.resources
+        ) {
+          switch (getResourceType(ecloudDeployment.roles[rolId]
+            .instances[instanceId].configuration.resources[res].type)) {
+            case ResourceType.volume:
+            
+              volumes[res] = new Volume.Instance(
+                ecloudDeployment.roles[rolId].instances[instanceId]
+                  .configuration.resources[res].parameters.id,
+                ecloudDeployment.roles[rolId].instances[instanceId]
+                  .configuration.resources[res].parameters.urn
+                  || resources[res] ? resources[res]._uri : undefined
 
-        volumes[vol] = new Volume.Instance(
-          ecloudDeployment.roles[rolId].instances[instanceId].volumes[vol].id,
-          ecloudDeployment.roles[rolId].instances[instanceId].volumes[vol].urn
-        );
+              );
 
+              break;
+            default:
+              console.warn('Not expected resource inside instance',
+                ecloudDeployment.roles[rolId]
+                  .instances[instanceId].configuration.resources[res]
+              );
+          }
+        }
       }
 
       instances[instanceId] = new Deployment.Role.Instance(
@@ -72,17 +137,6 @@ export function transformEcloudDeploymentToDeployment(
     );
   }
 
-  let resourcesConfig: { [resource: string]: any } = {};
-  // ecloudDeployment.resources;
-  for (let res in ecloudDeployment.resources) {
-    if (ecloudDeployment.resources[res].resource.name) {
-      resourcesConfig[ecloudDeployment.resources[res].resource.name] =
-        ecloudDeployment.resources[res].resource;
-    } else {
-      // console.warn('found resource not following structure: ', res);
-    }
-  }
-
   let parameters: any = {};
 
   let channels: {
@@ -114,9 +168,9 @@ export function transformEcloudDeploymentToDeployment(
   if (isServiceEntrypoint(ecloudDeployment.service)) {
     res = new HTTPEntryPoint(
       ecloudDeployment.urn, // uri
-      parameters,
-      roles,
-      resourcesConfig,
+      parameters, // parameters: any
+      roles, // roles: { [rolName: string]: DeploymentRol }
+      resources, // resources: { [resource: string]: Resource }
       channels // channels
     );
   } else {
@@ -126,7 +180,7 @@ export function transformEcloudDeploymentToDeployment(
       parameters, // parameters: any
       ecloudDeployment.service, // serviceId: string
       roles, // roles: { [rolName: string]: DeploymentRol }
-      resourcesConfig, // resourcesConfig: { [resource: string]: any }
+      resources, // resources: { [resource: string]: Resource }
       channels // channels
     );
   }
@@ -572,14 +626,16 @@ export function transformManifestToResource(manifest: {
       break;
     case ResourceType.volume:
       res = new Volume(
-        manifest.name,
-        manifest.parameters.fileSystem,
-        manifest.parameters.size,
-        null
+        manifest.name, // volume uri
+        manifest.parameters.size, // size
+        manifest.parameters.fileSystem // filesystem
       );
       break;
     default:
-      console.error('Not expected resource type', manifest.spec);
+      console.error(
+        'Not expected resource type when translating a manifest',
+        manifest.spec
+      );
   }
   return res;
 }
@@ -767,7 +823,14 @@ export function getElementType(uri: string): ElementType {
 export enum ResourceType { volume, certificate, domain }
 
 export function getResourceType(uri: string): ResourceType {
-  let res: ResourceType;
+  if (uri.startsWith('eslap://eslap.cloud/resource/vhost/'))
+    return ResourceType.domain;
+  if (uri.startsWith('slap//eslap.cloud/resource/cert/server/'))
+    return ResourceType.certificate;
+  if (uri.startsWith('eslap://eslap.cloud/resource/volume/persistent/'))
+    return ResourceType.volume;
+
+  let res: ResourceType = null;
   let splitted = uri.split('/');
   let i = 4;
   if (splitted[2] === 'temporary') { i = i + 2; }
@@ -787,7 +850,10 @@ export function getResourceType(uri: string): ResourceType {
       res = ResourceType.domain;
       break;
     default:
-      console.error('Not expected resource type', uri);
+      console.error(
+        'Not expected resource type %s when obtaining a resource type',
+        splitted[i]
+      );
   }
   return res;
 }
@@ -859,7 +925,7 @@ export function transformDeploymentToManifest(deployment: Deployment) {
     'nickname': deployment.name,
     'interconnection': true,
     'configuration': {
-      'resources': deployment.resourcesConfig,
+      'resources': deployment.resources,
       'parameters': deployment.parameters
     },
     'roles': manifestRoles

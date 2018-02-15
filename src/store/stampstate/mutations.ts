@@ -244,6 +244,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more volumes to the state */
   addVolume = (state: State, payload: { [uri: string]: Volume }): void => {
+    console.debug('Se llama a la mutacion de addVolume');
     state.volumes = { ...state.volumes, ...payload };
   }
 

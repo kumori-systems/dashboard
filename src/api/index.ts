@@ -759,71 +759,12 @@ class ProxyConnection extends EventEmitter {
         let deployment: Deployment =
           transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
 
-        for (let resource in deployment.resourcesConfig) {
-
-          if (deployment.resourcesConfig[resource].name) {
-            switch (
-            getResourceType(deployment.resourcesConfig[resource].name)
-            ) {
-              case ResourceType.certificate:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Certificate(
-                    deployment.resourcesConfig[resource].name,
-                    [deployment._uri]
-                  )
-                );
-                break;
-
-              case ResourceType.domain:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Domain(
-                    deployment.resourcesConfig[resource].name,
-                    deployment.resourcesConfig[resource].parameters.vhost,
-                    Domain.STATE.SUCCESS,
-                    [deployment._uri]
-                  )
-                );
-                break;
-
-              case ResourceType.volume:
-                try {
-                  let vol: Volume = new Volume(
-                    deployment.resourcesConfig[resource].name,
-                    deployment.resourcesConfig[resource].parameters.fileSystem,
-                    deployment.resourcesConfig[resource].parameters.size,
-                    null,
-                    [deployment._uri]
-                  );
-                  this.emit(
-                    this.onAddResource,
-                    deployment.resourcesConfig[resource].name, vol
-                  );
-                } catch (error) {
-                  this.emit(this.onAddNotification,
-                    new Notification(Notification.LEVEL.WARNING,
-                      'Unrecognized volume params',
-                      'Unrecognized volume params',
-                      JSON.stringify(
-                        deployment.resourcesConfig[resource], null, 4
-                      )
-                    )
-                  );
-                }
-
-                break;
-
-              default:
-                console.error('Unkown resource type: %s', resource);
-            }
-          }
-          else {
-            console.warn('unrecognized resource %s structure at %s',
-              resource, deployment._uri);
-          }
+        for (let resource in deployment.resources) {
+          this.emit(
+            this.onAddResource,
+            deployment.resources[resource]._uri,
+            deployment.resources[resource]
+          );
         }
 
         this.emit(this.onAddDeployment, deploymentId, deployment);
@@ -852,66 +793,12 @@ class ProxyConnection extends EventEmitter {
           deploymentList[deploymentId]);
 
 
-        for (let resource in deployment.resourcesConfig) {
-
-          if (deployment.resourcesConfig[resource].name) {
-            switch (
-            getResourceType(deployment.resourcesConfig[resource].name)
-            ) {
-              case ResourceType.certificate:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Certificate(
-                    deployment.resourcesConfig[resource].name,
-                    [deployment._uri]
-                  )
-                );
-                break;
-
-              case ResourceType.domain:
-                this.emit(
-                  this.onAddResource,
-                  deployment.resourcesConfig[resource].name,
-                  new Domain(
-                    deployment.resourcesConfig[resource].name,
-                    deployment.resourcesConfig[resource].parameters.vhost,
-                    Domain.STATE.SUCCESS,
-                    [deployment._uri]
-                  )
-                );
-                break;
-
-              case ResourceType.volume:
-                try {
-                  let vol: Volume = new Volume(
-                    deployment.resourcesConfig[resource].name,
-                    deployment.resourcesConfig[resource].parameters.fileSystem,
-                    deployment.resourcesConfig[resource].parameters.size,
-                    null, [deployment._uri]);
-                  this.emit(this.onAddResource,
-                    deployment.resourcesConfig[resource].name, vol);
-                } catch (error) {
-                  this.emit(this.onAddNotification,
-                    new Notification(Notification.LEVEL.WARNING,
-                      'Unrecognized volume params',
-                      'Unrecognized volume params',
-                      JSON.stringify(
-                        deployment.resourcesConfig[resource], null, 4
-                      )
-                    )
-                  );
-                }
-                break;
-
-              default:
-                console.error('Unkown resource type: %s', resource);
-            }
-          }
-          else {
-            console.warn('unrecognized resource %s structure at %s',
-              resource, deployment._uri);
-          }
+        for (let resource in deployment.resources) {
+          this.emit(
+            this.onAddResource,
+            deployment.resources[resource]._uri,
+            deployment.resources[resource]
+          );
         }
         this.emit(this.onAddDeployment, deploymentId, deployment);
       }
@@ -956,70 +843,10 @@ class ProxyConnection extends EventEmitter {
           let deployment: Deployment =
             transformEcloudDeploymentToDeployment(deploymentList[deploymentId]);
 
-          for (let resource in deployment.resourcesConfig) {
-            // There are actually two certificates which dont have the same
-            // structure
-            if (deployment.resourcesConfig[resource].resource.name) {
-              switch (getResourceType(deployment.resourcesConfig[resource]
-                .resource.name)) {
-                case ResourceType.certificate:
-                  this.emit(
-                    this.onAddResource,
-                    deployment.resourcesConfig[resource].resource.name,
-                    new Certificate(
-                      deployment.resourcesConfig[resource].resource.name,
-                      [deployment._uri]
-                    )
-                  );
-                  break;
-                case ResourceType.domain:
-                  this.emit(
-                    this.onAddResource,
-                    deployment.resourcesConfig[resource].resource.name,
-                    new Domain(
-                      deployment.resourcesConfig[resource].resource.name,
-                      deployment.resourcesConfig[resource].resource.parameters
-                        .vhost,
-                      Domain.STATE.SUCCESS,
-                      [deployment._uri]
-                    )
-                  );
-                  break;
-                case ResourceType.volume:
-                  try {
-                    let vol: Volume = new Volume(
-                      deployment.resourcesConfig[resource].resource.name,
-                      deployment.resourcesConfig[resource].resource.parameters
-                        .filesystem,
-                      deployment.resourcesConfig[resource].resource.parameters
-                        .size,
-                      null,
-                      [deployment._uri]
-                    );
-                    this.emit(
-                      this.onAddResource,
-                      deployment.resourcesConfig[resource].resource.name,
-                      vol);
-                  } catch (error) {
-                    this.emit(this.onAddNotification,
-                      new Notification(Notification.LEVEL.WARNING,
-                        'Unrecognized volume params',
-                        'Unrecognized volume params',
-                        JSON.stringify(
-                          deployment.resourcesConfig[resource], null, 4
-                        )
-                      )
-                    );
-                  }
-                  break;
-                default:
-                  console.error('Unkown resource type: %s', resource);
-              }
-            }
-            else {
-              console.warn('unrecognized resource %s structure at %s', resource,
-                deployment._uri);
-            }
+          for (let resource in deployment.resources) {
+            this.emit(
+              this.onAddResource, resource, deployment.resources[resource]
+            );
           }
 
           this.emit(this.onAddDeployment, deploymentId, deployment);
@@ -1061,7 +888,7 @@ class ProxyConnection extends EventEmitter {
       // If the bundle was successfully registered, the vhost is added to the
       // state
       let uri = (<RegistrationResult>value).successful[0].split(' ')[2];
-      let res = transformManifestToResource({
+      let res: Resource = transformManifestToResource({
         'spec': 'eslap://eslap.cloud/resource/vhost/1_0_0',
         'name': uri,
         'parameters': {

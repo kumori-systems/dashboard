@@ -204,10 +204,10 @@ export default class Card extends Vue {
 
   get deploymentVolumes(): Volume[] {
     let res: Volume[] = [];
-    let resources = this.deployment.resourcesConfig;
+    let resources = this.deployment.resources;
     for (let key in resources) {
       if (resources[key] instanceof Volume) {
-        res.push(resources[key]);
+        res.push(<Volume>resources[key]);
       }
     }
     return res;

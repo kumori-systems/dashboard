@@ -14,7 +14,7 @@ export abstract class Resource extends EcloudElement {
    * output, communication and storage.
    * @param uri <string> Uniform Resource Identifier for this resource.
    */
-  constructor(uri: string, usedBy: string[]) {
+  constructor(uri: string, usedBy?: string[]) {
     super(uri);
     if (this.usedBy) this.usedBy = usedBy;
   }
@@ -60,7 +60,7 @@ export module Domain {
  */
 export class Volume extends Resource {
 
-  readonly filesystem: Volume.FILESYSTEM;
+  filesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
   readonly size: number;
   items: { [id: string]: Volume.Instance } = {};
 
@@ -68,23 +68,24 @@ export class Volume extends Resource {
    * Phisical data volume
    * @param uri <string> Uniform Resource Identifier for this volume.
    * @param filesystem <Volume.FILESYSTEM> Filesystem associated to the volume.
-   * @param size <number> Size of the volume in MB.
+   * @param size <number> Size of the volume in GB.
    */
   constructor(
-    uri: string, filesystem: Volume.FILESYSTEM, size: number,
+    uri: string,
+    size: number,
+    filesystem?: Volume.FILESYSTEM,
     items?: { [id: string]: Volume.Instance },
     usedBy?: string[]
   ) {
 
     super(uri, usedBy);
 
-    if (!filesystem)
-      throw new Error('A volume must have a filesystem associated');
-    this.filesystem = filesystem;
-
     if (!size) throw new Error('A volume must have a size associated.');
     if (size <= 0) throw new Error('A volume\'s size must be higher than 0.');
     this.size = size;
+
+    if (filesystem)
+      this.filesystem = filesystem;
 
     if (items) this.items = items;
 
@@ -104,7 +105,7 @@ export module Volume {
     public readonly id: string;
 
     /** <string> The URI of the volume which this object is instance of. */
-    public readonly uri: string;
+    public uri: string = null;
 
     /** The disc actual usage in so much for one */
     private _usage: number = 0;
@@ -115,11 +116,10 @@ export module Volume {
      * @param uri <string> The URI of the volume which this object is instance
      *  of.
      */
-    constructor(id: string, uri: string) {
+    constructor(id: string, uri?: string) {
       if (!id) throw new Error('A volume instance must have an id');
       this.id = id;
-      if (!uri) throw new Error('A volume instance must have an URI');
-      this.uri = uri;
+      if (uri) this.uri = uri;
     }
 
     /** Sets the usage of the disc. */

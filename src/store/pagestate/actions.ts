@@ -5,7 +5,7 @@ import State from './state';
 import { connection } from '../../api';
 import { getResourceType, ResourceType } from '../../api/utils';
 import {
-  Component, Deployment, Resource, Runtime, Service
+  Certificate, Component, Deployment, Domain, Resource, Runtime, Service, Volume
 } from '../stampstate/classes';
 import { BackgroundAction, Notification, User } from './classes';
 
@@ -110,7 +110,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
-      
+
       return connection.getRegisteredElements().then(() => {
         console.debug('Stored a reference to all elements from the platform');
         return user;
@@ -303,32 +303,27 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     connection.onAddResource((resourceId: string, resource: Resource) => {
 
-      let type: ResourceType = getResourceType(resourceId);
-      let commitString: string;
-      switch (type) {
+      let commitString: string = null;
+      switch (getResourceType(resourceId)) {
         case ResourceType.certificate:
           commitString = 'addCertificate';
-          break;
-        case ResourceType.domain:
-          commitString = 'addDomain';
           break;
         case ResourceType.volume:
           commitString = 'addVolume';
           break;
+        case ResourceType.domain:
+          commitString = 'addDomain';
+          break;
         default:
-          console.error('Not expected resource type %s', resourceId);
+          console.error(
+            'Not expected resource type when adding a resource of', resourceId
+          );
       }
 
-      /**
-       * If the object is not known for the page it won't be added, but the page
-       * will keep loading.
-       */
-      if (type) {
-
+      if (commitString) {
         let val: { [id: string]: Resource } = {};
         val[resourceId] = resource;
         injectee.commit(commitString, val);
-
       }
 
     });
