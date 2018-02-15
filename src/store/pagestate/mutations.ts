@@ -94,15 +94,11 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     const NOTIFICATION_BUFFER_SIZE: number = 500;
 
-    if (state.user && state.user.state === User.State.AUTHENTICATED) {
-
-      while (state.notifications.length >= NOTIFICATION_BUFFER_SIZE) {
-        state.notifications.shift(); // Removes the oldest notification
-      }
-
-      state.notifications.push(notification);
-
+    while (state.notifications.length >= NOTIFICATION_BUFFER_SIZE) {
+      state.notifications.shift(); // Removes the oldest notification
     }
+
+    state.notifications.push(notification);
 
   }
 
