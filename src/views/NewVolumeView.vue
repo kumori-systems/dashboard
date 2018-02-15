@@ -47,7 +47,7 @@
         <!-- Volume size -->
         <v-layout>
           <v-flex xs12 md2>
-            <v-text-field type="number" label="Size in MB" v-model="size" required
+            <v-text-field type="number" label="Size in GB" v-model="size" required
               v-bind:rules="[
                 (v) => !!v || 'A size is required',
                 (v) => ( parseInt(v) > 0 )|| 'Size must be higher than 0'
@@ -73,7 +73,7 @@ import { Volume } from "../store/stampstate/classes";
 export default class NewVolumeView extends Vue {
   uri: string = "eslap://<namespace>/resources/volume/<volume_name>/persistent";
   selectedFilesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
-  size: number = 1024;
+  size: number = 1;
   valid: boolean = false;
 
   get filesystem() {

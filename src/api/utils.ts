@@ -50,7 +50,7 @@ export function transformEcloudDeploymentToDeployment(
         volumes,
         ecloudDeployment.roles[rolId].instances[instanceId].ports
       );
-      
+
     }
 
     roles[rolId] = new Deployment.Role(

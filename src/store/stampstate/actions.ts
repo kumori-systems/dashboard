@@ -136,7 +136,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * Adds a volume to the system.
    * @requires uri string which represents the URI of the element.
    * @requires filesystem filesystem selected for the volume.
-   * @requires size size of the volume in MB.
+   * @requires size size of the volume in GB.
    */
   addVolume = (injectee: Vuex.ActionContext<State, any>,
     { uri, filesystem, size }): void => {
