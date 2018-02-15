@@ -30,7 +30,7 @@ export function prepareDeploymentData(metrics) {
           res.labels.push(moment(metrics.data[index].timestamp));
           break;
         case 'cpu':
-        case 'mem':
+        case 'memory':
         case 'bandwith_input':
         case 'bandwith_output':
         case 'http_requests_per_second':
@@ -91,7 +91,7 @@ export function prepareRoleData(metrics) {
           res.labels.push(moment(metrics.data[index].timestamp));
           break;
         case 'cpu':
-        case 'mem':
+        case 'memory':
         case 'bandwith_input':
         case 'bandwith_output':
         case 'http_requests_per_second':
@@ -177,7 +177,7 @@ export function prepareInstanceData(metrics) {
           }
           break;
         case 'cpu':
-        case 'mem':
+        case 'memory':
         case 'bandwith_input':
         case 'bandwith_output':
         case 'http_requests_per_second':
