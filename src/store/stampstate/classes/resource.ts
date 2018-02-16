@@ -63,6 +63,7 @@ export class Volume extends Resource {
   filesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
   readonly size: number;
   items: { [id: string]: Volume.Instance } = {};
+  name: string = '';
 
   /**
    * Phisical data volume
@@ -75,10 +76,10 @@ export class Volume extends Resource {
     size: number,
     filesystem?: Volume.FILESYSTEM,
     items?: { [id: string]: Volume.Instance },
-    usedBy?: string[]
+    usedBy?: string
   ) {
 
-    super(uri, usedBy);
+    super(uri, [usedBy]);
 
     if (!size) throw new Error('A volume must have a size associated.');
     if (size <= 0) throw new Error('A volume\'s size must be higher than 0.');
@@ -88,6 +89,10 @@ export class Volume extends Resource {
       this.filesystem = filesystem;
 
     if (items) this.items = items;
+
+    let array = this._name.split('/');
+    for (let i = 1; i < array.length; i++)
+      this.name += array[i];
 
   }
 }
@@ -107,16 +112,27 @@ export module Volume {
     /** <string> The URI of the volume which this object is instance of. */
     public uri: string = null;
 
+    /** <string> Service role associated to the volume. */
+    public associatedRole: string = null;
+
+    /** <string> Service role instance associated to the volume. */
+    public associatedInstance: string = null;
+
     /**
      * Constructor of a volume instance.
      * @param id  <string> The id which identifies the instance.
      * @param uri <string> The URI of the volume which this object is instance
      *  of.
      */
-    constructor(id: string, uri?: string) {
+    constructor(
+      id: string, uri?: string, associatedRole?: string,
+      associatedInstance?: string
+    ) {
       if (!id) throw new Error('A volume instance must have an id');
       this.id = id;
       if (uri) this.uri = uri;
+      if (associatedRole) this.associatedRole = associatedRole;
+      if (associatedInstance) this.associatedInstance = associatedInstance;
     }
 
   }

@@ -15,25 +15,25 @@
         <v-btn outline to="/addVolume">Add Volume</v-btn>
 
       </v-card-actions>
-      
+
     </v-card-title>
     <v-container>
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
-          <td class="text-xs-left">{{ props.item._uri }}</td>
-          <td class="text-xs-left">{{ props.item._name }}</td>
-          <td class="text-xs-left">{{ props.item.filesystem }}</td>
-          <td class="text-xs-left">{{ props.item.size }}</td>
-          <td class="text-xs-left">{{ props.item.itemId }}</td>
-          <td class="text-xs-left">{{ props.item.usage }}</td>
+          <td class="text-xs-left">{{ props.item[4]? null : props.item[0] }}</td>
+          <td class="text-xs-left">{{ props.item[4]? null : props.item[1] }}</td>
+          <td class="text-xs-left">{{ props.item[4]? null : props.item[2] }}</td>
+          <td class="text-xs-left">{{ props.item[4]? null : props.item[3] }}</td>
+          <td class="text-xs-left">{{ props.item[4] }}</td>
+          <td class="text-xs-left">{{  props.item[4]? itemUsage(props.item[0], props.item[4], props.item[7][0], props.item[5], props.item[6]) : null }}</td>
           <td class="text-xs-left">
-            <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
+            <router-link v-if="!props.item[4]" v-for="elem in props.item[7]" v-bind:key="elem"
               v-bind:to="deployment(elem)._path">
               {{ deployment(elem).name }}
             </router-link>
           </td>
           <td class="text-xs-left">
-            <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
+            <v-btn color="error" v-if="props.item[4] === null" icon v-on:click="showDialog(props.item._uri)">
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
@@ -117,43 +117,88 @@ export default class VolumesView extends Vue {
   /**
    * Obtains the available volumes in the system.
    */
-  get volumes(): Volume[] {
-
-    let res = [];
+  get volumes(): [
+    string, // uri
+    string, // name
+    Volume.FILESYSTEM, // filesystem
+    number, // total size
+    string, // item id
+    string, // associated role
+    string, // associated instance
+    string[] // usedBy
+  ][] {
+    let res: [
+      string, // uri
+      string, // name
+      Volume.FILESYSTEM, // filesystem
+      number, // total size
+      string, // item id
+      string, // associated role
+      string, // associated instance
+      string[] // usedBy
+    ][] = [];
     let volumes: { [volume: string]: Volume } = ((<SSGetters>this.$store
       .getters).volumes as any) as {
       [uri: string]: Volume;
     };
 
     for (let key in volumes) {
-      res.push(volumes[key]);
+      res.push([
+        volumes[key]._uri,
+        volumes[key].name,
+        volumes[key].filesystem,
+        volumes[key].size,
+        null,
+        null,
+        null,
+        volumes[key].usedBy
+      ]);
+
+      for (let inst in volumes[key].items) {
+        res.push([
+          volumes[key]._uri,
+          volumes[key].name,
+          volumes[key].filesystem,
+          volumes[key].size,
+          volumes[key].items[inst].id,
+          volumes[key].items[inst].associatedRole,
+          volumes[key].items[inst].associatedInstance,
+          volumes[key].usedBy
+        ]);
+      }
     }
     return res;
-
   }
 
   get deployment(): (stri: string) => Deployment {
-
     return (deploymentURI: string) => {
       return ((<SSGetters>this.$store.getters).deployment as any)(
         deploymentURI
       );
     };
+  }
 
+  get itemUsage() {
+    return (
+      urn: string,
+      id: string,
+      dep: string,
+      role: string,
+      inst: string
+    ) => {
+      let met = this.$store.getters.metrics(dep);
+      return met[met.length - 1].roles[role].instances[inst].volumes?met[met.length - 1].roles[role].instances[inst].volumes[id].usage: '-';
+    };
   }
 
   showDialog(elementURI: string): void {
-
     this.dialog = true;
     this.selectedElement = elementURI;
-
   }
 
   removeElement(): void {
-
     this.$store.dispatch("deleteElement", this.selectedElement);
     this.dialog = false;
-
   }
 }
 </script>

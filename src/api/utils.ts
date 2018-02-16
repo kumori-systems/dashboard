@@ -46,7 +46,7 @@ export function transformEcloudDeploymentToDeployment(
             ecloudDeployment.resources[res].resource.parameters.filesystem
             || Volume.FILESYSTEM.XFS,
             null,
-            [ecloudDeployment.urn]
+            ecloudDeployment.urn
           );
         }
 
@@ -86,14 +86,15 @@ export function transformEcloudDeploymentToDeployment(
                   .configuration.resources[res].parameters.id,
                 ecloudDeployment.roles[rolId].instances[instanceId]
                   .configuration.resources[res].parameters.urn
-                  || resources[res] ? resources[res]._uri : undefined
+                  || resources[res] ? resources[res]._uri : undefined,
+                rolId,
+                instanceId
               );
 
               volumes[res] = volInst;
               if (resources[res]) {
                 (<Volume>resources[res]).items[volInst.id] = volInst;
               }
-
 
               break;
             default:
