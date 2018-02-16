@@ -19,8 +19,6 @@ export function transformEcloudDeploymentToDeployment(
   let instances: { [instanceId: string]: Deployment.Role.Instance };
   let volumes: { [instanceId: string]: Volume.Instance } = {};
 
-
-
   let resources: { [resource: string]: Resource } = {};
 
   for (let res in ecloudDeployment.resources) {
@@ -83,14 +81,19 @@ export function transformEcloudDeploymentToDeployment(
             .instances[instanceId].configuration.resources[res].type)) {
             case ResourceType.volume:
 
-              volumes[res] = new Volume.Instance(
+              let volInst: Volume.Instance = new Volume.Instance(
                 ecloudDeployment.roles[rolId].instances[instanceId]
                   .configuration.resources[res].parameters.id,
                 ecloudDeployment.roles[rolId].instances[instanceId]
                   .configuration.resources[res].parameters.urn
                   || resources[res] ? resources[res]._uri : undefined
-
               );
+
+              volumes[res] = volInst;
+              if (resources[res]) {
+                (<Volume>resources[res]).items[volInst.id] = volInst;
+              }
+
 
               break;
             default:

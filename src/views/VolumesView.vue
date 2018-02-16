@@ -15,17 +15,17 @@
         <v-btn outline to="/addVolume">Add Volume</v-btn>
 
       </v-card-actions>
-
+      
     </v-card-title>
     <v-container>
-
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
-          <td class="text-xs-left">{{ props.item._uri }}</td>
           <td class="text-xs-left">{{ props.item._uri }}</td>
           <td class="text-xs-left">{{ props.item._name }}</td>
           <td class="text-xs-left">{{ props.item.filesystem }}</td>
           <td class="text-xs-left">{{ props.item.size }}</td>
+          <td class="text-xs-left">{{ props.item.itemId }}</td>
+          <td class="text-xs-left">{{ props.item.usage }}</td>
           <td class="text-xs-left">
             <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
               v-bind:to="deployment(elem)._path">
@@ -75,12 +75,6 @@ export default class VolumesView extends Vue {
       value: "_uri"
     },
     {
-      text: "Item nº",
-      align: "left",
-      sortable: false,
-      value: "_uri"
-    },
-    {
       text: "Name",
       align: "left",
       sortable: false,
@@ -99,6 +93,18 @@ export default class VolumesView extends Vue {
       value: "size"
     },
     {
+      text: "ItemId",
+      align: "left",
+      sortable: false,
+      value: "itemId"
+    },
+    {
+      text: "Usage",
+      align: "left",
+      sortable: false,
+      value: "usage"
+    },
+    {
       text: "Used by",
       align: "left",
       sortable: false,
@@ -112,6 +118,7 @@ export default class VolumesView extends Vue {
    * Obtains the available volumes in the system.
    */
   get volumes(): Volume[] {
+
     let res = [];
     let volumes: { [volume: string]: Volume } = ((<SSGetters>this.$store
       .getters).volumes as any) as {
@@ -122,24 +129,31 @@ export default class VolumesView extends Vue {
       res.push(volumes[key]);
     }
     return res;
+
   }
 
   get deployment(): (stri: string) => Deployment {
+
     return (deploymentURI: string) => {
       return ((<SSGetters>this.$store.getters).deployment as any)(
         deploymentURI
       );
     };
+
   }
 
   showDialog(elementURI: string): void {
+
     this.dialog = true;
     this.selectedElement = elementURI;
+
   }
 
   removeElement(): void {
+
     this.$store.dispatch("deleteElement", this.selectedElement);
     this.dialog = false;
+
   }
 }
 </script>
