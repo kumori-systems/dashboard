@@ -30,11 +30,19 @@
           <v-list-tile-title>
             <v-tooltip bottom>
             <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
-            Total size: {{ volumes[vol.uri].size }} GB
+            <div>
+              <div>Total size: {{ volumes[vol.uri].size }} GB</div>
+              <div>Usage: {{instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
+                instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                : 'loading..' }}</div>
+              <div>Filesystem {{ volumes[vol.uri].filesystem }}</div>
+            </div>
             </v-tooltip>
           </v-list-tile-title>
           
         </v-list-tile>
+
+        
 
       </v-flex>
       
