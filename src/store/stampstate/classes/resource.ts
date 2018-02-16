@@ -107,9 +107,6 @@ export module Volume {
     /** <string> The URI of the volume which this object is instance of. */
     public uri: string = null;
 
-    /** The disc actual usage in so much for one */
-    private _usage: number = 0;
-
     /**
      * Constructor of a volume instance.
      * @param id  <string> The id which identifies the instance.
@@ -120,18 +117,6 @@ export module Volume {
       if (!id) throw new Error('A volume instance must have an id');
       this.id = id;
       if (uri) this.uri = uri;
-    }
-
-    /** Sets the usage of the disc. */
-    set usage(val: number) {
-      if (val >= 0 && val <= 1) {
-        this._usage = val;
-      }
-    }
-
-    /** Retrieves the usage of the disc. */
-    get usage() {
-      return this._usage;
     }
 
   }
