@@ -162,9 +162,9 @@ export function prepareInstanceData(metrics) {
                   }
                   else { // If not exists, create a new object
                     res.datasets.push({
-                      'label': volprop,
-                      'backgroundColor': color[volprop] || '#000000',
-                      'borderColor': color[volprop] || '#000000',
+                      'label': vol,
+                      'backgroundColor': '#e136ff',
+                      'borderColor': '#e136ff',
                       'fill': false,
                       'data': [metrics.data[index]['volumes'][vol][volprop]]
                     });
