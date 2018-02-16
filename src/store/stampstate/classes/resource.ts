@@ -16,7 +16,7 @@ export abstract class Resource extends EcloudElement {
    */
   constructor(uri: string, usedBy?: string[]) {
     super(uri);
-    if (this.usedBy) this.usedBy = usedBy;
+    if (usedBy) this.usedBy = usedBy;
   }
 
 }

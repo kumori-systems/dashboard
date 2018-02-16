@@ -22,6 +22,7 @@
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
           <td class="text-xs-left">{{ props.item._uri }}</td>
+          <td class="text-xs-left">{{ props.item._uri }}</td>
           <td class="text-xs-left">{{ props.item._name }}</td>
           <td class="text-xs-left">{{ props.item.filesystem }}</td>
           <td class="text-xs-left">{{ props.item.size }}</td>
@@ -60,7 +61,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
-import { Volume } from "../store/stampstate/classes";
+import { Deployment, Volume } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "volumes-view"
@@ -69,6 +70,12 @@ export default class VolumesView extends Vue {
   headers: any[] = [
     {
       text: "URI",
+      align: "left",
+      sortable: false,
+      value: "_uri"
+    },
+    {
+      text: "Item nº",
       align: "left",
       sortable: false,
       value: "_uri"
@@ -115,6 +122,14 @@ export default class VolumesView extends Vue {
       res.push(volumes[key]);
     }
     return res;
+  }
+
+  get deployment(): (stri: string) => Deployment {
+    return (deploymentURI: string) => {
+      return ((<SSGetters>this.$store.getters).deployment as any)(
+        deploymentURI
+      );
+    };
   }
 
   showDialog(elementURI: string): void {

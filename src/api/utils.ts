@@ -46,7 +46,9 @@ export function transformEcloudDeploymentToDeployment(
             ecloudDeployment.resources[res].resource.name,
             ecloudDeployment.resources[res].resource.parameters.size,
             ecloudDeployment.resources[res].resource.parameters.filesystem
-            || Volume.FILESYSTEM.XFS
+            || Volume.FILESYSTEM.XFS,
+            null,
+            [ecloudDeployment.urn]
           );
         }
 
@@ -80,7 +82,7 @@ export function transformEcloudDeploymentToDeployment(
           switch (getResourceType(ecloudDeployment.roles[rolId]
             .instances[instanceId].configuration.resources[res].type)) {
             case ResourceType.volume:
-            
+
               volumes[res] = new Volume.Instance(
                 ecloudDeployment.roles[rolId].instances[instanceId]
                   .configuration.resources[res].parameters.id,
