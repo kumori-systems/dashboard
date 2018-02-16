@@ -777,7 +777,7 @@ class ProxyConnection extends EventEmitter {
 
       return Promise.all(promiseArray)
         .then((values) => { })
-        .catch(err => console.log('Catch', err))
+        .catch(err => console.debug('Catch', err))
         .then(() => { });
     });
     return pro;
@@ -912,8 +912,6 @@ class ProxyConnection extends EventEmitter {
     Promise<any> {
 
     let manifest = transformVolumeToManifest(uri, filesystem, size);
-
-    // console.debug('The volume manifest', manifest);
 
     console.warn('########################################\n'
       + 'Volume creation is under development.\n'

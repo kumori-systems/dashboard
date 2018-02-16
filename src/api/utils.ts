@@ -63,9 +63,6 @@ export function transformEcloudDeploymentToDeployment(
     instances = {};
     for (let instanceId in ecloudDeployment.roles[rolId].instances) {
 
-      console.debug('instance', instanceId,
-        ecloudDeployment.roles[rolId].instances[instanceId]);
-
       volumes = {};
 
       if (
