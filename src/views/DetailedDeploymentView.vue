@@ -60,7 +60,7 @@
             </v-layout>
 
             <!-- Deployment volumes -->
-            <v-layout wrap>
+            <v-layout wrap v-if="deploymentVolumes.length > 0">
               <v-flex ma-1 xs12>
                 <span class="subheading">Volumes</span>
                 <div v-for="(volTuple, index) in deploymentVolumes" v-bind:key="index">

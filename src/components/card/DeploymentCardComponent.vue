@@ -80,7 +80,7 @@
             </template>
 
             <!-- Links -->
-            <template >
+            <template>
               <!-- Links are calculated with channel connections -->
               <v-subheader><strong>LINKS</strong></v-subheader>
               <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
@@ -94,7 +94,7 @@
             </template>
 
             <!-- Volumes -->
-            <template v-if="!isHTTPEntryPoint">
+            <template v-if="deploymentVolumes.length > 0">
               <v-subheader><strong>VOLUMES</strong></v-subheader>
               <v-list-tile v-for="(vol, index) in deploymentVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
