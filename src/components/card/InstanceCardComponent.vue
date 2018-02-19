@@ -25,23 +25,33 @@
           <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
         </v-layout>
 
-        <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
-
-          <v-list-tile-title>
-            <div>
-              <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
-              <div>Total size: {{ volumes[vol.uri].size }} GB</div>
-              <div>Usage: {{
-                instanceMetrics.length > 0
-                && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
-                && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
-                instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
-                : 'loading..' }}</div>
-              <div>Filesystem {{ volumes[vol.uri].filesystem }}</div>
-            </div>
-          </v-list-tile-title>
-          
-        </v-list-tile>
+        <v-list three-line>
+          <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
+            
+              <v-list-tile-content>
+                <v-list-tile-title>
+                  <v-icon>storage</v-icon> {{ vol.id }}
+                </v-list-tile-title>
+                <v-list-tile-sub-title>
+                  <v-layout>
+                  <v-flex xs6 class="ml-1">
+                  <span>{{ volumes[vol.uri].filesystem }}</span>
+                  <span>{{ volumes[vol.uri].size }} GB</span>
+                  </v-flex>
+                  <v-flex xs6>
+                  <span>Used: {{ instanceMetrics.length > 0
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
+                    instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                    : '..' }}
+                  </span>
+                  </v-flex>
+                  </v-layout>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            
+          </v-list-tile>
+        </v-list>
         
       </v-flex>
       

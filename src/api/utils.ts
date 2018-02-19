@@ -38,7 +38,7 @@ export function transformEcloudDeploymentToDeployment(
         break;
       case ResourceType.volume:
         if (!ecloudDeployment.resources[res].resource.name) {
-          console.warn('Volatile volumes actually can\'t be represented');
+          console.warn('Volatile volumes can\'t actually be represented');
         } else {
           resources[res] = new Volume(
             ecloudDeployment.resources[res].resource.name,

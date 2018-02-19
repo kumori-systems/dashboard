@@ -153,7 +153,7 @@ export function prepareInstanceData(metrics) {
               switch (volprop) {
                 case 'usage':
                   let position = res.datasets.findIndex((p) => {
-                    if (p['label'] === volprop) return p;
+                    if (p['label'] === vol) return p;
                   })
                   if (position !== -1) { // If exists, add the new object
                     res.datasets[position].data.push(

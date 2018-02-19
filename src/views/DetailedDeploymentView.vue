@@ -66,9 +66,13 @@
                 <div v-for="(volTuple, index) in deploymentVolumes" v-bind:key="index">
                   <v-tooltip bottom>
                     <div dark slot="activator">
-                      <v-icon>storage</v-icon> {{ volTuple[0] }}
-                      filesystem: {{ volTuple[1].filesystem }}
-                      size: {{ volTuple[1].size }} GB
+                       <v-layout>
+                        <v-flex xs6><v-icon>storage</v-icon> {{ volTuple[0] }}</v-flex>
+                        <v-flex xs6>
+                          {{ volTuple[1].size }} GB
+                          {{ volTuple[1].filesystem }}
+                        </v-flex>
+                      </v-layout>
                     </div>
                     {{ volTuple[1]._uri }}
                   </v-tooltip>
