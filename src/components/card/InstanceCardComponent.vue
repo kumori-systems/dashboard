@@ -28,9 +28,8 @@
         <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
 
           <v-list-tile-title>
-            <v-tooltip bottom>
-            <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
             <div>
+              <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
               <div>Total size: {{ volumes[vol.uri].size }} GB</div>
               <div>Usage: {{
                 instanceMetrics.length > 0
@@ -40,13 +39,10 @@
                 : 'loading..' }}</div>
               <div>Filesystem {{ volumes[vol.uri].filesystem }}</div>
             </div>
-            </v-tooltip>
           </v-list-tile-title>
           
         </v-list-tile>
-
         
-
       </v-flex>
       
       <!-- Applies spaces between components -->

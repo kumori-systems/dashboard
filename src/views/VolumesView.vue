@@ -31,6 +31,9 @@
               v-bind:to="deployment(elem)._path">
               {{ deployment(elem).name }}
             </router-link>
+            <span v-else>
+              {{ props.item[6] }}
+            </span>
           </td>
           <td class="text-xs-left">
             <v-btn color="error" v-if="props.item[4] === null" icon v-on:click="showDialog(props.item._uri)">

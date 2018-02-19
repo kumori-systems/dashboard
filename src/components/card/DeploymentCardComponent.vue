@@ -4,8 +4,10 @@
     <!-- Card's background represents the deployment's state -->
     <v-card>
       <!-- Card title: Deployment name -->
-      <v-card-title primary-title class="headline" v-bind:class="stateColor">
+      <v-card-title  primary-title v-bind:class="stateColor">
+
         <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>{{ deployment.name }}
+
         <v-spacer></v-spacer>
 
         <v-tooltip bottom>
@@ -102,8 +104,13 @@
                 </v-card-actions>
                 <v-list-tile-title>
                   <v-tooltip bottom>
-                  <span dark slot="activator"><v-icon>storage</v-icon> {{ vol._name }}</span>
-                  {{ vol._uri }}
+                    <div dark slot="activator">
+                      <v-layout>
+                        <v-flex xs6><v-icon>storage</v-icon> {{ vol.name }}</v-flex>
+                        <v-flex xs6>{{ vol.size }} GB</v-flex>
+                      </v-layout>
+                    </div>
+                    <span>{{ vol._uri }}</span>
                   </v-tooltip>
                 </v-list-tile-title>
               </v-list-tile>
