@@ -1,5 +1,5 @@
 import { Deployment } from './deployment';
-import { Service } from './index';
+import { Service, VolatileVolume } from './index';
 
 /**
  * Especialitzed type of deployment with the functionality of connecting
@@ -13,9 +13,13 @@ export abstract class EntryPoint extends Deployment {
       [originChannel: string]: {
         destinyChannelId: string, destinyDeploymentId: string
       }[]
-    }
+    },
+    volatileVolumes: { [volumeId: string]: VolatileVolume }
   ) {
-    super(uri, name, parameters, service, roles, resourcesConfig, channels);
+    super(
+      uri, name, parameters, service, roles, resourcesConfig, channels,
+      volatileVolumes
+    );
   }
 }
 
@@ -29,7 +33,10 @@ export module EntryPoint {
 
 /** Deployment which gives conectivity outside the stamp via http. */
 export class HTTPEntryPoint extends EntryPoint {
+
+  /** List of websites associated to the entrypoint. */
   websites: string[] = [];
+
   /**
    * Constructor of the HTTPEntryPoint class.
    * @param URI id of the service.
@@ -45,7 +52,7 @@ export class HTTPEntryPoint extends EntryPoint {
         destinyChannelId: string,
         destinyDeploymentId: string
       }[]
-    }) {
+    }, volatileVolumes?: { [volumeId: string]: VolatileVolume }) {
     super(
       URI,
       roles && roles['sep'].configuration ?
@@ -54,7 +61,8 @@ export class HTTPEntryPoint extends EntryPoint {
       EntryPoint.TYPE.HTTP_INBOUND,
       roles,
       resourcesConfig,
-      channels
+      channels,
+      volatileVolumes
     );
 
     if (roles && roles['sep'].configuration) {

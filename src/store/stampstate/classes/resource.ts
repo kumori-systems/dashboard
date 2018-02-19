@@ -56,6 +56,30 @@ export module Domain {
 }
 
 /**
+ * Represents a phisical data volume which won't persist on restarts.
+ */
+export class VolatileVolume {
+  
+  /** <string> Identification of the volume in the deployment. */
+  readonly id: string;
+
+  /** <number> Size of the volume in GB. */
+  readonly size: number;
+
+  /**
+   * Represents a phisical data volume which won't persist on restarts.
+   * @param id <string> Identification of the volume in the deployment.
+   * @param size <number> Size of the volume in GB.
+   */
+  constructor(id: string, size: number) {
+    if (!id) throw new Error('Volatile volumes require an id');
+    this.id = id;
+    if (!size) throw new Error('Volatile volumes require a size');
+    this.size = size;
+  }
+}
+
+/**
  * Phisical data volume.
  */
 export class Volume extends Resource {

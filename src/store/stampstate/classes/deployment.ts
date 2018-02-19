@@ -1,5 +1,5 @@
 import urlencode from 'urlencode';
-import { Resource, Service, Volume } from './index';
+import { Resource, Service, VolatileVolume, Volume } from './index';
 
 /**
  * Checks the format of the URI and returns the domain and the name of the
@@ -55,6 +55,12 @@ export class Deployment {
    * <{[resource:string]:Resource}> Set of resources for this deployment.
    */
   resources: { [resource: string]: Resource } = {};
+
+  /**
+   * <{ [volumeId: string]: VolatileVolume }> Set of volatile volumes associated
+   * to the deployment.
+   */
+  volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
 
   /** <any> Set of parameters passed to the initialitzation of this service. */
   parameters: any = null;
@@ -136,7 +142,8 @@ export class Deployment {
     resources: { [resource: string]: Resource }, channels: {
       [originChannel: string]:
       { destinyChannelId: string, destinyDeploymentId: string }[]
-    }) {
+    },
+    volatileVolumes?: { [volumeId: string]: VolatileVolume }) {
 
     // Check URI and assign results
     [this._domain, {}] = rightURIformat(uri);
@@ -160,7 +167,11 @@ export class Deployment {
     }
 
     if (channels) this.channels = channels;
+
+    // Assing volatile volumes to the deployment
+    if (volatileVolumes) { this.volatileVolumes = volatileVolumes; }
   }
+
 
 }
 export module Deployment {

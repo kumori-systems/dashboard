@@ -6,7 +6,7 @@ import {
   Deployment, Domain, FullConnector, HTTPEntryPoint, IntegerParameter,
   JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
   Parameter, ProvidedChannel, PublishSubscribeConnector, Resource, Runtime,
-  Service, StringParameter, Volume
+  Service, StringParameter, VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
 import { User } from '../store/pagestate/classes';
@@ -17,7 +17,8 @@ export function transformEcloudDeploymentToDeployment(
 
   let roles: { [rolId: string]: Deployment.Role } = {};
   let instances: { [instanceId: string]: Deployment.Role.Instance };
-  let volumes: { [instanceId: string]: Volume.Instance } = {};
+  let volumeInstances: { [instanceId: string]: Volume.Instance } = {};
+  let volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
 
   let resources: { [resource: string]: Resource } = {};
 
@@ -38,13 +39,18 @@ export function transformEcloudDeploymentToDeployment(
         break;
       case ResourceType.volume:
         if (!ecloudDeployment.resources[res].resource.name) {
-          console.warn('Volatile volumes can\'t actually be represented');
+
+          volatileVolumes[res] = new VolatileVolume(
+            res, // uri
+            ecloudDeployment.resources[res].resource.parameters.size // size
+          );
+
         } else {
           resources[res] = new Volume(
-            ecloudDeployment.resources[res].resource.name,
-            ecloudDeployment.resources[res].resource.parameters.size,
+            ecloudDeployment.resources[res].resource.name, // uri
+            ecloudDeployment.resources[res].resource.parameters.size, // size
             ecloudDeployment.resources[res].resource.parameters.filesystem
-            || Volume.FILESYSTEM.XFS,
+            || Volume.FILESYSTEM.XFS, // filesystem
             null,
             ecloudDeployment.urn
           );
@@ -63,7 +69,7 @@ export function transformEcloudDeploymentToDeployment(
     instances = {};
     for (let instanceId in ecloudDeployment.roles[rolId].instances) {
 
-      volumes = {};
+      volumeInstances = {};
 
       if (
         ecloudDeployment.roles[rolId].instances[instanceId].configuration &&
@@ -88,7 +94,7 @@ export function transformEcloudDeploymentToDeployment(
                 instanceId
               );
 
-              volumes[res] = volInst;
+              volumeInstances[res] = volInst;
               if (resources[res]) {
                 (<Volume>resources[res]).items[volInst.id] = volInst;
               }
@@ -115,7 +121,7 @@ export function transformEcloudDeploymentToDeployment(
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement.memory,
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement
           .bandwith,
-        volumes,
+        volumeInstances,
         ecloudDeployment.roles[rolId].instances[instanceId].ports
       );
 
@@ -174,7 +180,8 @@ export function transformEcloudDeploymentToDeployment(
       parameters, // parameters: any
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels // channels
+      channels, // channels
+      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
     );
   } else {
     res = new Deployment(
@@ -184,7 +191,8 @@ export function transformEcloudDeploymentToDeployment(
       ecloudDeployment.service, // serviceId: string
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels // channels
+      channels, // channels
+      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
     );
   }
   return res;
