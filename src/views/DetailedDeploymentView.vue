@@ -310,8 +310,9 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Deployment state. */
   get state(): string {
-    let res: string;
-    switch (this.deployment.state) {
+    let res: string = "unknown";
+    if(this.deployment){
+      switch (this.deployment.state) {
       case Deployment.Role.STATE.SUCCESS:
         res = "check_circle";
         break;
@@ -324,6 +325,8 @@ export default class DetailedDeploymentView extends Vue {
       default:
         res = "unknown";
     }
+    }
+    
     return res;
   }
 
