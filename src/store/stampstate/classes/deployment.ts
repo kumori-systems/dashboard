@@ -1,5 +1,5 @@
 import urlencode from 'urlencode';
-import { Service } from './index';
+import { Resource, Service, Volume } from './index';
 
 /**
  * Checks the format of the URI and returns the domain and the name of the
@@ -52,10 +52,9 @@ export class Deployment {
   service: string = null;
 
   /**
-   * <{[resource:string]:string}> Set of parameters configuring the resources
-   * used by this deployment.
+   * <{[resource:string]:Resource}> Set of resources for this deployment.
    */
-  resourcesConfig: { [resource: string]: any } = {};
+  resources: { [resource: string]: Resource } = {};
 
   /** <any> Set of parameters passed to the initialitzation of this service. */
   parameters: any = null;
@@ -134,7 +133,7 @@ export class Deployment {
    */
   constructor(uri: string, name: string, parameters: any, service: string,
     roles: { [rol: string]: Deployment.Role },
-    resourcesConfig: { [resource: string]: any }, channels: {
+    resources: { [resource: string]: Resource }, channels: {
       [originChannel: string]:
       { destinyChannelId: string, destinyDeploymentId: string }[]
     }) {
@@ -149,7 +148,7 @@ export class Deployment {
     if (!service || service.length === 0) throw new Error('Invalid value for '
       + 'service in Deployment:' + service);
     this.service = service;
-    if (resourcesConfig) this.resourcesConfig = resourcesConfig;
+    if (resources) this.resources = resources;
     if (parameters) this.parameters = parameters;
     if (roles) this.roles = roles;
 
@@ -393,7 +392,7 @@ export module Deployment {
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
-      volumes: { [volume: string]: string; } = {};
+      volumes: { [volume: string]: Volume.Instance } = {};
 
       /** <{ [port: string]: string; }> Logical ports implied into this role. */
       ports: { [port: string]: string; } = {};
@@ -424,7 +423,8 @@ export module Deployment {
       this role.
       */
       constructor(cnid: string, state: Instance.STATE, cpu: number,
-        memory: number, bandwidth: number, volumes?: { [key: string]: string; },
+        memory: number, bandwidth: number,
+        volumes?: { [volume: string]: Volume.Instance },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0)
           throw new Error('Invalid cnid for Instance: ' + cnid);

@@ -10,10 +10,11 @@ export const ADMISSION_URI = "https://admission.argo.kumori.cloud/admission";
 // export const ACS_URI = "http://acs-jvalero.test.kumori.cloud/acs";
 // export const ADMISSION_URI = "http://admission-jvalero.test.kumori.cloud/admission";
 
+// latest config
+// export const ACS_URI = "http://acs-latest.test.kumori.cloud/acs";
+// export const ADMISSION_URI = "http://admission-latest.test.kumori.cloud/admission";
+
 // fail config
 // export const ACS_URI = "";
 // export const ADMISSION_URI = "";
 
-// jferrer config
-// export const ACS_URI = "http://acs-oauth.test.kumori.cloud/acs";
-//export const ADMISSION_URI = "http://admission-oauth.test.kumori.cloud/admission";

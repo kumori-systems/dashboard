@@ -54,17 +54,19 @@ export class BackgroundAction {
   }
 }
 export module BackgroundAction {
+
   /** Marks if the action is on process or has finished. */
   export enum STATE { ON_PROCESS, FAIL, SUCCESS };
 
   /** Marks the background action type. */
   export enum TYPE {
-    LOGIN = 'login',
+    SIGNIN = 'signIn',
     DEPLOY_SERVICE = 'deploy service',
     UNDEPLOY_SERVICE = 'undeploy service',
     SCALE_SERVICE = 'scale service',
     REGISTER_BUNDLE = 'register bundle',
     REGISTER_DOMAIN = 'register domain',
+    REGISTER_VOLUME = 'register volume',
     UNREGISTER_DOMAIN = 'unregister domain',
     UNREGISTER_RUNTIME = 'unregister runtime',
     UNREGISTER_COMPONENT = 'unregister component',
@@ -73,4 +75,5 @@ export module BackgroundAction {
     UNLINK_SERVICES = 'unlink services',
     LOADING_DATA = 'loading data'
   }
+  
 }

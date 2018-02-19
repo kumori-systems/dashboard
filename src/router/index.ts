@@ -4,7 +4,7 @@ import Router from 'vue-router';
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
   NewBundleView, NewDeploymentView, NewDomainView, NewHTTPEntrypointView,
-  OverviewView, SignInView
+  NewVolumeView, OverviewView, SignInView, UserSettingsView, VolumesView
 } from '../views';
 
 Vue.use(Router);
@@ -31,7 +31,7 @@ export default new Router({
     },
     {
       path: '/volumes',
-      component: null
+      component: VolumesView
     },
     {
       path: '/alarmsAndLogs',
@@ -55,11 +55,15 @@ export default new Router({
     },
     {
       path: '/addVolume',
-      component: null
+      component: NewVolumeView
     },
     {
       path: '/uploadbundle',
       component: NewBundleView
+    },
+    {
+      path: '/userSettings',
+      component: UserSettingsView
     },
     // If not found, go to main view
     { path: '*', redirect: '/overview' }

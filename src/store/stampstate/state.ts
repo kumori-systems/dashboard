@@ -1,5 +1,6 @@
 import {
-  Certificate, Component, Deployment, Domain, Runtime, Service, Volume
+  Certificate, Component, Connector, Deployment, Domain, LoadBalancerConnector,
+  ProvidedChannel, Runtime, Service, Volume
 } from './classes';
 
 /**
@@ -41,7 +42,7 @@ export default class State {
           },
           'instances': {
             [instanceId: string]: {
-              [property: string]: number | string
+              [property: string]: number | string | object
             }
 
           }

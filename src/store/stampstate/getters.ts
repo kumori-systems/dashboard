@@ -70,7 +70,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           },
           'instances': {
             [instanceId: string]: {
-              [property: string]: number | string
+              [property: string]: number | string | object
             }
 
           }

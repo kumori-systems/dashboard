@@ -6,6 +6,7 @@ import { EcloudElement } from './ecloudelement';
  * communication and storage.
  */
 export abstract class Resource extends EcloudElement {
+
   usedBy: string[] = [];
   /**
    * Phisical or virtual component of linited availability within a computer or
@@ -13,10 +14,11 @@ export abstract class Resource extends EcloudElement {
    * output, communication and storage.
    * @param uri <string> Uniform Resource Identifier for this resource.
    */
-  constructor(uri: string, usedBy: string[]) {
+  constructor(uri: string, usedBy?: string[]) {
     super(uri);
-    if (this.usedBy) this.usedBy = usedBy;
+    if (usedBy) this.usedBy = usedBy;
   }
+
 }
 
 /**
@@ -24,6 +26,7 @@ export abstract class Resource extends EcloudElement {
  * authority or control within the Internet.
  */
 export class Domain extends Resource {
+
   /** <domain.State> Availability of this domain. Default WARNING. */
   state: Domain.STATE = Domain.STATE.WARNING;
   /** <string> Direction of this domain.*/
@@ -40,32 +43,107 @@ export class Domain extends Resource {
     if (url) this.url = url;
     if (state) this.state = state;
   }
+
 }
 
 export module Domain {
+
   /** Representation of the availavility of the domain. */
   export enum STATE {
     SUCCESS = 'validated', WARNING = 'under validation', DANGER = 'erroneous'
   }
+
 }
 
 /**
  * Phisical data volume.
  */
 export class Volume extends Resource {
+
+  filesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
+  readonly size: number;
+  items: { [id: string]: Volume.Instance } = {};
+  name: string = '';
+
   /**
    * Phisical data volume
    * @param uri <string> Uniform Resource Identifier for this volume.
+   * @param filesystem <Volume.FILESYSTEM> Filesystem associated to the volume.
+   * @param size <number> Size of the volume in GB.
    */
-  constructor(uri: string, usedBy: string[]) {
-    super(uri, usedBy);
+  constructor(
+    uri: string,
+    size: number,
+    filesystem?: Volume.FILESYSTEM,
+    items?: { [id: string]: Volume.Instance },
+    usedBy?: string
+  ) {
+
+    super(uri, [usedBy]);
+
+    if (!size) throw new Error('A volume must have a size associated.');
+    if (size <= 0) throw new Error('A volume\'s size must be higher than 0.');
+    this.size = size;
+
+    if (filesystem)
+      this.filesystem = filesystem;
+
+    if (items) this.items = items;
+
+    let array = this._name.split('/');
+    for (let i = 1; i < array.length; i++)
+      this.name += array[i];
+
   }
+}
+
+export module Volume {
+
+  /**
+   * Available volume file systems.
+   */
+  export enum FILESYSTEM { XFS = 'XFS', Ext4 = 'Ext4' }
+
+  export class Instance {
+
+    /** <string> The id which identifies the instance. */
+    public readonly id: string;
+
+    /** <string> The URI of the volume which this object is instance of. */
+    public uri: string = null;
+
+    /** <string> Service role associated to the volume. */
+    public associatedRole: string = null;
+
+    /** <string> Service role instance associated to the volume. */
+    public associatedInstance: string = null;
+
+    /**
+     * Constructor of a volume instance.
+     * @param id  <string> The id which identifies the instance.
+     * @param uri <string> The URI of the volume which this object is instance
+     *  of.
+     */
+    constructor(
+      id: string, uri?: string, associatedRole?: string,
+      associatedInstance?: string
+    ) {
+      if (!id) throw new Error('A volume instance must have an id');
+      this.id = id;
+      if (uri) this.uri = uri;
+      if (associatedRole) this.associatedRole = associatedRole;
+      if (associatedInstance) this.associatedInstance = associatedInstance;
+    }
+
+  }
+
 }
 
 /**
  * A cornfirmation of veracity of the connection.
  */
 export class Certificate extends Resource {
+
   /**
    * A confirmation of veracity of the connection.
    * @param uri <string> Uniform Resource Identifier for this data volume.
@@ -73,4 +151,5 @@ export class Certificate extends Resource {
   constructor(uri: string, usedBy: string[]) {
     super(uri, usedBy);
   }
+
 }

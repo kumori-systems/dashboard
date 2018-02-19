@@ -55,7 +55,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // platform
     if (!res && res !== null) {
       connection.getElementInfo(elementURI).catch((err) => {
-        if (err.code !== '001')
+        if (err.message !== 'Duplicated request')
           console.error('Error getting info from element %s', elementURI, err);
       });
     }
@@ -133,10 +133,47 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   /**
-   * Adds a new domain to the stamp.
-   * @requires domain <string> Domain name to be added to the stamp.
+   * Adds a volume to the system.
+   * @requires uri string which represents the URI of the element.
+   * @requires filesystem filesystem selected for the volume.
+   * @requires size size of the volume in GB.
    */
-  addNewDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
+  addVolume = (injectee: Vuex.ActionContext<State, any>,
+    { uri, filesystem, size }): void => {
+
+    injectee.dispatch(
+      'addBackgroundAction',
+      new BackgroundAction(BackgroundAction.TYPE.REGISTER_VOLUME)
+    );
+
+    connection.addVolume(uri, filesystem, size).then(() => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+        'state': BackgroundAction.STATE.SUCCESS
+      });
+
+    }).catch((err: Error) => {
+
+      injectee.dispatch('finishBackgroundAction', {
+        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+        'state': BackgroundAction.STATE.FAIL
+      });
+
+      injectee.dispatch('addNotification',
+        new Notification(Notification.LEVEL.ERROR, 'Error registering a volume',
+          'Error registering a volume ' + uri,
+          JSON.stringify(err.message, null, 4))
+      );
+
+    });
+  }
+
+  /**
+   * Adds a new domain to the system.
+   * @requires domain <string> Domain name to be added to the system.
+   */
+  addDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
     void => {
 
     injectee.dispatch(
@@ -174,7 +211,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
-
     switch (utils.getElementType(elementId)) {
       case utils.ElementType.component:
         injectee.dispatch(
@@ -278,11 +314,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       );
 
     });
+
   }
 
   /**
    * Changes the state of a deployment.
-   * @requires Object <{deploymentURN, roleNumInstances, killInstances}> Object
+   * @requires object <{deploymentURN, roleNumInstances, killInstances}> object
    *  representing the changes to be made on the deployment.
    */
   aplyingChangesToDeployment = (injectee: Vuex.ActionContext<State, any>, {
@@ -359,7 +396,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   /**
    * Links two deployments in the stamp.
    * @requires params <{ deploymentOne: string, channelOne: string,
-   *  deploymentTwo: string, channelTwo: string }> Object with the deploymentss
+   *  deploymentTwo: string, channelTwo: string }> object with the deploymentss
    *  and the channels to link.
    */
   link = (injectee: Vuex.ActionContext<State, any>, params: {
@@ -401,7 +438,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   /**
   * Unlinks two deployments in the stamp.
   * @requires params <{ deploymentOne: string, channelOne: string,
-  *  deploymentTwo: string, channelTwo: string }> Object with the deployments
+  *  deploymentTwo: string, channelTwo: string }> object with the deployments
   *  and the channels to unlink.
   */
   unlink = (injectee: Vuex.ActionContext<State, any>,

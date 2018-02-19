@@ -1,5 +1,6 @@
 <template>  
   <v-card id="overview-view">
+    
     <v-card-title>
 
         <!-- View title -->
@@ -24,6 +25,7 @@
           </v-btn>
 
         </v-card-actions>
+
       </v-card-title>
 
     <!-- Divides the content of the card-->

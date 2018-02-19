@@ -12,8 +12,9 @@ export default class State {
     this.user = null;
     this.notifications = [];
     this.pendingBackgroundActions = {
-      [BackgroundAction.TYPE.LOGIN]: [],
+      [BackgroundAction.TYPE.SIGNIN]: [],
       [BackgroundAction.TYPE.REGISTER_DOMAIN]: [],
+      [BackgroundAction.TYPE.REGISTER_VOLUME]: [],
       [BackgroundAction.TYPE.DEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.UNDEPLOY_SERVICE]: [],
       [BackgroundAction.TYPE.SCALE_SERVICE]: [],

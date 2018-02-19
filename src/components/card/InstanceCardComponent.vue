@@ -14,14 +14,45 @@
       
       <!-- Instance arrangement -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+
         <v-layout>
           <v-flex ma-1 xs2>{{ instance.memory }} MEM</v-flex>
           <v-flex ma-1 xs2>{{ instance.cpu }} CPU</v-flex>
           <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
         </v-layout>
+
         <v-layout>
           <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
         </v-layout>
+
+        <v-list three-line>
+          <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
+            
+              <v-list-tile-content>
+                <v-list-tile-title>
+                  <v-icon>storage</v-icon> {{ vol.id }}
+                </v-list-tile-title>
+                <v-list-tile-sub-title>
+                  <v-layout>
+                  <v-flex xs6 class="ml-1">
+                  <span>{{ volumes[vol.uri].filesystem }}</span>
+                  <span>{{ volumes[vol.uri].size }} GB</span>
+                  </v-flex>
+                  <v-flex xs6>
+                  <span>Used: {{ instanceMetrics.length > 0
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
+                    instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                    : '..' }}
+                  </span>
+                  </v-flex>
+                  </v-layout>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            
+          </v-list-tile>
+        </v-list>
+        
       </v-flex>
       
       <!-- Applies spaces between components -->
@@ -41,7 +72,9 @@ import VueClassComponent from "vue-class-component";
 
 // Components
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
-import { Deployment } from "../../store/stampstate/classes";
+import { Deployment, Volume } from "../../store/stampstate/classes";
+
+import SSGetters from "../../store/stampstate/getters";
 
 import ChartComponent from "./../chart";
 
@@ -70,6 +103,23 @@ export default class InstanceCardComponent extends Vue {
     });
   }
 
+  get volumes(): { [volURN: string]: Volume } {
+    return ((<SSGetters>this.$store.getters).volumes as any) as {
+      [volURN: string]: Volume;
+    };
+  }
+
+  get instanceVolumes(): Volume.Instance[] {
+    let res: Volume.Instance[] = [];
+
+    if (this.instance.volumes)
+      for (let vol in this.instance.volumes) {
+        res.push(this.instance.volumes[vol]);
+      }
+
+    return res;
+  }
+
   get onInstanceMetricsUpdate() {
     let res: {
       data: { [property: string]: number | string }[];
@@ -83,7 +133,9 @@ export default class InstanceCardComponent extends Vue {
   }
 
   get instanceChartData() {
-    return ChartComponentUtils.prepareInstanceData(this.onInstanceMetricsUpdate);
+    return ChartComponentUtils.prepareInstanceData(
+      this.onInstanceMetricsUpdate
+    );
   }
 
   get state(): string {
