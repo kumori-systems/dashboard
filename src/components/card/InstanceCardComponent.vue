@@ -32,7 +32,10 @@
             <span dark slot="activator"><v-icon>storage</v-icon> {{ vol.id }}</span>
             <div>
               <div>Total size: {{ volumes[vol.uri].size }} GB</div>
-              <div>Usage: {{instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
+              <div>Usage: {{
+                instanceMetrics.length > 0
+                && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
+                && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
                 instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
                 : 'loading..' }}</div>
               <div>Filesystem {{ volumes[vol.uri].filesystem }}</div>
@@ -103,9 +106,10 @@ export default class InstanceCardComponent extends Vue {
   get instanceVolumes(): Volume.Instance[] {
     let res: Volume.Instance[] = [];
 
-    for (let vol in this.instance.volumes) {
-      res.push(this.instance.volumes[vol]);
-    }
+    if (this.instance.volumes)
+      for (let vol in this.instance.volumes) {
+        res.push(this.instance.volumes[vol]);
+      }
 
     return res;
   }

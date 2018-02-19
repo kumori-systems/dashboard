@@ -70,43 +70,43 @@ export default class VolumesView extends Vue {
   headers: any[] = [
     {
       text: "URI",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "_uri"
     },
     {
       text: "Name",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "_name"
     },
     {
       text: "Filesystem",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "filesystem"
     },
     {
       text: "Size",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "size"
     },
     {
       text: "ItemId",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "itemId"
     },
     {
       text: "Usage",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "usage"
     },
     {
       text: "Used by",
-      align: "left",
+      align: "center",
       sortable: false,
       value: "usedBy"
     }
@@ -187,7 +187,12 @@ export default class VolumesView extends Vue {
       inst: string
     ) => {
       let met = this.$store.getters.metrics(dep);
-      return met[met.length - 1].roles[role].instances[inst].volumes?met[met.length - 1].roles[role].instances[inst].volumes[id].usage: '-';
+      let res = null;
+      
+      if(met.length > 0)
+      res = met[met.length - 1].roles[role].instances[inst].volumes?met[met.length - 1].roles[role].instances[inst].volumes[id].usage: '-';
+
+      return res;
     };
   }
 
