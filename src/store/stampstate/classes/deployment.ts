@@ -295,33 +295,33 @@ export module Deployment {
     /**
      * Instance of a role defined in this deployment's service.
      * @param name <string> Readable text which identifies this role in this
-     * deployment.
+     *  deployment.
      * @param component <string> Component which implements the role in this
-     * deployment.
+     *  deployment.
      * @param configuration <any> Innitial settings for a role.
      * @param cpu <number> Amount of CPU units available. Default 1.
      * @param memory <number> Amount of main memory units needed by this rol.
-     * Each unit corresponds to a certain amount of physical RAM plus swap.
-     * Default 1.
+     *  Each unit corresponds to a certain amount of physical RAM plus swap.
+     *  Default 1.
      * @param ioperf <number> Amount of I/O performance units available.
-     * Each IOperf unit corresponds to a specific disk bandwidth rate and to a
-     * specific tare of disk operations per second (IOPS) the role can perform.
-     * Default 1.
+     *  Each IOperf unit corresponds to a specific disk bandwidth rate and to a
+     *  specific tare of disk operations per second (IOPS) the role can perform.
+     *  Default 1.
      * @param iopsintensive <boolean> Indicates that the component is especially
      *  I/O intensive in terms of IOPS. When the value is true, the rate of disk
      *  operations per second included per I/O performance unit will be higher.
-     * Default false.
+     *  Default false.
      * @param bandwidth <number> Maximum rate (in Mbps) of data transmission
-     * through network interfaces. Default 1.
+     *  through network interfaces. Default 1.
      * @param resilience <number> Number of failures needed to take down all
-     * instances of a component. The resilience is specified by levels, but they
-     * indicate various types of failures by likelihood. Default 1.
+     *  instances of a component. The resilience is specified by levels, but
+     *  they indicate various types of failures by likelihood. Default 1.
      * @param instances <{ [instance: string]: Role.Instance }>Instances of the
-     * role to be mantained running.
+     *  role to be mantained running.
      * @param minInstances <number> Minim amount of instances running at the
-     * same time. Default 1.
+     *  same time. Default 1.
      * @param maxInstances <number> Maximum amount of instances running at the
-     * same time. Default 1.
+     *  same time. Default 1.
      */
     constructor(name: string, component: string, configuration: any,
       cpu: number, memory: number, ioperf: number, iopsintensive: boolean,
@@ -403,9 +403,13 @@ export module Deployment {
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
-      volumes: { [volume: string]: Volume.Instance } = {};
+      volumes: {
+        [volume: string]: Volume.Instance | VolatileVolume.Instance
+      } = {};
 
-      /** <{ [port: string]: string; }> Logical ports implied into this role. */
+      /**
+       * <{ [port: string]: string; }> Logical ports implied into this role.
+       */
       ports: { [port: string]: string; } = {};
 
       /**
@@ -416,26 +420,29 @@ export module Deployment {
 
       /**
       * Instance of a component, running as a role, defined in this deployment's
-       service.
+      *  service.
       * @param cnid <string> Identificatior of the instance in Ecloud.
       * @param state <State> Represents the availability of the rol. Default
-      Disconnected.
+      *  Disconnected.
       * @param cpu <number> Amount of main memory units needed by this instance.
-      Each unit corresponds to a certain amount of physical RAM plus swap.
-      Default 1.
+      *  Each unit corresponds to a certain amount of physical RAM plus swap.
+      *  Default 1.
       * @param memory <number> Amount of main memory units needed by this rol.
-      Each unit corresponds to a certain amount of physical RAM plus swap.
-      Default 1.
+      *  Each unit corresponds to a certain amount of physical RAM plus swap.
+      *  Default 1.
       * @param bandwidth <number> Maximum rate (in Mbps) of data transmission
-      through network interfaces. Default 1.
-      * @param volumes <{ [volume: string]: string; }> Phisical data volumes
-      implied into this role.
+      *  through network interfaces. Default 1.
+      * @param volumes <{ [volume: string]: Volume.Instance |
+      *  VolatileVolume.Instance }> Phisical data volumes
+      *  implied into this role.
       * @param ports <{ [port: string]: string; }> Logical ports implied into
-      this role.
+      *  this role.
       */
       constructor(cnid: string, state: Instance.STATE, cpu: number,
         memory: number, bandwidth: number,
-        volumes?: { [volume: string]: Volume.Instance },
+        volumes?: {
+          [volume: string]: Volume.Instance | VolatileVolume.Instance
+        },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0)
           throw new Error('Invalid cnid for Instance: ' + cnid);

@@ -17,7 +17,9 @@ export function transformEcloudDeploymentToDeployment(
 
   let roles: { [rolId: string]: Deployment.Role } = {};
   let instances: { [instanceId: string]: Deployment.Role.Instance };
-  let volumeInstances: { [instanceId: string]: Volume.Instance } = {};
+  let volumeInstances: {
+    [instanceId: string]: Volume.Instance | VolatileVolume.Instance
+  } = {};
   let volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
 
   let resources: { [resource: string]: Resource } = {};
@@ -38,23 +40,22 @@ export function transformEcloudDeploymentToDeployment(
         );
         break;
       case ResourceType.volume:
-        if (!ecloudDeployment.resources[res].resource.name) {
+        resources[res] = new Volume(
+          ecloudDeployment.resources[res].resource.name, // uri
+          ecloudDeployment.resources[res].resource.parameters.size, // size
+          ecloudDeployment.resources[res].resource.parameters.filesystem
+          || Volume.FILESYSTEM.XFS, // filesystem
+          null,
+          ecloudDeployment.urn
+        );
+        break;
+      case ResourceType.volatileVolume:
+        console.debug('The volume is ', res);
 
-          volatileVolumes[res] = new VolatileVolume(
-            res, // uri
-            ecloudDeployment.resources[res].resource.parameters.size // size
-          );
-
-        } else {
-          resources[res] = new Volume(
-            ecloudDeployment.resources[res].resource.name, // uri
-            ecloudDeployment.resources[res].resource.parameters.size, // size
-            ecloudDeployment.resources[res].resource.parameters.filesystem
-            || Volume.FILESYSTEM.XFS, // filesystem
-            null,
-            ecloudDeployment.urn
-          );
-        }
+        volatileVolumes[res] = new VolatileVolume(
+          res, // id
+          ecloudDeployment.resources[res].resource.parameters.size // size
+        );
 
         break;
       default:
@@ -80,8 +81,10 @@ export function transformEcloudDeploymentToDeployment(
           let res in ecloudDeployment.roles[rolId].instances[instanceId]
             .configuration.resources
         ) {
+
           switch (getResourceType(ecloudDeployment.roles[rolId]
             .instances[instanceId].configuration.resources[res].type)) {
+
             case ResourceType.volume:
 
               let volInst: Volume.Instance = new Volume.Instance(
@@ -100,11 +103,37 @@ export function transformEcloudDeploymentToDeployment(
               }
 
               break;
+
+            case ResourceType.volatileVolume:
+
+              let volatileVolInst: VolatileVolume.Instance =
+                new VolatileVolume.Instance(
+                  ecloudDeployment.roles[rolId].instances[instanceId]
+                    .configuration.resources[res].parameters.id,
+                    rolId,
+                    instanceId
+                );
+
+              volumeInstances[res] = volatileVolInst;
+              if (volatileVolumes[res]) {
+
+                if (!volatileVolumes[res].items) {
+                  volatileVolumes[res].items = {};
+                }
+
+                volatileVolumes[res].items[volatileVolInst.id]
+                  = volatileVolInst;
+              }
+              break;
+
             default:
+
               console.warn('Not expected resource inside instance',
-                ecloudDeployment.roles[rolId]
-                  .instances[instanceId].configuration.resources[res]
+                res,
+                ecloudDeployment.roles[rolId].instances[instanceId]
+                  .configuration.resources[res]
               );
+
           }
         }
       }
@@ -831,15 +860,18 @@ export function getElementType(uri: string): ElementType {
   return res;
 }
 
-export enum ResourceType { volume, certificate, domain }
+export enum ResourceType { volatileVolume, volume, certificate, domain }
 
 export function getResourceType(uri: string): ResourceType {
+  console.debug('La uri que recibimos es', uri);
   if (uri.startsWith('eslap://eslap.cloud/resource/vhost/'))
     return ResourceType.domain;
   if (uri.startsWith('slap//eslap.cloud/resource/cert/server/'))
     return ResourceType.certificate;
   if (uri.startsWith('eslap://eslap.cloud/resource/volume/persistent/'))
     return ResourceType.volume;
+  if (uri.startsWith('eslap://eslap.cloud/resource/volume/volatile/'))
+    return ResourceType.volatileVolume;
 
   let res: ResourceType = null;
   let splitted = uri.split('/');

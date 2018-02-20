@@ -89,6 +89,7 @@
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
                   v-bind:key="instanceId" v-bind:instance="instanceContent"
                   v-bind:instanceMetrics="roleChartData.instances"
+                  v-bind:deploymentVolatileVolumes="deploymentVolatileVolumes"
                   v-on:killInstanceChange="handleKillInstanceChange"
                   v-bind:clear="onClearHandler">
                 </instance-card-component>
@@ -128,7 +129,8 @@ import ChartComponent from "./../chart";
     /**  Clear changes when user cancels. */
     clear: { required: true, type: Boolean },
     /** Role and instance metrics. */
-    roleMetrics: { required: true }
+    roleMetrics: { required: true },
+    deploymentVolatileVolumes: { required: false }
   },
   filters: {
     roleChannels: function(rolId: string, service: Service) {

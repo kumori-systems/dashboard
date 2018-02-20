@@ -67,7 +67,9 @@
                   <v-tooltip bottom>
                     <div dark slot="activator">
                        <v-layout>
-                        <v-flex xs6><v-icon>storage</v-icon> {{ volTuple[0] }}</v-flex>
+                        <v-flex xs6>
+                          <v-icon class="indigo--text">storage</v-icon> {{ volTuple[0] }}
+                        </v-flex>
                         <v-flex xs6>
                           {{ volTuple[1].size }} GB
                           {{ volTuple[1].filesystem }}
@@ -76,6 +78,22 @@
                     </div>
                     {{ volTuple[1]._uri }}
                   </v-tooltip>
+                </div>
+              </v-flex>
+            </v-layout>
+
+             <!-- Deployment volumes -->
+            <v-layout wrap v-if="Object.keys(deployment.volatileVolumes).length > 0">
+              <v-flex ma-1 xs12>
+                <span class="subheading">Volatile Volumes</span>
+                <div v-for="vol in deployment.volatileVolumes" v-bind:key="vol.id">
+                  <v-layout>
+                  <v-flex xs6>
+                        <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}</v-flex>
+                  <v-flex xs6>
+                    {{ vol.size }} GB
+                  </v-flex>
+                  </v-layout>
                 </div>
               </v-flex>
             </v-layout>
@@ -164,6 +182,7 @@
           <role-card-component v-for="(rolContent, rolId) in deployment.roles"
           v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
           v-bind:roleMetrics="deploymentMetrics.roles"
+          v-bind:deploymentVolatileVolumes="deployment.volatileVolumes"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
@@ -319,22 +338,22 @@ export default class DetailedDeploymentView extends Vue {
   /** Deployment state. */
   get state(): string {
     let res: string = "unknown";
-    if(this.deployment){
+    if (this.deployment) {
       switch (this.deployment.state) {
-      case Deployment.Role.STATE.SUCCESS:
-        res = "check_circle";
-        break;
-      case Deployment.Role.STATE.DANGER:
-        res = "error";
-        break;
-      case Deployment.Role.STATE.WARNING:
-        res = "warning";
-        break;
-      default:
-        res = "unknown";
+        case Deployment.Role.STATE.SUCCESS:
+          res = "check_circle";
+          break;
+        case Deployment.Role.STATE.DANGER:
+          res = "error";
+          break;
+        case Deployment.Role.STATE.WARNING:
+          res = "warning";
+          break;
+        default:
+          res = "unknown";
+      }
     }
-    }
-    
+
     return res;
   }
 

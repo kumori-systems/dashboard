@@ -59,7 +59,7 @@ export module Domain {
  * Represents a phisical data volume which won't persist on restarts.
  */
 export class VolatileVolume {
-  
+
   /** <string> Identification of the volume in the deployment. */
   readonly id: string;
 
@@ -67,15 +67,46 @@ export class VolatileVolume {
   readonly size: number;
 
   /**
+   * <{ [itemId: string]: VolatileVolume.Instance }> Instances of the volatile
+   * volume.
+   */
+  items: { [itemId: string]: VolatileVolume.Instance };
+
+  /**
    * Represents a phisical data volume which won't persist on restarts.
    * @param id <string> Identification of the volume in the deployment.
    * @param size <number> Size of the volume in GB.
    */
-  constructor(id: string, size: number) {
+  constructor(id: string, size: number, items?: {
+    [itemId: string]: VolatileVolume.Instance
+  }) {
+
     if (!id) throw new Error('Volatile volumes require an id');
     this.id = id;
+
     if (!size) throw new Error('Volatile volumes require a size');
     this.size = size;
+
+    if (items) this.items = items;
+  }
+}
+
+export module VolatileVolume {
+  export class Instance {
+
+    readonly id: string;
+    associatedRole: string;
+    associatedInstance: string;
+
+    constructor(
+      id: string, associatedRole?: string, associatedInstance?: string
+    ) {
+      if (!id) throw new Error('Volatile volumes instances require an id');
+      this.id = id;
+      if (associatedRole) this.associatedRole = associatedRole;
+      if (associatedInstance) this.associatedInstance = associatedInstance;
+    }
+
   }
 }
 
