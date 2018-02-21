@@ -226,6 +226,7 @@ import {
   Volume
 } from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
+import { setTimeout } from "timers";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -280,6 +281,8 @@ export default class DetailedDeploymentView extends Vue {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
+  unwatch: () => void;
+
   mounted() {
     /* No longer needed because it's loaded on user's load
     // Retrieve all actually deployed services
@@ -297,9 +300,14 @@ export default class DetailedDeploymentView extends Vue {
       }
     }*/
 
-    this.$watch("$route.path", val => {
+    this.unwatch = this.$watch("$route.path", val => {
+      this.$forceUpdate();
       this.cancelChanges();
     });
+  }
+
+  beforeDestroy() {
+    this.unwatch();
   }
 
   /** Obtains the deployment from the storage. */
