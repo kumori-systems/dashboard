@@ -777,7 +777,7 @@ class ProxyConnection extends EventEmitter {
 
       return Promise.all(promiseArray)
         .then((values) => { })
-        .catch(err => console.debug('Catch', err))
+        .catch(err => console.debug('Catched', err))
         .then(() => { });
     });
     return pro;

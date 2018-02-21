@@ -50,7 +50,6 @@ export function transformEcloudDeploymentToDeployment(
         );
         break;
       case ResourceType.volatileVolume:
-        console.debug('The volume is ', res);
 
         volatileVolumes[res] = new VolatileVolume(
           res, // id
@@ -863,7 +862,6 @@ export function getElementType(uri: string): ElementType {
 export enum ResourceType { volatileVolume, volume, certificate, domain }
 
 export function getResourceType(uri: string): ResourceType {
-  console.debug('La uri que recibimos es', uri);
   if (uri.startsWith('eslap://eslap.cloud/resource/vhost/'))
     return ResourceType.domain;
   if (uri.startsWith('slap//eslap.cloud/resource/cert/server/'))

@@ -248,7 +248,7 @@ export default class VolumesView extends Vue {
       role: string,
       inst: string
     ) => {
-      console.debug("Entramos en intem usage con", urn, id, dep, role, inst);
+
       let res = null;
       if (dep && role && inst) {
         let met = this.$store.getters.metrics(dep);
@@ -259,6 +259,7 @@ export default class VolumesView extends Vue {
       }
 
       return res;
+      
     };
   }
 
