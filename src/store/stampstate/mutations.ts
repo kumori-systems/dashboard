@@ -62,38 +62,55 @@ export default class Mutations implements Vuex.MutationTree<State> {
   /** Removes one deployment from the state */
   removeDeployment = (state: State, deploymentURI: string): void => {
 
-    // Remove this deployment from all domains
-    for (let dom in state.domains) {
-      if (state.domains[dom]) {
-        let index = state.domains[dom].usedBy.indexOf(deploymentURI);
-        if (index !== -1) {
-          state.domains[dom].usedBy.splice(index, 1);
+    if (state.deployments[deploymentURI]) {
+
+      // Unlink all related deployments
+      for (let chann in state.deployments[deploymentURI].channels) {
+        for (let conn in state.deployments[deploymentURI].channels[chann]) {
+          this.unlink(state, {
+            deploymentOne: deploymentURI,
+            channelOne: chann,
+            deploymentTwo: state.deployments[deploymentURI]
+              .channels[chann][conn].destinyDeploymentId,
+            channelTwo: state.deployments[deploymentURI]
+              .channels[chann][conn].destinyChannelId
+          });
         }
       }
-    }
 
-    // Remove this deployment from all certificates
-    for (let cert in state.certificates) {
-      if (state.certificates[cert]) {
-        let index = state.certificates[cert].usedBy.indexOf(deploymentURI);
-        if (index !== -1) {
-          state.certificates[cert].usedBy.splice(index, 1);
+      // Remove this deployment from all domains
+      for (let dom in state.domains) {
+        if (state.domains[dom]) {
+          let index = state.domains[dom].usedBy.indexOf(deploymentURI);
+          if (index !== -1) {
+            state.domains[dom].usedBy.splice(index, 1);
+          }
         }
       }
+
+      // Remove this deployment from all certificates
+      for (let cert in state.certificates) {
+        if (state.certificates[cert]) {
+          let index = state.certificates[cert].usedBy.indexOf(deploymentURI);
+          if (index !== -1) {
+            state.certificates[cert].usedBy.splice(index, 1);
+          }
+        }
+      }
+
+      // Remove this deployment from the service
+      let ser = state.deployments[deploymentURI].service;
+      if (state.services[ser]) {
+        let index = state.services[ser].usedBy.indexOf(deploymentURI);
+        state.services[ser].usedBy.splice(index, 1);
+      }
+
+      // Remove deployment metrics
+      Vue.delete(state.metrics, deploymentURI);
+
+      // Remove this deployment from the state
+      Vue.delete(state.deployments, deploymentURI);
     }
-
-    // Remove this deployment from the service
-    let ser = state.deployments[deploymentURI].service;
-    if (state.services[ser]) {
-      let index = state.services[ser].usedBy.indexOf(deploymentURI);
-      state.services[ser].usedBy.splice(index, 1);
-    }
-
-    // Remove deployment metrics
-    Vue.delete(state.metrics, deploymentURI);
-
-    // Remove this deployment from the state
-    Vue.delete(state.deployments, deploymentURI);
 
   }
 
