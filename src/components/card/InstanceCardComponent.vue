@@ -60,6 +60,7 @@
                 <v-list-tile-sub-title>
                   <v-layout>
                   <v-flex xs6 class="ml-1">
+                    <span>{{ deploymentVolatileVolumes[vol.name].filesystem }}</span>
                     <span>{{ deploymentVolatileVolumes[vol.name].size }} GB</span>
                   </v-flex>
                   <v-flex xs6>

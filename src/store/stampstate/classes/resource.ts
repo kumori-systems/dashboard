@@ -66,6 +66,8 @@ export class VolatileVolume {
   /** <number> Size of the volume in GB. */
   readonly size: number;
 
+  filesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
+
   /**
    * <{ [itemId: string]: VolatileVolume.Instance }> Instances of the volatile
    * volume.
@@ -79,7 +81,7 @@ export class VolatileVolume {
    */
   constructor(id: string, size: number, items?: {
     [itemId: string]: VolatileVolume.Instance
-  }) {
+  }, filesystem?: Volume.FILESYSTEM) {
 
     if (!id) throw new Error('Volatile volumes require an id');
     this.id = id;
@@ -88,6 +90,7 @@ export class VolatileVolume {
     this.size = size;
 
     if (items) this.items = items;
+    if (filesystem) this.filesystem = filesystem;
   }
 }
 
@@ -101,7 +104,7 @@ export module VolatileVolume {
 
     constructor(
       id: string, name: string, associatedRole?: string,
-      associatedInstance?: string
+      associatedInstance?: string, filesystem?: Volume.FILESYSTEM
     ) {
       if (!id) throw new Error('Volatile volumes instances require an id');
       this.id = id;
@@ -160,7 +163,7 @@ export module Volume {
   /**
    * Available volume file systems.
    */
-  export enum FILESYSTEM { XFS = 'XFS', Ext4 = 'Ext4' }
+  export enum FILESYSTEM { XFS = 'XFS' }
 
   export class Instance {
 
