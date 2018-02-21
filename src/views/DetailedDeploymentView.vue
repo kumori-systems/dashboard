@@ -318,7 +318,10 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get deploymentVolumes(): [string, Volume][] {
+
     let res: [string, Volume][] = [];
+    
+    // Persistent volumes
     let resources = this.deployment.resources;
     for (let key in resources) {
       if (resources[key] instanceof Volume) {

@@ -109,6 +109,7 @@ export function transformEcloudDeploymentToDeployment(
                 new VolatileVolume.Instance(
                   ecloudDeployment.roles[rolId].instances[instanceId]
                     .configuration.resources[res].parameters.id,
+                    res,
                     rolId,
                     instanceId
                 );

@@ -95,14 +95,17 @@ export module VolatileVolume {
   export class Instance {
 
     readonly id: string;
+    name: string;
     associatedRole: string;
     associatedInstance: string;
 
     constructor(
-      id: string, associatedRole?: string, associatedInstance?: string
+      id: string, name: string, associatedRole?: string,
+      associatedInstance?: string
     ) {
       if (!id) throw new Error('Volatile volumes instances require an id');
       this.id = id;
+      if (name) this.name = name;
       if (associatedRole) this.associatedRole = associatedRole;
       if (associatedInstance) this.associatedInstance = associatedInstance;
     }

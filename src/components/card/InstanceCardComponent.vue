@@ -53,13 +53,14 @@
 
               <!-- A volatile volume -->
               <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
+
                 <v-list-tile-title>
                   <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
                   <v-flex xs6 class="ml-1">
-                  <span>{{ deploymentVolatileVolumes[vol.id].size }} GB</span>
+                    <span>{{ deploymentVolatileVolumes[vol.name].size }} GB</span>
                   </v-flex>
                   <v-flex xs6>
                   <span>Used: {{ instanceMetrics.length > 0
