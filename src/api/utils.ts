@@ -28,15 +28,25 @@ export function transformEcloudDeploymentToDeployment(
 
     switch (getResourceType(ecloudDeployment.resources[res].type)) {
       case ResourceType.certificate:
-        // resources[res] = new Certificate();
-        console.warn('Certificates can\'t actually be represented');
+        // Ther's actually a bug in which deployments with no certificates
+        // return a resource with null parameters
+        if (ecloudDeployment.resources[res].resource.parameters) {
+          resources[res] = new Certificate(
+            ecloudDeployment.resources[res].resource.parameters.name, // uri
+            ecloudDeployment.resources[res].resource.parameters.content
+              .key, // key
+            ecloudDeployment.resources[res].resource.parameters.content
+              .cert, // certificate
+            [ecloudDeployment.urn] // usedBy
+          );
+        }
         break;
       case ResourceType.domain:
         resources[res] = new Domain(
-          ecloudDeployment.resources[res].resource.name,
-          ecloudDeployment.resources[res].resource.parameters.vhost,
-          Domain.STATE.SUCCESS,
-          [ecloudDeployment.urn]
+          ecloudDeployment.resources[res].resource.name, // uri
+          ecloudDeployment.resources[res].resource.parameters.vhost, // domain
+          Domain.STATE.SUCCESS, // state
+          [ecloudDeployment.urn] // usedBy
         );
         break;
       case ResourceType.volume:
@@ -45,8 +55,8 @@ export function transformEcloudDeploymentToDeployment(
           ecloudDeployment.resources[res].resource.parameters.size, // size
           ecloudDeployment.resources[res].resource.parameters.filesystem
           || Volume.FILESYSTEM.XFS, // filesystem
-          null,
-          ecloudDeployment.urn
+          null, // items
+          ecloudDeployment.urn // usedBy
         );
         break;
       case ResourceType.volatileVolume:
@@ -109,9 +119,9 @@ export function transformEcloudDeploymentToDeployment(
                 new VolatileVolume.Instance(
                   ecloudDeployment.roles[rolId].instances[instanceId]
                     .configuration.resources[res].parameters.id,
-                    res,
-                    rolId,
-                    instanceId
+                  res,
+                  rolId,
+                  instanceId
                 );
 
               volumeInstances[res] = volatileVolInst;
@@ -661,6 +671,8 @@ export function transformManifestToResource(manifest: {
     case ResourceType.certificate:
       res = new Certificate(
         manifest.name,
+        manifest.parameters.content.key, // key
+        manifest.parameters.content.cert, // certificate
         []
       );
       break;
