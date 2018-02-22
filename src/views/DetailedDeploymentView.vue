@@ -3,17 +3,23 @@
     <v-card-title>
       
       <!-- View title-->
-      <h3 class="headline mb-0">{{ deployment.name }}</h3>
+      <h3 class="headline mb-0">
+        <span v-if="deployment instanceof HTTPEntryPoint">
+          <v-icon class="ma-1">language</v-icon>
+          <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
+        </span>
+        {{ deployment.name }}
+      </h3>
         
-        <!-- Applies a space between elements -->
-        <v-spacer></v-spacer>
-        
-        <!-- Deployment actions -->
-        <v-card-actions>
-          <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-          <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-        </v-card-actions>
+      <!-- Applies a space between elements -->
+      <v-spacer></v-spacer>
+      
+      <!-- Deployment actions -->
+      <v-card-actions>
+        <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+        <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
+        <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+      </v-card-actions>
       
     </v-card-title>
     
@@ -160,6 +166,21 @@
               </v-flex>
             </v-layout>
 
+            <!-- Websites -->
+            <v-layout v-if="deployment instanceof HTTPEntryPoint">
+              <v-flex ma-1 xs12>
+                <span class="subheading">Websites</span>
+                <v-list>
+                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index">
+                  <v-list-tile-title>
+                    <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                    <a v-else v-bind:href="'http://' + web">{{ web }}</a>
+                  </v-list-tile-title>
+                </v-list-tile>
+                </v-list>
+              </v-flex>
+            </v-layout>
+
           </v-flex>
 
           <!-- Applies space between elements -->
@@ -220,8 +241,10 @@ import {
   ChartComponentUtils
 } from "../components";
 import {
+  Certificate,
   Channel,
   Deployment,
+  HTTPEntryPoint,
   Service,
   Volume
 } from "../store/stampstate/classes";
@@ -253,6 +276,8 @@ import { setTimeout } from "timers";
   }
 })
 export default class DetailedDeploymentView extends Vue {
+  HTTPEntryPoint = HTTPEntryPoint;
+
   /** Temporary number of instances of a role. **/
   roleNumInstances: { [rolId: string]: number } = {};
 
@@ -318,9 +343,8 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get deploymentVolumes(): [string, Volume][] {
-
     let res: [string, Volume][] = [];
-    
+
     // Persistent volumes
     let resources = this.deployment.resources;
     for (let key in resources) {
@@ -439,6 +463,15 @@ export default class DetailedDeploymentView extends Vue {
         channel
       );
     };
+  }
+
+  get hasCertificate() {
+    let res: boolean = false;
+    for (let resource in this.deployment.resources) {
+      if (this.deployment.resources[resource] instanceof Certificate)
+        res = true;
+    }
+    return res;
   }
 
   /**

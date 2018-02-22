@@ -6,7 +6,9 @@
       <!-- Card title: Deployment name -->
       <v-card-title  primary-title class="headline" v-bind:class="stateColor">
 
-        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>{{ deployment.name }}
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint && hasCertificate">https</v-icon>
+        {{ deployment.name }}
 
         <v-spacer></v-spacer>
 
@@ -129,7 +131,8 @@
                   <!-- <v-icon></v-icon> -->
                 </v-card-actions>
                 <v-list-tile-title>
-                  <a v-bind:href="'http://' + web">{{ web }}</a>
+                  <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                  <a v-else v-bind:href="'http://' + web">{{ web }}</a>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
@@ -153,6 +156,7 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import {
+  Certificate,
   Deployment,
   HTTPEntryPoint,
   Volume,
@@ -212,6 +216,16 @@ export default class Card extends Vue {
 
   get isHTTPEntryPoint(): boolean {
     return this.deployment instanceof HTTPEntryPoint;
+  }
+
+  get hasCertificate(): boolean {
+    let res: boolean = false;
+    for (let resource in this.deployment.resources) {
+      if (this.deployment.resources[resource] instanceof Certificate) {
+        res = true;
+      }
+    }
+    return res;
   }
 
   get deploymentVolumes(): Volume[] {
