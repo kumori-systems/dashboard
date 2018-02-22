@@ -205,12 +205,20 @@ export module Volume {
  */
 export class Certificate extends Resource {
 
+  /** Certificate key. */
+  key: string;
+
+  /** Certificate. */
+  cert: string;
+
   /**
    * A confirmation of veracity of the connection.
    * @param uri <string> Uniform Resource Identifier for this data volume.
    */
-  constructor(uri: string, usedBy: string[]) {
+  constructor(uri: string, key: string, cert: string, usedBy: string[]) {
     super(uri, usedBy);
+    if (key) this.key = key;
+    if (cert) this.cert = cert;
   }
 
 }

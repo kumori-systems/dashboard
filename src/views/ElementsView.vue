@@ -191,6 +191,59 @@
           </v-expansion-panel>
 
         </v-expansion-panel-content>
+         <v-expansion-panel-content>
+          
+          <!-- Certificates -->
+          <div slot="header">Certificates</div>
+          <v-expansion-panel popout expand>
+            <v-expansion-panel-content v-for="(certificatesByName, owner) in certificatesByOwner" v-bind:key="owner">
+              
+              <!-- Certificate owners -->
+              <div slot="header">{{ owner }}</div>
+              <v-expansion-panel inset expand>
+                <v-expansion-panel-content v-for="(certificatesByVersion, name) in certificatesByName" v-bind:key="name">
+                  
+                  <!-- Certificate -->
+                  <div slot="header">{{ name }}</div>
+                  <v-container fluid>
+                    <v-layout wrap v-for="(certificate, version) in certificatesByVersion" v-bind:key="version" justify-space-between>
+                      <v-flex xs4>
+
+                        <v-checkbox v-bind:label="version" v-model="selectedCertificates" v-bind:value="certificate"></v-checkbox>
+                        
+                      </v-flex>
+                      <v-flex xs6>
+
+                        <div v-if="certificateUsedBy(certificate).length>0">
+                          <div><span class="yellow">in use by:</span></div>
+                          <div v-for="(usedBy, index) in certificateUsedBy(certificate)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
+                            <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
+                          </div>
+                        </div>
+                        <div v-else>not in use</div>
+
+                      </v-flex>
+                      <v-flex xs2>
+
+                        <v-btn color="info" icon v-on:click="showInfoElementDialog(certificate)">
+                          <v-icon class="white--text">info_outline</v-icon>
+                        </v-btn>
+
+                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(certificate)">
+                          <v-icon class="white--text">delete_forever</v-icon>
+                        </v-btn>
+
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+        </v-expansion-panel-content>
       </v-expansion-panel>
 
       <!-- Single delete -->
@@ -204,7 +257,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat="flat" @click.native="deleteElement">Delete element</v-btn>
-            <v-btn flat="flat" @click.native="deleteElementDialog = false">Cancel</v-btn>
+            <v-btn flat="flat" @click.native="deleteElementDialog=false">Cancel</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -230,9 +283,9 @@
           <v-card-title class="headline">Delete element?</v-card-title>
           <v-card-text>
             This action <strong>CAN'T BE UNDONE</strong> and will delete:
-            <div v-for="(comp, index) in selectedComponents" v-bind:key="index">{{comp}}</div>
-            <div v-for="(serv, index) in selectedServices" v-bind:key="index">{{serv}}</div>
-            <div v-for="(runt, index) in selectedRuntimes" v-bind:key="index">{{runt}}</div>
+            <div v-for="(comp, index) in selectedComponents" v-bind:key="index">{{ comp }}</div>
+            <div v-for="(serv, index) in selectedServices" v-bind:key="index">{{ serv }}</div>
+            <div v-for="(runt, index) in selectedRuntimes" v-bind:key="index">{{ runt }}</div>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -252,6 +305,7 @@ import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
 import {
+  Certificate,
   Component,
   Service,
   Runtime,
@@ -271,6 +325,8 @@ export default class ElementsView extends Vue {
 
   /** Selected runtimes to make groupal actions. */
   selectedRuntimes: string[] = [];
+
+  selectedCertificates: string[] = [];
 
   /** Search filter. */
   search: string = null;
@@ -307,7 +363,8 @@ export default class ElementsView extends Vue {
     if (
       this.selectedComponents.length > 0 ||
       this.selectedServices.length > 0 ||
-      this.selectedRuntimes.length > 0
+      this.selectedRuntimes.length > 0 || 
+      this.selectedCertificates.length > 0
     )
       return true;
     return false;
@@ -332,6 +389,24 @@ export default class ElementsView extends Vue {
   get componentUsedBy(): Function {
     return (uri): string[] => {
       return (((<SSGetters>this.$store.getters).componentUsedBy as Function)(
+        uri
+      ) as any) as string[];
+    };
+  }
+
+  get certificatesByOwner():{
+    [owner: string]: { [name: string]: { [version: string]: Certificate } };
+  } {
+    return ((<SSGetters>this.$store.getters).certificatesByOwner as any)(
+      this.search
+    ) as {
+      [owner: string]: { [name: string]: { [version: string]: Certificate } };
+    };
+  }
+
+  get certificateUsedBy(): Function {
+    return (uri): string[] => {
+      return (((<SSGetters>this.$store.getters).certificateUsedBy as Function)(
         uri
       ) as any) as string[];
     };
@@ -416,10 +491,13 @@ export default class ElementsView extends Vue {
       this.$store.dispatch("downloadManifest", this.selectedServices[serv]);
     }
     for (let comp in this.selectedComponents) {
-      this.$store.dispatch("downloadManifest", this.selectedServices[comp]);
+      this.$store.dispatch("downloadManifest", this.selectedComponents[comp]);
     }
     for (let runt in this.selectedRuntimes) {
-      this.$store.dispatch("downloadManifest", this.selectedServices[runt]);
+      this.$store.dispatch("downloadManifest", this.selectedRuntimes[runt]);
+    }
+    for (let cert in this.selectedCertificates) {
+      this.$store.dispatch("downloadManifest", this.selectedCertificates[cert]);
     }
   }
 
@@ -443,6 +521,11 @@ export default class ElementsView extends Vue {
       this.$store.dispatch("deleteElement", this.selectedRuntimes[index]);
     }
     this.selectedRuntimes = [];
+
+    for (let index in this.selectedCertificates) {
+      this.$store.dispatch("deleteElement", this.selectedCertificates[index]);
+    }
+    this.selectedCertificates = [];
 
     this.deleteGroupDialog = false;
   }
