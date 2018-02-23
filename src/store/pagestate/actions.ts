@@ -161,7 +161,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               injectee.commit('refreshToken', renewedToken);
 
               // Update localstorage info
-              localStorage.setItem('user', injectee.getters.user);
+              localStorage.setItem(
+                'user', JSON.stringify(injectee.getters.user)
+              );
 
             }).catch((error) => {
 
