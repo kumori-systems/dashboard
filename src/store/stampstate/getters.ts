@@ -209,6 +209,52 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     };
   }
 
+  certificatesByOwner = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): (searchFilter: string) => {
+      [owner: string]: {
+        [name: string]: {
+          [version: string]: string
+        }
+      }
+    } => {
+    return (searchFilter: string) => {
+      let res: {
+        [owner: string]: {
+          [name: string]: {
+            [version: string]: string
+          }
+        }
+      } = {};
+      for (let uri in state.certificates) {
+        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
+          let [certificateDomain, certificateName, certificateVersion] =
+            utils.getElementAtributes(uri);
+
+          if (!res[certificateDomain])
+            res[certificateDomain] = {};
+          if (!res[certificateDomain][certificateName])
+            res[certificateDomain][certificateName] = {};
+
+          res[certificateDomain][certificateName][certificateVersion] = uri;
+        }
+      }
+      return res;
+    };
+  }
+
+  certificateUsedBy = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): (certificateURI: string) => string[] => {
+    return (certificateUri: string) => {
+      let res: string[] = [];
+      if (state.certificates[certificateUri]) {
+        res = state.certificates[certificateUri].usedBy;
+      }
+      return res;
+    };
+  }
+
+
+
   getServiceProvidedChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURI: string) =>
       ProvidedChannel[] => {
@@ -454,9 +500,17 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         case utils.ElementType.service:
           res = state.services[uri];
           break;
-        case utils.ElementType.deployment:
         case utils.ElementType.resource:
-          console.warn('This case is under development');
+          switch (utils.getResourceType(uri)) {
+            case utils.ResourceType.certificate:
+              res = state.certificates[uri];
+              break;
+            default:
+            // Not expected call for this kind of resource
+          }
+          break;
+        case utils.ElementType.deployment:
+          // Not expected call for this kind of resource
           break;
         default:
           console.error('Unknown element type %s', uri);

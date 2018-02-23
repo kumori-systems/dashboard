@@ -20,26 +20,35 @@
     <v-container>
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
-          <td class="text-xs-left">{{ props.item[4]? null : props.item[0] }}</td>
-          <td class="text-xs-left">{{ props.item[4]? null : props.item[1] }}</td>
-          <td class="text-xs-left">{{ props.item[4]? null : props.item[2] }}</td>
-          <td class="text-xs-left">{{ props.item[4]? null : props.item[3] }}</td>
-          <td class="text-xs-left">{{ props.item[4] }}</td>
-          <td class="text-xs-left">{{  props.item[4]? itemUsage(props.item[0], props.item[4], props.item[7][0], props.item[5], props.item[6]) : null }}</td>
+
+
           <td class="text-xs-left">
-            <router-link v-if="!props.item[4]" v-for="elem in props.item[7]" v-bind:key="elem"
+            <v-icon v-if="props.item[0]" class="indigo--text">storage</v-icon>
+            <v-icon v-else class="light-blue--text text--lighten-2">storage</v-icon>
+          </td>
+          <td class="text-xs-left">{{ props.item[5]? null : props.item[1] }}</td>
+          <td class="text-xs-left">{{ props.item[5]? null : props.item[2] }}</td>
+          <td class="text-xs-left">{{ props.item[5]? null : props.item[3] }}</td>
+          <td class="text-xs-left">{{ props.item[5]? null : props.item[4] }}</td>
+          <td class="text-xs-left">{{ props.item[5] }}</td>
+          <td class="text-xs-left">{{ props.item[5]? itemUsage(props.item[1], props.item[5], props.item[8][0], props.item[6], props.item[7]) : null }}</td>
+          <td class="text-xs-left">
+            <router-link v-if="!props.item[5]" v-for="elem in props.item[8]" v-bind:key="elem"
               v-bind:to="deployment(elem)._path">
               {{ deployment(elem).name }}
             </router-link>
             <span v-else>
-              {{ props.item[6] }}
+              {{ props.item[7] }}
             </span>
           </td>
+          
           <td class="text-xs-left">
-            <v-btn color="error" v-if="props.item[4] === null" icon v-on:click="showDialog(props.item._uri)">
+            <v-btn color="error" v-if="props.item[0] && !props.item[5]" icon v-on:click="showDialog(props.item._uri)">
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
+
+
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" max-width="800px">
@@ -72,6 +81,12 @@ import { Deployment, Volume } from "../store/stampstate/classes";
 export default class VolumesView extends Vue {
   headers: any[] = [
     {
+      text: "Persistent",
+      align: "center",
+      sortable: false,
+      value: "persistent"
+    },
+    {
       text: "URI",
       align: "center",
       sortable: false,
@@ -103,15 +118,21 @@ export default class VolumesView extends Vue {
     },
     {
       text: "Usage",
-      align: "center",
+      align: "left",
       sortable: false,
       value: "usage"
     },
     {
       text: "Used by",
-      align: "center",
+      align: "left",
       sortable: false,
       value: "usedBy"
+    },
+    {
+      text: "",
+      align: "center",
+      sortable: false,
+      value: "actions"
     }
   ];
   dialog: boolean = false;
@@ -121,6 +142,7 @@ export default class VolumesView extends Vue {
    * Obtains the available volumes in the system.
    */
   get volumes(): [
+    boolean, // persistent
     string, // uri
     string, // name
     Volume.FILESYSTEM, // filesystem
@@ -131,6 +153,7 @@ export default class VolumesView extends Vue {
     string[] // usedBy
   ][] {
     let res: [
+      boolean, // persistent
       string, // uri
       string, // name
       Volume.FILESYSTEM, // filesystem
@@ -140,6 +163,7 @@ export default class VolumesView extends Vue {
       string, // associated instance
       string[] // usedBy
     ][] = [];
+
     let volumes: { [volume: string]: Volume } = ((<SSGetters>this.$store
       .getters).volumes as any) as {
       [uri: string]: Volume;
@@ -147,29 +171,64 @@ export default class VolumesView extends Vue {
 
     for (let key in volumes) {
       res.push([
-        volumes[key]._uri,
-        volumes[key].name,
-        volumes[key].filesystem,
-        volumes[key].size,
-        null,
-        null,
-        null,
-        volumes[key].usedBy
+        true, // persistent
+        volumes[key]._uri, // uri
+        volumes[key].name, // name
+        volumes[key].filesystem, // filesystem
+        volumes[key].size, // size
+        null, // item id
+        null, // associated role
+        null, // associated instance
+        volumes[key].usedBy // used by
       ]);
 
       for (let inst in volumes[key].items) {
         res.push([
-          volumes[key]._uri,
-          volumes[key].name,
-          volumes[key].filesystem,
-          volumes[key].size,
-          volumes[key].items[inst].id,
-          volumes[key].items[inst].associatedRole,
-          volumes[key].items[inst].associatedInstance,
-          volumes[key].usedBy
+          true, // persistent
+          volumes[key]._uri, // uri
+          volumes[key].name, // name
+          volumes[key].filesystem, // filesystem
+          volumes[key].size, // size
+          volumes[key].items[inst].id, // item id
+          volumes[key].items[inst].associatedRole, // associated role
+          volumes[key].items[inst].associatedInstance, // associated instance
+          volumes[key].usedBy // used by
         ]);
       }
     }
+
+    // Volatile volumes
+    let deployments = this.$store.getters.deployments;
+    for (let dep in deployments) {
+      for (let volvol in (<Deployment>deployments[dep]).volatileVolumes) {
+        res.push([
+          false, // persistent
+          "volatile", // uri
+          (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
+          null, // filesystem
+          (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
+          null, // item id
+          null, // associated role
+          null, // associated instance
+          [dep] // used by
+        ]);
+
+        for (let item in (<Deployment>deployments[dep]).volatileVolumes[volvol].items) {
+          res.push([
+            false, // persistent
+            "volatile", // uri
+            (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
+            null, // filesystem
+            (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
+            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].id, // item id
+            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].associatedRole, // associated role
+            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].associatedInstance, // associated instance
+            [dep] // used by
+          ]);
+        }
+      }
+    }
+
     return res;
   }
 
@@ -189,13 +248,18 @@ export default class VolumesView extends Vue {
       role: string,
       inst: string
     ) => {
-      let met = this.$store.getters.metrics(dep);
+
       let res = null;
-      
-      if(met.length > 0)
-      res = met[met.length - 1].roles[role].instances[inst].volumes?met[met.length - 1].roles[role].instances[inst].volumes[id].usage: '-';
+      if (dep && role && inst) {
+        let met = this.$store.getters.metrics(dep);
+        if (met.length > 0)
+          res = met[met.length - 1].roles[role].instances[inst].volumes
+            ? met[met.length - 1].roles[role].instances[inst].volumes[id].usage
+            : "-";
+      }
 
       return res;
+      
     };
   }
 

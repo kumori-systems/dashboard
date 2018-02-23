@@ -15,9 +15,7 @@
       <!-- Num instances selector -->
       <span>Instances</span>
       <v-btn-toggle class="grey lighten-3">
-        <v-btn flat v-on:click="lessInstances">
-          <v-icon>remove</v-icon>
-        </v-btn>
+        <v-btn flat v-on:click="lessInstances"><v-icon>remove</v-icon></v-btn>
       </v-btn-toggle>
       {{ localNumInstances }}
       <v-btn-toggle class="grey lighten-3">
@@ -54,7 +52,11 @@
           <!-- Role arrangement -->
           <v-layout>
             <v-flex ma-1 xs12>
-              <p>{{ role.memory }} <span class="subheading">MEM</span> {{ role.cpu }} <span class="subheading">CPU</span> {{ role.bandwidth }} <span class="subheading">NET</span></p>
+              <p>
+                {{ role.memory }} <span class="subheading">MEM</span>
+                {{ role.cpu }} <span class="subheading">CPU</span>
+                {{ role.bandwidth }} <span class="subheading">NET</span>
+              </p>
             </v-flex>
           </v-layout>
         
@@ -62,7 +64,23 @@
           <v-layout>
             <v-flex ma-1 xs12>
               <span class="subheading">Channels:</span>
-              <div>{{ role.id | roleChannels(service) }}</div>
+
+              <v-layout v-for="(channel, index) in roleChannels(service, role.name)" v-bind:key="index">
+                <div v-for="(pro, index) in channel.provided" v-bind:key="index">
+                  <v-chip color="lime" @input="pro">
+                    <span v-if="pro.role">{{ pro.role }} ~</span>
+                    <span v-else>Service ~</span>
+                    <span v-if="pro.endpoint">{{ pro.endpoint }}</span>
+                  </v-chip>
+                </div>
+                <div v-for="(dep, index) in channel.depended" v-bind:key="index">
+                  <v-chip color="light-blue lighten-3" @input="dep">
+                    <span v-if="dep.role">{{ dep.role }} ~</span>
+                    <span v-else>Service ~</span>
+                    <span v-if="dep.endpoint">{{ dep.endpoint }}</span>
+                  </v-chip>
+                </div>
+              </v-layout>
             </v-flex>
           </v-layout>
 
@@ -89,6 +107,7 @@
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
                   v-bind:key="instanceId" v-bind:instance="instanceContent"
                   v-bind:instanceMetrics="roleChartData.instances"
+                  v-bind:deploymentVolatileVolumes="deploymentVolatileVolumes"
                   v-on:killInstanceChange="handleKillInstanceChange"
                   v-bind:clear="onClearHandler">
                 </instance-card-component>
@@ -128,23 +147,8 @@ import ChartComponent from "./../chart";
     /**  Clear changes when user cancels. */
     clear: { required: true, type: Boolean },
     /** Role and instance metrics. */
-    roleMetrics: { required: true }
-  },
-  filters: {
-    roleChannels: function(rolId: string, service: Service) {
-      if (service && service.connectors)
-        return service.connectors.filter(conn => {
-          return (
-            conn.depended.find(dep => {
-              return dep.role === rolId;
-            }) ||
-            conn.provided.find(pro => {
-              return pro.role === rolId;
-            })
-          );
-        });
-      return "";
-    }
+    roleMetrics: { required: true },
+    deploymentVolatileVolumes: { required: false }
   }
 })
 export default class RoleCardComponent extends Vue {
@@ -217,6 +221,27 @@ export default class RoleCardComponent extends Vue {
       }
     }
     return res;
+  }
+
+  get roleChannels() {
+    return (service: Service, roleId: string) => {
+      console.debug('The service we are receiving is:', service);
+      console.debug('The roleId is:', roleId);
+      let res: Connector[] = [];
+      if (roleId && service && service.connectors) {
+        res = service.connectors.filter(conn => {
+          return (
+            conn.depended.find(dep => {
+              return dep.role === roleId;
+            }) ||
+            conn.provided.find(pro => {
+              return pro.role === roleId;
+            })
+          );
+        });
+      }
+      return res;
+    };
   }
 
   /**

@@ -6,7 +6,9 @@
       <!-- Card title: Deployment name -->
       <v-card-title  primary-title class="headline" v-bind:class="stateColor">
 
-        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>{{ deployment.name }}
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>
+        <v-icon class="ma-1" v-if="isHTTPEntryPoint && hasCertificate">https</v-icon>
+        {{ deployment.name }}
 
         <v-spacer></v-spacer>
 
@@ -25,7 +27,7 @@
           <!-- List of deployment's properties -->
           <v-list two-line>
 
-            <!-- Service -->
+            <!-- Deployment details -->
             <template>
               <v-subheader>
                 <strong>DATE</strong>
@@ -36,9 +38,6 @@
 
                 </v-subheader>
                 <v-list-tile tag="div">
-                  <v-card-actions>
-                    <v-icon></v-icon>
-                  </v-card-actions>
                   <v-list-tile-title>
                     {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
                   </v-list-tile-title>
@@ -49,9 +48,6 @@
             <template>
               <v-subheader><strong>SERVICE</strong></v-subheader>
               <v-list-tile tag="div">
-                <v-card-actions>
-                  <v-icon></v-icon>
-                </v-card-actions>
                 <v-list-tile-title>
                   <v-tooltip bottom>
                     <span dark slot="activator">  {{ deployment.service }}</span>
@@ -65,9 +61,6 @@
             <template>
               <v-subheader><strong>ROLES</strong></v-subheader>
               <v-list-tile v-for="(rol, uri) in deployment.roles" v-bind:key="uri" tag="div">
-                <v-card-actions>
-                  <v-icon></v-icon>
-                </v-card-actions>
                 <v-list-tile-content>
                   <v-list-tile-title>{{ uri }}</v-list-tile-title>
                   <v-list-tile-sub-title>
@@ -87,9 +80,6 @@
               <v-subheader><strong>LINKS</strong></v-subheader>
               <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
               <v-list-tile  v-for="(conn, index) in channConnections" v-bind:key="index" tag="div">
-                <v-card-actions>
-                  <v-icon></v-icon>
-                </v-card-actions>
                 <v-list-tile-title>{{ findDeployment(conn.destinyDeploymentId).name }}</v-list-tile-title>
               </v-list-tile>
               </div>
@@ -100,13 +90,13 @@
               <v-subheader><strong>VOLUMES</strong></v-subheader>
               <v-list-tile v-for="(vol, index) in deploymentVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
-                  <v-icon></v-icon>
+                  <v-icon class="indigo--text">storage</v-icon>
                 </v-card-actions>
                 <v-list-tile-title>
                   <v-tooltip bottom>
                     <div dark slot="activator">
                       <v-layout>
-                        <v-flex xs6><v-icon>storage</v-icon> {{ vol.name }}</v-flex>
+                        <v-flex xs6>{{ vol.name }}</v-flex>
                         <v-flex xs6>{{ vol.size }} GB</v-flex>
                       </v-layout>
                     </div>
@@ -116,15 +106,33 @@
               </v-list-tile>
             </template>
 
+             <!-- Volatile Volumes -->
+            <template v-if="Object.keys(deployment.volatileVolumes).length !== 0
+              && deployment.volatileVolumes.constructor === Object">
+              <v-subheader><strong>VOLATILE VOLUMES</strong></v-subheader>
+              <v-list-tile v-for="vol in deployment.volatileVolumes" v-bind:key="vol.id" tag="div">
+                <v-card-actions>
+                  <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
+                </v-card-actions>
+                <v-list-tile-title>
+                  <v-layout>
+                    <v-flex xs6>{{ vol.id }}</v-flex>
+                    <v-flex xs6>{{ vol.size }} GB</v-flex>
+                  </v-layout>
+                </v-list-tile-title>
+              </v-list-tile>
+            </template>
+
             <!-- Websites -->
             <template v-if="isHTTPEntryPoint">
               <v-subheader><strong>WEBSITES</strong></v-subheader>
               <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" tag="div">
                 <v-card-actions>
-                  <v-icon></v-icon>
+                  <!-- <v-icon></v-icon> -->
                 </v-card-actions>
                 <v-list-tile-title>
-                  <a v-bind:href="'http://' + web">{{ web }}</a>
+                  <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                  <a v-else v-bind:href="'http://' + web">{{ web }}</a>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
@@ -148,6 +156,7 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import {
+  Certificate,
   Deployment,
   HTTPEntryPoint,
   Volume,
@@ -207,6 +216,16 @@ export default class Card extends Vue {
 
   get isHTTPEntryPoint(): boolean {
     return this.deployment instanceof HTTPEntryPoint;
+  }
+
+  get hasCertificate(): boolean {
+    let res: boolean = false;
+    for (let resource in this.deployment.resources) {
+      if (this.deployment.resources[resource] instanceof Certificate) {
+        res = true;
+      }
+    }
+    return res;
   }
 
   get deploymentVolumes(): Volume[] {

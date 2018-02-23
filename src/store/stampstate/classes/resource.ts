@@ -56,6 +56,67 @@ export module Domain {
 }
 
 /**
+ * Represents a phisical data volume which won't persist on restarts.
+ */
+export class VolatileVolume {
+
+  /** <string> Identification of the volume in the deployment. */
+  readonly id: string;
+
+  /** <number> Size of the volume in GB. */
+  readonly size: number;
+
+  filesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
+
+  /**
+   * <{ [itemId: string]: VolatileVolume.Instance }> Instances of the volatile
+   * volume.
+   */
+  items: { [itemId: string]: VolatileVolume.Instance };
+
+  /**
+   * Represents a phisical data volume which won't persist on restarts.
+   * @param id <string> Identification of the volume in the deployment.
+   * @param size <number> Size of the volume in GB.
+   */
+  constructor(id: string, size: number, items?: {
+    [itemId: string]: VolatileVolume.Instance
+  }, filesystem?: Volume.FILESYSTEM) {
+
+    if (!id) throw new Error('Volatile volumes require an id');
+    this.id = id;
+
+    if (!size) throw new Error('Volatile volumes require a size');
+    this.size = size;
+
+    if (items) this.items = items;
+    if (filesystem) this.filesystem = filesystem;
+  }
+}
+
+export module VolatileVolume {
+  export class Instance {
+
+    readonly id: string;
+    name: string;
+    associatedRole: string;
+    associatedInstance: string;
+
+    constructor(
+      id: string, name: string, associatedRole?: string,
+      associatedInstance?: string, filesystem?: Volume.FILESYSTEM
+    ) {
+      if (!id) throw new Error('Volatile volumes instances require an id');
+      this.id = id;
+      if (name) this.name = name;
+      if (associatedRole) this.associatedRole = associatedRole;
+      if (associatedInstance) this.associatedInstance = associatedInstance;
+    }
+
+  }
+}
+
+/**
  * Phisical data volume.
  */
 export class Volume extends Resource {
@@ -102,7 +163,7 @@ export module Volume {
   /**
    * Available volume file systems.
    */
-  export enum FILESYSTEM { XFS = 'XFS', Ext4 = 'Ext4' }
+  export enum FILESYSTEM { XFS = 'XFS' }
 
   export class Instance {
 
@@ -144,12 +205,20 @@ export module Volume {
  */
 export class Certificate extends Resource {
 
+  /** Certificate key. */
+  key: string;
+
+  /** Certificate. */
+  cert: string;
+
   /**
    * A confirmation of veracity of the connection.
    * @param uri <string> Uniform Resource Identifier for this data volume.
    */
-  constructor(uri: string, usedBy: string[]) {
+  constructor(uri: string, key: string, cert: string, usedBy: string[]) {
     super(uri, usedBy);
+    if (key) this.key = key;
+    if (cert) this.cert = cert;
   }
 
 }

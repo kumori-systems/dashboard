@@ -12,7 +12,9 @@ import {
   NumberParameter, Parameter, StringParameter
 } from './parameter';
 import { Protocol } from './protocol';
-import { Certificate, Domain, Resource, Volume } from './resource';
+import {
+  Certificate, Domain, Resource, VolatileVolume, Volume
+} from './resource';
 import { Runtime } from './runtime';
 import { Service } from './service';
 
@@ -21,5 +23,6 @@ export {
   Deployment, Domain, EcloudElement, EntryPoint, FullConnector, HTTPEntryPoint,
   IntegerParameter, JsonParameter, ListParameter, LoadBalancerConnector,
   Manifest, NumberParameter, Parameter, Protocol, ProvidedChannel,
-  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter, Volume
+  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter,
+  VolatileVolume, Volume
 };

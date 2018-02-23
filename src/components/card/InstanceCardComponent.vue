@@ -28,15 +28,40 @@
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
             
-              <v-list-tile-content>
+              <!-- A persistent volume. -->
+              <v-list-tile-content v-if="vol instanceof Volume.Instance">
                 <v-list-tile-title>
-                  <v-icon>storage</v-icon> {{ vol.id }}
+                  <v-icon class="indigo--text">storage</v-icon> {{ vol.id }}
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
                   <v-flex xs6 class="ml-1">
                   <span>{{ volumes[vol.uri].filesystem }}</span>
                   <span>{{ volumes[vol.uri].size }} GB</span>
+                  </v-flex>
+                  <v-flex xs6>
+                  <span>Used: {{ instanceMetrics.length > 0
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
+                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
+                    instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                    : '..' }}
+                  </span>
+                  </v-flex>
+                  </v-layout>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+
+              <!-- A volatile volume -->
+              <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
+
+                <v-list-tile-title>
+                  <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}
+                </v-list-tile-title>
+                <v-list-tile-sub-title>
+                  <v-layout>
+                  <v-flex xs6 class="ml-1">
+                    <span>{{ deploymentVolatileVolumes[vol.name].filesystem }}</span>
+                    <span>{{ deploymentVolatileVolumes[vol.name].size }} GB</span>
                   </v-flex>
                   <v-flex xs6>
                   <span>Used: {{ instanceMetrics.length > 0
@@ -72,7 +97,11 @@ import VueClassComponent from "vue-class-component";
 
 // Components
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
-import { Deployment, Volume } from "../../store/stampstate/classes";
+import {
+  Deployment,
+  Volume,
+  VolatileVolume
+} from "../../store/stampstate/classes";
 
 import SSGetters from "../../store/stampstate/getters";
 
@@ -83,7 +112,8 @@ import ChartComponent from "./../chart";
   props: {
     instance: { required: true },
     clear: { required: true, type: Boolean }, // Used to clean 'kill instances' when changes are canceled
-    instanceMetrics: { required: true }
+    instanceMetrics: { required: true },
+    deploymentVolatileVolumes:{ required: false }
   },
   components: {
     "chart-component": ChartComponent
@@ -94,6 +124,8 @@ export default class InstanceCardComponent extends Vue {
   killInstance: boolean = false;
   chartOptions = ChartComponentOptions;
   instanceMetrics = this.instanceMetrics;
+  VolatileVolume = VolatileVolume;
+  Volume = Volume;
 
   mounted() {
     this.$watch("clear", function(value) {
@@ -109,8 +141,8 @@ export default class InstanceCardComponent extends Vue {
     };
   }
 
-  get instanceVolumes(): Volume.Instance[] {
-    let res: Volume.Instance[] = [];
+  get instanceVolumes(): any {
+    let res: any = [];
 
     if (this.instance.volumes)
       for (let vol in this.instance.volumes) {

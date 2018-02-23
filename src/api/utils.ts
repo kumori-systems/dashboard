@@ -6,7 +6,7 @@ import {
   Deployment, Domain, FullConnector, HTTPEntryPoint, IntegerParameter,
   JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
   Parameter, ProvidedChannel, PublishSubscribeConnector, Resource, Runtime,
-  Service, StringParameter, Volume
+  Service, StringParameter, VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
 import { User } from '../store/pagestate/classes';
@@ -17,7 +17,10 @@ export function transformEcloudDeploymentToDeployment(
 
   let roles: { [rolId: string]: Deployment.Role } = {};
   let instances: { [instanceId: string]: Deployment.Role.Instance };
-  let volumes: { [instanceId: string]: Volume.Instance } = {};
+  let volumeInstances: {
+    [instanceId: string]: Volume.Instance | VolatileVolume.Instance
+  } = {};
+  let volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
 
   let resources: { [resource: string]: Resource } = {};
 
@@ -25,30 +28,43 @@ export function transformEcloudDeploymentToDeployment(
 
     switch (getResourceType(ecloudDeployment.resources[res].type)) {
       case ResourceType.certificate:
-        // resources[res] = new Certificate();
-        console.warn('Certificates can\'t actually be represented');
+        // Ther's actually a bug in which deployments with no certificates
+        // return a resource with null parameters
+        if (ecloudDeployment.resources[res].resource.parameters) {
+          resources[res] = new Certificate(
+            ecloudDeployment.resources[res].resource.parameters.name, // uri
+            ecloudDeployment.resources[res].resource.parameters.content
+              .key, // key
+            ecloudDeployment.resources[res].resource.parameters.content
+              .cert, // certificate
+            [ecloudDeployment.urn] // usedBy
+          );
+        }
         break;
       case ResourceType.domain:
         resources[res] = new Domain(
-          ecloudDeployment.resources[res].resource.name,
-          ecloudDeployment.resources[res].resource.parameters.vhost,
-          Domain.STATE.SUCCESS,
-          [ecloudDeployment.urn]
+          ecloudDeployment.resources[res].resource.name, // uri
+          ecloudDeployment.resources[res].resource.parameters.vhost, // domain
+          Domain.STATE.SUCCESS, // state
+          [ecloudDeployment.urn] // usedBy
         );
         break;
       case ResourceType.volume:
-        if (!ecloudDeployment.resources[res].resource.name) {
-          console.warn('Volatile volumes can\'t actually be represented');
-        } else {
-          resources[res] = new Volume(
-            ecloudDeployment.resources[res].resource.name,
-            ecloudDeployment.resources[res].resource.parameters.size,
-            ecloudDeployment.resources[res].resource.parameters.filesystem
-            || Volume.FILESYSTEM.XFS,
-            null,
-            ecloudDeployment.urn
-          );
-        }
+        resources[res] = new Volume(
+          ecloudDeployment.resources[res].resource.name, // uri
+          ecloudDeployment.resources[res].resource.parameters.size, // size
+          ecloudDeployment.resources[res].resource.parameters.filesystem
+          || Volume.FILESYSTEM.XFS, // filesystem
+          null, // items
+          ecloudDeployment.urn // usedBy
+        );
+        break;
+      case ResourceType.volatileVolume:
+
+        volatileVolumes[res] = new VolatileVolume(
+          res, // id
+          ecloudDeployment.resources[res].resource.parameters.size // size
+        );
 
         break;
       default:
@@ -63,7 +79,7 @@ export function transformEcloudDeploymentToDeployment(
     instances = {};
     for (let instanceId in ecloudDeployment.roles[rolId].instances) {
 
-      volumes = {};
+      volumeInstances = {};
 
       if (
         ecloudDeployment.roles[rolId].instances[instanceId].configuration &&
@@ -74,8 +90,10 @@ export function transformEcloudDeploymentToDeployment(
           let res in ecloudDeployment.roles[rolId].instances[instanceId]
             .configuration.resources
         ) {
+
           switch (getResourceType(ecloudDeployment.roles[rolId]
             .instances[instanceId].configuration.resources[res].type)) {
+
             case ResourceType.volume:
 
               let volInst: Volume.Instance = new Volume.Instance(
@@ -88,17 +106,44 @@ export function transformEcloudDeploymentToDeployment(
                 instanceId
               );
 
-              volumes[res] = volInst;
+              volumeInstances[res] = volInst;
               if (resources[res]) {
                 (<Volume>resources[res]).items[volInst.id] = volInst;
               }
 
               break;
+
+            case ResourceType.volatileVolume:
+
+              let volatileVolInst: VolatileVolume.Instance =
+                new VolatileVolume.Instance(
+                  ecloudDeployment.roles[rolId].instances[instanceId]
+                    .configuration.resources[res].parameters.id,
+                  res,
+                  rolId,
+                  instanceId
+                );
+
+              volumeInstances[res] = volatileVolInst;
+              if (volatileVolumes[res]) {
+
+                if (!volatileVolumes[res].items) {
+                  volatileVolumes[res].items = {};
+                }
+
+                volatileVolumes[res].items[volatileVolInst.id]
+                  = volatileVolInst;
+              }
+              break;
+
             default:
+
               console.warn('Not expected resource inside instance',
-                ecloudDeployment.roles[rolId]
-                  .instances[instanceId].configuration.resources[res]
+                res,
+                ecloudDeployment.roles[rolId].instances[instanceId]
+                  .configuration.resources[res]
               );
+
           }
         }
       }
@@ -115,7 +160,7 @@ export function transformEcloudDeploymentToDeployment(
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement.memory,
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement
           .bandwith,
-        volumes,
+        volumeInstances,
         ecloudDeployment.roles[rolId].instances[instanceId].ports
       );
 
@@ -174,7 +219,8 @@ export function transformEcloudDeploymentToDeployment(
       parameters, // parameters: any
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels // channels
+      channels, // channels
+      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
     );
   } else {
     res = new Deployment(
@@ -184,7 +230,8 @@ export function transformEcloudDeploymentToDeployment(
       ecloudDeployment.service, // serviceId: string
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels // channels
+      channels, // channels
+      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
     );
   }
   return res;
@@ -624,6 +671,8 @@ export function transformManifestToResource(manifest: {
     case ResourceType.certificate:
       res = new Certificate(
         manifest.name,
+        manifest.parameters.content.key, // key
+        manifest.parameters.content.cert, // certificate
         []
       );
       break;
@@ -823,7 +872,7 @@ export function getElementType(uri: string): ElementType {
   return res;
 }
 
-export enum ResourceType { volume, certificate, domain }
+export enum ResourceType { volatileVolume, volume, certificate, domain }
 
 export function getResourceType(uri: string): ResourceType {
   if (uri.startsWith('eslap://eslap.cloud/resource/vhost/'))
@@ -832,6 +881,8 @@ export function getResourceType(uri: string): ResourceType {
     return ResourceType.certificate;
   if (uri.startsWith('eslap://eslap.cloud/resource/volume/persistent/'))
     return ResourceType.volume;
+  if (uri.startsWith('eslap://eslap.cloud/resource/volume/volatile/'))
+    return ResourceType.volatileVolume;
 
   let res: ResourceType = null;
   let splitted = uri.split('/');

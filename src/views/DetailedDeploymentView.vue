@@ -3,17 +3,23 @@
     <v-card-title>
       
       <!-- View title-->
-      <h3 class="headline mb-0">{{ deployment.name }}</h3>
+      <h3 class="headline mb-0">
+        <span v-if="deployment instanceof HTTPEntryPoint">
+          <v-icon class="ma-1">language</v-icon>
+          <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
+        </span>
+        {{ deployment.name }}
+      </h3>
         
-        <!-- Applies a space between elements -->
-        <v-spacer></v-spacer>
-        
-        <!-- Deployment actions -->
-        <v-card-actions>
-          <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-          <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-        </v-card-actions>
+      <!-- Applies a space between elements -->
+      <v-spacer></v-spacer>
+      
+      <!-- Deployment actions -->
+      <v-card-actions>
+        <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+        <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
+        <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+      </v-card-actions>
       
     </v-card-title>
     
@@ -67,7 +73,9 @@
                   <v-tooltip bottom>
                     <div dark slot="activator">
                        <v-layout>
-                        <v-flex xs6><v-icon>storage</v-icon> {{ volTuple[0] }}</v-flex>
+                        <v-flex xs6>
+                          <v-icon class="indigo--text">storage</v-icon> {{ volTuple[0] }}
+                        </v-flex>
                         <v-flex xs6>
                           {{ volTuple[1].size }} GB
                           {{ volTuple[1].filesystem }}
@@ -76,6 +84,22 @@
                     </div>
                     {{ volTuple[1]._uri }}
                   </v-tooltip>
+                </div>
+              </v-flex>
+            </v-layout>
+
+             <!-- Deployment volumes -->
+            <v-layout wrap v-if="Object.keys(deployment.volatileVolumes).length > 0">
+              <v-flex ma-1 xs12>
+                <span class="subheading">Volatile Volumes</span>
+                <div v-for="vol in deployment.volatileVolumes" v-bind:key="vol.id">
+                  <v-layout>
+                  <v-flex xs6>
+                        <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}</v-flex>
+                  <v-flex xs6>
+                    {{ vol.size }} GB
+                  </v-flex>
+                  </v-layout>
                 </div>
               </v-flex>
             </v-layout>
@@ -142,6 +166,21 @@
               </v-flex>
             </v-layout>
 
+            <!-- Websites -->
+            <v-layout v-if="deployment instanceof HTTPEntryPoint">
+              <v-flex ma-1 xs12>
+                <span class="subheading">Websites</span>
+                <v-list>
+                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index">
+                  <v-list-tile-title>
+                    <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                    <a v-else v-bind:href="'http://' + web">{{ web }}</a>
+                  </v-list-tile-title>
+                </v-list-tile>
+                </v-list>
+              </v-flex>
+            </v-layout>
+
           </v-flex>
 
           <!-- Applies space between elements -->
@@ -164,6 +203,7 @@
           <role-card-component v-for="(rolContent, rolId) in deployment.roles"
           v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
           v-bind:roleMetrics="deploymentMetrics.roles"
+          v-bind:deploymentVolatileVolumes="deployment.volatileVolumes"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
@@ -201,12 +241,15 @@ import {
   ChartComponentUtils
 } from "../components";
 import {
+  Certificate,
   Channel,
   Deployment,
+  HTTPEntryPoint,
   Service,
   Volume
 } from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
+import { setTimeout } from "timers";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -233,6 +276,8 @@ import SSGetters from "../store/stampstate/getters";
   }
 })
 export default class DetailedDeploymentView extends Vue {
+  HTTPEntryPoint = HTTPEntryPoint;
+
   /** Temporary number of instances of a role. **/
   roleNumInstances: { [rolId: string]: number } = {};
 
@@ -261,6 +306,8 @@ export default class DetailedDeploymentView extends Vue {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
+  unwatch: () => void;
+
   mounted() {
     /* No longer needed because it's loaded on user's load
     // Retrieve all actually deployed services
@@ -278,9 +325,14 @@ export default class DetailedDeploymentView extends Vue {
       }
     }*/
 
-    this.$watch("$route.path", val => {
+    this.unwatch = this.$watch("$route.path", val => {
+      this.$forceUpdate();
       this.cancelChanges();
     });
+  }
+
+  beforeDestroy() {
+    this.unwatch();
   }
 
   /** Obtains the deployment from the storage. */
@@ -292,6 +344,8 @@ export default class DetailedDeploymentView extends Vue {
 
   get deploymentVolumes(): [string, Volume][] {
     let res: [string, Volume][] = [];
+
+    // Persistent volumes
     let resources = this.deployment.resources;
     for (let key in resources) {
       if (resources[key] instanceof Volume) {
@@ -319,22 +373,22 @@ export default class DetailedDeploymentView extends Vue {
   /** Deployment state. */
   get state(): string {
     let res: string = "unknown";
-    if(this.deployment){
+    if (this.deployment) {
       switch (this.deployment.state) {
-      case Deployment.Role.STATE.SUCCESS:
-        res = "check_circle";
-        break;
-      case Deployment.Role.STATE.DANGER:
-        res = "error";
-        break;
-      case Deployment.Role.STATE.WARNING:
-        res = "warning";
-        break;
-      default:
-        res = "unknown";
+        case Deployment.Role.STATE.SUCCESS:
+          res = "check_circle";
+          break;
+        case Deployment.Role.STATE.DANGER:
+          res = "error";
+          break;
+        case Deployment.Role.STATE.WARNING:
+          res = "warning";
+          break;
+        default:
+          res = "unknown";
+      }
     }
-    }
-    
+
     return res;
   }
 
@@ -409,6 +463,15 @@ export default class DetailedDeploymentView extends Vue {
         channel
       );
     };
+  }
+
+  get hasCertificate() {
+    let res: boolean = false;
+    for (let resource in this.deployment.resources) {
+      if (this.deployment.resources[resource] instanceof Certificate)
+        res = true;
+    }
+    return res;
   }
 
   /**
