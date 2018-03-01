@@ -3,7 +3,8 @@ import Vuex from 'vuex';
 import State from './state';
 
 import {
-  Certificate, Component, Deployment, Domain, Runtime, Service, Volume
+  Certificate, Component, Deployment, Domain, PersistentVolume, Runtime,
+  Service, VolatileVolume
 } from './classes';
 /**
  * Mutations to handle the representation of the stamp state easier.
@@ -34,15 +35,16 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.domains = {};
     state.runtimes = {};
     state.services = {};
-    state.volumes = {};
+    state.persistentVolumes = {};
+    state.volatileVolumes = {};
   }
 
 
   /** Adds one or more deployments to the state */
-  addDeployment = (state: State,
-    payload: { [uri: string]: Deployment }): void => {
+  deploy = (state: State, payload: { [urn: string]: Deployment }): void => {
 
     for (let dep in payload) {
+
       let serv = payload[dep].service;
 
       // If the service is already in the state, it's marked as usedby
@@ -52,27 +54,28 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
 
       // Initialitze deployment metrics
-      if (!state.metrics[dep])
-        state.metrics[dep] = [];
+      if (!state.serviceMetrics[dep])
+        state.serviceMetrics[dep] = [];
+
     }
 
     state.deployments = { ...state.deployments, ...payload };
   }
 
   /** Removes one deployment from the state */
-  removeDeployment = (state: State, deploymentURI: string): void => {
+  undeploy = (state: State, deploymentURN: string): void => {
 
-    if (state.deployments[deploymentURI]) {
+    if (state.deployments[deploymentURN]) {
 
       // Unlink all related deployments
-      for (let chann in state.deployments[deploymentURI].channels) {
-        for (let conn in state.deployments[deploymentURI].channels[chann]) {
+      for (let chann in state.deployments[deploymentURN].channels) {
+        for (let conn in state.deployments[deploymentURN].channels[chann]) {
           this.unlink(state, {
-            deploymentOne: deploymentURI,
+            deploymentOne: deploymentURN,
             channelOne: chann,
-            deploymentTwo: state.deployments[deploymentURI]
+            deploymentTwo: state.deployments[deploymentURN]
               .channels[chann][conn].destinyDeploymentId,
-            channelTwo: state.deployments[deploymentURI]
+            channelTwo: state.deployments[deploymentURN]
               .channels[chann][conn].destinyChannelId
           });
         }
@@ -81,7 +84,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       // Remove this deployment from all domains
       for (let dom in state.domains) {
         if (state.domains[dom]) {
-          let index = state.domains[dom].usedBy.indexOf(deploymentURI);
+          let index = state.domains[dom].usedBy.indexOf(deploymentURN);
           if (index !== -1) {
             state.domains[dom].usedBy.splice(index, 1);
           }
@@ -91,7 +94,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       // Remove this deployment from all certificates
       for (let cert in state.certificates) {
         if (state.certificates[cert]) {
-          let index = state.certificates[cert].usedBy.indexOf(deploymentURI);
+          let index = state.certificates[cert].usedBy.indexOf(deploymentURN);
           if (index !== -1) {
             state.certificates[cert].usedBy.splice(index, 1);
           }
@@ -99,17 +102,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
 
       // Remove this deployment from the service
-      let ser = state.deployments[deploymentURI].service;
+      let ser = state.deployments[deploymentURN].service;
       if (state.services[ser]) {
-        let index = state.services[ser].usedBy.indexOf(deploymentURI);
+        let index = state.services[ser].usedBy.indexOf(deploymentURN);
         state.services[ser].usedBy.splice(index, 1);
       }
 
       // Remove deployment metrics
-      Vue.delete(state.metrics, deploymentURI);
+      Vue.delete(state.serviceMetrics, deploymentURN);
 
       // Remove this deployment from the state
-      Vue.delete(state.deployments, deploymentURI);
+      Vue.delete(state.deployments, deploymentURN);
     }
 
   }
@@ -134,7 +137,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more services to the state */
   addService = (state: State,
-    payload: { [uri: string]: Service }): void => {
+    payload: { [urn: string]: Service }): void => {
 
     // for each service we add
     for (let ser in payload) {
@@ -170,16 +173,16 @@ export default class Mutations implements Vuex.MutationTree<State> {
    * Removes one service from the state. The stamp will only allow this
    * operation when there are no deployments from this service
    */
-  removeService = (state: State, serviceURI: string): void => {
+  removeService = (state: State, serviceURN: string): void => {
 
     // Remove this service from the state
-    Vue.delete(state.services, serviceURI);
+    Vue.delete(state.services, serviceURN);
 
   }
 
   /** Adds one or more components to the state */
   addComponent = (state: State,
-    payload: { [uri: string]: Component }): void => {
+    payload: { [urn: string]: Component }): void => {
 
     // for each component we add
     for (let comp in payload) {
@@ -200,24 +203,23 @@ export default class Mutations implements Vuex.MutationTree<State> {
         }
       }
     }
-
     state.components = { ...state.components, ...payload };
 
   }
 
   /** Removes one component from the state */
-  removeComponent = (state: State, componentURI: string): void => {
+  removeComponent = (state: State, componentURN: string): void => {
 
     // When a component is erased from the state, all deployments using it
     // are previously undeployed
 
     // Remove component from the state
-    Vue.delete(state.components, componentURI);
+    Vue.delete(state.components, componentURN);
 
   }
 
   /** Adds one or more runtimes to the state */
-  addRuntime = (state: State, payload: { [uri: string]: Runtime }): void => {
+  addRuntime = (state: State, payload: { [urn: string]: Runtime }): void => {
 
     // Check for all components using this runtime
     for (let runt in payload) {
@@ -241,47 +243,61 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   /** Removes one runtime from the state */
-  removeRuntime = (state: State, runtimeURI: string): void => {
+  removeRuntime = (state: State, runtimeURN: string): void => {
     //  All components which are using this runtime must be removed before this
     //  runtime can be removed
 
     // Remove runtime from the state
-    Vue.delete(state.runtimes, runtimeURI);
+    Vue.delete(state.runtimes, runtimeURN);
   }
 
   /** Adds one or more domains to the state */
-  addDomain = (state: State, payload: { [uri: string]: Domain }): void => {
+  addDomain = (state: State, payload: { [urn: string]: Domain }): void => {
     state.domains = { ...state.domains, ...payload };
   }
 
   /** Removes one domain from the state */
-  removeDomain = (state: State, domainURI: string): void => {
-    Vue.delete(state.domains, domainURI);
+  removeDomain = (state: State, domainURN: string): void => {
+    Vue.delete(state.domains, domainURN);
   }
 
   /** Adds one or more volumes to the state */
-  addVolume = (state: State, payload: { [uri: string]: Volume }): void => {
-    state.volumes = { ...state.volumes, ...payload };
+  addPersistentVolume = (state: State, payload: {
+    [urn: string]: PersistentVolume
+  }): void => {
+    state.persistentVolumes = { ...state.persistentVolumes, ...payload };
   }
 
   /** Removes one volume from the state */
-  removeVolume = (state: State, volumeURI: string): void => {
-    Vue.delete(state.volumes, volumeURI);
+  removePersistentVolume = (state: State, volumeURN: string): void => {
+    Vue.delete(state.persistentVolumes, volumeURN);
+  }
+
+  /** Adds one or more volumes to the state */
+  addVolatileVolume = (state: State, payload: {
+    [urn: string]: VolatileVolume
+  }): void => {
+    state.volatileVolumes = { ...state.volatileVolumes, ...payload };
+  }
+
+  /** Removes one volume from the state */
+  removeVolatileVolume = (state: State, volumeURN: string): void => {
+    Vue.delete(state.volatileVolumes, volumeURN);
   }
 
   /** Adds one or more certificates to the state */
   addCertificate = (state: State,
-    payload: { [uri: string]: Certificate }): void => {
+    payload: { [urn: string]: Certificate }): void => {
     state.certificates = { ...state.certificates, ...payload };
   }
 
   /** Removes one certificate from the state */
-  removeCertificate = (state: State, certificateURI: string): void => {
-    Vue.delete(state.certificates, certificateURI);
+  removeCertificate = (state: State, certificateURN: string): void => {
+    Vue.delete(state.certificates, certificateURN);
   }
 
-  /** Adds one or more certificates to the state */
-  addMetrics = (state: State, metricBundle: {
+  /** Adds one or more service metrics to the state */
+  addServiceMetrics = (state: State, metricBundle: {
     [deploymentId: string]: {
       'data': { [property: string]: string | number },
       'roles': {
@@ -299,40 +315,52 @@ export default class Mutations implements Vuex.MutationTree<State> {
     const METRICS_BUFFER_SIZE: number = 100;
 
     for (let deploymentId in metricBundle) { // This will only happen once
-      if (state.metrics[deploymentId]) {
+      if (state.serviceMetrics[deploymentId]) {
 
-        let metrics =
-          state.metrics[deploymentId].concat([metricBundle[deploymentId]]);
+        let metrics = state.serviceMetrics[deploymentId]
+          .concat([metricBundle[deploymentId]]);
 
         while (metrics.length > METRICS_BUFFER_SIZE) { metrics.shift(); }
 
         // Optimized way of adding metrics to the storage
-        state.metrics = {
-          ...state.metrics,
+        state.serviceMetrics = {
+          ...state.serviceMetrics,
           [deploymentId]: metrics
         };
 
-        /*
-        // This way spends more time
-        let list = state.metrics[deploymentId];
-        list.push(metricBundle[deploymentId]);
-        state.metrics = {
-          ...state.metrics,
-          [deploymentId]: list
-        };
-        */
-
-        /*
-        // This way spends more time
-        let list = state.metrics[deploymentId];
-        list.unshift(metricBundle[deploymentId]);
-        state.metrics = {
-          ...state.metrics,
-          [deploymentId]: list
-        };
-        */
-
       }
+    }
+  }
+
+  /** Adds one or more volume metrics to the state */
+  addVolumeMetrics = (state: State, metricBundle: {
+    [itemId: string]: {
+      'timestamp': string,
+      'free': number,
+      'total': number,
+      'usage': number,
+      'used': number
+    }
+  }) => {
+
+    console.debug('Las metricas de volumenes que llegan al estado contienen',
+      metricBundle);
+
+    const METRICS_BUFFER_SIZE: number = 100;
+
+    for (let volumeInstaceId in metricBundle) { // This will only happen once
+      let metrics =
+        (state.volumeMetrics[volumeInstaceId] ?
+          state.volumeMetrics[volumeInstaceId] : [])
+          .concat([metricBundle[volumeInstaceId]]);
+
+      while (metrics.length > METRICS_BUFFER_SIZE) { metrics.shift(); }
+
+      // Optimized way of adding metrics to the storage
+      state.volumeMetrics = {
+        ...state.volumeMetrics,
+        [volumeInstaceId]: metrics
+      };
     }
   }
 
@@ -413,7 +441,11 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   }
 
-  selectedService = (state: State, serviceURI: string): void => {
-    state.selectedService = serviceURI;
+  /**
+   * This retains the selected service in the elements view for deploying an
+   * instance of it.
+   */
+  selectedService = (state: State, serviceURN: string): void => {
+    state.selectedService = serviceURN;
   }
 };

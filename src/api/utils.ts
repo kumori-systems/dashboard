@@ -3,83 +3,232 @@ import {
 } from 'admission-client';
 import {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
-  Deployment, Domain, FullConnector, HTTPEntryPoint, IntegerParameter,
-  JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
-  Parameter, ProvidedChannel, PublishSubscribeConnector, Resource, Runtime,
-  Service, StringParameter, VolatileVolume, Volume
+  Deployment, Domain, ECloudElement, EntryPoint, FullConnector, HTTPEntryPoint,
+  IntegerParameter, JsonParameter, ListParameter, LoadBalancerConnector,
+  NumberParameter, Parameter, ProvidedChannel, PublishSubscribeConnector,
+  Resource, Runtime, Service, StringParameter, VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
+import { ProxyConnection } from './index';
+
 import { User } from '../store/pagestate/classes';
+import { PersistentVolume } from '../store/stampstate/classes/resource';
 
-export function transformEcloudDeploymentToDeployment(
-  ecloudDeployment: EcloudDeployment
-) {
+/**
+ * Given an URN returns the ECloud element type
+ * @param urn <string> URN which represents the element in the stamp.
+ */
+export function getElementType(urn: string): ECloudElement.ECLOUDELEMENT_TYPE {
 
-  let roles: { [rolId: string]: Deployment.Role } = {};
-  let instances: { [instanceId: string]: Deployment.Role.Instance };
-  let volumeInstances: {
-    [instanceId: string]: Volume.Instance | VolatileVolume.Instance
-  } = {};
-  let volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
+  let res: ECloudElement.ECLOUDELEMENT_TYPE = null;
+  try {
 
-  let resources: { [resource: string]: Resource } = {};
+    let splitted = urn.split('/');
 
-  for (let res in ecloudDeployment.resources) {
+    let i = 3;
 
-    switch (getResourceType(ecloudDeployment.resources[res].type)) {
-      case ResourceType.certificate:
-        // Ther's actually a bug in which deployments with no certificates
-        // return a resource with null parameters
-        if (ecloudDeployment.resources[res].resource.parameters) {
-          resources[res] = new Certificate(
-            ecloudDeployment.resources[res].resource.parameters.name, // uri
-            ecloudDeployment.resources[res].resource.parameters.content
-              .key, // key
-            ecloudDeployment.resources[res].resource.parameters.content
-              .cert, // certificate
-            [ecloudDeployment.urn] // usedBy
-          );
-        }
+    // If this is a temporary element, the type will be twice realocated to the
+    // left
+    if (splitted[2] === 'temporary') { i = i + 2; }
+
+    switch (splitted[i]) {
+      case 'runtime':
+      case 'runtimes':
+        res = ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME;
         break;
-      case ResourceType.domain:
-        resources[res] = new Domain(
-          ecloudDeployment.resources[res].resource.name, // uri
-          ecloudDeployment.resources[res].resource.parameters.vhost, // domain
-          Domain.STATE.SUCCESS, // state
-          [ecloudDeployment.urn] // usedBy
-        );
+      case 'service':
+      case 'services':
+        res = ECloudElement.ECLOUDELEMENT_TYPE.SERVICE;
         break;
-      case ResourceType.volume:
-        resources[res] = new Volume(
-          ecloudDeployment.resources[res].resource.name, // uri
-          ecloudDeployment.resources[res].resource.parameters.size, // size
-          ecloudDeployment.resources[res].resource.parameters.filesystem
-          || Volume.FILESYSTEM.XFS, // filesystem
-          null, // items
-          ecloudDeployment.urn // usedBy
-        );
+      case 'component':
+      case 'components':
+        res = ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT;
         break;
-      case ResourceType.volatileVolume:
-
-        volatileVolumes[res] = new VolatileVolume(
-          res, // id
-          ecloudDeployment.resources[res].resource.parameters.size // size
-        );
-
+      case 'resource':
+      case 'resources':
+        res = ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE;
         break;
       default:
-        console.error(
-          'Resource not following structure', res,
-          ecloudDeployment.resources[res]
-        );
+        console.error('Unknown element type', urn);
     }
+
+  } catch (err) {
+    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
   }
 
-  for (let rolId in ecloudDeployment.roles) {
-    instances = {};
-    for (let instanceId in ecloudDeployment.roles[rolId].instances) {
+  return res;
+}
 
-      volumeInstances = {};
+/**
+ * Given a URN of an element returns the resource type of the element.
+ * @param urn <string> 
+ */
+export function getResourceType(urn: string): Resource.RESOURCE_TYPE {
+
+  if (urn.startsWith('eslap://eslap.cloud/resource/vhost/'))
+    return Resource.RESOURCE_TYPE.DOMAIN;
+  if (urn.startsWith('slap//eslap.cloud/resource/cert/server/'))
+    return Resource.RESOURCE_TYPE.CERTIFICATE;
+  if (urn.startsWith('eslap://eslap.cloud/resource/volume/persistent/'))
+    return Resource.RESOURCE_TYPE.PERSISTENT_VOLUME;
+  if (urn.startsWith('eslap://eslap.cloud/resource/volume/volatile/'))
+    return Resource.RESOURCE_TYPE.VOLATILE_VOLUME;
+
+  let res: Resource.RESOURCE_TYPE = null;
+  try {
+
+    let splitted = urn.split('/');
+    let i = 4;
+    if (splitted[2] === 'temporary') { i = i + 2; }
+
+    // Obtain the type. In case it's a temporary element, the type will be twice
+    // realocated to the left
+    switch (splitted[i]) {
+      case 'volume':
+      case 'volumes':
+        res = Resource.RESOURCE_TYPE.PERSISTENT_VOLUME;
+        break;
+      case 'cert':
+        res = Resource.RESOURCE_TYPE.CERTIFICATE;
+        break;
+      case 'vhost':
+        res = Resource.RESOURCE_TYPE.DOMAIN;
+        break;
+      default:
+
+        // This part is supposed to be a temporary solution.
+        switch (splitted[i + 1]) {
+          case 'volume':
+          case 'volumes':
+            res = Resource.RESOURCE_TYPE.PERSISTENT_VOLUME;
+            break;
+          case 'cert':
+            res = Resource.RESOURCE_TYPE.CERTIFICATE;
+            break;
+          case 'vhost':
+            res = Resource.RESOURCE_TYPE.DOMAIN;
+            break;
+          default:
+            throw new Error(
+              'Not able to extract resource from \'' + urn + '\'.'
+            );
+        }
+    }
+
+  } catch (err) {
+    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+  }
+
+  return res;
+
+}
+
+/**
+ * Given the URN of an element returns it's domain.
+ * @param urn <string> URN with the format
+ *  'eslap://<domain>/deployment/<name>/<version>'.
+ */
+export function getElementDomain(urn: string): string {
+
+  let res: string = null;
+
+  try {
+    res = urn.split('/')[2];
+  } catch (err) {
+    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+  }
+
+  return res;
+
+}
+
+/**
+ * Given the URN of an element returns it's name.
+ * @param urn <string> URN with the format
+ *  'eslap://<domain>/deployment/<name>/<version>'.
+ */
+export function getElementName(urn: string): string {
+
+  let res: string = null;
+  try {
+    res = urn.split('/')[2];
+
+    let splitted: Array<string> = urn.split('/');
+    res = splitted[4];
+    for (let i = 5; i < splitted.length - 1; i++) {
+      res += '.' + splitted[i];
+    }
+
+  } catch (err) {
+    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+  }
+  return res;
+
+}
+
+/**
+ * Given the URN of an element returns it's version.
+ * @param urn <string> URN with the format
+ *  'eslap://<domain>/deployment/<name>/<version>'.
+ */
+export function getElementVersion(urn: string): string {
+
+  let res: string = null;
+  try {
+
+    let splitted: Array<string> = urn.split('/');
+    res = splitted[splitted.length - 1];
+
+  } catch (err) {
+    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+  }
+  return res;
+
+}
+
+/**
+ * Given an URN of an element returns if the 
+ * @param urn <string> URN with the format
+ *  'eslap://<domain>/deployment/<name>/<version>'.
+ */
+export function isServiceEntrypoint(urn: string): boolean {
+
+  let res: boolean = false;
+  switch (urn) {
+    case EntryPoint.ENTRYPOINT_TYPE.HTTP_INBOUND:
+      res = true;
+    default:
+    // Do nothing because res is already false
+  }
+  return res;
+
+}
+
+/**
+ * Transforms the library class Ecloud Deployment to a local Deployment.
+ * @param emitter <ProxyConnection> Emmiter to send notifications of events.
+ * @param ecloudDeployment <EcloudDeployment> Deployment represented in the
+ *  ecloud deployment class.
+ */
+export function transformEcloudDeploymentToDeployment(
+  emitter: ProxyConnection,
+  ecloudDeployment: EcloudDeployment
+): Deployment {
+
+  let resources: { [resource: string]: string } = {};
+  let roles: { [rolId: string]: Deployment.Role } = {};
+
+  // This must before be added to their respective resources
+  let resourceInstances: Volume.Instance[] = [];
+
+  // For each role
+  for (let rolId in ecloudDeployment.roles) {
+    let roleResources: {} = {};
+
+    let instances: { [instanceId: string]: Deployment.Role.Instance } = {};
+
+    for (let instanceId in ecloudDeployment.roles[rolId].instances) {
+      let instanceResources: {} = {};
 
       if (
         ecloudDeployment.roles[rolId].instances[instanceId].configuration &&
@@ -94,46 +243,44 @@ export function transformEcloudDeploymentToDeployment(
           switch (getResourceType(ecloudDeployment.roles[rolId]
             .instances[instanceId].configuration.resources[res].type)) {
 
-            case ResourceType.volume:
+            case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
+              let volInst: PersistentVolume.Instance =
+                new PersistentVolume.Instance(
+                  ecloudDeployment.roles[rolId].instances[instanceId]
+                    .configuration.resources[res].parameters.id, // id
+                  res, // volume name
+                  // definition URN
+                  ecloudDeployment.resources[res].resource.name,
+                  rolId, // associated role
+                  instanceId, // associated instance
+                  null // usage
+                );
 
-              let volInst: Volume.Instance = new Volume.Instance(
-                ecloudDeployment.roles[rolId].instances[instanceId]
-                  .configuration.resources[res].parameters.id,
-                ecloudDeployment.roles[rolId].instances[instanceId]
-                  .configuration.resources[res].parameters.urn
-                  || resources[res] ? resources[res]._uri : undefined,
-                rolId,
-                instanceId
-              );
+              instanceResources[res] = volInst;
 
-              volumeInstances[res] = volInst;
-              if (resources[res]) {
-                (<Volume>resources[res]).items[volInst.id] = volInst;
-              }
+              resourceInstances.push(volInst);
 
               break;
 
-            case ResourceType.volatileVolume:
+            case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
 
               let volatileVolInst: VolatileVolume.Instance =
                 new VolatileVolume.Instance(
                   ecloudDeployment.roles[rolId].instances[instanceId]
-                    .configuration.resources[res].parameters.id,
-                  res,
-                  rolId,
-                  instanceId
+                    .configuration.resources[res].parameters.id, // id
+                  res, // volume name,
+                  ecloudDeployment.roles[rolId].instances[instanceId]
+                    .configuration.resources[res].name,
+                  rolId, // associated role
+                  instanceId, // associated instance
+                  ecloudDeployment.roles[rolId].instances[instanceId]
+                    .configuration.resources[res].parameters.filesystem
                 );
 
-              volumeInstances[res] = volatileVolInst;
-              if (volatileVolumes[res]) {
+              instanceResources[res] = volatileVolInst;
 
-                if (!volatileVolumes[res].items) {
-                  volatileVolumes[res].items = {};
-                }
+              resourceInstances.push(volatileVolInst);
 
-                volatileVolumes[res].items[volatileVolInst.id]
-                  = volatileVolInst;
-              }
               break;
 
             default:
@@ -160,7 +307,7 @@ export function transformEcloudDeploymentToDeployment(
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement.memory,
         ecloudDeployment.roles[rolId].instances[instanceId].arrangement
           .bandwith,
-        volumeInstances,
+        instanceResources,
         ecloudDeployment.roles[rolId].instances[instanceId].ports
       );
 
@@ -183,6 +330,118 @@ export function transformEcloudDeploymentToDeployment(
       ecloudDeployment.roles[rolId].arrangement.mininstances, // mininstances
       ecloudDeployment.roles[rolId].arrangement.maxinstances // maxinstances
     );
+  }
+
+  for (let res in ecloudDeployment.resources) {
+
+    switch (getResourceType(ecloudDeployment.resources[res].type)) {
+      case Resource.RESOURCE_TYPE.CERTIFICATE:
+        // Ther's actually a bug in which deployments with no certificates
+        // return a resource with null parameters
+        if (ecloudDeployment.resources[res].resource.parameters) {
+          resources[res] = ecloudDeployment.resources[res].resource.parameters
+            .name;
+
+          emitter.onAddCertificate(
+            ecloudDeployment.resources[res].resource.name,
+            new Certificate(
+              ecloudDeployment.resources[res].resource.parameters.name, // urn
+              ecloudDeployment.resources[res].resource.parameters.content
+                .key, // key
+              ecloudDeployment.resources[res].resource.parameters.content
+                .cert, // certificate
+              ecloudDeployment.urn // usedBy
+            )
+          );
+        }
+        break;
+
+      case Resource.RESOURCE_TYPE.DOMAIN:
+        resources[res] = ecloudDeployment.resources[res].resource.name;
+        emitter.onAddDomain(
+          ecloudDeployment.resources[res].resource.name,
+          new Domain(
+            ecloudDeployment.resources[res].resource.name, // urn
+            ecloudDeployment.resources[res].resource.parameters.vhost, // domain
+            Domain.STATE.SUCCESS, // state
+            ecloudDeployment.urn // usedBy
+          )
+        );
+        break;
+
+      case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
+        resources[res] = ecloudDeployment.resources[res].resource.name;
+
+        let persistentItems: {
+          [persitentVolInstance: string]: PersistentVolume.Instance
+        } = {};
+        for (let resInstIndex in resourceInstances) {
+          if (resourceInstances[resInstIndex].volumeName === res) {
+            persistentItems[resourceInstances[resInstIndex].id] =
+              resourceInstances[resInstIndex];
+          }
+        }
+
+        emitter.onAddPersistentVolume(
+          ecloudDeployment.resources[res].resource.name,
+          new PersistentVolume(
+            ecloudDeployment.resources[res].resource.name, // urn
+            res, // name
+            ecloudDeployment.resources[res].resource.parameters.size, // size
+            persistentItems, // items
+            null, // associated role
+            ecloudDeployment.resources[res].resource.parameters.filesystem
+            || Volume.FILESYSTEM.XFS, // filesystem
+            ecloudDeployment.urn // usedBy
+          )
+        );
+        break;
+
+      case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
+        let volatileItems: {
+          [volatileVolInstance: string]: VolatileVolume.Instance
+        } = {};
+
+        /* There is a problem in which the identifier of the volume must be
+        taken from the instances and not from the volume in the deployment
+        definition */
+        let volumeURN: string;
+
+
+        for (let resInstIndex in resourceInstances) {
+          if (resourceInstances[resInstIndex].volumeName === res) {
+            volatileItems[resourceInstances[resInstIndex].id] =
+              resourceInstances[resInstIndex];
+
+            volumeURN =
+              volatileItems[resourceInstances[resInstIndex].id]._urn;
+          }
+        }
+
+        resources[res] = volumeURN;
+
+        // Due to the identifier, volatile volumes can't be added when getting
+        // the info of a deployment and must be added in a different call
+        emitter.onAddVolatileVolume(
+          res,
+          new VolatileVolume(
+            res, // name
+            volumeURN, // id
+            ecloudDeployment.resources[res].resource.parameters.size, // size
+            volatileItems, // items
+            // filesystem
+            ecloudDeployment.resources[res].resource.parameters.filesystem,
+            null, // associated role
+            ecloudDeployment.urn // usedBy
+          )
+        );
+        break;
+
+      default:
+        throw new Error('Resource not following structure \'' + res + '\' ' +
+          ecloudDeployment.resources[res]
+        );
+    }
   }
 
   let parameters: any = {};
@@ -213,27 +472,27 @@ export function transformEcloudDeploymentToDeployment(
 
   let res: Deployment = null;
 
+
   if (isServiceEntrypoint(ecloudDeployment.service)) {
     res = new HTTPEntryPoint(
-      ecloudDeployment.urn, // uri
+      ecloudDeployment.urn, // urn
       parameters, // parameters: any
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels, // channels
-      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
+      channels // channels
     );
   } else {
     res = new Deployment(
-      ecloudDeployment.urn, // uri
+      ecloudDeployment.urn, // urn
       (<any>ecloudDeployment).name, // name: string
       parameters, // parameters: any
       ecloudDeployment.service, // serviceId: string
       roles, // roles: { [rolName: string]: DeploymentRol }
       resources, // resources: { [resource: string]: Resource }
-      channels, // channels
-      volatileVolumes // volatileVolume: { [volumeId: string]: VolatileVolume }
+      channels // channels
     );
   }
+
   return res;
 }
 
@@ -326,49 +585,49 @@ export function transformManifestToService(manifest: {
       case 'eslap://eslap.cloud/channel/request/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.REQUEST, // type
+          Channel.CHANNEL_TYPE.REQUEST, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/reply/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.REPLY, // type
+          Channel.CHANNEL_TYPE.REPLY, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/send/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.SEND, // type
+          Channel.CHANNEL_TYPE.SEND, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/receive/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.RECEIVE, // type
+          Channel.CHANNEL_TYPE.RECEIVE, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/duplex/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.DUPLEX, // type
+          Channel.CHANNEL_TYPE.DUPLEX, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case ' eslap://eslap.cloud/endpoint/request/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.ENDPOINT_REQUEST, // type
+          Channel.CHANNEL_TYPE.ENDPOINT_REQUEST, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
       case ' eslap://eslap.cloud/endpoint/reply/1_0_0':
         res = new ProvidedChannel(
           manifest.channels.provides[i].name, // name
-          Channel.TYPE.ENDPOINT_REPLY, // type
+          Channel.CHANNEL_TYPE.ENDPOINT_REPLY, // type
           manifest.channels.provides[i].protocol // protocol
         );
         break;
@@ -388,49 +647,49 @@ export function transformManifestToService(manifest: {
       case 'eslap://eslap.cloud/channel/request/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.REQUEST, // type
+          Channel.CHANNEL_TYPE.REQUEST, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/reply/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.REPLY, // type
+          Channel.CHANNEL_TYPE.REPLY, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/send/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.SEND, // type
+          Channel.CHANNEL_TYPE.SEND, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/receive/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.RECEIVE, // type
+          Channel.CHANNEL_TYPE.RECEIVE, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/channel/duplex/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.DUPLEX, // type
+          Channel.CHANNEL_TYPE.DUPLEX, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/endpoint/request/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.ENDPOINT_REQUEST, // type
+          Channel.CHANNEL_TYPE.ENDPOINT_REQUEST, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
       case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
         res = new DependedChannel(
           manifest.channels.requires[i].name, // name
-          Channel.TYPE.ENDPOINT_REPLY, // type
+          Channel.CHANNEL_TYPE.ENDPOINT_REPLY, // type
           manifest.channels.requires[i].protocol // protocol
         );
         break;
@@ -473,7 +732,7 @@ export function transformManifestToService(manifest: {
 
   // Creating the service
   return new Service(
-    manifest.name, // uri:string
+    manifest.name, // urn:string
     resources, // resources: Array<string>,
     parameters, // {[parameter:string]: Parameter},
     roles, // roles: { [roleId: string]: Service.Role },
@@ -529,49 +788,49 @@ export function transformManifestToComponent(manifest: {
         case 'eslap://eslap.cloud/channel/request/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.REQUEST, // type
+            Channel.CHANNEL_TYPE.REQUEST, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/reply/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.REPLY, // type
+            Channel.CHANNEL_TYPE.REPLY, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/send/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.SEND, // type
+            Channel.CHANNEL_TYPE.SEND, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/receive/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.RECEIVE, // type
+            Channel.CHANNEL_TYPE.RECEIVE, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/duplex/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.DUPLEX, // type
+            Channel.CHANNEL_TYPE.DUPLEX, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/endpoint/request/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.ENDPOINT_REQUEST, // type
+            Channel.CHANNEL_TYPE.ENDPOINT_REQUEST, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
           res = new ProvidedChannel(
             manifest.channels.provides[i].name, // name
-            Channel.TYPE.ENDPOINT_REPLY, // type
+            Channel.CHANNEL_TYPE.ENDPOINT_REPLY, // type
             manifest.channels.provides[i].protocol // protocol
           );
           break;
@@ -592,49 +851,49 @@ export function transformManifestToComponent(manifest: {
         case 'eslap://eslap.cloud/channel/request/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.REQUEST, // type
+            Channel.CHANNEL_TYPE.REQUEST, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/reply/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.REPLY, // type
+            Channel.CHANNEL_TYPE.REPLY, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/send/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.SEND, // type
+            Channel.CHANNEL_TYPE.SEND, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/receive/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.RECEIVE, // type
+            Channel.CHANNEL_TYPE.RECEIVE, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/channel/duplex/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.DUPLEX, // type
+            Channel.CHANNEL_TYPE.DUPLEX, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/endpoint/request/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.ENDPOINT_REQUEST, // type
+            Channel.CHANNEL_TYPE.ENDPOINT_REQUEST, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
         case 'eslap://eslap.cloud/endpoint/reply/1_0_0':
           res = new DependedChannel(
             manifest.channels.requires[i].name, // name
-            Channel.TYPE.ENDPOINT_REPLY, // type
+            Channel.CHANNEL_TYPE.ENDPOINT_REPLY, // type
             manifest.channels.requires[i].protocol // protocol
           );
           break;
@@ -646,7 +905,7 @@ export function transformManifestToComponent(manifest: {
     }
 
   return new Component(
-    manifest.name, // uri: string
+    manifest.name, // urn: string
     manifest.runtime, // runtime: string
     resources, // resourcesConfig: { [resourceName: string]: string }
     manifest.configuration.parameters, // parameters: object
@@ -660,28 +919,34 @@ export function transformManifestToResource(manifest: {
 }): Resource {
   let res: Resource = null;
   switch (getResourceType(manifest.spec)) {
-    case ResourceType.domain:
+    case Resource.RESOURCE_TYPE.DOMAIN:
+      /*
       res = new Domain(
         manifest.name,
         manifest.parameters.vhost,
         Domain.STATE.SUCCESS,
         []
       );
+      */
       break;
-    case ResourceType.certificate:
+    case Resource.RESOURCE_TYPE.CERTIFICATE:
+      /*
       res = new Certificate(
         manifest.name,
         manifest.parameters.content.key, // key
         manifest.parameters.content.cert, // certificate
         []
       );
+      */
       break;
-    case ResourceType.volume:
+    case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
+      /*
       res = new Volume(
-        manifest.name, // volume uri
+        manifest.name, // volume urn
         manifest.parameters.size, // size
         manifest.parameters.fileSystem // filesystem
       );
+      */
       break;
     default:
       console.error(
@@ -713,26 +978,28 @@ export function transformManifestToRuntime(manifest: {
   return new Runtime(manifest.name);
 }
 
-export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
-  [deploymentId: string]: {
-    'data': {
-      [property: string]: number | string
-    },
-    'roles': {
-      [rolId: string]: {
-        'data': {
-          [property: string]: number | string
-        },
-        'instances': {
-          [instanceId: string]: {
-            [property: string]: number | string | object
-          }
+export function transformEcloudEventDataToServiceMetrics(
+  ecloudEvent: EcloudEvent
+): {
+    [deploymentId: string]: {
+      'data': {
+        [property: string]: number | string
+      },
+      'roles': {
+        [rolId: string]: {
+          'data': {
+            [property: string]: number | string
+          },
+          'instances': {
+            [instanceId: string]: {
+              [property: string]: number | string | object
+            }
 
+          }
         }
       }
     }
-  }
-} {
+  } {
 
   let res: {
     [deploymentId: string]: {
@@ -839,115 +1106,42 @@ export function transformEcloudEventDataToMetrics(ecloudEvent: EcloudEvent): {
   return res;
 }
 
-export enum ElementType { deployment, service, runtime, component, resource }
+export function transformEcloudEventDataToVolumeMetrics(
+  ecloudEvent: EcloudEvent
+): {
+    [itemId: string]: {
+      [property: string]: string | number
+    }
+  } {
 
-export function getElementType(uri: string): ElementType {
-  let res: ElementType = null;
+  let res: {
+    [itemId: string]: {
+      'timestamp': string,
+      'free': number,
+      'total': number,
+      'usage': number,
+      'used': number
+    }
+  } = {};
 
-  let splitted = uri.split('/');
+  res[ecloudEvent.data.item] = {
+    'timestamp': null,
+    'free': -1,
+    'total': -1,
+    'usage': -1,
+    'used': -1
+  };
 
-  let i = 3;
-
-  if (splitted[2] === 'temporary') { i = i + 2; }
-
-  // Obtain the type. In case it's a temporary element, the type will be twice
-  // realocated to the left
-  switch (splitted[i]) {
-    case 'runtime':
-    case 'runtimes':
-      res = ElementType.runtime;
-      break;
-    case 'services':
-      res = ElementType.service;
-      break;
-    case 'components':
-      res = ElementType.component;
-      break;
-    case 'resources':
-      res = ElementType.resource;
-      break;
-    default:
-      console.error('Unknown element type', uri);
+  for (let property in ecloudEvent.data.data) {
+    res[ecloudEvent.data.item][property] = ecloudEvent.data.data[property].mean;
   }
+  res[ecloudEvent.data.item]['timestamp'] = ecloudEvent.timestamp;
+
   return res;
 }
 
-export enum ResourceType { volatileVolume, volume, certificate, domain }
+export function transformDeploymentToManifest(deployment: Deployment): Object {
 
-export function getResourceType(uri: string): ResourceType {
-  if (uri.startsWith('eslap://eslap.cloud/resource/vhost/'))
-    return ResourceType.domain;
-  if (uri.startsWith('slap//eslap.cloud/resource/cert/server/'))
-    return ResourceType.certificate;
-  if (uri.startsWith('eslap://eslap.cloud/resource/volume/persistent/'))
-    return ResourceType.volume;
-  if (uri.startsWith('eslap://eslap.cloud/resource/volume/volatile/'))
-    return ResourceType.volatileVolume;
-
-  let res: ResourceType = null;
-  let splitted = uri.split('/');
-  let i = 4;
-  if (splitted[2] === 'temporary') { i = i + 2; }
-
-  // Obtain the type. In case it's a temporary element, the type will be twice
-  // realocated to the left
-  switch (splitted[i]) {
-    case 'volume':
-    // console.warn('deprecated resource type \'volume\': %s', uri);
-    case 'volumes':
-      res = ResourceType.volume;
-      break;
-    case 'cert':
-      res = ResourceType.certificate;
-      break;
-    case 'vhost':
-      res = ResourceType.domain;
-      break;
-    default:
-      console.error(
-        'Not expected resource type %s when obtaining a resource type',
-        splitted[i]
-      );
-  }
-  return res;
-}
-
-export function getElementAtributes(uri: string): [string, string, string] {
-  let splitted: string[] = uri.split('/');
-  let domain = splitted[2];
-  let name = splitted[4];
-  for (let i = 5; i < splitted.length - 1; i++) {
-    name += '.' + splitted[i];
-  }
-  let version = splitted[splitted.length - 1];
-
-  return [domain, name, version];
-}
-
-export function getElementDomain(uri: string): string {
-  return uri.split('/')[2];
-}
-
-export function getElementName(uri: string): string {
-  let splitted: Array<string> = uri.split('/');
-  let name = splitted[4];
-  for (let i = 5; i < splitted.length - 1; i++) {
-    name += '.' + splitted[i];
-  }
-  return name;
-}
-
-export function getElementVersion(uri: string): string {
-  let splitted: Array<string> = uri.split('/');
-  return splitted[splitted.length - 1];
-}
-
-export function isServiceEntrypoint(uri: string): boolean {
-  const entrypoints = ['eslap://eslap.cloud/services/http/inbound/1_0_0'];
-  return entrypoints.indexOf(uri) !== -1;
-}
-
-export function transformDeploymentToManifest(deployment: Deployment) {
   let manifestRoles = {};
 
   for (let rolId in deployment.roles) {
@@ -986,22 +1180,25 @@ export function transformDeploymentToManifest(deployment: Deployment) {
   };
 }
 
-export function transformDomainToManifest(uri: string, domain: string) {
+export function transformDomainToManifest(urn: string, domain: string): Object {
+
   return {
     spec: 'eslap://eslap.cloud/resource/vhost/1_0_0',
-    name: uri,
+    name: urn,
     parameters: {
       vhost: domain
     }
   };
+
 }
 
-export function transformVolumeToManifest(uri: string,
-  filesystem: Volume.FILESYSTEM, size: number) {
+export function transformVolumeToManifest(
+  urn: string, filesystem: Volume.FILESYSTEM, size: number
+): Object {
 
   return {
     spec: 'eslap://eslap.cloud/resource/volume/persistent/1_0_0',
-    name: uri,
+    name: urn,
     parameters: {
       filesystem,
       size

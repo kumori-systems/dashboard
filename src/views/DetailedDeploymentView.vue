@@ -42,10 +42,10 @@
           <!-- Detailed info -->
           <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
-            <!-- Deployment uri -->
+            <!-- Deployment urn -->
             <v-layout wrap>
               <v-flex ma-1 xs12>
-                <span class="subheading">URN</span><p>{{ deployment._uri }}</p>
+                <span class="subheading">URN</span><p>{{ deployment._urn }}</p>
               </v-flex>
             </v-layout>
 
@@ -53,7 +53,7 @@
             <v-layout wrap>
               <v-flex ma-1 xs12>
                 <span class="subheading">Date</span>
-                <p>{{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}</p>
+                <p>{{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}</p>
               </v-flex>
             </v-layout>
 
@@ -65,42 +65,60 @@
               </v-flex>
             </v-layout>
 
-            <!-- Deployment volumes -->
-            <v-layout wrap v-if="deploymentVolumes.length > 0">
-              <v-flex ma-1 xs12>
-                <span class="subheading">Volumes</span>
-                <div v-for="(volTuple, index) in deploymentVolumes" v-bind:key="index">
-                  <v-tooltip bottom>
-                    <div dark slot="activator">
-                       <v-layout>
-                        <v-flex xs6>
-                          <v-icon class="indigo--text">storage</v-icon> {{ volTuple[0] }}
-                        </v-flex>
-                        <v-flex xs6>
-                          {{ volTuple[1].size }} GB
-                          {{ volTuple[1].filesystem }}
-                        </v-flex>
-                      </v-layout>
-                    </div>
-                    {{ volTuple[1]._uri }}
-                  </v-tooltip>
-                </div>
-              </v-flex>
-            </v-layout>
+            <!-- Persistent Volumes -->
+            <template v-if="deploymentPersistentVolumes.length > 0">
+              <span class="subheading">Persistent volumes</span>
+              <v-list>
+                <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div">
+                  <v-card-actions>
+                    <v-icon class="indigo--text">storage</v-icon>
+                  </v-card-actions>
+                  <v-list-tile-title>
+                    <v-tooltip bottom>
+                      <div dark slot="activator">
+                        <v-layout>
+                          <v-flex xs6>{{ vol.name }}</v-flex>
+                          <v-flex xs6>{{ vol.size }} GB</v-flex>
+                        </v-layout>
+                      </div>
+                      <span>{{ vol._urn }}</span>
+                    </v-tooltip>
+                  </v-list-tile-title>
+                </v-list-tile>
+              </v-list>
+            </template>
+            
+             <!-- Volatile Volumes -->
+            <template v-if="deploymentVolatileVolumes.length > 0">
+              <span class="subheading">Volatile volumes</span>
+              <v-list>
+                <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div">
+                  <v-card-actions>
+                    <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
+                  </v-card-actions>
+                  <v-list-tile-title>
+                    <v-layout>
+                      <v-flex xs6>{{ vol.id }}</v-flex>
+                      <v-flex xs6>{{ vol.size }} GB</v-flex>
+                    </v-layout>
+                    <span>{{ vol._urn }}</span>
+                  </v-list-tile-title>
+                </v-list-tile>
+              </v-list>
+            </template>
 
-             <!-- Deployment volumes -->
-            <v-layout wrap v-if="Object.keys(deployment.volatileVolumes).length > 0">
+            <!-- Websites -->
+            <v-layout v-if="deployment instanceof HTTPEntryPoint">
               <v-flex ma-1 xs12>
-                <span class="subheading">Volatile Volumes</span>
-                <div v-for="vol in deployment.volatileVolumes" v-bind:key="vol.id">
-                  <v-layout>
-                  <v-flex xs6>
-                        <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}</v-flex>
-                  <v-flex xs6>
-                    {{ vol.size }} GB
-                  </v-flex>
-                  </v-layout>
-                </div>
+                <span class="subheading">Websites</span>
+                <v-list>
+                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index">
+                  <v-list-tile-title>
+                    <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                    <a v-else v-bind:href="'http://' + web">{{ web }}</a>
+                  </v-list-tile-title>
+                </v-list-tile>
+                </v-list>
               </v-flex>
             </v-layout>
 
@@ -166,21 +184,6 @@
               </v-flex>
             </v-layout>
 
-            <!-- Websites -->
-            <v-layout v-if="deployment instanceof HTTPEntryPoint">
-              <v-flex ma-1 xs12>
-                <span class="subheading">Websites</span>
-                <v-list>
-                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index">
-                  <v-list-tile-title>
-                    <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
-                    <a v-else v-bind:href="'http://' + web">{{ web }}</a>
-                  </v-list-tile-title>
-                </v-list-tile>
-                </v-list>
-              </v-flex>
-            </v-layout>
-
           </v-flex>
 
           <!-- Applies space between elements -->
@@ -203,7 +206,6 @@
           <role-card-component v-for="(rolContent, rolId) in deployment.roles"
           v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
           v-bind:roleMetrics="deploymentMetrics.roles"
-          v-bind:deploymentVolatileVolumes="deployment.volatileVolumes"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"
           v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
@@ -234,6 +236,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import Moment from "moment";
 
+
 import {
   RoleCardComponent,
   ChartComponent,
@@ -245,10 +248,13 @@ import {
   Channel,
   Deployment,
   HTTPEntryPoint,
+  PersistentVolume,
+  Resource,
   Service,
-  Volume
+  VolatileVolume
 } from "../store/stampstate/classes";
 import SSGetters from "../store/stampstate/getters";
+import * as utils from "../api/utils";
 import { setTimeout } from "timers";
 
 @VueClassComponent({
@@ -342,14 +348,43 @@ export default class DetailedDeploymentView extends Vue {
     );
   }
 
-  get deploymentVolumes(): [string, Volume][] {
-    let res: [string, Volume][] = [];
+  get deploymentPersistentVolumes(): PersistentVolume[] {
+    let res: PersistentVolume[] = [];
+    let ser: Service = <Service>this.$store.getters.service(
+      this.deployment.service
+    );
+    for (let resName in ser.resources) {
+      if (
+        utils.getResourceType(ser.resources[resName]) ===
+        Resource.RESOURCE_TYPE.PERSISTENT_VOLUME
+      ) {
+        if (this.deployment.resources[resName]) {
+          let volumes = this.$store.getters.persistentVolumes;
+          if (volumes) {
+            res.push(volumes[this.deployment.resources[resName]]);
+          }
+        }
+      }
+    }
+    return res;
+  }
 
-    // Persistent volumes
-    let resources = this.deployment.resources;
-    for (let key in resources) {
-      if (resources[key] instanceof Volume) {
-        res.push([key, <Volume>resources[key]]);
+  get deploymentVolatileVolumes(): VolatileVolume[] {
+    let res: VolatileVolume[] = [];
+    let ser: Service = <Service>this.$store.getters.service(
+      this.deployment.service
+    );
+    for (let resName in ser.resources) {
+      if (
+        utils.getResourceType(ser.resources[resName]) ===
+        Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+      ) {
+        if (this.deployment.resources[resName]) {
+          let volumes = this.$store.getters.volatileVolumes;
+          if (volumes) {
+            res.push(volumes[this.deployment.resources[resName]]);
+          }
+        }
       }
     }
     return res;
@@ -413,7 +448,7 @@ export default class DetailedDeploymentView extends Vue {
           };
         };
       };
-    }[] = this.$store.getters.metrics(this.deployment._uri);
+    }[] = this.$store.getters.serviceMetrics[this.deployment._urn];
 
     let res: {
       data: {
@@ -458,7 +493,7 @@ export default class DetailedDeploymentView extends Vue {
   get totalDependedDeploymentChannels() {
     return channel => {
       return this.$store.getters.getTotalDependedDeploymentChannels(
-        this.deployment._uri,
+        this.deployment._urn,
         this.deployment.service,
         channel
       );
@@ -468,8 +503,11 @@ export default class DetailedDeploymentView extends Vue {
   get hasCertificate() {
     let res: boolean = false;
     for (let resource in this.deployment.resources) {
-      if (this.deployment.resources[resource] instanceof Certificate)
+      /*
+      if (this.deployment.resources[resource] instanceof Certificate){
         res = true;
+      }
+      */
     }
     return res;
   }
@@ -519,7 +557,7 @@ export default class DetailedDeploymentView extends Vue {
         // If the link haven't been found, the link is erased
         if (!found) {
           this.$store.dispatch("unlink", {
-            deploymentOne: this.deployment._uri,
+            deploymentOne: this.deployment._urn,
             channelOne: chann,
             deploymentTwo: this.deployment.channels[chann][realConn]
               .destinyDeploymentId,
@@ -562,7 +600,7 @@ export default class DetailedDeploymentView extends Vue {
           );
 
           this.$store.dispatch("link", {
-            deploymentOne: this.deployment._uri,
+            deploymentOne: this.deployment._urn,
             channelOne: chann,
             deploymentTwo: newConnexion.deployment,
             channelTwo: newConnexion.channel
@@ -603,7 +641,7 @@ export default class DetailedDeploymentView extends Vue {
           );
 
           this.$store.dispatch("link", {
-            deploymentOne: this.deployment._uri,
+            deploymentOne: this.deployment._urn,
             channelOne: chann,
             deploymentTwo: newConnexion.deployment,
             channelTwo: newConnexion.channel
@@ -629,7 +667,7 @@ export default class DetailedDeploymentView extends Vue {
     if (changedNumInstances) {
       // Send changes to the stamp
       this.$store.dispatch("aplyingChangesToDeployment", {
-        deploymentURN: this.deployment._uri,
+        deploymentURN: this.deployment._urn,
         roleNumInstances: this.roleNumInstances,
         killInstances: this.instanceKill
       });
@@ -698,7 +736,7 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Function called from undeploy modal when confirmation is done. */
   undeploy(): void {
-    this.$store.dispatch("undeploy", this.deployment._uri);
+    this.$store.dispatch("undeploy", this.deployment._urn);
     this.$router.push("/overview");
   }
 

@@ -32,12 +32,12 @@
       <v-layout wrap>
        <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
           
-          <!-- Component uri -->
+          <!-- Component urn -->
           <v-layout>
             <v-flex ma-1 xs12>
               <p v-if="!component">
                 <span class="subheading">Component:</span> retrieving info..</p>
-              <p v-else><span class="subheading">Component:</span> {{ component._uri }}</p>
+              <p v-else><span class="subheading">Component:</span> {{ component._urn }}</p>
             </v-flex>
           </v-layout>
 
@@ -107,7 +107,6 @@
                 <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
                   v-bind:key="instanceId" v-bind:instance="instanceContent"
                   v-bind:instanceMetrics="roleChartData.instances"
-                  v-bind:deploymentVolatileVolumes="deploymentVolatileVolumes"
                   v-on:killInstanceChange="handleKillInstanceChange"
                   v-bind:clear="onClearHandler">
                 </instance-card-component>
@@ -147,8 +146,7 @@ import ChartComponent from "./../chart";
     /**  Clear changes when user cancels. */
     clear: { required: true, type: Boolean },
     /** Role and instance metrics. */
-    roleMetrics: { required: true },
-    deploymentVolatileVolumes: { required: false }
+    roleMetrics: { required: true }
   }
 })
 export default class RoleCardComponent extends Vue {
@@ -225,8 +223,6 @@ export default class RoleCardComponent extends Vue {
 
   get roleChannels() {
     return (service: Service, roleId: string) => {
-      console.debug('The service we are receiving is:', service);
-      console.debug('The roleId is:', roleId);
       let res: Connector[] = [];
       if (roleId && service && service.connectors) {
         res = service.connectors.filter(conn => {

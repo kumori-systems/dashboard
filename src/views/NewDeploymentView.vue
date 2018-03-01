@@ -39,7 +39,7 @@
         <v-layout>
           <v-flex xs12 sm6>
             <v-select label="Service" v-model="selectedService" v-bind:items="services"
-              item-text="_uri" item-value="_uri" required
+              item-text="_urn" item-value="_urn" required
               v-bind:rules="[(v) => !!v || 'A service is required']" autocomplete
             ></v-select>
           </v-flex>
@@ -140,8 +140,8 @@
               v-model="resourceConfig[index]"
               v-bind:label="resource[0]"
               v-bind:items="freePersistentVolumes"
-              item-text="_uri"
-              item-value="_uri"
+              item-text="_urn"
+              item-value="_urn"
               v-bind:rules="[(v) => !!v  || 'A volume is required']"
               autocomplete
             ></v-select>
@@ -209,9 +209,9 @@ export default class NewDeploymentView extends Vue {
     this.selectedService = this.$store.getters.selectedService || null;
   }
 
-  get deployments(): { [uri: string]: Deployment } {
+  get deployments(): { [urn: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
-      [uri: string]: Deployment;
+      [urn: string]: Deployment;
     };
   }
 
@@ -228,6 +228,7 @@ export default class NewDeploymentView extends Vue {
       let skeleton: string = "{\n";
       for (let par in ser.parameters) {
         if (count > 0) skeleton += ",\n";
+        /*
         switch (ser.parameters[par]._name) {
           case "boolean":
             skeleton += '  "' + par + '": <boolean>';
@@ -250,6 +251,7 @@ export default class NewDeploymentView extends Vue {
           default:
             console.error("Unknown parameter type");
         }
+        */
         count++;
       }
       skeleton += "\n}";
@@ -279,14 +281,14 @@ export default class NewDeploymentView extends Vue {
 
   get services(): string[] {
     // All deployed services must be loaded to show available channels
-    for (let deploymentURI in this.deployments) {
+    for (let deploymentURN in this.deployments) {
       let service: Service = ((<SSGetters>this.$store.getters).service as any)(
-        this.deployments[deploymentURI].service
+        this.deployments[deploymentURN].service
       );
       if (!service)
         this.$store.dispatch(
           "getElementInfo",
-          this.deployments[deploymentURI].service
+          this.deployments[deploymentURN].service
         );
     }
 
@@ -342,16 +344,16 @@ export default class NewDeploymentView extends Vue {
   /** Gets all free persistent volumes. */
   get freePersistentVolumes(): Volume[] {
     let volumes = ((<SSGetters>this.$store.getters).volumes as any) as {
-      [uri: string]: Volume;
+      [urn: string]: Volume;
     };
     let volumeList: Volume[] = [];
-    for (let volumeUri in volumes) {
-      if (volumes[volumeUri]) {
-        if (volumes[volumeUri].usedBy.length === 0) {
-          volumeList.push(volumes[volumeUri]);
+    for (let volumeURN in volumes) {
+      if (volumes[volumeURN]) {
+        if (volumes[volumeURN].usedBy.length === 0) {
+          volumeList.push(volumes[volumeURN]);
         }
       } else {
-        this.$store.dispatch("getElementInfo", volumeUri);
+        this.$store.dispatch("getElementInfo", volumeURN);
       }
     }
     return volumeList;
@@ -456,9 +458,9 @@ export default class NewDeploymentView extends Vue {
       }
 
       this.$store.dispatch(
-        "addDeployment",
+        "deploy",
         new Deployment(
-          "slap://domain/deployments/date/this_will_be_overrited", //uri
+          "slap://domain/deployments/date/this_will_be_overrited", //urn
           this.deploymentName, //name
           JSON.parse(this.serviceConfig), //parameters
           this.selectedService, //serviceId

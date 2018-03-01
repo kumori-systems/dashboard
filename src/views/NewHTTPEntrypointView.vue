@@ -43,7 +43,7 @@
               v-model="selectedCertificate"
               v-bind:items="certificates"
               item-text="_version"
-              item-value="_uri"
+              item-value="_urn"
               autocomplete
             ></v-select>
           </v-flex>
@@ -119,22 +119,25 @@ export default class NewHTTPEntrypointView extends Vue {
   resilience: number = 1;
 
   mounted() {
-    this.$store.dispatch("getElementInfo", EntryPoint.TYPE.HTTP_INBOUND);
+    this.$store.dispatch(
+      "getElementInfo",
+      EntryPoint.ENTRYPOINT_TYPE.HTTP_INBOUND
+    );
   }
 
   /** Gets all domains. A filter is applicated to show only free domains. */
   get domains() {
     let domains = ((<SSGetters>this.$store.getters).domains as any) as {
-      [uri: string]: Domain;
+      [urn: string]: Domain;
     };
     let domainList: Domain[] = [];
-    for (let domainUri in domains) {
-      if (domains[domainUri]) {
-        if (domains[domainUri].usedBy.length === 0) {
-          domainList.push(domains[domainUri]);
+    for (let domainURN in domains) {
+      if (domains[domainURN]) {
+        if (domains[domainURN].usedBy.length === 0) {
+          domainList.push(domains[domainURN]);
         }
       } else {
-        this.$store.dispatch("getElementInfo", domainUri);
+        this.$store.dispatch("getElementInfo", domainURN);
       }
     }
     return domainList;
@@ -144,16 +147,16 @@ export default class NewHTTPEntrypointView extends Vue {
   get certificates(): Certificate[] {
     let certificates = ((<SSGetters>this.$store.getters)
       .certificates as any) as {
-      [uri: string]: Certificate;
+      [urn: string]: Certificate;
     };
     let certificatesList: Certificate[] = [];
-    for (let certificateUri in certificates) {
-      if (certificates[certificateUri]) {
-        if (certificates[certificateUri].usedBy.length === 0) {
-          certificatesList.push(certificates[certificateUri]);
+    for (let certificateURN in certificates) {
+      if (certificates[certificateURN]) {
+        if (certificates[certificateURN].usedBy.length === 0) {
+          certificatesList.push(certificates[certificateURN]);
         }
       } else {
-        this.$store.dispatch("getElementInfo", certificateUri);
+        this.$store.dispatch("getElementInfo", certificateURN);
       }
     }
     return certificatesList;
@@ -173,7 +176,7 @@ export default class NewHTTPEntrypointView extends Vue {
         vhost: null
       };
       if (this.selectedDomain) {
-        resourcesConfig.vhost = this.selectedDomain._uri;
+        resourcesConfig.vhost = this.selectedDomain._urn;
       }
 
       if (this.selectedCertificate) {
@@ -202,7 +205,7 @@ export default class NewHTTPEntrypointView extends Vue {
       roles["sep"] = new Deployment.Role(
         "sep", // id
         "slap://slapdomain/components/httpsep/0_0_1", // component - overrided by service configuration
-        this.selectedDomain ? { domain: this.selectedDomain._uri } : null, // configuration
+        this.selectedDomain ? { domain: this.selectedDomain._urn } : null, // configuration
         1, //cpu
         1, //memory
         0, //ioperf
@@ -215,9 +218,9 @@ export default class NewHTTPEntrypointView extends Vue {
       );
 
       this.$store.dispatch(
-        "addDeployment",
+        "deploy",
         new HTTPEntryPoint(
-          "slap://domain/deployments/date/this_will_be_overrited", // uri
+          "slap://domain/deployments/date/this_will_be_overrited", // urn
           config,
           roles,
           resourcesConfig,
@@ -232,7 +235,6 @@ export default class NewHTTPEntrypointView extends Vue {
   cancel() {
     this.$router.go(-1);
   }
-  
 }
 </script>
 <style lang="scss" scoped>

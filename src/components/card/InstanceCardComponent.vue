@@ -25,20 +25,21 @@
           <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
         </v-layout>
 
+        
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
-            
-              <!-- A persistent volume. -->
-              <v-list-tile-content v-if="vol instanceof Volume.Instance">
+              <!-- A persistent volume -->
+              <v-list-tile-content v-if="vol instanceof PersistentVolume.Instance" >
                 <v-list-tile-title>
                   <v-icon class="indigo--text">storage</v-icon> {{ vol.id }}
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
-                  <v-flex xs6 class="ml-1">
-                  <span>{{ volumes[vol.uri].filesystem }}</span>
-                  <span>{{ volumes[vol.uri].size }} GB</span>
+                  <v-flex xs12 class="ml-1">
+                  <span>{{ persistentVolumes[vol._urn].filesystem }}</span>
+                  <span>{{ persistentVolumes[vol._urn].size }} GB</span>
                   </v-flex>
+                  
                   <v-flex xs6>
                   <span>Used: {{ instanceMetrics.length > 0
                     && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
@@ -47,11 +48,15 @@
                     : '..' }}
                   </span>
                   </v-flex>
+                  
                   </v-layout>
+                  
                 </v-list-tile-sub-title>
               </v-list-tile-content>
+              
 
               <!-- A volatile volume -->
+              <!--
               <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
 
                 <v-list-tile-title>
@@ -74,10 +79,10 @@
                   </v-layout>
                 </v-list-tile-sub-title>
               </v-list-tile-content>
+              -->
             
           </v-list-tile>
         </v-list>
-        
       </v-flex>
       
       <!-- Applies spaces between components -->
@@ -99,6 +104,7 @@ import VueClassComponent from "vue-class-component";
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
 import {
   Deployment,
+  PersistentVolume,
   Volume,
   VolatileVolume
 } from "../../store/stampstate/classes";
@@ -112,8 +118,7 @@ import ChartComponent from "./../chart";
   props: {
     instance: { required: true },
     clear: { required: true, type: Boolean }, // Used to clean 'kill instances' when changes are canceled
-    instanceMetrics: { required: true },
-    deploymentVolatileVolumes:{ required: false }
+    instanceMetrics: { required: true }
   },
   components: {
     "chart-component": ChartComponent
@@ -125,7 +130,7 @@ export default class InstanceCardComponent extends Vue {
   chartOptions = ChartComponentOptions;
   instanceMetrics = this.instanceMetrics;
   VolatileVolume = VolatileVolume;
-  Volume = Volume;
+  PersistentVolume = PersistentVolume;
 
   mounted() {
     this.$watch("clear", function(value) {
@@ -135,32 +140,70 @@ export default class InstanceCardComponent extends Vue {
     });
   }
 
-  get volumes(): { [volURN: string]: Volume } {
-    return ((<SSGetters>this.$store.getters).volumes as any) as {
-      [volURN: string]: Volume;
+  get persistentVolumes(): { [volURN: string]: PersistentVolume } {
+    return ((<SSGetters>this.$store.getters).persistentVolumes as any) as {
+      [volURN: string]: PersistentVolume;
+    };
+  }
+
+  get volatileVolumes(): { [volURN: string]: VolatileVolume } {
+    return ((<SSGetters>this.$store.getters).volatileVolumes as any) as {
+      [volURN: string]: VolatileVolume;
     };
   }
 
   get instanceVolumes(): any {
     let res: any = [];
-
-    if (this.instance.volumes)
-      for (let vol in this.instance.volumes) {
-        res.push(this.instance.volumes[vol]);
+    if (this.instance.resources) {
+      for (let vol in this.instance.resources) {
+        res.push(this.instance.resources[vol]);
       }
-
+    }
     return res;
+  }
+
+  get volumeMetrics(): {
+    [volumeInstanceId: string]: {
+      [property: string]: number | string;
+    }[];
+  } {
+    return this.$store.getters.volumeMetrics;
   }
 
   get onInstanceMetricsUpdate() {
     let res: {
-      data: { [property: string]: number | string }[];
+      data: { [property: string]: number | string | object }[];
     } = {
       data: []
     };
+
+    // Adding instance metrics
     for (let i in this.instanceMetrics) {
       res.data.push(this.instanceMetrics[i][this.instance.cnid]);
     }
+
+    console.debug("Vamos a obtener metricas de volumenes");
+    // Adding volume metrics
+    let localVolumeInstances = this.instanceVolumes;
+    console.debug(
+      "Obtenidas referencias a volumenes locales",
+      localVolumeInstances
+    );
+    console.debug("Volume metrics contiene", this.volumeMetrics);
+    for (let i in localVolumeInstances) {
+      for (let m in this.volumeMetrics[localVolumeInstances[i].id]) {
+        res.data.push({
+          volumes: {
+            [localVolumeInstances[i].id]: this.volumeMetrics[
+              localVolumeInstances[i].id
+            ][m]
+          }
+        });
+      }
+    }
+
+    console.debug("Las metricas de las instancias contienen", res);
+
     return res;
   }
 

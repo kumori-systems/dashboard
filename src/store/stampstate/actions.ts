@@ -1,10 +1,10 @@
 import Vuex from 'vuex';
 import State from './state';
 
-import { connection } from '../../api';
+import { ProxyConnection } from '../../api';
 import * as utils from '../../api/utils';
 import { BackgroundAction, Notification } from '../pagestate/classes';
-import { Deployment } from './classes';
+import { Deployment, ECloudElement, Resource } from './classes';
 
 /**
  * Actions to handle the representation of the stamp state easier.
@@ -14,49 +14,53 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   /**
    * Obtains information from a stamp element.
-   * @requires elementURI <string> Element identification.
+   * @requires elementURN <string> Element identification.
    */
   getElementInfo = (injectee: Vuex.ActionContext<State, any>,
-    elementURI: string): void => {
+    elementURN: string): void => {
     // Obtain the element in the state
     let res: any = undefined;
-    switch (utils.getElementType(elementURI)) {
-      case utils.ElementType.runtime:
-        res = injectee.state.runtimes[elementURI];
+    switch (utils.getElementType(elementURN)) {
+      case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
+        res = injectee.state.runtimes[elementURN];
         break;
-      case utils.ElementType.service:
-        res = injectee.state.services[elementURI];
+      case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
+        res = injectee.state.services[elementURN];
         break;
-      case utils.ElementType.component:
-        res = injectee.state.components[elementURI];
+      case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
+        res = injectee.state.components[elementURN];
         break;
-      case utils.ElementType.resource:
-        let resourceType: utils.ResourceType =
-          utils.getResourceType(elementURI);
+      case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
+        let resourceType: Resource.RESOURCE_TYPE =
+          utils.getResourceType(elementURN);
         switch (resourceType) {
-          case utils.ResourceType.certificate:
-            res = injectee.state.certificates[elementURI];
+          case Resource.RESOURCE_TYPE.CERTIFICATE:
+            res = injectee.state.certificates[elementURN];
             break;
-          case utils.ResourceType.domain:
-            res = injectee.state.domains[elementURI];
+          case Resource.RESOURCE_TYPE.DOMAIN:
+            res = injectee.state.domains[elementURN];
             break;
-          case utils.ResourceType.volume:
-            res = injectee.state.volumes[elementURI];
+          case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
+            res = injectee.state.persistentVolumes[elementURN];
+            break;
+          case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
+            res = injectee.state.volatileVolumes[elementURN];
             break;
           default:
-            console.error('ResourceType not covered %s', resourceType);
+            throw new Error('ResourceType not covered ' + resourceType);
         }
         break;
       default:
-        console.error('Unkown element type at %s', elementURI);
+        throw new Error('Unkown element type at ' + elementURN);
     }
 
     // If the element isn't stored in the state, info is requested to the
     // platform
     if (!res && res !== null) {
-      connection.getElementInfo(elementURI).catch((err) => {
+
+      ProxyConnection.instance.getElementInfo(elementURN).catch((err) => {
         if (err.message !== 'Duplicated request')
-          console.error('Error getting info from element %s', elementURI, err);
+          console.error('Error getting info from element %s', elementURN, err);
       });
     }
 
@@ -66,7 +70,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * Adds a new deployment to the stamp.
    * @requires deployment <Deployment> Deployment to add in the stamp.
    */
-  addDeployment = (injectee: Vuex.ActionContext<State, any>,
+  deploy = (injectee: Vuex.ActionContext<State, any>,
     deployment: Deployment): void => {
 
     injectee.dispatch(
@@ -74,7 +78,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.DEPLOY_SERVICE)
     );
 
-    connection.addDeployment(deployment).then(() => {
+    ProxyConnection.instance.deploy(deployment).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.DEPLOY_SERVICE,
@@ -109,7 +113,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.UNDEPLOY_SERVICE)
     );
 
-    connection.undeployDeployment(deploymentURN).then(() => {
+    ProxyConnection.instance.undeployDeployment(deploymentURN).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
@@ -134,19 +138,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   /**
    * Adds a volume to the system.
-   * @requires uri string which represents the URI of the element.
+   * @requires urn string which represents the URN of the element.
    * @requires filesystem filesystem selected for the volume.
    * @requires size size of the volume in GB.
    */
   addVolume = (injectee: Vuex.ActionContext<State, any>,
-    { uri, filesystem, size }): void => {
+    { urn, filesystem, size }): void => {
 
     injectee.dispatch(
       'addBackgroundAction',
       new BackgroundAction(BackgroundAction.TYPE.REGISTER_VOLUME)
     );
 
-    connection.addVolume(uri, filesystem, size).then(() => {
+    ProxyConnection.instance.addVolume(urn, filesystem, size).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.REGISTER_VOLUME,
@@ -161,9 +165,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
 
       injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.ERROR, 'Error registering a volume',
-          'Error registering a volume ' + uri,
-          JSON.stringify(err.message, null, 4))
+        new Notification(
+          Notification.LEVEL.ERROR,
+          'Error registering a volume',
+          'Error registering a volume ' + urn,
+          JSON.stringify(err.message, null, 4)
+        )
       );
 
     });
@@ -171,9 +178,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   /**
    * Adds a new domain to the system.
+   * @requires urn string which represents the URN of the element.
    * @requires domain <string> Domain name to be added to the system.
    */
-  addDomain = (injectee: Vuex.ActionContext<State, any>, { uri, domain }):
+  addDomain = (injectee: Vuex.ActionContext<State, any>, { urn, domain }):
     void => {
 
     injectee.dispatch(
@@ -181,7 +189,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.REGISTER_DOMAIN)
     );
 
-    connection.addDomain(uri, domain).then(() => {
+    ProxyConnection.instance.addDomain(urn, domain).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.REGISTER_DOMAIN,
@@ -212,19 +220,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   deleteElement = (injectee: Vuex.ActionContext<State, any>, elementId: string):
     void => {
     switch (utils.getElementType(elementId)) {
-      case utils.ElementType.component:
+      case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
         injectee.dispatch(
           'addBackgroundAction',
           new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_COMPONENT)
         );
         break;
-      case utils.ElementType.service:
+      case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
         injectee.dispatch(
           'addBackgroundAction',
           new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_SERVICE)
         );
         break;
-      case utils.ElementType.runtime:
+      case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
         injectee.dispatch(
           'addBackgroundAction',
           new BackgroundAction(BackgroundAction.TYPE.UNREGISTER_RUNTIME)
@@ -234,24 +242,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       // console.error('Error deleting element: Unknown type of element');
     }
 
-    connection.deleteElement(elementId).then(() => {
+    ProxyConnection.instance.deleteElement(elementId).then(() => {
       let action: string;
       switch (utils.getElementType(elementId)) {
-        case utils.ElementType.component:
+        case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
           action = 'removeComponent';
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_COMPONENT,
             'state': BackgroundAction.STATE.SUCCESS
           });
           break;
-        case utils.ElementType.service:
+        case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
           action = 'removeService';
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_SERVICE,
             'state': BackgroundAction.STATE.SUCCESS
           });
           break;
-        case utils.ElementType.runtime:
+        case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
           action = 'removeRuntime';
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_RUNTIME,
@@ -266,19 +274,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }).catch((err: Error) => {
 
       switch (utils.getElementType(elementId)) {
-        case utils.ElementType.component:
+        case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_COMPONENT,
             'state': BackgroundAction.STATE.FAIL
           });
           break;
-        case utils.ElementType.service:
+        case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_SERVICE,
             'state': BackgroundAction.STATE.FAIL
           });
           break;
-        case utils.ElementType.runtime:
+        case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
           injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.UNREGISTER_RUNTIME,
             'state': BackgroundAction.STATE.FAIL
@@ -305,15 +313,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   downloadManifest = (injectee: Vuex.ActionContext<State, any>,
     elementURN: string): void => {
 
-    connection.downloadManifest(elementURN).catch((err: Error) => {
+    ProxyConnection.instance.downloadManifest(elementURN)
+      .catch((err: Error) => {
 
-      injectee.dispatch('addNotification',
-        new Notification(Notification.LEVEL.ERROR, 'Error downloading manifest',
-          'Error downloading manifest from ' + elementURN,
-          JSON.stringify(err.message, null, 4))
-      );
+        injectee.dispatch('addNotification',
+          new Notification(
+            Notification.LEVEL.ERROR,
+            'Error downloading manifest',
+            'Error downloading manifest from ' + elementURN,
+            JSON.stringify(err.message, null, 4)
+          )
+        );
 
-    });
+      });
 
   }
 
@@ -331,7 +343,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.SCALE_SERVICE)
     );
 
-    connection.aplyChangesToDeployment(
+    ProxyConnection.instance.aplyChangesToDeployment(
       deploymentURN, roleNumInstances, killInstances
     ).then(() => {
       injectee.dispatch('finishBackgroundAction', {
@@ -368,7 +380,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.REGISTER_BUNDLE)
     );
 
-    connection.addNewBundle(file).then(() => {
+    ProxyConnection.instance.addNewBundle(file).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.REGISTER_BUNDLE,
@@ -409,7 +421,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.LINK_SERVICES)
     );
 
-    connection.link(params).then(() => {
+    ProxyConnection.instance.link(params).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.LINK_SERVICES,
@@ -452,7 +464,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.UNLINK_SERVICES)
     );
 
-    connection.unlink(params).then(() => {
+    ProxyConnection.instance.unlink(params).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.UNLINK_SERVICES,
@@ -482,12 +494,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   /**
    * Stores in the state the selected service on elements view to be able
    * to show it on addDeploymentView.
-   * @requires serviceURI <string> Id of the service.
+   * @requires serviceURN <string> Id of the service.
    */
   selectedService = (injectee: Vuex.ActionContext<State, any>,
-    serviceURI: string): void => {
+    serviceURN: string): void => {
 
-    injectee.commit('selectedService', serviceURI);
+    injectee.commit('selectedService', serviceURN);
 
   }
 

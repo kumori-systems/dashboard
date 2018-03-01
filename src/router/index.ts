@@ -18,7 +18,7 @@ export default new Router({
       component: OverviewView
     },
     {
-      path: '/deployment/:uri',
+      path: '/deployment/:urn',
       component: DetailedDeploymentView
     },
     {

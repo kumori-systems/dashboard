@@ -6,27 +6,23 @@ import { Service, VolatileVolume } from './index';
  * another deployment to the outside.
  */
 export abstract class EntryPoint extends Deployment {
-  constructor(uri: string, name: string, parameters: any, service: string,
+  constructor(urn: string, name: string, parameters: any, service: string,
     roles: { [rol: string]: Deployment.Role },
     resourcesConfig: { [resource: string]: any },
     channels: {
       [originChannel: string]: {
         destinyChannelId: string, destinyDeploymentId: string
       }[]
-    },
-    volatileVolumes: { [volumeId: string]: VolatileVolume }
+    }
   ) {
-    super(
-      uri, name, parameters, service, roles, resourcesConfig, channels,
-      volatileVolumes
-    );
+    super(urn, name, parameters, service, roles, resourcesConfig, channels);
   }
 }
 
 export module EntryPoint {
 
   /** Entrypoint Types. */
-  export enum TYPE {
+  export enum ENTRYPOINT_TYPE {
     HTTP_INBOUND = 'eslap://eslap.cloud/services/http/inbound/1_0_0'
   };
 }
@@ -39,30 +35,30 @@ export class HTTPEntryPoint extends EntryPoint {
 
   /**
    * Constructor of the HTTPEntryPoint class.
-   * @param URI id of the service.
+   * @param URN id of the service.
    * @param parameters parameters for the service.
    * @param roles service roles.
    * @param resourcesConfig service resources config.
    * @param channels service channel unions.
    */
-  constructor(URI: string, parameters: any,
-    roles: { [roleURI: string]: Deployment.Role }, resourcesConfig: any,
+  constructor(URN: string, parameters: any,
+    roles: { [roleURN: string]: Deployment.Role }, resourcesConfig: any,
     channels: {
       [originChannel: string]: {
         destinyChannelId: string,
         destinyDeploymentId: string
       }[]
     }, volatileVolumes?: { [volumeId: string]: VolatileVolume }) {
+      
     super(
-      URI,
+      URN,
       roles && roles['sep'].configuration ?
         roles['sep'].configuration.domain : null,
       parameters,
-      EntryPoint.TYPE.HTTP_INBOUND,
+      EntryPoint.ENTRYPOINT_TYPE.HTTP_INBOUND,
       roles,
       resourcesConfig,
-      channels,
-      volatileVolumes
+      channels
     );
 
     if (roles && roles['sep'].configuration) {

@@ -90,7 +90,7 @@ import PSGetters from "./../store/pagestate/getters";
 import { BackgroundAction } from "../store/pagestate/classes";
 import urlencode from "urlencode";
 
-import { ACS_URI } from "../api/config";
+import { ACS_URL } from "../api/config";
 
 @VueClassComponent({
   name: "sign-in-view"
@@ -119,7 +119,7 @@ export default class SignInView extends Vue {
   mounted() {
     // Set redirection path for google oauth
     this.googleOauthURN =
-      ACS_URI +
+      ACS_URL +
       "/auth/google?redirectOnSuccessUrl=" +
       urlencode(location.origin + "/#/overview") +
       "&redirectOnFailureUrl=" +

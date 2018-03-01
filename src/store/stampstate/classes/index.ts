@@ -4,7 +4,7 @@ import {
 } from './channel';
 import { Component } from './component';
 import { Deployment } from './deployment';
-import { EcloudElement } from './ecloudelement';
+import { ECloudElement } from './ecloudelement';
 import { EntryPoint, HTTPEntryPoint } from './entrypoint';
 import { Manifest } from './manifest';
 import {
@@ -13,16 +13,16 @@ import {
 } from './parameter';
 import { Protocol } from './protocol';
 import {
-  Certificate, Domain, Resource, VolatileVolume, Volume
+  Certificate, Domain, PersistentVolume, Resource, VolatileVolume, Volume
 } from './resource';
 import { Runtime } from './runtime';
 import { Service } from './service';
 
 export {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
-  Deployment, Domain, EcloudElement, EntryPoint, FullConnector, HTTPEntryPoint,
+  Deployment, Domain, ECloudElement, EntryPoint, FullConnector, HTTPEntryPoint,
   IntegerParameter, JsonParameter, ListParameter, LoadBalancerConnector,
-  Manifest, NumberParameter, Parameter, Protocol, ProvidedChannel,
-  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter,
-  VolatileVolume, Volume
+  Manifest, NumberParameter, Parameter, PersistentVolume, Protocol,
+  ProvidedChannel, PublishSubscribeConnector, Resource, Runtime, Service,
+  StringParameter, VolatileVolume, Volume
 };

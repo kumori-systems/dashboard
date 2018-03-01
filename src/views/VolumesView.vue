@@ -43,7 +43,7 @@
           </td>
           
           <td class="text-xs-left">
-            <v-btn color="error" v-if="props.item[0] && !props.item[5]" icon v-on:click="showDialog(props.item._uri)">
+            <v-btn color="error" v-if="props.item[0] && !props.item[5]" icon v-on:click="showDialog(props.item._urn)">
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
@@ -87,10 +87,10 @@ export default class VolumesView extends Vue {
       value: "persistent"
     },
     {
-      text: "URI",
+      text: "URN",
       align: "center",
       sortable: false,
-      value: "_uri"
+      value: "_urn"
     },
     {
       text: "Name",
@@ -143,7 +143,7 @@ export default class VolumesView extends Vue {
    */
   get volumes(): [
     boolean, // persistent
-    string, // uri
+    string, // urn
     string, // name
     Volume.FILESYSTEM, // filesystem
     number, // total size
@@ -154,7 +154,7 @@ export default class VolumesView extends Vue {
   ][] {
     let res: [
       boolean, // persistent
-      string, // uri
+      string, // urn
       string, // name
       Volume.FILESYSTEM, // filesystem
       number, // total size
@@ -166,13 +166,13 @@ export default class VolumesView extends Vue {
 
     let volumes: { [volume: string]: Volume } = ((<SSGetters>this.$store
       .getters).volumes as any) as {
-      [uri: string]: Volume;
+      [urn: string]: Volume;
     };
 
     for (let key in volumes) {
       res.push([
         true, // persistent
-        volumes[key]._uri, // uri
+        volumes[key]._urn, // urn
         volumes[key].name, // name
         volumes[key].filesystem, // filesystem
         volumes[key].size, // size
@@ -185,7 +185,7 @@ export default class VolumesView extends Vue {
       for (let inst in volumes[key].items) {
         res.push([
           true, // persistent
-          volumes[key]._uri, // uri
+          volumes[key]._urn, // urn
           volumes[key].name, // name
           volumes[key].filesystem, // filesystem
           volumes[key].size, // size
@@ -199,11 +199,12 @@ export default class VolumesView extends Vue {
 
     // Volatile volumes
     let deployments = this.$store.getters.deployments;
+    /*
     for (let dep in deployments) {
       for (let volvol in (<Deployment>deployments[dep]).volatileVolumes) {
         res.push([
           false, // persistent
-          "volatile", // uri
+          "volatile", // urn
           (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
           null, // filesystem
           (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
@@ -216,7 +217,7 @@ export default class VolumesView extends Vue {
         for (let item in (<Deployment>deployments[dep]).volatileVolumes[volvol].items) {
           res.push([
             false, // persistent
-            "volatile", // uri
+            "volatile", // urn
             (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
             null, // filesystem
             (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
@@ -228,14 +229,15 @@ export default class VolumesView extends Vue {
         }
       }
     }
+    */
 
     return res;
   }
 
   get deployment(): (stri: string) => Deployment {
-    return (deploymentURI: string) => {
+    return (deploymentURN: string) => {
       return ((<SSGetters>this.$store.getters).deployment as any)(
-        deploymentURI
+        deploymentURN
       );
     };
   }
@@ -251,7 +253,7 @@ export default class VolumesView extends Vue {
 
       let res = null;
       if (dep && role && inst) {
-        let met = this.$store.getters.metrics(dep);
+        let met = this.$store.getters.volumeMetrics(dep);
         if (met.length > 0)
           res = met[met.length - 1].roles[role].instances[inst].volumes
             ? met[met.length - 1].roles[role].instances[inst].volumes[id].usage
@@ -263,9 +265,9 @@ export default class VolumesView extends Vue {
     };
   }
 
-  showDialog(elementURI: string): void {
+  showDialog(elementURN: string): void {
     this.dialog = true;
-    this.selectedElement = elementURI;
+    this.selectedElement = elementURN;
   }
 
   removeElement(): void {

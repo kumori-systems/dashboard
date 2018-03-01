@@ -2,16 +2,17 @@ import { setTimeout } from 'timers';
 import Vuex from 'vuex';
 import State from './state';
 
-import { connection } from '../../api';
-import { getResourceType, ResourceType } from '../../api/utils';
+import { ProxyConnection } from '../../api';
+import { getResourceType } from '../../api/utils';
 import {
   Certificate, Component, Deployment, Domain, Resource, Runtime, Service, Volume
 } from '../stampstate/classes';
 import { BackgroundAction, Notification, User } from './classes';
 
-
+import {
+  PersistentVolume, VolatileVolume
+} from '../stampstate/classes/resource';
 import PSGetters from './getters';
-
 
 let checktokeninterval = null;
 
@@ -68,7 +69,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     injectee.commit('clearState');
 
     // Closes all connections to the system.
-    connection.signOut();
+    ProxyConnection.instance.signOut();
 
   }
 
@@ -89,7 +90,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.SIGNIN, 'Validating user')
     ).then(() => { // Check correc id and password
 
-      return connection.signIn(
+      return ProxyConnection.instance.signIn(
         payload.username, payload.userpassword, payload.userid, payload.token
       );
 
@@ -111,14 +112,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all elements
 
-      return connection.getRegisteredElements().then(() => {
+      return ProxyConnection.instance.getRegisteredElements().then(() => {
         console.debug('Stored a reference to all elements from the platform');
+        return user;
+      });
+
+    }).then((user) => { // Load all resources
+
+      return ProxyConnection.instance.getResources().then(() => {
+        console.debug('Retrieved all resources from the platform');
         return user;
       });
 
     }).then((user) => { // Load all deployments
 
-      return connection.getDeploymentList().then(() => {
+      return ProxyConnection.instance.getDeploymentList().then(() => {
         console.debug('Retrieved all deployments from the platform');
         return user;
       });
@@ -156,7 +164,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           - tokenCheckerTimeInterval
         )) {
 
-          connection.renewToken(actualToken)
+          ProxyConnection.instance.renewToken(actualToken)
             .then((renewedToken) => {
               injectee.commit('refreshToken', renewedToken);
 
@@ -236,7 +244,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onMustSignOut((reason: string) => {
+    ProxyConnection.instance.onMustSignOut((reason: string) => {
 
       injectee.dispatch('signOut').then(() => {
         injectee.dispatch('finishBackgroundAction', {
@@ -248,21 +256,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onRefreshToken((token) => {
+    ProxyConnection.instance.onRefreshToken((token) => {
+
       injectee.dispatch('refreshToken', token);
+
     });
 
-    connection.onAddDeployment((deploymentId: string,
+    ProxyConnection.instance.onDeploy((deploymentId: string,
       deployment: Deployment) => {
 
       let val: { [id: string]: Deployment } = {};
       val[deploymentId] = deployment;
-      injectee.commit('addDeployment', val);
+      injectee.commit('deploy', val);
 
     });
 
-    connection.onAddInstance((deploymentId: string, roleId: string,
-      instanceId: string, instance: Deployment.Role.Instance) => {
+    ProxyConnection.instance.onAddInstance((deploymentId: string,
+      roleId: string, instanceId: string, instance: Deployment.Role.Instance
+    ) => {
 
       injectee.commit('addInstance', {
         'deploymentId': deploymentId,
@@ -273,13 +284,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onRemoveDeployment((deploymentId) => {
+    ProxyConnection.instance.onUndeploy((deploymentId) => {
 
       injectee.commit('removeDeployment', deploymentId);
 
     });
 
-    connection.onAddService((serviceId: string, service: Service) => {
+    ProxyConnection.instance.onAddService((serviceId: string,
+      service: Service) => {
 
       let val: { [id: string]: Service } = {};
       val[serviceId] = service;
@@ -287,7 +299,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onAddComponent((componentId: string, component: Component) => {
+    ProxyConnection.instance.onAddComponent((componentId: string,
+      component: Component) => {
 
       let val: { [id: string]: Component } = {};
       val[componentId] = component;
@@ -295,7 +308,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onAddRuntime((runtimeId: string, runtime: Runtime) => {
+    ProxyConnection.instance.onAddRuntime((runtimeId: string,
+      runtime: Runtime) => {
 
       let val: { [id: string]: Runtime } = {};
       val[runtimeId] = runtime;
@@ -303,53 +317,71 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     });
 
-    connection.onAddResource((resourceId: string, resource: Resource) => {
+    ProxyConnection.instance.onAddCertificate((resourceId: string,
+      resource: Certificate) => {
 
-      let commitString: string = null;
-      switch (getResourceType(resourceId)) {
-        case ResourceType.certificate:
-          commitString = 'addCertificate';
-          break;
-        case ResourceType.volume:
-          commitString = 'addVolume';
-          break;
-        case ResourceType.domain:
-          commitString = 'addDomain';
-          break;
-        default:
-          console.error(
-            'Not expected resource type when adding a resource of', resourceId
-          );
-      }
-
-      if (commitString) {
-        let val: { [id: string]: Resource } = {};
-        val[resourceId] = resource;
-        injectee.commit(commitString, val);
-      }
+      let val: { [id: string]: Certificate } = {};
+      val[resourceId] = resource;
+      injectee.commit('addCertificate', val);
 
     });
 
-    connection.onAddMetrics((metrics) => {
+    ProxyConnection.instance.onAddDomain((resourceId: string,
+      resource: Domain) => {
 
-      injectee.commit('addMetrics', metrics);
+      let val: { [id: string]: Domain } = {};
+      val[resourceId] = resource;
+      injectee.commit('addDomain', val);
 
     });
 
-    connection.onLink((params) => {
+    ProxyConnection.instance.onAddPersistentVolume((resourceId: string,
+      resource: PersistentVolume) => {
+
+      let val: { [id: string]: PersistentVolume } = {};
+      val[resourceId] = resource;
+      injectee.commit('addPersistentVolume', val);
+
+    });
+
+    ProxyConnection.instance.onAddVolatileVolume((resourceId: string,
+      resource: VolatileVolume) => {
+
+      let val: { [id: string]: VolatileVolume } = {};
+      val[resourceId] = resource;
+      injectee.commit('addVolatileVolume', val);
+
+    });
+
+    ProxyConnection.instance.onAddServiceMetrics((metrics) => {
+
+      injectee.commit('addServiceMetrics', metrics);
+
+    });
+
+    ProxyConnection.instance.onAddVolumeMetrics((metrics) => {
+
+      injectee.commit('addVolumeMetrics', metrics);
+
+    });
+
+
+    ProxyConnection.instance.onLink((params) => {
 
       injectee.commit('link', params);
 
     });
 
-    connection.onUnlink((params) => {
+    ProxyConnection.instance.onUnlink((params) => {
 
       injectee.commit('unlink', params);
 
     });
 
-    connection.onAddNotification((notification: Notification) => {
+    ProxyConnection.instance.onAddNotification((notification: Notification) => {
+
       injectee.dispatch('addNotification', notification);
+
     });
 
   }

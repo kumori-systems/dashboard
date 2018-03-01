@@ -1,11 +1,16 @@
+import { ECloudElement } from './ecloudelement';
+
 /**
  * Relation between two elements.
  */
-export abstract class Channel {
+export abstract class Channel extends ECloudElement {
+
   /** <string> Readable identifier of this channel. */
   readonly name: string;
+
   /** <Channel.Type> Type of connection provided by this channel. */
-  readonly type: Channel.TYPE;
+  readonly type: Channel.CHANNEL_TYPE;
+
   /** <string> Protocol which is running this channel. */
   protocol: string = null;
 
@@ -16,7 +21,8 @@ export abstract class Channel {
    * @param type <Channel.Type> Type of connection provided by this channel.
    * @param protocol <string> Protocol which is running this channel.
    */
-  constructor(name: string, type: Channel.TYPE, protocol: string) {
+  constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
+    super(ECloudElement.ECLOUDELEMENT_TYPE.CHANNEL);
     if (!name) this.name = name;
     if (!type) throw new Error('Invalid Type for Channel: ' + type);
     this.type = type;
@@ -25,8 +31,9 @@ export abstract class Channel {
 }
 
 export module Channel {
+
   /** Indicates how the channel can be used from within the element. */
-  export enum TYPE {
+  export enum CHANNEL_TYPE {
     REQUEST = 'request',
     REPLY = 'reply',
     SEND = 'send',
@@ -35,44 +42,55 @@ export module Channel {
     ENDPOINT_REQUEST = 'endpoint_request',
     ENDPOINT_REPLY = 'endpoint_Reply'
   };
+
 }
 
 /** Give access the provided function set of the element. */
 export class ProvidedChannel extends Channel {
+
   /** Allowed type of channels for a ProvidedChannel */
-  readonly allowedTypes: Channel.TYPE[] = [Channel.TYPE.REPLY,
-  Channel.TYPE.SEND, Channel.TYPE.DUPLEX, Channel.TYPE.ENDPOINT_REQUEST,
-  Channel.TYPE.ENDPOINT_REPLY];
+  readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
+    Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.SEND,
+    Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
+    Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+  ];
+
   /**
    * Give access the provided function set of the element.
    * @param name <string> Readable identifier of this channel.
    * @param type <Channel.Type> Type of connection provided by this channel.
    * @param protocol <string> Protocol which is running this channel. 
    */
-  constructor(name: string, type: Channel.TYPE, protocol: string) {
+  constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
     if (this.allowedTypes.indexOf(type) === -1)
       throw new Error('Invalid Type for ProvidedChannel: ' + type);
   }
+
 }
 
 /** Gives a element access to it's dependencies. */
 export class DependedChannel extends Channel {
+
   /** Allowed type of channels for a DependedChannel */
-  readonly allowedTypes: Channel.TYPE[] = [Channel.TYPE.REQUEST,
-  Channel.TYPE.RECEIVE, Channel.TYPE.DUPLEX, Channel.TYPE.ENDPOINT_REQUEST,
-  Channel.TYPE.ENDPOINT_REPLY];
+  readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
+    Channel.CHANNEL_TYPE.REQUEST, Channel.CHANNEL_TYPE.RECEIVE,
+    Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
+    Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+  ];
+
   /**
    * Gives a element access to it's dependencies.
    * @param name <string> Readable identifier of this channel.
    * @param type <Channel.Type> Type of connection provided by this channel.
    * @param protocol <string> Protocol which is running this channel.
    */
-  constructor(name: string, type: Channel.TYPE, protocol: string) {
+  constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
     if (this.allowedTypes.indexOf(type) === -1) throw new Error('Invalid Type'
       + ' for DependededChannel: ' + type);
   }
+
 }
 
 /**
@@ -80,8 +98,10 @@ export class DependedChannel extends Channel {
  * role channel to another role channel.
  */
 export abstract class Connector {
+
   /** <ProvidedChannel[]> Collection of send channels. */
   provided: Connector.Direction[] = [];
+
   /** <DependedChannel[]> Collection of receive channels. */
   depended: Connector.Direction[] = [];
 
@@ -105,12 +125,16 @@ export abstract class Connector {
 
     this.depended = depended;
   };
+
 }
 
 export module Connector {
+
   export class Direction {
-    /** URI of the element where we make the connection. */
+
+    /** URN of the element where we make the connection. */
     endpoint: string = null;
+
     /** Role where we are connecting from or to. */
     role: string = null;
 
@@ -123,7 +147,9 @@ export module Connector {
       if (endpoint) this.endpoint = endpoint;
       if (role) this.role = role;
     }
+
   }
+
 }
 
 /**
@@ -131,6 +157,7 @@ export module Connector {
  * channels.
  */
 export class LoadBalancerConnector extends Connector {
+
   /**
    * Designed to relate a set of request channels with a set of reply channels.
    * @param provided <ProvidedChannel[]> Collection of reply channels.
@@ -138,9 +165,11 @@ export class LoadBalancerConnector extends Connector {
    */
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
+
     super(provided, depended);
 
   }
+
 }
 
 /**
@@ -148,6 +177,7 @@ export class LoadBalancerConnector extends Connector {
  * all attached receive channels.
  */
 export class PublishSubscribeConnector extends Connector {
+
   /**
    * Messages send through one of the attached send channels are broadcasted to
    * all attached receive channels.
@@ -157,8 +187,11 @@ export class PublishSubscribeConnector extends Connector {
    */
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
+
     super(provided, depended);
+
   }
+
 }
 
 /**
@@ -167,6 +200,7 @@ export class PublishSubscribeConnector extends Connector {
  * list.
  */
 export class FullConnector extends Connector {
+
   /**
    * Messages send through one of the attached send channels are broadcasted to
    * all attached receive channels.
@@ -176,6 +210,9 @@ export class FullConnector extends Connector {
    */
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
+
     super(provided, depended);
+
   }
+
 }
