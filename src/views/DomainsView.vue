@@ -105,7 +105,6 @@ export default class DomainsView extends Vue {
       if (this.$store.getters.domains[domainURN]) {
         domains.push(this.$store.getters.domains[domainURN]);
       } else {
-        console.debug('Vamos a pedir informacion del elemento ', domainURN);
         this.$store.dispatch("getElementInfo", domainURN);
       }
     }

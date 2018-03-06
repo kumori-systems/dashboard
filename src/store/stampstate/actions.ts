@@ -59,7 +59,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           'Not expected to handle a manifest of this element ' + elementURN
         );
       default:
-        console.debug('Trying to discover element type of ', elementURN);
         throw new Error('Unkown element type at ' + elementURN);
     }
 

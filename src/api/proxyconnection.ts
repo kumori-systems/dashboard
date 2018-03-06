@@ -273,11 +273,6 @@ export class ProxyConnection extends EventEmitter {
 
         this.admission.onEcloudEvent((event: EcloudEvent) => {
 
-          /* console.warn('Event under development: %s / %s event received:',
-            event.strType, event.strName, event); */
-
-          // const timeStart = performance.now();
-
           switch (event.type) {
             case EcloudEventType.service:
               switch (event.name) {
@@ -588,11 +583,6 @@ export class ProxyConnection extends EventEmitter {
                 event.strType, event);
           }
 
-          /* const timeEnd = performance.now();
-          const totalTime = timeEnd - timeStart;
-          console.debug('Event handler took %dms for %s:%s',
-            totalTime, event.strType, event.strName); */
-
         });
 
         this.admission.onDisconnected(() => {
@@ -768,7 +758,6 @@ export class ProxyConnection extends EventEmitter {
                 );
                 break;
               case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
-                console.debug('Creating a persistent volume2');
                 this.emit(
                   this.onAddPersistentVolume, registeredElements[i], undefined
                 );
@@ -809,7 +798,6 @@ export class ProxyConnection extends EventEmitter {
         res = this.admission.getStorageManifest(urn);
       } else {
         res = Promise.reject(new Error('Duplicated request'));
-        console.warn('duplicated request');
       }
       return res;
 
@@ -837,15 +825,17 @@ export class ProxyConnection extends EventEmitter {
         case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
           try {
             ecloudElement = this.transformManifestToService(element);
-            this.emit(
-              this.onAddService, urn, ecloudElement);
+            this.emit(this.onAddService, urn, ecloudElement);
+
             /*
             let promiseArray: Promise<any>[] = [];
             for (let role in ser.roles) {
               res = res.then(() => {
                 return this.getElementInfo(ser.roles[role].component);
               });
-            }*/
+            }
+            */
+
           } catch (err) {
             console.error(err);
             this.emit(
@@ -879,7 +869,6 @@ export class ProxyConnection extends EventEmitter {
           break;
 
         case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
-          console.debug('Es reconocido como resource');
           ecloudElement = this.transformManifestToResource(element);
           switch ((<Resource>ecloudElement)._resource_type) {
             case Resource.RESOURCE_TYPE.CERTIFICATE:
@@ -1123,7 +1112,6 @@ export class ProxyConnection extends EventEmitter {
         }
       });
 
-      console.debug('A: Going to add domain', urn, res);
       this.emit(this.onAddDomain, urn, res);
 
       this.emit(this.onAddNotification,
@@ -1283,7 +1271,7 @@ export class ProxyConnection extends EventEmitter {
 
               default:
 
-                console.warn('Not expected resource inside instance',
+                console.warn('Not expected resource \'%s\' inside instance',
                   res,
                   ecloudDeployment.roles[rolId].instances[instanceId]
                     .configuration.resources[res]

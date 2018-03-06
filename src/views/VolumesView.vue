@@ -176,8 +176,6 @@ export default class VolumesView extends Vue {
       [urn: string]: PersistentVolume;
     };
 
-    console.debug("Persistent volumes contain", persistentVolumes);
-
     for (let key in persistentVolumes) {
       if (!persistentVolumes[key]) {
         this.$store.dispatch("getElementInfo", key);

@@ -179,14 +179,8 @@ export default class InstanceCardComponent extends Vue {
       res.data.push(this.instanceMetrics[i][this.instance.cnid]);
     }
 
-    console.debug("Vamos a obtener metricas de volumenes");
     // Adding volume metrics
     let localVolumeInstances = this.instanceVolumes;
-    console.debug(
-      "Obtenidas referencias a volumenes locales",
-      localVolumeInstances
-    );
-    console.debug("Volume metrics contiene", this.volumeMetrics);
     for (let i in localVolumeInstances) {
       for (let m in this.volumeMetrics[localVolumeInstances[i].id]) {
         res.data.push({
@@ -198,8 +192,6 @@ export default class InstanceCardComponent extends Vue {
         });
       }
     }
-
-    console.debug("Las metricas de las instancias contienen", res);
 
     return res;
   }
