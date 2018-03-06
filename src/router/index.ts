@@ -54,7 +54,7 @@ export default new Router({
       component: NewDomainView
     },
     {
-      path: '/addVolume',
+      path: '/addPersistentVolume',
       component: NewVolumeView
     },
     {

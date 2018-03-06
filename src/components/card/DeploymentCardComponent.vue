@@ -121,7 +121,7 @@
                 </v-card-actions>
                 <v-list-tile-title>
                   <v-layout>
-                    <v-flex xs6>{{ vol.id }}</v-flex>
+                    <v-flex xs6>{{ vol.name }}</v-flex>
                     <v-flex xs6>{{ vol.size }} GB</v-flex>
                   </v-layout>
                   <span>{{ vol._urn }}</span>
@@ -231,7 +231,9 @@ export default class Card extends Vue {
   get hasCertificate(): boolean {
     let res: boolean = false;
     for (let resource in this.deployment.resources) {
-      if (this.$store.getters.certificates[this.deployment.resources[resource]]) {
+      if (
+        this.$store.getters.certificates[this.deployment.resources[resource]]
+      ) {
         res = true;
       }
     }
@@ -243,15 +245,17 @@ export default class Card extends Vue {
     let ser: Service = <Service>this.$store.getters.service(
       this.deployment.service
     );
-    for (let resName in ser.resources) {
-      if (
-        utils.getResourceType(ser.resources[resName]) ===
-        Resource.RESOURCE_TYPE.PERSISTENT_VOLUME
-      ) {
-        if (this.deployment.resources[resName]) {
-          let volumes = this.$store.getters.persistentVolumes;
-          if (volumes) {
-            res.push(volumes[ this.deployment.resources[resName]]);
+    if (ser) {
+      for (let resName in ser.resources) {
+        if (
+          utils.getResourceType(ser.resources[resName]) ===
+          Resource.RESOURCE_TYPE.PERSISTENT_VOLUME
+        ) {
+          if (this.deployment.resources[resName]) {
+            let volumes = this.$store.getters.persistentVolumes;
+            if (volumes) {
+              res.push(volumes[this.deployment.resources[resName]]);
+            }
           }
         }
       }
@@ -264,19 +268,22 @@ export default class Card extends Vue {
     let ser: Service = <Service>this.$store.getters.service(
       this.deployment.service
     );
-    for (let resName in ser.resources) {
-      if (
-        utils.getResourceType(ser.resources[resName]) ===
-        Resource.RESOURCE_TYPE.VOLATILE_VOLUME
-      ) {
-        if (this.deployment.resources[resName]) {
-          let volumes = this.$store.getters.volatileVolumes;
-          if (volumes) {
-            res.push(volumes[ this.deployment.resources[resName]]);
+    if (ser) {
+      for (let resName in ser.resources) {
+        if (
+          utils.getResourceType(ser.resources[resName]) ===
+          Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+        ) {
+          if (this.deployment.resources[resName]) {
+            let volumes = this.$store.getters.volatileVolumes;
+            if (volumes) {
+              res.push(volumes[this.deployment.resources[resName]]);
+            }
           }
         }
       }
     }
+
     return res;
   }
 

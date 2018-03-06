@@ -41,10 +41,10 @@
                   </v-flex>
                   
                   <v-flex xs6>
-                  <span>Used: {{ instanceMetrics.length > 0
-                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
-                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
-                    instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                  <span>Used: {{
+                    volumeMetrics[vol.id]
+                    && volumeMetrics[vol.id].length > 0?
+                    volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%'
                     : '..' }}
                   </span>
                   </v-flex>
@@ -54,9 +54,7 @@
                 </v-list-tile-sub-title>
               </v-list-tile-content>
               
-
               <!-- A volatile volume -->
-              <!--
               <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
 
                 <v-list-tile-title>
@@ -65,21 +63,20 @@
                 <v-list-tile-sub-title>
                   <v-layout>
                   <v-flex xs6 class="ml-1">
-                    <span>{{ deploymentVolatileVolumes[vol.name].filesystem }}</span>
-                    <span>{{ deploymentVolatileVolumes[vol.name].size }} GB</span>
+                    <span>{{ volatileVolumes[vol._urn].filesystem }}</span>
+                    <span>{{ volatileVolumes[vol._urn].size }} GB</span>
                   </v-flex>
                   <v-flex xs6>
-                  <span>Used: {{ instanceMetrics.length > 0
-                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid]
-                    && instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes?
-                    instanceMetrics[instanceMetrics.length - 1 ][instance.cnid].volumes[vol].usage + ' %'
+                  <span>Used: {{
+                    volumeMetrics[vol.id]
+                    && volumeMetrics[vol.id].length > 0?
+                    volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%'
                     : '..' }}
                   </span>
                   </v-flex>
                   </v-layout>
                 </v-list-tile-sub-title>
               </v-list-tile-content>
-              -->
             
           </v-list-tile>
         </v-list>

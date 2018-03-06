@@ -50,7 +50,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             throw new Error('ResourceType not covered ' + resourceType);
         }
         break;
+      case ECloudElement.ECLOUDELEMENT_TYPE.CHANNEL:
+      case ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT:
+      case ECloudElement.ECLOUDELEMENT_TYPE.MANIFEST:
+      case ECloudElement.ECLOUDELEMENT_TYPE.PARAMETER:
+      case ECloudElement.ECLOUDELEMENT_TYPE.PROTOCOL:
+        throw new Error(
+          'Not expected to handle a manifest of this element ' + elementURN
+        );
       default:
+        console.debug('Trying to discover element type of ', elementURN);
         throw new Error('Unkown element type at ' + elementURN);
     }
 
@@ -142,7 +151,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    * @requires filesystem filesystem selected for the volume.
    * @requires size size of the volume in GB.
    */
-  addVolume = (injectee: Vuex.ActionContext<State, any>,
+  addPersistentVolume = (injectee: Vuex.ActionContext<State, any>,
     { urn, filesystem, size }): void => {
 
     injectee.dispatch(
@@ -150,30 +159,31 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.REGISTER_VOLUME)
     );
 
-    ProxyConnection.instance.addVolume(urn, filesystem, size).then(() => {
+    ProxyConnection.instance.addPersistentVolume(urn, filesystem, size)
+      .then(() => {
 
-      injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
-        'state': BackgroundAction.STATE.SUCCESS
+        injectee.dispatch('finishBackgroundAction', {
+          'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+          'state': BackgroundAction.STATE.SUCCESS
+        });
+
+      }).catch((err: Error) => {
+
+        injectee.dispatch('finishBackgroundAction', {
+          'type': BackgroundAction.TYPE.REGISTER_VOLUME,
+          'state': BackgroundAction.STATE.FAIL
+        });
+
+        injectee.dispatch('addNotification',
+          new Notification(
+            Notification.LEVEL.ERROR,
+            'Error registering a volume',
+            'Error registering a volume ' + urn,
+            JSON.stringify(err.message, null, 4)
+          )
+        );
+
       });
-
-    }).catch((err: Error) => {
-
-      injectee.dispatch('finishBackgroundAction', {
-        'type': BackgroundAction.TYPE.REGISTER_VOLUME,
-        'state': BackgroundAction.STATE.FAIL
-      });
-
-      injectee.dispatch('addNotification',
-        new Notification(
-          Notification.LEVEL.ERROR,
-          'Error registering a volume',
-          'Error registering a volume ' + urn,
-          JSON.stringify(err.message, null, 4)
-        )
-      );
-
-    });
   }
 
   /**

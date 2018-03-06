@@ -101,11 +101,12 @@ export default class DomainsView extends Vue {
 
   get domains(): Domain[] {
     let domains: Domain[] = [];
-    for (let domainId in this.$store.getters.domains) {
-      if (this.$store.getters.domains[domainId]) {
-        domains.push(this.$store.getters.domains[domainId]);
+    for (let domainURN in this.$store.getters.domains) {
+      if (this.$store.getters.domains[domainURN]) {
+        domains.push(this.$store.getters.domains[domainURN]);
       } else {
-        this.$store.dispatch("getElementInfo", domainId);
+        console.debug('Vamos a pedir informacion del elemento ', domainURN);
+        this.$store.dispatch("getElementInfo", domainURN);
       }
     }
     return domains;

@@ -31,6 +31,8 @@ export class Resource extends ECloudElement {
     super(ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE);
     if (!urn) throw new Error('A resource requires an URN');
     this._urn = urn;
+    if (!resourceType) throw new Error('A resource requires a resource type');
+    this._resource_type = resourceType;
     if (usedBy) this.usedBy = [usedBy];
   }
 

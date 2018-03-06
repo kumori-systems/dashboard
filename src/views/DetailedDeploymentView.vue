@@ -98,7 +98,7 @@
                   </v-card-actions>
                   <v-list-tile-title>
                     <v-layout>
-                      <v-flex xs6>{{ vol.id }}</v-flex>
+                      <v-flex xs6>{{ vol.name }}</v-flex>
                       <v-flex xs6>{{ vol.size }} GB</v-flex>
                     </v-layout>
                     <span>{{ vol._urn }}</span>
@@ -138,7 +138,7 @@
 
                   <!-- Provided Channels -->
                   <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                    <th><v-chip color="lime">{{ name }}</v-chip></th>
                     <th>
                       <v-select
                         v-model="serviceNewProvidedConnections[name]"
@@ -149,7 +149,7 @@
                         <template slot="selection" scope="items">
                           <v-chip
                             @input="items.parent.selectItem(items.item)"
-                              close color="indigo lighten-4">
+                              close color="light-blue lighten-3">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
@@ -170,14 +170,14 @@
                         <template slot="selection" scope="items">
                           <v-chip 
                             @input="items.parent.selectItem(items.item)"
-                            close color="indigo lighten-4">
+                            close color="light-blue lighten-3">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
                   
                       </v-select>
                     </th>
-                    <th><v-chip color="amber lighten-4">{{ name }}</v-chip></th>
+                    <th><v-chip color="lime">{{ name }}</v-chip></th>
                   </tr>
 
                 </table>

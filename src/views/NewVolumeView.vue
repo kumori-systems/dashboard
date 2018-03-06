@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Adds a volume to the system -->
-        <v-btn class="elevation-0" color="primary" v-on:click="addVolume" v-bind:disabled="!valid">Add Volume</v-btn>
+        <v-btn class="elevation-0" color="primary" v-on:click="addPersistentVolume" v-bind:disabled="!valid">Add Volume</v-btn>
 
         <!-- Cancels the action -->
         <v-btn outline v-on:click="cancel">Cancel</v-btn>
@@ -84,8 +84,8 @@ export default class NewVolumeView extends Vue {
     return res;
   }
 
-  addVolume() {
-    this.$store.dispatch("addVolume", {
+  addPersistentVolume() {
+    this.$store.dispatch("addPersistentVolume", {
       urn: this.urn,
       filesystem: this.selectedFilesystem,
       size: this.size

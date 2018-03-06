@@ -37,6 +37,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.services = {};
     state.persistentVolumes = {};
     state.volatileVolumes = {};
+    state.volumeMetrics = {};
+    state.selectedService = null;
+    state.serviceMetrics = {};
   }
 
 
@@ -253,7 +256,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more domains to the state */
   addDomain = (state: State, payload: { [urn: string]: Domain }): void => {
+    console.debug('Entra en la mutación addDomain');
     state.domains = { ...state.domains, ...payload };
+    console.debug('Sale de la mutación addDomain');
   }
 
   /** Removes one domain from the state */
@@ -342,9 +347,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
       'used': number
     }
   }) => {
-
-    console.debug('Las metricas de volumenes que llegan al estado contienen',
-      metricBundle);
 
     const METRICS_BUFFER_SIZE: number = 100;
 

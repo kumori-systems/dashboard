@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Cancels the action -->
-        <v-btn outline to="/addVolume">Add Volume</v-btn>
+        <v-btn outline to="/addPersistentVolume">Add Volume</v-btn>
 
       </v-card-actions>
 
@@ -43,7 +43,7 @@
           </td>
           
           <td class="text-xs-left">
-            <v-btn color="error" v-if="props.item[0] && !props.item[5]" icon v-on:click="showDialog(props.item._urn)">
+            <v-btn color="error" v-if="props.item[0] && props.item[8].length === 0" icon v-on:click="showDialog(props.item._urn)">
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
@@ -73,7 +73,12 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
-import { Deployment, Volume } from "../store/stampstate/classes";
+import {
+  Deployment,
+  PersistentVolume,
+  Volume,
+  VolatileVolume
+} from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "volumes-view"
@@ -164,73 +169,81 @@ export default class VolumesView extends Vue {
       string[] // usedBy
     ][] = [];
 
-    let volumes: { [volume: string]: Volume } = ((<SSGetters>this.$store
-      .getters).volumes as any) as {
-      [urn: string]: Volume;
+    /* Persistent volumes */
+    let persistentVolumes: {
+      [volume: string]: PersistentVolume;
+    } = ((<SSGetters>this.$store.getters).persistentVolumes as any) as {
+      [urn: string]: PersistentVolume;
     };
 
-    for (let key in volumes) {
-      res.push([
-        true, // persistent
-        volumes[key]._urn, // urn
-        volumes[key].name, // name
-        volumes[key].filesystem, // filesystem
-        volumes[key].size, // size
-        null, // item id
-        null, // associated role
-        null, // associated instance
-        volumes[key].usedBy // used by
-      ]);
+    console.debug("Persistent volumes contain", persistentVolumes);
 
-      for (let inst in volumes[key].items) {
+    for (let key in persistentVolumes) {
+      if (!persistentVolumes[key]) {
+        this.$store.dispatch("getElementInfo", key);
+      } else {
         res.push([
           true, // persistent
-          volumes[key]._urn, // urn
-          volumes[key].name, // name
-          volumes[key].filesystem, // filesystem
-          volumes[key].size, // size
-          volumes[key].items[inst].id, // item id
-          volumes[key].items[inst].associatedRole, // associated role
-          volumes[key].items[inst].associatedInstance, // associated instance
-          volumes[key].usedBy // used by
-        ]);
-      }
-    }
-
-    // Volatile volumes
-    let deployments = this.$store.getters.deployments;
-    /*
-    for (let dep in deployments) {
-      for (let volvol in (<Deployment>deployments[dep]).volatileVolumes) {
-        res.push([
-          false, // persistent
-          "volatile", // urn
-          (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
-          null, // filesystem
-          (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
+          persistentVolumes[key]._urn, // urn
+          persistentVolumes[key].name, // name
+          persistentVolumes[key].filesystem, // filesystem
+          persistentVolumes[key].size, // size
           null, // item id
           null, // associated role
           null, // associated instance
-          [dep] // used by
+          persistentVolumes[key].usedBy // used by
         ]);
 
-        for (let item in (<Deployment>deployments[dep]).volatileVolumes[volvol].items) {
+        for (let inst in persistentVolumes[key].items) {
           res.push([
-            false, // persistent
-            "volatile", // urn
-            (<Deployment>deployments[dep]).volatileVolumes[volvol].id, // name
-            null, // filesystem
-            (<Deployment>deployments[dep]).volatileVolumes[volvol].size, // size
-            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].id, // item id
-            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].associatedRole, // associated role
-            (<Deployment>deployments[dep]).volatileVolumes[volvol].items[item].associatedInstance, // associated instance
-            [dep] // used by
+            true, // persistent
+            persistentVolumes[key]._urn, // urn
+            persistentVolumes[key].name, // name
+            persistentVolumes[key].filesystem, // filesystem
+            persistentVolumes[key].size, // size
+            persistentVolumes[key].items[inst].id, // item id
+            persistentVolumes[key].items[inst].associatedRole, // associated role
+            persistentVolumes[key].items[inst].associatedInstance, // associated instance
+            persistentVolumes[key].usedBy // used by
           ]);
         }
       }
     }
-    */
 
+    /* Volatile volumes */
+
+    let volatileVolumes: { [urn: string]: VolatileVolume } = ((<SSGetters>this
+      .$store.getters).volatileVolumes as any) as {
+      [urn: string]: VolatileVolume;
+    };
+
+    for (let volvol in volatileVolumes) {
+      res.push([
+        false, // persistent
+        volatileVolumes[volvol]._urn, // urn
+        volatileVolumes[volvol].name, // name
+        null, // filesystem
+        volatileVolumes[volvol].size, // size
+        null, // item id
+        null, // associated role
+        null, // associated instance
+        volatileVolumes[volvol].usedBy // used by
+      ]);
+
+      for (let item in volatileVolumes[volvol].items) {
+        res.push([
+          false, // persistent
+          volatileVolumes[volvol]._urn, // urn
+          volatileVolumes[volvol].name, // name
+          null, // filesystem
+          volatileVolumes[volvol].size, // size
+          volatileVolumes[volvol].items[item].id, // item id
+          volatileVolumes[volvol].items[item].associatedRole, // associated role
+          volatileVolumes[volvol].items[item].associatedInstance, // associated instance
+          volatileVolumes[volvol].usedBy // used by
+        ]);
+      }
+    }
     return res;
   }
 
@@ -250,7 +263,6 @@ export default class VolumesView extends Vue {
       role: string,
       inst: string
     ) => {
-
       let res = null;
       if (dep && role && inst) {
         let met = this.$store.getters.volumeMetrics(dep);
@@ -261,7 +273,6 @@ export default class VolumesView extends Vue {
       }
 
       return res;
-      
     };
   }
 
