@@ -97,11 +97,12 @@
                     <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
                   </v-card-actions>
                   <v-list-tile-title>
+
                     <v-layout>
-                      <v-flex xs6>{{ vol.name }}</v-flex>
+                      <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                       <v-flex xs6>{{ vol.size }} GB</v-flex>
                     </v-layout>
-                    <span>{{ vol._urn }}</span>
+                    
                   </v-list-tile-title>
                 </v-list-tile>
               </v-list>
@@ -263,6 +264,9 @@ import { setTimeout } from "timers";
     "deployment-chart-component": ChartComponent
   },
   filters: {
+    truncateRight: function(text: string, value: number) {
+      return text.substring(0, value) + "...";
+    },
     year: function(text: string) {
       return text.split("/")[4].substring(0, 4);
     },
