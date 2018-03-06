@@ -827,14 +827,16 @@ export class ProxyConnection extends EventEmitter {
             ecloudElement = this.transformManifestToService(element);
             this.emit(this.onAddService, urn, ecloudElement);
 
-            /*
+
             let promiseArray: Promise<any>[] = [];
-            for (let role in ser.roles) {
-              res = res.then(() => {
-                return this.getElementInfo(ser.roles[role].component);
-              });
+            for (let role in (<Service>ecloudElement).roles) {
+              promiseArray.push(
+                this.getElementInfo((<Service>ecloudElement).roles[role]
+                  .component
+                )
+              );
             }
-            */
+            return Promise.all(promiseArray);
 
           } catch (err) {
             console.error(err);
@@ -854,7 +856,7 @@ export class ProxyConnection extends EventEmitter {
             this.emit(
               this.onAddComponent, urn, ecloudElement
             );
-            // this.getElementInfo(comp.runtime);
+            return this.getElementInfo((<Component>ecloudElement).runtime);
           } catch (err) {
             console.error(err);
             this.emit(
