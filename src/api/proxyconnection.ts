@@ -1416,7 +1416,7 @@ export class ProxyConnection extends EventEmitter {
           // the info of a deployment and must be added in a different call
           this.emit(
             this.onAddVolatileVolume,
-            res,
+            volumeURN,
             new VolatileVolume(
               res, // name
               volumeURN, // id
