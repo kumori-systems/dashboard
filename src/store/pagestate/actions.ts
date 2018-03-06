@@ -145,7 +145,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       ProxyConnection.instance.onUndeploy((deploymentId) => {
 
-        injectee.commit('removeDeployment', deploymentId);
+        injectee.commit('undeploy', deploymentId);
 
       });
 

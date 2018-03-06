@@ -121,7 +121,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       new BackgroundAction(BackgroundAction.TYPE.UNDEPLOY_SERVICE)
     );
 
-    ProxyConnection.instance.undeployDeployment(deploymentURN).then(() => {
+    ProxyConnection.instance.undeploy(deploymentURN).then(() => {
 
       injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.UNDEPLOY_SERVICE,
