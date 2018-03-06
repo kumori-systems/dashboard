@@ -108,7 +108,7 @@ export default class AppbarComponent extends Vue {
 
   /** Changes the actual view to alarmsAndLogs view */
   toAlarmsAndLogs() {
-    this.$router.push("alarmsAndLogs");
+    this.$router.push("/alarmsAndLogs");
   }
 }
 </script>
