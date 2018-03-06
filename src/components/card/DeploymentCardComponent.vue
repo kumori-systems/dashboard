@@ -101,7 +101,7 @@
                   <v-tooltip bottom>
                     <div dark slot="activator">
                       <v-layout>
-                        <v-flex xs6>{{ vol.name }}</v-flex>
+                        <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                         <v-flex xs6>{{ vol.size }} GB</v-flex>
                       </v-layout>
                     </div>
@@ -121,7 +121,7 @@
                 </v-card-actions>
                 <v-list-tile-title>
                   <v-layout>
-                    <v-flex xs6>{{ vol.name }}</v-flex>
+                    <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                     <v-flex xs6>{{ vol.size }} GB</v-flex>
                   </v-layout>
                   <span>{{ vol._urn }}</span>
