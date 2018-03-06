@@ -458,10 +458,6 @@ export class ProxyConnection extends EventEmitter {
                   );
                   break;
 
-                case EcloudEventName.status:
-                  // Unused event
-                  break;
-
                 default:
                   console.error('Not espected ecloud event name: '
                     + event.strType + '/' + event.strName);
@@ -1032,7 +1028,7 @@ export class ProxyConnection extends EventEmitter {
    * Undeploys a deployed service from the stamp.
    * @param deploymentURN <string> Deployment identification.
    */
-  undeployDeployment(deploymentURN: string): Promise<DeploymentInstanceInfo[]> {
+  undeploy(deploymentURN: string): Promise<DeploymentInstanceInfo[]> {
 
     return this.admission.undeploy(deploymentURN);
 
@@ -1479,7 +1475,7 @@ export class ProxyConnection extends EventEmitter {
     } else {
       res = new Deployment(
         ecloudDeployment.urn, // urn
-        (<any>ecloudDeployment).name, // name: string
+        ecloudDeployment.nickname, // name: string
         parameters, // parameters: any
         ecloudDeployment.service, // serviceId: string
         roles, // roles: { [rolName: string]: DeploymentRol }
