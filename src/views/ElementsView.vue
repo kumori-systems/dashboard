@@ -363,7 +363,7 @@ export default class ElementsView extends Vue {
     if (
       this.selectedComponents.length > 0 ||
       this.selectedServices.length > 0 ||
-      this.selectedRuntimes.length > 0 || 
+      this.selectedRuntimes.length > 0 ||
       this.selectedCertificates.length > 0
     )
       return true;
@@ -394,7 +394,7 @@ export default class ElementsView extends Vue {
     };
   }
 
-  get certificatesByOwner():{
+  get certificatesByOwner(): {
     [owner: string]: { [name: string]: { [version: string]: Certificate } };
   } {
     return ((<SSGetters>this.$store.getters).certificatesByOwner as any)(

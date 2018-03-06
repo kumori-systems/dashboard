@@ -25,6 +25,7 @@ export module EntryPoint {
   export enum ENTRYPOINT_TYPE {
     HTTP_INBOUND = 'eslap://eslap.cloud/services/http/inbound/1_0_0'
   };
+
 }
 
 /** Deployment which gives conectivity outside the stamp via http. */
@@ -49,7 +50,7 @@ export class HTTPEntryPoint extends EntryPoint {
         destinyDeploymentId: string
       }[]
     }, volatileVolumes?: { [volumeId: string]: VolatileVolume }) {
-      
+
     super(
       URN,
       roles && roles['sep'].configuration ?
@@ -66,4 +67,5 @@ export class HTTPEntryPoint extends EntryPoint {
     }
 
   }
+
 }

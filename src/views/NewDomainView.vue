@@ -56,13 +56,17 @@ export default class AddDomainView extends Vue {
   valid: boolean = false;
 
   submit() {
-    this.$store.dispatch("addDomain", {'urn':this.domainURN, 'domain':this.newDomain});
+    this.$store.dispatch("addDomain", {
+      urn: this.domainURN,
+      domain: this.newDomain
+    });
     this.$router.push("/domains");
   }
 
   checkURN(value: string) {
-    // return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
-    return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
+    return RegExp(
+      "^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
+    ).test(value);
   }
 
   cancel() {

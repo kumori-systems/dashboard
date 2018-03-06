@@ -236,7 +236,6 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import Moment from "moment";
 
-
 import {
   RoleCardComponent,
   ChartComponent,
@@ -315,22 +314,6 @@ export default class DetailedDeploymentView extends Vue {
   unwatch: () => void;
 
   mounted() {
-    /* No longer needed because it's loaded on user's load
-    // Retrieve all actually deployed services
-    
-    for (let dep in this.$store.getters.deployments) {
-      if (
-        !this.$store.getters.service(
-          this.$store.getters.deployments[dep].service
-        )
-      ) {
-        this.$store.dispatch(
-          "getElementInfo",
-          this.$store.getters.deployments[dep].service
-        );
-      }
-    }*/
-
     this.unwatch = this.$watch("$route.path", val => {
       this.$forceUpdate();
       this.cancelChanges();
@@ -423,7 +406,6 @@ export default class DetailedDeploymentView extends Vue {
           res = "unknown";
       }
     }
-
     return res;
   }
 
@@ -501,15 +483,7 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get hasCertificate() {
-    let res: boolean = false;
-    for (let resource in this.deployment.resources) {
-      /*
-      if (this.deployment.resources[resource] instanceof Certificate){
-        res = true;
-      }
-      */
-    }
-    return res;
+    return this.deployment.resources["server_cert"] ? true : false;
   }
 
   /**

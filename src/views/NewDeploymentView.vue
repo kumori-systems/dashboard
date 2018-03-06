@@ -172,6 +172,7 @@ import {
   Certificate,
   Deployment,
   Domain,
+  Parameter,
   Service,
   Volume
 } from "../store/stampstate/classes";
@@ -216,7 +217,6 @@ export default class NewDeploymentView extends Vue {
   }
 
   get service(): Service {
-
     let ser: Service = ((<SSGetters>this.$store.getters).service as any)(
       this.selectedService
     );
@@ -228,30 +228,33 @@ export default class NewDeploymentView extends Vue {
       let skeleton: string = "{\n";
       for (let par in ser.parameters) {
         if (count > 0) skeleton += ",\n";
-        /*
-        switch (ser.parameters[par]._name) {
-          case "boolean":
+
+        switch (ser.parameters[par]._parameter_type) {
+          case Parameter.PARAMETER_TYPE.BOOLEAN:
             skeleton += '  "' + par + '": <boolean>';
             break;
-          case "integer":
+          case Parameter.PARAMETER_TYPE.INTEGER:
             skeleton += '  "' + par + '": <integer>';
             break;
-          case "json":
+          case Parameter.PARAMETER_TYPE.JSON:
             skeleton += '  "' + par + '": { }';
             break;
-          case "list":
+          case Parameter.PARAMETER_TYPE.LIST:
             skeleton += '  "' + par + '": [ ]';
             break;
-          case "number":
+          case Parameter.PARAMETER_TYPE.NUMBER:
             skeleton += '  "' + par + '": <number>';
             break;
-          case "string":
+          case Parameter.PARAMETER_TYPE.STRING:
             skeleton += '  "' + par + '": ""';
             break;
           default:
-            console.error("Unknown parameter type");
+            console.error(
+              "Unknown parameter type",
+              ser.parameters[par]._parameter_type
+            );
         }
-        */
+
         count++;
       }
       skeleton += "\n}";
@@ -260,7 +263,7 @@ export default class NewDeploymentView extends Vue {
       // Done this way to avoid ui input problems
       let defaultList = [];
       for (let numRol in ser.roles) {
-        defaultList.push('1');
+        defaultList.push("1");
       }
 
       // Initialitze arrangement
@@ -333,7 +336,6 @@ export default class NewDeploymentView extends Vue {
   }
 
   get totalResourceConfig() {
-
     return resourceId => {
       return ((<SSGetters>this.$store.getters).getFreeResource as any)(
         resourceId

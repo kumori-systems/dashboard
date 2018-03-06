@@ -33,30 +33,28 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         return a.name < b.name ? 1 : -1;
       }
     });
-
     for (let dep in state.deployments) {
       pq.push({
         'name': state.deployments[dep].name,
         '_urn': state.deployments[dep]._urn
       });
     }
-
     let res: string[] = [];
-
     while (pq.size() > 0) {
       res.push(pq.pop()['_urn']);
     }
-
-
     return res;
+
   }
 
 
   deployment = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (deploymentURN: string) => Deployment => {
+
     return (deploymentURN: string) => {
       return state.deployments[deploymentURN];
     };
+
   }
 
   serviceMetrics = (state?: State, getters?: Getters, rootState?: any,
@@ -80,6 +78,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }[]
     } => {
+
     return state.serviceMetrics;
 
   }
@@ -91,12 +90,14 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         [property: string]: number | string
       }[]
     } => {
+
     return state.volumeMetrics;
 
   }
 
   deploymentFromPath = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (deploymentPath: string) => Deployment => {
+
     return (deploymentPath: string) => {
       let res: string = null;
       for (let urn in state.deployments) {
@@ -106,33 +107,41 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return (getters.deployment as Function)(res);
     };
+
   }
 
   numDeployments = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): number => {
+
     let res: number = 0;
     for (let urn in state.deployments)
       res++;
     return res;
+
   }
 
 
   components = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: Component } => {
+
     return state.components;
+
   }
 
   component = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (componentURN: string) => Component => {
+
     return (componentURN: string) => {
       return state.components[componentURN];
     };
+
   }
 
   componentsByOwner = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (searchFilter: string) => {
       [owner: string]: { [name: string]: { [version: string]: string } }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: { [name: string]: { [version: string]: string } }
@@ -154,10 +163,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
       return res;
     };
+
   }
 
   componentUsedBy = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (componentURN: string) => string[] => {
+
     return (componentURN: string) => {
       let res: string[] = [];
       if (state.components[componentURN]) {
@@ -165,18 +176,23 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   services = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: Service } => {
+
     return state.services;
+
   }
 
   service = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (serviceURN: string) => Service => {
+
     return (serviceURN: string) => {
       return state.services[serviceURN];
     };
+
   }
 
   servicesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -187,6 +203,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -211,10 +228,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   serviceUsedBy = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (serviceURN: string) => string[] => {
+
     return (serviceURN: string) => {
       let res: string[] = [];
       if (state.services[serviceURN]) {
@@ -222,6 +241,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   certificatesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -232,6 +252,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -256,10 +277,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   certificateUsedBy = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (certificateURN: string) => string[] => {
+
     return (certificateURN: string) => {
       let res: string[] = [];
       if (state.certificates[certificateURN]) {
@@ -267,6 +290,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
 
@@ -274,6 +298,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   getServiceProvidedChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURN: string) =>
       ProvidedChannel[] => {
+
     return (serviceURN: string) => {
       let res = [];
       if ((<Service>state.services[serviceURN])) { // if service exists
@@ -284,11 +309,13 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   getServiceDependedChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURN: string) =>
       DependedChannel[] => {
+
     return (serviceURN: string) => {
       let res = [];
       if ((<Service>state.services[serviceURN])) { // if service exists
@@ -299,13 +326,13 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   getTotalProvidedDeploymentChannels = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): (serviceURN: string,
-      channelId: string) => {
-        'value': string, 'text': string
-      }[] => {
+      channelId: string) => { 'value': string, 'text': string }[] => {
+
     return (serviceId: string, channelId: string) => {
 
       let type: string = (<Service>state.services[serviceId])
@@ -364,6 +391,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   getTotalDependedDeploymentChannels = (state?: State, getters?: Getters,
@@ -371,6 +399,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       serviceURN: string, channelId: string) => {
         'value': string, 'text': string
       }[] => {
+
     return (myDeploymentId: string, serviceId: string, channelId: string) => {
       // Depending on the channel type, the search will be different
       let type: string = (<Service>state.services[serviceId])
@@ -441,11 +470,14 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   runtimes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: Runtime } => {
+
     return state.runtimes;
+
   }
 
   runtimesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -456,6 +488,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -481,10 +514,12 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   runtimeUsedBy = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (componentURN: string) => string[] => {
+
     return (runtimeURN: string) => {
       let res: string[] = [];
       if (state.runtimes[runtimeURN]) {
@@ -492,30 +527,40 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   persistentVolumes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: PersistentVolume } => {
+
     return state.persistentVolumes;
+
   }
 
   volatileVolumes = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: VolatileVolume } => {
+
     return state.volatileVolumes;
+
   }
 
   domains = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: Domain } => {
+
     return state.domains;
+
   }
 
   certificates = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): { [urn: string]: Certificate } => {
+
     return state.certificates;
+
   }
 
   elementInfo = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (urn: string) => any => {
+
     return (urn: string) => {
       let res: any = null;
       switch (utils.getElementType(urn)) {
@@ -545,11 +590,14 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   selectedService = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): string => {
+
     return state.selectedService;
+
   }
 
 };

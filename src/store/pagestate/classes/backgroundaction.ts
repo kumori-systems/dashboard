@@ -7,6 +7,7 @@ let getBrackgroundActionId = (() => {
     return 'ba_' + counter++;
   };
 })();
+
 /**
  * Action executed in the background and eventually solved. Be carefull when
  * creating or editing this object, thus a wrong value can produce unexpected
@@ -75,5 +76,5 @@ export module BackgroundAction {
     UNLINK_SERVICES = 'unlink services',
     LOADING_DATA = 'loading data'
   }
-  
+
 }
