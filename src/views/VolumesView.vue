@@ -31,7 +31,7 @@
           <td class="text-xs-left">{{ props.item[5]? null : props.item[3] }}</td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[4] }}</td>
           <td class="text-xs-left">{{ props.item[5] }}</td>
-          <td class="text-xs-left">{{ props.item[5]? itemUsage(props.item[1], props.item[5], props.item[8][0], props.item[6], props.item[7]) : null }}</td>
+          <td class="text-xs-left">{{ props.item[5]? itemUsage(props.item[5]):null}}</td>
           <td class="text-xs-left">
             <router-link v-if="!props.item[5]" v-for="elem in props.item[8]" v-bind:key="elem"
               v-bind:to="deployment(elem)._path">
@@ -254,22 +254,11 @@ export default class VolumesView extends Vue {
   }
 
   get itemUsage() {
-    return (
-      urn: string,
-      id: string,
-      dep: string,
-      role: string,
-      inst: string
-    ) => {
+    return (id: string) => {
       let res = null;
-      if (dep && role && inst) {
-        let met = this.$store.getters.volumeMetrics(dep);
-        if (met.length > 0)
-          res = met[met.length - 1].roles[role].instances[inst].volumes
-            ? met[met.length - 1].roles[role].instances[inst].volumes[id].usage
-            : "-";
-      }
-
+      let met = this.$store.getters.volumeMetrics[id];
+      if (met.length > 0)
+        res = met[met.length - 1] ? met[met.length - 1].usage : "-";
       return res;
     };
   }
