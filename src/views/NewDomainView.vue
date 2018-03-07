@@ -32,9 +32,9 @@
 
            <v-layout>
           <v-flex xs4>
-          <v-text-field label="Domain uri" v-model="domainURI"
-            v-bind:rules="[(v) => !!v || 'An uri is required',
-            (v)=> checkUri(v) || 'Invalid URI. Format eslap://namespace/resources/vhost/mydomain/1_0_0' ]" required>
+          <v-text-field label="Domain urn" v-model="domainURN"
+            v-bind:rules="[(v) => !!v || 'An urn is required',
+            (v)=> checkURN(v) || 'Invalid URN. Format eslap://namespace/resources/vhost/mydomain/1_0_0' ]" required>
           </v-text-field>
           </v-flex>
         </v-layout>
@@ -52,17 +52,21 @@ import VueClassComponent from "vue-class-component";
 })
 export default class AddDomainView extends Vue {
   newDomain: string = null;
-  domainURI: string = "eslap://<name_space>/resources/vhost/<element_uri>/<number>_<number>_<number>";
+  domainURN: string = "eslap://<name_space>/resources/vhost/<element_urn>/<number>_<number>_<number>";
   valid: boolean = false;
 
   submit() {
-    this.$store.dispatch("addDomain", {'uri':this.domainURI, 'domain':this.newDomain});
+    this.$store.dispatch("addDomain", {
+      urn: this.domainURN,
+      domain: this.newDomain
+    });
     this.$router.push("/domains");
   }
 
-  checkUri(value: string) {
-    // return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
-    return RegExp("^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$").test(value);
+  checkURN(value: string) {
+    return RegExp(
+      "^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
+    ).test(value);
   }
 
   cancel() {

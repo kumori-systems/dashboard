@@ -2,12 +2,16 @@
  * User properties.
  */
 export class User {
+
   /** <string> Path to icon representing the user */
   avatar: string = '/static/default_user_avatar.png';
+
   /** <string> Real id of the user. */
   id: string = null;
+
   /** <string> Name representing the user. */
   name: string = null;
+
   /** <string> Token which autentifies the user. */
   token: User.Token = null;
 
@@ -40,6 +44,7 @@ export class User {
 }
 
 export module User {
+
   /**
    * Represents if the user has been authenticated or is a guest in the system.
    */
@@ -82,8 +87,8 @@ export module User {
       const expirationDate: Date = new Date(
         creationDate.getTime() + expiresIn * 1000
       );
-
       return expirationDate > actualDate;
+
     }
 
   }

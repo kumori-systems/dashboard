@@ -1,4 +1,4 @@
-import { EcloudElement } from './ecloudelement';
+import { ECloudElement } from './ecloudelement';
 import {
   Channel, Connector, DependedChannel, FullConnector, LoadBalancerConnector,
   Parameter, ProvidedChannel, PublishSubscribeConnector
@@ -7,7 +7,11 @@ import {
 /**
  * Definition of a system for the Ecloud ecosystem.
  */
-export class Service extends EcloudElement {
+export class Service extends ECloudElement {
+
+  /** Identifier of the service in the stamp. */
+  readonly _urn: string;
+
   /** <any> Service configuration parameters. */
   parameters: { [parameter: string]: Parameter } = {};
 
@@ -18,7 +22,7 @@ export class Service extends EcloudElement {
   roles: { [role: string]: Service.Role } = {};
 
   /**
-   * <{[resource:string]:string}> Asotiation form a name to the uri of the
+   * <{[resource:string]:string}> Asotiation form a name to the urn of the
    * resource.
    */
   resources: { [resource: string]: string } = {};
@@ -43,9 +47,9 @@ export class Service extends EcloudElement {
 
   /**
    * Definition of a system for the Ecloud ecosystem.
-   * @param uri <string> Uniform Resource Identifier for this service.
+   * @param urn <string> Uniform Resource Name for this service.
    * @param resources <{[resource:string]:string}> Asotiation form a name to the
-   *  uri of the resource.
+   *  urn of the resource.
    * @param parameters <any> Set of parameters passed to the initialitzation of
    * this service.
    * @param roles { [role: string]: Service.Role } Set of behaviours and
@@ -56,21 +60,26 @@ export class Service extends EcloudElement {
    * channels which require data on connection.
    */
   constructor(
-    uri: string, resources: { [resource: string]: string },
+    urn: string, resources: { [resource: string]: string },
     parameters: { [parameter: string]: Parameter },
     roles: { [rol: string]: Service.Role },
     providedChannels: { [channel: string]: ProvidedChannel },
     dependedChannels: { [channel: string]: DependedChannel },
     connectors: Connector[]
   ) {
-    super(uri);
+
+    super(ECloudElement.ECLOUDELEMENT_TYPE.SERVICE);
+    if (!urn) throw new Error('A service requires an URN');
+    this._urn = urn;
     if (resources) this.resources = resources;
     if (parameters) this.parameters = parameters;
     if (roles) this.roles = roles;
     if (providedChannels) this.providedChannels = providedChannels;
     if (dependedChannels) this.dependedChannels = dependedChannels;
     if (connectors) this.connectors = connectors;
+
   }
+
 }
 
 export module Service {
@@ -78,35 +87,39 @@ export module Service {
   /** Set of behaviours and properties for a component. */
   export class Role {
 
-    /** <string> URI of the component which will be executed as this role. */
+    /** <string> URN of the component which will be executed as this role. */
     readonly component: string;
 
     /** <any> Set of parameters passed to the initialitzation of this role. */
     parameters: { [parameter: string]: Parameter } = {};
 
     /**
-     * <{ [resource: string]: string }> Asotiation form a name to the uri of
+     * <{ [resource: string]: string }> Asotiation form a name to the urn of
      * the resource.
      */
     resources: { [resource: string]: string } = {};
 
     /**
      * Set of behaviours and properties for a component.
-     * @param component <string> URI of the component which will be executed as
+     * @param component <string> URN of the component which will be executed as
      * this role.
      * @param parameters <any> Set of parameters passed to the initialitzation
      * of this role.
      * @param resources <{ [resource: string]: string }> Asotiation form a name
-     * to the uri of the resource.
+     * to the urn of the resource.
      */
     constructor(
       component: string, parameters: { [parameter: string]: Parameter },
       resources: { [resource: string]: string }
     ) {
+
       if (!component) throw new Error('Invalid value for component in Role');
       this.component = component;
       if (parameters) this.parameters = parameters;
       if (resources) this.resources = resources;
+
     }
+
   }
+
 }

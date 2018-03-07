@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Adds a volume to the system -->
-        <v-btn class="elevation-0" color="primary" v-on:click="addVolume" v-bind:disabled="!valid">Add Volume</v-btn>
+        <v-btn class="elevation-0" color="primary" v-on:click="addPersistentVolume" v-bind:disabled="!valid">Add Volume</v-btn>
 
         <!-- Cancels the action -->
         <v-btn outline v-on:click="cancel">Cancel</v-btn>
@@ -23,13 +23,13 @@
     <v-container>
        <v-form v-model="valid" ref="form">
 
-        <!-- Volume URI -->
+        <!-- Volume URN -->
         <v-layout>
           <v-flex xs12 md6>
-            <v-text-field label="Volume URI" v-model="uri" required
+            <v-text-field label="Volume URN" v-model="urn" required
               v-bind:rules="[
-                (v) => !!v || 'A URI is required',
-                (v)=> checkUri(v) || 'Invalid URI. Format eslap://namespace/resources/volume/myvolume/persistent'
+                (v) => !!v || 'A URN is required',
+                (v)=> checkURN(v) || 'Invalid URN. Format eslap://namespace/resources/volume/myvolume/persistent'
                 ]">
             </v-text-field>
           </v-flex>
@@ -71,7 +71,7 @@ import { Volume } from "../store/stampstate/classes";
   components: {}
 })
 export default class NewVolumeView extends Vue {
-  uri: string = "eslap://<namespace>/resources/volume/<volume_name>/persistent";
+  urn: string = "eslap://<namespace>/resources/volume/<volume_name>/persistent";
   selectedFilesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
   size: number = 1;
   valid: boolean = false;
@@ -84,16 +84,16 @@ export default class NewVolumeView extends Vue {
     return res;
   }
 
-  addVolume() {
-    this.$store.dispatch("addVolume", {
-      uri: this.uri,
+  addPersistentVolume() {
+    this.$store.dispatch("addPersistentVolume", {
+      urn: this.urn,
       filesystem: this.selectedFilesystem,
       size: this.size
     });
     this.$router.go(-1);
   }
 
-  checkUri(value: string) {
+  checkURN(value: string) {
     return RegExp(
       "^eslap://(\\w+)/resource(s)?/volume/(\\w+)/persistent$"
     ).test(value);

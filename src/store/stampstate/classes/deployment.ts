@@ -1,66 +1,35 @@
 import urlencode from 'urlencode';
-import { Resource, Service, VolatileVolume, Volume } from './index';
+import * as utils from '../../../api/utils';
+import { ECloudElement } from './ecloudelement';
+import {
+  Resource, Service, VolatileVolume, Volume
+} from './index';
 
-/**
- * Checks the format of the URI and returns the domain and the name of the
- * element. If the format is not corret it throws an Error.
- */
-function rightURIformat(URI): [string, string] {
-
-  try {
-
-    if (!URI) throw new Error();
-    let splitted = URI.split('/');
-    // Check two first static pieces
-    if (splitted[0] !== 'slap:' || splitted[1] !== '' ||
-      'deployments' !== splitted[3]) throw new Error();
-    // Save domain
-    let domain = splitted[2];
-    // Save name even if it's got more than one word
-    let name = splitted[4];
-    for (let i = 5; i < splitted.length - 1; i++) {
-      name += '/' + splitted[i];
-    }
-    return [domain, name];
-
-  } catch (err) {
-
-    throw new Error('URI format error: ' + URI);
-
-  }
-
-}
 
 /**
  * Instance of a service.
  */
-export class Deployment {
+export class Deployment extends ECloudElement {
 
-  /** <string> Uniform Resource Identifier for this deployment. */
-  readonly _uri: string;
+  /** <string> Uniform Resource Name for this deployment. */
+  readonly _urn: string;
 
   /** <string> Where this deployment belongs to. */
   readonly _domain: string;
 
-  /** <string> Path for this deployment based on his URI. */
+  /** <string> Path for this deployment based on his URN. */
   readonly _path: string;
 
   /** <string> Friendly readable text to identify this deployment. */
   name: string = null;
 
-  /** <string> URI of the service which defines this deployment. */
+  /** <string> URN of the service which defines this deployment. */
   service: string = null;
 
   /**
    * <{[resource:string]:Resource}> Set of resources for this deployment.
    */
-  resources: { [resource: string]: Resource } = {};
-
-  /**
-   * <{ [volumeId: string]: VolatileVolume }> Set of volatile volumes associated
-   * to the deployment.
-   */
-  volatileVolumes: { [volumeId: string]: VolatileVolume } = {};
+  resources: { [resourceKey: string]: string } = {};
 
   /** <any> Set of parameters passed to the initialitzation of this service. */
   parameters: any = null;
@@ -90,8 +59,8 @@ export class Deployment {
     let danger: number = 0;
     let unkown: number = 0;
 
-    for (let uri in this.roles) {
-      switch (this.roles[uri].state) {
+    for (let urn in this.roles) {
+      switch (this.roles[urn].state) {
         case Deployment.Role.STATE.SUCCESS:
           success++;
           break;
@@ -124,12 +93,12 @@ export class Deployment {
 
   /**
    * Main class of Ecloud ecosystem, which represents the instance of a service.
-   * @param uri <string> Uniform Resource Identifier for this element following
+   * @param urn <string> Uniform Resource Name for this element following
    * the format 'eslap://<domain>/deployment/<name>/<version>'.
    * @param name <string> Friendly readable text to identify this deployment.
    * @param parameters <any> Set of parameters passed to the initialitzation of
    * this service.
-   * @param service <string> URI of the service which defines this deployment.
+   * @param service <string> URN of the service which defines this deployment.
    * @param roles { [role: string]: Deployment.Role } Instances of a service
    * rol.
    * @param resourcesConfig <{[resource:string]:string}> Set of parameters
@@ -137,20 +106,22 @@ export class Deployment {
    * @param channels <{[originChannel: string]:{ destinyChannelId: string,
    * destinyDeploymentId: string }[]> Connections with this deployment.
    */
-  constructor(uri: string, name: string, parameters: any, service: string,
+  constructor(urn: string, name: string, parameters: any, service: string,
     roles: { [rol: string]: Deployment.Role },
-    resources: { [resource: string]: Resource }, channels: {
+    resources: { [resourceKey: string]: string }, channels: {
       [originChannel: string]:
       { destinyChannelId: string, destinyDeploymentId: string }[]
-    },
-    volatileVolumes?: { [volumeId: string]: VolatileVolume }) {
+    }) {
+    super(ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT);
 
-    // Check URI and assign results
-    [this._domain, {}] = rightURIformat(uri);
-    this._uri = uri;
+    if (!urn) throw new Error('A deployment must have associated a URN.');
+    this._urn = urn;
+
+
+    this._domain = utils.getElementDomain(urn);
 
     // Calculate path
-    this._path = '/deployment/' + urlencode(uri);
+    this._path = '/deployment/' + urlencode(urn);
 
     if (!service || service.length === 0) throw new Error('Invalid value for '
       + 'service in Deployment:' + service);
@@ -167,9 +138,6 @@ export class Deployment {
     }
 
     if (channels) this.channels = channels;
-
-    // Assing volatile volumes to the deployment
-    if (volatileVolumes) { this.volatileVolumes = volatileVolumes; }
   }
 
 
@@ -266,8 +234,8 @@ export module Deployment {
       let disconnected: number = 0;
       let unkown: number = 0;
 
-      for (let uri in this.instances) {
-        switch (this.instances[uri].state) {
+      for (let urn in this.instances) {
+        switch (this.instances[urn].state) {
           case Role.Instance.STATE.DISCONNECTED:
             disconnected++;
             break;
@@ -403,8 +371,8 @@ export module Deployment {
        * <{ [volume: string]: string; }> Phisical data volumes implied into this
        *  role.
        */
-      volumes: {
-        [volume: string]: Volume.Instance | VolatileVolume.Instance
+      resources: {
+        [resourceId: string]: string
       } = {};
 
       /**
@@ -432,16 +400,15 @@ export module Deployment {
       *  Default 1.
       * @param bandwidth <number> Maximum rate (in Mbps) of data transmission
       *  through network interfaces. Default 1.
-      * @param volumes <{ [volume: string]: Volume.Instance |
-      *  VolatileVolume.Instance }> Phisical data volumes
-      *  implied into this role.
+      * @param resources <{ [resourceKey: string]: string }> Phisical data
+      *  volumes implied into this role.
       * @param ports <{ [port: string]: string; }> Logical ports implied into
       *  this role.
       */
       constructor(cnid: string, state: Instance.STATE, cpu: number,
         memory: number, bandwidth: number,
-        volumes?: {
-          [volume: string]: Volume.Instance | VolatileVolume.Instance
+        resources?: {
+          [resourceKey: string]: string
         },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0)
@@ -451,7 +418,7 @@ export module Deployment {
         if (cpu && cpu >= 0) this.cpu = cpu;
         if (memory && memory >= 0) this.memory = memory;
         if (bandwidth && bandwidth >= 0) this.bandwidth = bandwidth;
-        if (volumes) this.volumes = volumes;
+        if (resources) this.resources = resources;
         if (ports) this.ports = ports;
       }
 

@@ -69,7 +69,7 @@ export default class NavigationComponent extends Vue {
     let entrypointDeployments: NavigationItem[] = [];
     let commonDeployments: NavigationItem[] = [];
     let deployments = ((<SSGetters>this.$store.getters).deployments as any) as {
-      [uri: string]: Deployment;
+      [urn: string]: Deployment;
     };
 
     // Gets deployments ordered by some characteristic

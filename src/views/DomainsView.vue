@@ -34,7 +34,7 @@
           </router-link>
         </td>
         <td class="text-xs-left">
-          <v-btn color="error" icon v-on:click="showDialog(props.item._uri)">
+          <v-btn color="error" icon v-on:click="showDialog(props.item._urn)">
             <v-icon class="white--text">delete_forever</v-icon>
           </v-btn>
         </td>
@@ -101,27 +101,27 @@ export default class DomainsView extends Vue {
 
   get domains(): Domain[] {
     let domains: Domain[] = [];
-    for (let domainId in this.$store.getters.domains) {
-      if (this.$store.getters.domains[domainId]) {
-        domains.push(this.$store.getters.domains[domainId]);
+    for (let domainURN in this.$store.getters.domains) {
+      if (this.$store.getters.domains[domainURN]) {
+        domains.push(this.$store.getters.domains[domainURN]);
       } else {
-        this.$store.dispatch("getElementInfo", domainId);
+        this.$store.dispatch("getElementInfo", domainURN);
       }
     }
     return domains;
   }
 
   get deployment(): (stri: string) => Deployment {
-    return (deploymentURI: string) => {
+    return (deploymentURN: string) => {
       return ((<SSGetters>this.$store.getters).deployment as any)(
-        deploymentURI
+        deploymentURN
       );
     };
   }
 
-  showDialog(domainURI): void {
+  showDialog(domainURN): void {
     this.dialog = true;
-    this.selectedDomain = domainURI;
+    this.selectedDomain = domainURN;
   }
 
   deleteDomain(): void {

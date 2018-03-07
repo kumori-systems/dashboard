@@ -149,7 +149,9 @@ const NUM_ITEMS_PER_PAGE = 10;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
+
   Notification = Notification;
+
   /** Table headers. */
   headers: any[] = [
     {
@@ -189,11 +191,13 @@ export default class AlarmsAndLogsView extends Vue {
 
   /** Selectable log levels. */
   logLevels: string[] = ["Debug", "Info", "Warning", "Error"];
+
   /** Selected minimum log level. */
   selectedLogLevel: string = "Debug";
 
   /** Total number of pages. */
   numPages: number = 1;
+
   /** Actual page. */
   actualPage: number = 1;
 
@@ -205,28 +209,38 @@ export default class AlarmsAndLogsView extends Vue {
   get defaultPagination() {
     return this._defPag;
   }
+
   set defaultPagination(value) {
     this._defPag = value;
   }
+
   /** Show/Hide from date selector. */
   showFromDateMenu: boolean = false;
+
   /** Show/Hide from time selector. */
   showFromTimeMenu: boolean = false;
+
   /** Selected from date */
   fromDate: string = null;
+
   /** Selected from date formatted. */
   fromDateFormatted: string = null;
+
   /** Selected from time. */
   fromTime: string = null;
 
   /** Show/Hide to date selector. */
   showToDateMenu: boolean = false;
+
   /** Show/Hide to time selector. */
   showToTimeMenu: boolean = false;
+
   /** Selected to date */
   toDate: string = null;
+  
   /** Selected to date formatted. */
   toDateFormatted: string = null;
+  
   /** Selected to time. */
   toTime: string = null;
 

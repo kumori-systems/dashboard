@@ -63,12 +63,12 @@
         
       <!-- EntryPoint Deployments -->
       <v-layout wrap v-if="show==='all' || show==='entrypoints'">
-        <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+        <deployment-card-component v-for="urn in orderedDeploymentURN" v-if="isEntrypoint(deployments[urn])" v-bind:key="urn" v-bind:deploymentURN="urn"></deployment-card-component>
       </v-layout>
 
       <!-- Common Deployments -->
       <v-layout wrap v-if="show==='all' || show==='deployments'">
-        <deployment-card-component v-for="uri in orderedDeploymentURN" v-if="!isEntrypoint(deployments[uri])" v-bind:key="uri" v-bind:deploymentURI="uri"></deployment-card-component>
+        <deployment-card-component v-for="urn in orderedDeploymentURN" v-if="!isEntrypoint(deployments[urn])" v-bind:key="urn" v-bind:deploymentURN="urn"></deployment-card-component>
       </v-layout>
 
     </v-container>
@@ -109,18 +109,18 @@ export default class OverviewView extends Vue {
 
   /**
     * Obtains all deployments stored in the state.
-    * @return <{ [uri: string]: Deployment }> all deployments stored in the
+    * @return <{ [urn: string]: Deployment }> all deployments stored in the
     * state.
     */
-  get deployments(): { [uri: string]: Deployment } {
+  get deployments(): { [urn: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
-      [uri: string]: Deployment;
+      [urn: string]: Deployment;
     };
   }
 
   /**
-   * Gets the deployment URIs ordered by deployment name.
-   * @return <string[]> array with deployment uris ordered by deployment name
+   * Gets the deployment URNs ordered by deployment name.
+   * @return <string[]> array with deployment urns ordered by deployment name
    */
   get orderedDeploymentURN(): string[] {
     return ((<SSGetters>this.$store.getters)

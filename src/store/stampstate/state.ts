@@ -1,6 +1,6 @@
 import {
   Certificate, Component, Connector, Deployment, Domain, LoadBalancerConnector,
-  ProvidedChannel, Runtime, Service, Volume
+  PersistentVolume, ProvidedChannel, Runtime, Service, VolatileVolume
 } from './classes';
 
 /**
@@ -9,28 +9,31 @@ import {
 export default class State {
 
   /** Map of deployments. */
-  deployments: { [uri: string]: Deployment };
+  deployments: { [urn: string]: Deployment };
 
   /** Map of services. */
-  services: { [uri: string]: Service };
+  services: { [urn: string]: Service };
 
   /** Map of components. */
-  components: { [uri: string]: Component };
+  components: { [urn: string]: Component };
 
   /** Map of runtimes. */
-  runtimes: { [uri: string]: Runtime };
+  runtimes: { [urn: string]: Runtime };
 
-  /** Map of volumes. */
-  volumes: { [uri: string]: Volume };
+  /** Map of persistent volumes. */
+  persistentVolumes: { [urn: string]: PersistentVolume };
+
+  /** Map of volatile volumes. */
+  volatileVolumes: { [urn: string]: VolatileVolume };
 
   /** Map of certificates. */
-  certificates: { [uri: string]: Certificate };
+  certificates: { [urn: string]: Certificate };
 
   /** Map of domains. */
-  domains: { [uri: string]: Domain };
+  domains: { [urn: string]: Domain };
 
-  /** Map of metrics. */
-  metrics: {
+  /** Map of service metrics. */
+  serviceMetrics: {
     [deploymentId: string]: {
       'data': {
         [property: string]: number | string
@@ -42,12 +45,19 @@ export default class State {
           },
           'instances': {
             [instanceId: string]: {
-              [property: string]: number | string | object
+              [property: string]: number | string
             }
 
           }
         }
       }
+    }[]
+  };
+
+  /** Map of volume metrics. */
+  volumeMetrics: {
+    [volumeInstanceId: string]: {
+      [property: string]: number | string
     }[]
   };
 
@@ -60,10 +70,12 @@ export default class State {
     this.services = {};
     this.components = {};
     this.runtimes = {};
-    this.volumes = {};
+    this.persistentVolumes = {};
+    this.volatileVolumes = {};
     this.certificates = {};
     this.domains = {};
-    this.metrics = {};
+    this.serviceMetrics = {};
+    this.volumeMetrics = {};
     this.selectedService = null;
   }
 }

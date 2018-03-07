@@ -2,15 +2,20 @@
  * Item for Navigation component's list.
  */
 export default class NavigationItem {
+
   /** <string> Path to the icon representing the item. */
   icon: string = null;
+
   /** <string> Name representing the item. */
   title: string = null;
+
   /** <string> Path to the destination of the item. */
   path: string = null;
+
   /** <NavigationItem[]> Other items contained by this item. If length>0 this
    * item's path should be useless. */
   children: NavigationItem[] = [];
+
   /**
    * <boolean> If the item has got children, marks if it should be expanded or
    * not. Default false.

@@ -6,7 +6,8 @@ import PriorityQueue from 'priorityqueue';
 import * as utils from '../../api/utils';
 import {
   Certificate, Channel, Component, DependedChannel, Deployment, Domain,
-  EntryPoint, HTTPEntryPoint, ProvidedChannel, Runtime, Service, Volume
+  ECloudElement, EntryPoint, HTTPEntryPoint, PersistentVolume, ProvidedChannel,
+  Resource, Runtime, Service, VolatileVolume
 } from './classes';
 
 /**
@@ -16,13 +17,13 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   [name: string]: Vuex.Getter<State, any>;
 
   deployments = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Deployment } => {
+    rootGetters?: any): { [urn: string]: Deployment } => {
     return state.deployments;
   }
 
   /**
-   * Gets the deployment uris ordered by their names.
-   * @returns <string[]> array of the uris ordered by deployment name
+   * Gets the deployment urns ordered by their names.
+   * @returns <string[]> array of the urns ordered by deployment name
   */
   orderDeploymentsByName = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): string[] => {
@@ -32,137 +33,166 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         return a.name < b.name ? 1 : -1;
       }
     });
-
     for (let dep in state.deployments) {
       pq.push({
         'name': state.deployments[dep].name,
-        '_uri': state.deployments[dep]._uri
+        '_urn': state.deployments[dep]._urn
       });
     }
-
     let res: string[] = [];
-
     while (pq.size() > 0) {
-      res.push(pq.pop()['_uri']);
+      res.push(pq.pop()['_urn']);
     }
-
-
     return res;
+
   }
 
 
   deployment = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (deploymentURI: string) => Deployment => {
-    return (deploymentURI: string) => {
-      return state.deployments[deploymentURI];
+    rootGetters?: any): (deploymentURN: string) => Deployment => {
+
+    return (deploymentURN: string) => {
+      return state.deployments[deploymentURN];
     };
+
   }
 
-  metrics = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (deploymentId: string) => {
-      'data': {
-        [property: string]: number | string
-      },
-      'roles': {
-        [rolId: string]: {
-          'data': {
-            [property: string]: number | string
-          },
-          'instances': {
-            [instanceId: string]: {
-              [property: string]: number | string | object
-            }
+  serviceMetrics = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): {
+      [deploymentURN: string]: {
+        'data': {
+          [property: string]: number | string
+        },
+        'roles': {
+          [rolId: string]: {
+            'data': {
+              [property: string]: number | string
+            },
+            'instances': {
+              [instanceId: string]: {
+                [property: string]: number | string
+              }
 
+            }
           }
         }
-      }
-    }[] => {
-    return (deploymentId: string) => {
-      return state.metrics[deploymentId];
-    };
+      }[]
+    } => {
+
+    return state.serviceMetrics;
+
+  }
+
+  /** Returns metrics related to volumes. */
+  volumeMetrics = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): {
+      [volumeInstanceId: string]: {
+        [property: string]: number | string
+      }[]
+    } => {
+
+    return state.volumeMetrics;
+
   }
 
   deploymentFromPath = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (deploymentPath: string) => Deployment => {
+
     return (deploymentPath: string) => {
       let res: string = null;
-      for (let uri in state.deployments) {
-        if (state.deployments[uri]._path === deploymentPath) {
-          res = uri;
+      for (let urn in state.deployments) {
+        if (state.deployments[urn]._path === deploymentPath) {
+          res = urn;
         }
       }
       return (getters.deployment as Function)(res);
     };
+
   }
 
   numDeployments = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): number => {
+
     let res: number = 0;
-    for (let uri in state.deployments)
+    for (let urn in state.deployments)
       res++;
     return res;
+
   }
 
 
   components = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Component } => {
+    rootGetters?: any): { [urn: string]: Component } => {
+
     return state.components;
+
   }
 
   component = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (componentURI: string) => Component => {
-    return (componentURI: string) => {
-      return state.components[componentURI];
+    rootGetters?: any): (componentURN: string) => Component => {
+
+    return (componentURN: string) => {
+      return state.components[componentURN];
     };
+
   }
 
   componentsByOwner = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): (searchFilter: string) => {
       [owner: string]: { [name: string]: { [version: string]: string } }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: { [name: string]: { [version: string]: string } }
       } = {};
-      for (let uri in state.components) {
-        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
-          let [componentDomain, componentName, componentVersion] =
-            utils.getElementAtributes(uri);
+      for (let urn in state.components) {
+        if (searchFilter === null || urn.indexOf(searchFilter) !== -1) {
+          let componentDomain = utils.getElementDomain(urn);
+          let componentName = utils.getElementName(urn);
+          let componentVersion = utils.getElementVersion(urn);
 
           if (!res[componentDomain])
             res[componentDomain] = {};
           if (!res[componentDomain][componentName])
             res[componentDomain][componentName] = {};
 
-          res[componentDomain][componentName][componentVersion] = uri;
+          res[componentDomain][componentName][componentVersion] = urn;
         }
       }
 
       return res;
     };
+
   }
 
   componentUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (componentURI: string) => string[] => {
-    return (componentUri: string) => {
+    rootGetters?: any): (componentURN: string) => string[] => {
+
+    return (componentURN: string) => {
       let res: string[] = [];
-      if (state.components[componentUri]) {
-        res = state.components[componentUri].usedBy;
+      if (state.components[componentURN]) {
+        res = state.components[componentURN].usedBy;
       }
       return res;
     };
+
   }
 
   services = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Service } => {
+    rootGetters?: any): { [urn: string]: Service } => {
+
     return state.services;
+
   }
 
   service = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (serviceURI: string) => Service => {
-    return (serviceURI: string) => {
-      return state.services[serviceURI];
+    rootGetters?: any): (serviceURN: string) => Service => {
+
+    return (serviceURN: string) => {
+      return state.services[serviceURN];
     };
+
   }
 
   servicesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -173,6 +203,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -181,32 +212,36 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           }
         }
       } = {};
-      for (let uri in state.services) {
-        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
-          let [serviceDomain, serviceName, serviceVersion] =
-            utils.getElementAtributes(uri);
+      for (let urn in state.services) {
+        if (searchFilter === null || urn.indexOf(searchFilter) !== -1) {
+          let serviceDomain = utils.getElementDomain(urn);
+          let serviceName = utils.getElementName(urn);
+          let serviceVersion = utils.getElementVersion(urn);
 
           if (!res[serviceDomain])
             res[serviceDomain] = {};
           if (!res[serviceDomain][serviceName])
             res[serviceDomain][serviceName] = {};
 
-          res[serviceDomain][serviceName][serviceVersion] = uri;
+          res[serviceDomain][serviceName][serviceVersion] = urn;
         }
       }
       return res;
     };
+
   }
 
   serviceUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (serviceURI: string) => string[] => {
-    return (serviceUri: string) => {
+    rootGetters?: any): (serviceURN: string) => string[] => {
+
+    return (serviceURN: string) => {
       let res: string[] = [];
-      if (state.services[serviceUri]) {
-        res = state.services[serviceUri].usedBy;
+      if (state.services[serviceURN]) {
+        res = state.services[serviceURN].usedBy;
       }
       return res;
     };
+
   }
 
   certificatesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -217,6 +252,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -225,91 +261,101 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           }
         }
       } = {};
-      for (let uri in state.certificates) {
-        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
-          let [certificateDomain, certificateName, certificateVersion] =
-            utils.getElementAtributes(uri);
+      for (let urn in state.certificates) {
+        if (searchFilter === null || urn.indexOf(searchFilter) !== -1) {
+          let certificateDomain = utils.getElementDomain(urn);
+          let certificateName = utils.getElementName(urn);
+          let certificateVersion = utils.getElementVersion(urn);
 
           if (!res[certificateDomain])
             res[certificateDomain] = {};
           if (!res[certificateDomain][certificateName])
             res[certificateDomain][certificateName] = {};
 
-          res[certificateDomain][certificateName][certificateVersion] = uri;
+          res[certificateDomain][certificateName][certificateVersion] = urn;
         }
       }
       return res;
     };
+
   }
 
   certificateUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (certificateURI: string) => string[] => {
-    return (certificateUri: string) => {
+    rootGetters?: any): (certificateURN: string) => string[] => {
+
+    return (certificateURN: string) => {
       let res: string[] = [];
-      if (state.certificates[certificateUri]) {
-        res = state.certificates[certificateUri].usedBy;
+      if (state.certificates[certificateURN]) {
+        res = state.certificates[certificateURN].usedBy;
       }
       return res;
     };
+
   }
 
 
 
   getServiceProvidedChannels = (state?: State, getters?: Getters,
-    rootState?: any, rootGetters?: any): (serviceURI: string) =>
+    rootState?: any, rootGetters?: any): (serviceURN: string) =>
       ProvidedChannel[] => {
-    return (serviceURI: string) => {
+
+    return (serviceURN: string) => {
       let res = [];
-      if ((<Service>state.services[serviceURI])) { // if service exists
+      if ((<Service>state.services[serviceURN])) { // if service exists
         for (let providedChannel in
-          (<Service>state.services[serviceURI]).providedChannels) {
+          (<Service>state.services[serviceURN]).providedChannels) {
           res.push(providedChannel);
         }
       }
       return res;
     };
+
   }
 
   getServiceDependedChannels = (state?: State, getters?: Getters,
-    rootState?: any, rootGetters?: any): (serviceURI: string) =>
+    rootState?: any, rootGetters?: any): (serviceURN: string) =>
       DependedChannel[] => {
-    return (serviceURI: string) => {
+
+    return (serviceURN: string) => {
       let res = [];
-      if ((<Service>state.services[serviceURI])) { // if service exists
+      if ((<Service>state.services[serviceURN])) { // if service exists
         for (let dependedChannel in
-          (<Service>state.services[serviceURI]).dependedChannels) {
+          (<Service>state.services[serviceURN]).dependedChannels) {
           res.push(dependedChannel);
         }
       }
       return res;
     };
+
   }
 
   getTotalProvidedDeploymentChannels = (state?: State, getters?: Getters,
-    rootState?: any, rootGetters?: any): (serviceURI: string,
-      channelId: string) => {
-        'value': string, 'text': string
-      }[] => {
+    rootState?: any, rootGetters?: any): (serviceURN: string,
+      channelId: string) => { 'value': string, 'text': string }[] => {
+
     return (serviceId: string, channelId: string) => {
 
       let type: string = (<Service>state.services[serviceId])
         .dependedChannels[channelId].type;
-      let typeSearched: Channel.TYPE[] = [];
+      let typeSearched: Channel.CHANNEL_TYPE[] = [];
       switch (type) {
-        case Channel.TYPE.ENDPOINT_REQUEST:
-        // console.warn('deprecated channel URI \'endpoint\'');
-        case Channel.TYPE.REQUEST:
-          typeSearched = [Channel.TYPE.REPLY, Channel.TYPE.ENDPOINT_REPLY];
+        case Channel.CHANNEL_TYPE.ENDPOINT_REQUEST:
+        case Channel.CHANNEL_TYPE.REQUEST:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+          ];
           break;
-        case Channel.TYPE.ENDPOINT_REPLY:
-        // console.warn('deprecated channel URI \'endpoint\'');
-        case Channel.TYPE.REPLY:
-          typeSearched = [Channel.TYPE.REQUEST, Channel.TYPE.ENDPOINT_REQUEST];
+        case Channel.CHANNEL_TYPE.ENDPOINT_REPLY:
+        case Channel.CHANNEL_TYPE.REPLY:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REQUEST, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
+          ];
           break;
-
         default:
-          console.error('Not expected channel type \'%s\' on  \'%s:%s\'', type,
-            serviceId, channelId);
+          throw new Error(
+            'Not expected channel type \'' + type + '\' on  \'' + serviceId
+            + ':' + channelId + '\''
+          );
       }
 
       let res: { 'value': string, 'text': string }[] = [];
@@ -345,28 +391,32 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   getTotalDependedDeploymentChannels = (state?: State, getters?: Getters,
-    rootState?: any, rootGetters?: any): (deploymentURI: string,
-      serviceURI: string, channelId: string) => {
+    rootState?: any, rootGetters?: any): (deploymentURN: string,
+      serviceURN: string, channelId: string) => {
         'value': string, 'text': string
       }[] => {
+
     return (myDeploymentId: string, serviceId: string, channelId: string) => {
       // Depending on the channel type, the search will be different
       let type: string = (<Service>state.services[serviceId])
         .providedChannels[channelId].type;
-      let typeSearched: Channel.TYPE[] = [];
+      let typeSearched: Channel.CHANNEL_TYPE[] = [];
       switch (type) {
-        case Channel.TYPE.ENDPOINT_REQUEST:
-        // console.warn('deprecated channel URI \'endpoint\'');
-        case Channel.TYPE.REQUEST:
-          typeSearched = [Channel.TYPE.REPLY, Channel.TYPE.ENDPOINT_REPLY];
+        case Channel.CHANNEL_TYPE.ENDPOINT_REQUEST:
+        case Channel.CHANNEL_TYPE.REQUEST:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+          ];
           break;
-        case Channel.TYPE.ENDPOINT_REPLY:
-        // console.warn('deprecated channel URI \'endpoint\'');
-        case Channel.TYPE.REPLY:
-          typeSearched = [Channel.TYPE.REQUEST, Channel.TYPE.ENDPOINT_REQUEST];
+        case Channel.CHANNEL_TYPE.ENDPOINT_REPLY:
+        case Channel.CHANNEL_TYPE.REPLY:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REQUEST, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
+          ];
           break;
 
         default:
@@ -420,11 +470,14 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
       return res;
     };
+
   }
 
   runtimes = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Runtime } => {
+    rootGetters?: any): { [urn: string]: Runtime } => {
+
     return state.runtimes;
+
   }
 
   runtimesByOwner = (state?: State, getters?: Getters, rootState?: any,
@@ -435,6 +488,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
         }
       }
     } => {
+
     return (searchFilter: string) => {
       let res: {
         [owner: string]: {
@@ -443,85 +497,107 @@ export default class Getters implements Vuex.GetterTree<State, any> {
           }
         }
       } = {};
-      for (let uri in state.runtimes) {
-        if (searchFilter === null || uri.indexOf(searchFilter) !== -1) {
-          let [runtimeDomain, runtimeName, runtimeVersion] =
-            utils.getElementAtributes(uri);
+      for (let urn in state.runtimes) {
+        if (searchFilter === null || urn.indexOf(searchFilter) !== -1) {
+
+          let runtimeDomain = utils.getElementDomain(urn);
+          let runtimeName = utils.getElementName(urn);
+          let runtimeVersion = utils.getElementVersion(urn);
 
           if (!res[runtimeDomain])
             res[runtimeDomain] = {};
           if (!res[runtimeDomain][runtimeName])
             res[runtimeDomain][runtimeName] = {};
 
-          res[runtimeDomain][runtimeName][runtimeVersion] = uri;
+          res[runtimeDomain][runtimeName][runtimeVersion] = urn;
         }
       }
       return res;
     };
+
   }
 
   runtimeUsedBy = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (componentURI: string) => string[] => {
-    return (runtimeUri: string) => {
+    rootGetters?: any): (componentURN: string) => string[] => {
+
+    return (runtimeURN: string) => {
       let res: string[] = [];
-      if (state.runtimes[runtimeUri]) {
-        res = state.runtimes[runtimeUri].usedBy;
+      if (state.runtimes[runtimeURN]) {
+        res = state.runtimes[runtimeURN].usedBy;
       }
       return res;
     };
+
   }
 
-  volumes = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Volume } => {
-    return state.volumes;
+  persistentVolumes = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): { [urn: string]: PersistentVolume } => {
+
+    return state.persistentVolumes;
+
+  }
+
+  volatileVolumes = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any): { [urn: string]: VolatileVolume } => {
+
+    return state.volatileVolumes;
+
   }
 
   domains = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Domain } => {
+    rootGetters?: any): { [urn: string]: Domain } => {
+
     return state.domains;
+
   }
 
   certificates = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): { [uri: string]: Certificate } => {
+    rootGetters?: any): { [urn: string]: Certificate } => {
+
     return state.certificates;
+
   }
 
   elementInfo = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any): (uri: string) => any => {
-    return (uri: string) => {
+    rootGetters?: any): (urn: string) => any => {
+
+    return (urn: string) => {
       let res: any = null;
-      switch (utils.getElementType(uri)) {
-        case utils.ElementType.component:
-          res = state.components[uri];
+      switch (utils.getElementType(urn)) {
+        case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
+          res = state.components[urn];
           break;
-        case utils.ElementType.runtime:
-          res = state.runtimes[uri];
+        case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
+          res = state.runtimes[urn];
           break;
-        case utils.ElementType.service:
-          res = state.services[uri];
+        case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
+          res = state.services[urn];
           break;
-        case utils.ElementType.resource:
-          switch (utils.getResourceType(uri)) {
-            case utils.ResourceType.certificate:
-              res = state.certificates[uri];
+        case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
+          switch (utils.getResourceType(urn)) {
+            case Resource.RESOURCE_TYPE.CERTIFICATE:
+              res = state.certificates[urn];
               break;
             default:
             // Not expected call for this kind of resource
           }
           break;
-        case utils.ElementType.deployment:
+        case ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT:
           // Not expected call for this kind of resource
           break;
         default:
-          console.error('Unknown element type %s', uri);
+          throw new Error('Unknown element type \'' + urn + '\'');
       }
       return res;
     };
+
   }
 
   selectedService = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): string => {
+
     return state.selectedService;
+
   }
 
 };

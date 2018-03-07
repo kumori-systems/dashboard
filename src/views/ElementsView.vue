@@ -363,7 +363,7 @@ export default class ElementsView extends Vue {
     if (
       this.selectedComponents.length > 0 ||
       this.selectedServices.length > 0 ||
-      this.selectedRuntimes.length > 0 || 
+      this.selectedRuntimes.length > 0 ||
       this.selectedCertificates.length > 0
     )
       return true;
@@ -371,8 +371,8 @@ export default class ElementsView extends Vue {
   }
 
   get deploymentInfo() {
-    return (uri: string) => {
-      return this.$store.getters.deployment(uri);
+    return (urn: string) => {
+      return this.$store.getters.deployment(urn);
     };
   }
 
@@ -387,14 +387,14 @@ export default class ElementsView extends Vue {
   }
 
   get componentUsedBy(): Function {
-    return (uri): string[] => {
+    return (urn): string[] => {
       return (((<SSGetters>this.$store.getters).componentUsedBy as Function)(
-        uri
+        urn
       ) as any) as string[];
     };
   }
 
-  get certificatesByOwner():{
+  get certificatesByOwner(): {
     [owner: string]: { [name: string]: { [version: string]: Certificate } };
   } {
     return ((<SSGetters>this.$store.getters).certificatesByOwner as any)(
@@ -405,9 +405,9 @@ export default class ElementsView extends Vue {
   }
 
   get certificateUsedBy(): Function {
-    return (uri): string[] => {
+    return (urn): string[] => {
       return (((<SSGetters>this.$store.getters).certificateUsedBy as Function)(
-        uri
+        urn
       ) as any) as string[];
     };
   }
@@ -423,9 +423,9 @@ export default class ElementsView extends Vue {
   }
 
   get serviceUsedBy(): Function {
-    return (uri): string[] => {
+    return (urn): string[] => {
       return (((<SSGetters>this.$store.getters).serviceUsedBy as Function)(
-        uri
+        urn
       ) as any) as string[];
     };
   }
@@ -441,9 +441,9 @@ export default class ElementsView extends Vue {
   }
 
   get runtimeUsedBy(): Function {
-    return (uri): string[] => {
+    return (urn): string[] => {
       return (((<SSGetters>this.$store.getters).runtimeUsedBy as Function)(
-        uri
+        urn
       ) as any) as string[];
     };
   }
@@ -537,7 +537,7 @@ export default class ElementsView extends Vue {
     // Depending on the type of service, a view must be loaded
     let route;
     switch (service) {
-      case EntryPoint.TYPE.HTTP_INBOUND:
+      case EntryPoint.ENTRYPOINT_TYPE.HTTP_INBOUND:
         route = "addHTTPEntrypoint";
         break;
 

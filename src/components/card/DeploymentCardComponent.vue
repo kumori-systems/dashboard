@@ -1,20 +1,22 @@
 <template>
+
   <!-- Flexible content allows good resize: MarginAll size_eXtraSmall, size_SMall, size_MeDium, size_LarGe, size_eXtraLarge -->
   <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+
     <!-- Card's background represents the deployment's state -->
     <v-card>
       <!-- Card title: Deployment name -->
       <v-card-title  primary-title class="headline" v-bind:class="stateColor">
 
-        <v-icon class="ma-1" v-if="isHTTPEntryPoint">language</v-icon>
-        <v-icon class="ma-1" v-if="isHTTPEntryPoint && hasCertificate">https</v-icon>
+        <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint">language</v-icon>
+        <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint && hasCertificate">https</v-icon>
         {{ deployment.name }}
 
         <v-spacer></v-spacer>
 
         <v-tooltip bottom>
-          <span dark slot="activator">{{ deployment._uri | truncateLeft(8) }}</span>
-          <span>{{ deployment._uri }}</span>
+          <span dark slot="activator">{{ deployment._urn | truncateLeft(8) }}</span>
+          <span>{{ deployment._urn }}</span>
         </v-tooltip>
   
       </v-card-title>
@@ -24,6 +26,7 @@
 
         <!-- Flexible content allows good resize -->
         <v-flex>
+
           <!-- List of deployment's properties -->
           <v-list two-line>
 
@@ -36,12 +39,12 @@
                 <v-icon class="ma-1" v-if="state!=='unknown'" v-bind:id="state">{{ state }}</v-icon>
                 <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
 
-                </v-subheader>
-                <v-list-tile tag="div">
-                  <v-list-tile-title>
-                    {{ deployment._uri | day }}-{{ deployment._uri | month }}-{{ deployment._uri | year }}  {{ deployment._uri | hour }}:{{ deployment._uri | min }}
-                  </v-list-tile-title>
-                </v-list-tile>
+              </v-subheader>
+              <v-list-tile tag="div">
+                <v-list-tile-title>
+                  {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
+                </v-list-tile-title>
+              </v-list-tile>
             </template>
 
             <!-- Service -->
@@ -60,9 +63,9 @@
             <!-- Roles -->
             <template>
               <v-subheader><strong>ROLES</strong></v-subheader>
-              <v-list-tile v-for="(rol, uri) in deployment.roles" v-bind:key="uri" tag="div">
+              <v-list-tile v-for="(rol, urn) in deployment.roles" v-bind:key="urn" tag="div">
                 <v-list-tile-content>
-                  <v-list-tile-title>{{ uri }}</v-list-tile-title>
+                  <v-list-tile-title>{{ urn }}</v-list-tile-title>
                   <v-list-tile-sub-title>
                     <v-tooltip bottom>
                       <span dark slot="activator">{{ rol.component }}</span>
@@ -76,6 +79,7 @@
 
             <!-- Links -->
             <template>
+
               <!-- Links are calculated with channel connections -->
               <v-subheader><strong>LINKS</strong></v-subheader>
               <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
@@ -83,12 +87,13 @@
                 <v-list-tile-title>{{ findDeployment(conn.destinyDeploymentId).name }}</v-list-tile-title>
               </v-list-tile>
               </div>
+
             </template>
 
-            <!-- Volumes -->
-            <template v-if="deploymentVolumes.length > 0">
-              <v-subheader><strong>VOLUMES</strong></v-subheader>
-              <v-list-tile v-for="(vol, index) in deploymentVolumes" v-bind:key="index" tag="div">
+            <!-- Persistent Volumes -->
+            <template v-if="deploymentPersistentVolumes.length > 0">
+              <v-subheader><strong>PERSISTENT VOLUMES</strong></v-subheader>
+              <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <v-icon class="indigo--text">storage</v-icon>
                 </v-card-actions>
@@ -96,35 +101,37 @@
                   <v-tooltip bottom>
                     <div dark slot="activator">
                       <v-layout>
-                        <v-flex xs6>{{ vol.name }}</v-flex>
+                        <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                         <v-flex xs6>{{ vol.size }} GB</v-flex>
                       </v-layout>
                     </div>
-                    <span>{{ vol._uri }}</span>
+                    <span>{{ vol._urn }}</span>
                   </v-tooltip>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
+            
 
              <!-- Volatile Volumes -->
-            <template v-if="Object.keys(deployment.volatileVolumes).length !== 0
-              && deployment.volatileVolumes.constructor === Object">
+            <template v-if="deploymentVolatileVolumes.length > 0">
               <v-subheader><strong>VOLATILE VOLUMES</strong></v-subheader>
-              <v-list-tile v-for="vol in deployment.volatileVolumes" v-bind:key="vol.id" tag="div">
+              <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
                 </v-card-actions>
                 <v-list-tile-title>
                   <v-layout>
-                    <v-flex xs6>{{ vol.id }}</v-flex>
+                    <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                     <v-flex xs6>{{ vol.size }} GB</v-flex>
                   </v-layout>
+                  <span>{{ vol._urn }}</span>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
+            
 
             <!-- Websites -->
-            <template v-if="isHTTPEntryPoint">
+            <template v-if="deployment instanceof HTTPEntryPoint">
               <v-subheader><strong>WEBSITES</strong></v-subheader>
               <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" tag="div">
                 <v-card-actions>
@@ -159,18 +166,23 @@ import {
   Certificate,
   Deployment,
   HTTPEntryPoint,
-  Volume,
-  Resource
+  PersistentVolume,
+  VolatileVolume,
+  Resource,
+  Service
 } from "../../store/stampstate/classes";
 import SSGetters from "../../store/stampstate/getters";
+
+import * as utils from "../../api/utils";
 
 @VueClassComponent({
   name: "deployment-card",
   props: {
-    deploymentURI: { required: true, type: String }
+    deploymentURN: { required: true, type: String }
   },
   filters: {
     truncateRight: function(text: string, value: number) {
+      if(text.length < value) return text;
       return text.substring(0, value) + "...";
     },
     truncateLeft: function(text: string, value: number) {
@@ -197,45 +209,82 @@ import SSGetters from "../../store/stampstate/getters";
   }
 })
 export default class Card extends Vue {
+  /** Just a reference to the HTTPEntrypoint class. */
+  HTTPEntryPoint = HTTPEntryPoint;
+
   /** <string> Deployment represented in this card. */
-  deploymentURI: string = this.deploymentURI;
+  deploymentURN: string = this.deploymentURN;
 
   get deployment(): Deployment {
     return (((<SSGetters>this.$store.getters).deployment as any) as (
-      deploymentURI: string
-    ) => Deployment)(this.deploymentURI);
+      deploymentURN: string
+    ) => Deployment)(this.deploymentURN);
   }
 
-  get findDeployment(): (deploymentURI: string) => Deployment {
-    return (deploymentURI: string): Deployment => {
+  get findDeployment(): (deploymentURN: string) => Deployment {
+    return (deploymentURN: string): Deployment => {
       return (((<SSGetters>this.$store.getters).deployment as any) as (
-        deploymentURI: string
-      ) => Deployment)(deploymentURI);
+        deploymentURN: string
+      ) => Deployment)(deploymentURN);
     };
-  }
-
-  get isHTTPEntryPoint(): boolean {
-    return this.deployment instanceof HTTPEntryPoint;
   }
 
   get hasCertificate(): boolean {
     let res: boolean = false;
     for (let resource in this.deployment.resources) {
-      if (this.deployment.resources[resource] instanceof Certificate) {
+      if (
+        this.$store.getters.certificates[this.deployment.resources[resource]]
+      ) {
         res = true;
       }
     }
     return res;
   }
 
-  get deploymentVolumes(): Volume[] {
-    let res: Volume[] = [];
-    let resources = this.deployment.resources;
-    for (let key in resources) {
-      if (resources[key] instanceof Volume) {
-        res.push(<Volume>resources[key]);
+  get deploymentPersistentVolumes(): PersistentVolume[] {
+    let res: PersistentVolume[] = [];
+    let ser: Service = <Service>this.$store.getters.service(
+      this.deployment.service
+    );
+    if (ser) {
+      for (let resName in ser.resources) {
+        if (
+          utils.getResourceType(ser.resources[resName]) ===
+          Resource.RESOURCE_TYPE.PERSISTENT_VOLUME
+        ) {
+          if (this.deployment.resources[resName]) {
+            let volumes = this.$store.getters.persistentVolumes;
+            if (volumes) {
+              res.push(volumes[this.deployment.resources[resName]]);
+            }
+          }
+        }
       }
     }
+    return res;
+  }
+
+  get deploymentVolatileVolumes(): VolatileVolume[] {
+    let res: VolatileVolume[] = [];
+    let ser: Service = <Service>this.$store.getters.service(
+      this.deployment.service
+    );
+    if (ser) {
+      for (let resName in ser.resources) {
+        if (
+          utils.getResourceType(ser.resources[resName]) ===
+          Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+        ) {
+          if (this.deployment.resources[resName]) {
+            let volumes = this.$store.getters.volatileVolumes;
+            if (volumes) {
+              res.push(volumes[this.deployment.resources[resName]]);
+            }
+          }
+        }
+      }
+    }
+
     return res;
   }
 
