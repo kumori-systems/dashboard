@@ -182,6 +182,7 @@ import * as utils from "../../api/utils";
   },
   filters: {
     truncateRight: function(text: string, value: number) {
+      if(text.length < value) return text;
       return text.substring(0, value) + "...";
     },
     truncateLeft: function(text: string, value: number) {

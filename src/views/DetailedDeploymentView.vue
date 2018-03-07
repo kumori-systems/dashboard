@@ -265,6 +265,7 @@ import { setTimeout } from "timers";
   },
   filters: {
     truncateRight: function(text: string, value: number) {
+      if(text.length < value) return text;
       return text.substring(0, value) + "...";
     },
     year: function(text: string) {
