@@ -130,11 +130,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
   ): void => {
 
     (<Deployment>state.deployments[payload.deploymentId])
-      .roles[payload.roleId].instances = {
-        ...(<Deployment>state.deployments[payload.deploymentId])
-          .roles[payload.roleId].instances,
-        [payload.instanceId]: payload.instance
-      };
+      .roles[payload.roleId].instances[payload.instanceId].state =
+      payload.instance.state;
+
 
   }
 
@@ -440,7 +438,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
         state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
       }
     }
-    
+
   }
 
   /**
