@@ -72,14 +72,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // Unlink all related deployments
       for (let chann in state.deployments[deploymentURN].channels) {
-        for (let conn in state.deployments[deploymentURN].channels[chann]) {
+        while (state.deployments[deploymentURN].channels[chann].length > 0) {
           this.unlink(state, {
             deploymentOne: deploymentURN,
             channelOne: chann,
             deploymentTwo: state.deployments[deploymentURN]
-              .channels[chann][conn].destinyDeploymentId,
+              .channels[chann][0].destinyDeploymentId,
             channelTwo: state.deployments[deploymentURN]
-              .channels[chann][conn].destinyChannelId
+              .channels[chann][0].destinyChannelId
           });
         }
       }
@@ -411,6 +411,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   /** Unlinks two services */
   unlink = (state: State,
     { deploymentOne, channelOne, deploymentTwo, channelTwo }): void => {
+
     let index;
     // Locate connexion
     if (state.deployments[deploymentOne]
@@ -439,6 +440,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
         state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
       }
     }
+    
   }
 
   /**
