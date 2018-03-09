@@ -303,6 +303,8 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
+import { utils } from "./../api";
+
 import SSGetters from "../store/stampstate/getters";
 import {
   Certificate,
@@ -347,9 +349,9 @@ export default class ElementsView extends Vue {
     // Retrieve all actually deployed services
     for (let dep in this.$store.getters.deployments) {
       if (
-        !this.$store.getters.service(
+        !this.$store.getters.services[
           this.$store.getters.deployments[dep].service
-        )
+        ]
       ) {
         this.$store.dispatch(
           "getElementInfo",
@@ -372,79 +374,150 @@ export default class ElementsView extends Vue {
 
   get deploymentInfo() {
     return (urn: string) => {
-      return this.$store.getters.deployment(urn);
+      return this.$store.getters.deployments[urn];
     };
   }
 
-  get componentsByOwner(): {
-    [owner: string]: { [name: string]: { [version: string]: Component } };
-  } {
-    return ((<SSGetters>this.$store.getters).componentsByOwner as any)(
-      this.search
-    ) as {
-      [owner: string]: { [name: string]: { [version: string]: Component } };
-    };
+  get componentsByOwner() {
+    let res: {
+      [owner: string]: { [name: string]: { [version: string]: string } };
+    } = {};
+    let comps: { [key: string]: Component } = this.$store.getters.components;
+    for (let urn in comps) {
+      if (this.search === null || urn.indexOf(this.search) !== -1) {
+        let componentDomain = utils.getElementDomain(urn);
+        let componentName = utils.getElementName(urn);
+        let componentVersion = utils.getElementVersion(urn);
+
+        if (!res[componentDomain]) {
+          res[componentDomain] = {};
+        }
+        if (!res[componentDomain][componentName]) {
+          res[componentDomain][componentName] = {};
+        }
+
+        res[componentDomain][componentName][componentVersion] = urn;
+      }
+    }
+    return res;
   }
 
   get componentUsedBy(): Function {
-    return (urn): string[] => {
-      return (((<SSGetters>this.$store.getters).componentUsedBy as Function)(
-        urn
-      ) as any) as string[];
+    return (componentURN: string) => {
+      let res: string[] = [];
+      let comp = this.$store.getters.components[componentURN];
+      if (comp) {
+        res = comp.usedBy;
+      }
+      return res;
     };
   }
 
-  get certificatesByOwner(): {
-    [owner: string]: { [name: string]: { [version: string]: Certificate } };
-  } {
-    return ((<SSGetters>this.$store.getters).certificatesByOwner as any)(
-      this.search
-    ) as {
-      [owner: string]: { [name: string]: { [version: string]: Certificate } };
-    };
+  get certificatesByOwner() {
+    let res: {
+      [owner: string]: {
+        [name: string]: {
+          [version: string]: string;
+        };
+      };
+    } = {};
+    let certs = this.$store.getters.certificates;
+    for (let urn in certs) {
+      if (this.search === null || urn.indexOf(this.search) !== -1) {
+        let certificateDomain = utils.getElementDomain(urn);
+        let certificateName = utils.getElementName(urn);
+        let certificateVersion = utils.getElementVersion(urn);
+
+        if (!res[certificateDomain]) res[certificateDomain] = {};
+        if (!res[certificateDomain][certificateName])
+          res[certificateDomain][certificateName] = {};
+
+        res[certificateDomain][certificateName][certificateVersion] = urn;
+      }
+    }
+    return res;
   }
 
   get certificateUsedBy(): Function {
-    return (urn): string[] => {
-      return (((<SSGetters>this.$store.getters).certificateUsedBy as Function)(
-        urn
-      ) as any) as string[];
+    return (certificateURN: string) => {
+      let res: string[] = [];
+      let cert = this.$store.getters.certificates[certificateURN];
+      if (cert) {
+        res = cert.usedBy;
+      }
+      return res;
     };
   }
 
-  get servicesByOwner(): {
-    [owner: string]: { [name: string]: { [version: string]: Service } };
-  } {
-    return ((<SSGetters>this.$store.getters).servicesByOwner as any)(
-      this.search
-    ) as {
-      [owner: string]: { [name: string]: { [version: string]: Service } };
-    };
+  get servicesByOwner() {
+    let res: {
+      [owner: string]: {
+        [name: string]: {
+          [version: string]: string;
+        };
+      };
+    } = {};
+    let sers = this.$store.getters.services;
+    for (let urn in sers) {
+      if (this.search === null || urn.indexOf(this.search) !== -1) {
+        let serviceDomain = utils.getElementDomain(urn);
+        let serviceName = utils.getElementName(urn);
+        let serviceVersion = utils.getElementVersion(urn);
+
+        if (!res[serviceDomain]) res[serviceDomain] = {};
+        if (!res[serviceDomain][serviceName])
+          res[serviceDomain][serviceName] = {};
+
+        res[serviceDomain][serviceName][serviceVersion] = urn;
+      }
+    }
+    return res;
   }
 
   get serviceUsedBy(): Function {
-    return (urn): string[] => {
-      return (((<SSGetters>this.$store.getters).serviceUsedBy as Function)(
-        urn
-      ) as any) as string[];
+    return (serviceURN): string[] => {
+      let res: string[] = [];
+      let ser = this.$store.getters.services[serviceURN];
+      if (ser) {
+        res = ser.usedBy;
+      }
+      return res;
     };
   }
 
-  get runtimesByOwner(): {
-    [owner: string]: { [name: string]: { [version: string]: Runtime } };
-  } {
-    return ((<SSGetters>this.$store.getters).runtimesByOwner as any)(
-      this.search
-    ) as {
-      [owner: string]: { [name: string]: { [version: string]: Runtime } };
-    };
+  get runtimesByOwner() {
+    let res: {
+      [owner: string]: {
+        [name: string]: {
+          [version: string]: string;
+        };
+      };
+    } = {};
+    let runs = this.$store.getters.runtimes;
+    for (let urn in runs) {
+      if (this.search === null || urn.indexOf(this.search) !== -1) {
+        let runtimeDomain = utils.getElementDomain(urn);
+        let runtimeName = utils.getElementName(urn);
+        let runtimeVersion = utils.getElementVersion(urn);
+
+        if (!res[runtimeDomain]) res[runtimeDomain] = {};
+        if (!res[runtimeDomain][runtimeName])
+          res[runtimeDomain][runtimeName] = {};
+
+        res[runtimeDomain][runtimeName][runtimeVersion] = urn;
+      }
+    }
+    return res;
   }
 
   get runtimeUsedBy(): Function {
-    return (urn): string[] => {
-      return (((<SSGetters>this.$store.getters).runtimeUsedBy as Function)(
-        urn
-      ) as any) as string[];
+    return (runtimeURN: string) => {
+      let res: string[] = [];
+      let run = this.$store.getters.runtimes[runtimeURN];
+      if (run) {
+        res = run.usedBy;
+      }
+      return res;
     };
   }
 

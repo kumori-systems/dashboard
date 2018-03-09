@@ -1,8 +1,7 @@
 import Vuex from 'vuex';
 import State from './state';
 
-import { ProxyConnection } from '../../api';
-import * as utils from '../../api/utils';
+import { ProxyConnection, utils } from '../../api';
 import { BackgroundAction, Notification } from '../pagestate/classes';
 import { Deployment, ECloudElement, Resource } from './classes';
 

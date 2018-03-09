@@ -217,9 +217,9 @@ export default class NewDeploymentView extends Vue {
   }
 
   get service(): Service {
-    let ser: Service = ((<SSGetters>this.$store.getters).service as any)(
+    let ser: Service = (<SSGetters>this.$store.getters).services[
       this.selectedService
-    );
+    ];
     if (!ser) {
       if (this.selectedService)
         this.$store.dispatch("getElementInfo", this.selectedService);
@@ -285,9 +285,9 @@ export default class NewDeploymentView extends Vue {
   get services(): string[] {
     // All deployed services must be loaded to show available channels
     for (let deploymentURN in this.deployments) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.deployments[deploymentURN].service
-      );
+      ];
       if (!service)
         this.$store.dispatch(
           "getElementInfo",
@@ -308,9 +308,9 @@ export default class NewDeploymentView extends Vue {
   get serviceResourcesList(): [string, string][] {
     let resourcesList: [string, string][] = [];
     if (this.selectedService) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.selectedService
-      );
+      ];
       if (service) {
         for (let res in service.resources) {
           resourcesList.push([res, service.resources[res]]);
@@ -323,9 +323,9 @@ export default class NewDeploymentView extends Vue {
   get serviceRolesList(): string[] {
     let roleList: string[] = [];
     if (this.selectedService) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.selectedService
-      );
+      ];
       if (service) {
         for (let role in service.roles) {
           roleList.push(role);

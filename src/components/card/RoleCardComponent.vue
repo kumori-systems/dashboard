@@ -208,9 +208,9 @@ export default class RoleCardComponent extends Vue {
   get component() {
     let res;
     if (this.service) {
-      res = this.$store.getters.component(
+      res = this.$store.getters.components[
         this.service.roles[this.role.name].component
-      );
+      ];
       if (!res) {
         this.$store.dispatch(
           "getElementInfo",

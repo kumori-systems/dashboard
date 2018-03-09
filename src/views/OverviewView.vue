@@ -59,7 +59,7 @@
     </v-card-actions>
 
     <!-- The view changes depending on if we've got deployed services or not-->
-    <v-container fluid v-if="numDeployments > 0">
+    <v-container fluid v-if="Object.keys(deployments).length > 0">
         
       <!-- EntryPoint Deployments -->
       <v-layout wrap v-if="show==='all' || show==='entrypoints'">
@@ -100,18 +100,10 @@ export default class OverviewView extends Vue {
   show: string = "all";
 
   /**
-    * Obtains actual number of deployments.
-    * @return <number> actual number of deployments.
-    */
-  get numDeployments(): number {
-    return ((<SSGetters>this.$store.getters).numDeployments as any) as number;
-  }
-
-  /**
-    * Obtains all deployments stored in the state.
-    * @return <{ [urn: string]: Deployment }> all deployments stored in the
-    * state.
-    */
+   * Obtains all deployments stored in the state.
+   * @return <{ [urn: string]: Deployment }> all deployments stored in the
+   * state.
+   */
   get deployments(): { [urn: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [urn: string]: Deployment;

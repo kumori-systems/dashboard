@@ -1,10 +1,9 @@
 <template>
-
-  <!-- Flexible content allows good resize: MarginAll size_eXtraSmall, size_SMall, size_MeDium, size_LarGe, size_eXtraLarge -->
   <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
     <!-- Card's background represents the deployment's state -->
     <v-card>
+
       <!-- Card title: Deployment name -->
       <v-card-title  primary-title class="headline" v-bind:class="stateColor">
 
@@ -84,7 +83,7 @@
               <v-subheader><strong>LINKS</strong></v-subheader>
               <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
               <v-list-tile  v-for="(conn, index) in channConnections" v-bind:key="index" tag="div">
-                <v-list-tile-title>{{ findDeployment(conn.destinyDeploymentId).name }}</v-list-tile-title>
+                <v-list-tile-title>{{ deployments[conn.destinyDeploymentId].name }}</v-list-tile-title>
               </v-list-tile>
               </div>
 
@@ -155,8 +154,11 @@
           </v-layout>
 
         </v-flex>
+
       </v-container>
+
     </v-card>
+
   </v-flex>
 </template>
 <script lang="ts">
@@ -173,7 +175,7 @@ import {
 } from "../../store/stampstate/classes";
 import SSGetters from "../../store/stampstate/getters";
 
-import * as utils from "../../api/utils";
+import { utils } from "../../api";
 
 @VueClassComponent({
   name: "deployment-card",
@@ -182,7 +184,7 @@ import * as utils from "../../api/utils";
   },
   filters: {
     truncateRight: function(text: string, value: number) {
-      if(text.length < value) return text;
+      if (text.length < value) return text;
       return text.substring(0, value) + "...";
     },
     truncateLeft: function(text: string, value: number) {
@@ -212,21 +214,15 @@ export default class Card extends Vue {
   /** Just a reference to the HTTPEntrypoint class. */
   HTTPEntryPoint = HTTPEntryPoint;
 
-  /** <string> Deployment represented in this card. */
-  deploymentURN: string = this.deploymentURN;
+  /** The URN of the deployment represented by this card. */
+  deploymentURN = this.deploymentURN;
 
-  get deployment(): Deployment {
-    return (((<SSGetters>this.$store.getters).deployment as any) as (
-      deploymentURN: string
-    ) => Deployment)(this.deploymentURN);
+  get deployment(){
+    return this.deployments[this.deploymentURN];
   }
 
-  get findDeployment(): (deploymentURN: string) => Deployment {
-    return (deploymentURN: string): Deployment => {
-      return (((<SSGetters>this.$store.getters).deployment as any) as (
-        deploymentURN: string
-      ) => Deployment)(deploymentURN);
-    };
+  get deployments() {
+    return (<SSGetters>this.$store.getters).deployments;
   }
 
   get hasCertificate(): boolean {
@@ -243,9 +239,9 @@ export default class Card extends Vue {
 
   get deploymentPersistentVolumes(): PersistentVolume[] {
     let res: PersistentVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.service(
+    let ser: Service = <Service>this.$store.getters.services[
       this.deployment.service
-    );
+    ];
     if (ser) {
       for (let resName in ser.resources) {
         if (
@@ -266,9 +262,9 @@ export default class Card extends Vue {
 
   get deploymentVolatileVolumes(): VolatileVolume[] {
     let res: VolatileVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.service(
+    let ser: Service = <Service>this.$store.getters.services[
       this.deployment.service
-    );
+    ];
     if (ser) {
       for (let resName in ser.resources) {
         if (

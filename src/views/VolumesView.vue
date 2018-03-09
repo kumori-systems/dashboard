@@ -247,9 +247,7 @@ export default class VolumesView extends Vue {
 
   get deployment(): (stri: string) => Deployment {
     return (deploymentURN: string) => {
-      return ((<SSGetters>this.$store.getters).deployment as any)(
-        deploymentURN
-      );
+      return this.$store.getters.deployments[deploymentURN];
     };
   }
 

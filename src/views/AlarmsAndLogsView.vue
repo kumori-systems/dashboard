@@ -116,7 +116,7 @@
       </v-data-table>
 
       <div class="text-xs-center">
-        <v-pagination v-if="numPages>1" v-bind:length="numPages" v-model="actualPage"></v-pagination>
+        <v-pagination v-if="numPages>0" v-bind:length="numPages" v-model="actualPage"></v-pagination>
       </div>
 
     </v-container>
@@ -149,7 +149,6 @@ const NUM_ITEMS_PER_PAGE = 10;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
-
   Notification = Notification;
 
   /** Table headers. */
@@ -196,7 +195,7 @@ export default class AlarmsAndLogsView extends Vue {
   selectedLogLevel: string = "Debug";
 
   /** Total number of pages. */
-  numPages: number = 1;
+  numPages: number = 0;
 
   /** Actual page. */
   actualPage: number = 1;
@@ -237,10 +236,10 @@ export default class AlarmsAndLogsView extends Vue {
 
   /** Selected to date */
   toDate: string = null;
-  
+
   /** Selected to date formatted. */
   toDateFormatted: string = null;
-  
+
   /** Selected to time. */
   toTime: string = null;
 
@@ -321,7 +320,9 @@ export default class AlarmsAndLogsView extends Vue {
       );
 
     // Switch the page
-    this.numPages = Math.trunc(loglist.length / NUM_ITEMS_PER_PAGE + 1);
+    this.numPages = Math.trunc(
+      loglist.length / NUM_ITEMS_PER_PAGE + this.actualPage
+    );
 
     return loglist;
   }
