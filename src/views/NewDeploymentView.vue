@@ -208,6 +208,7 @@ export default class NewDeploymentView extends Vue {
   mounted() {
     // If there is a preselected service, load it
     this.selectedService = this.$store.getters.selectedService || null;
+    if(this.selectedService) this.$store.dispatch('selectedService', null);
   }
 
   get deployments(): { [urn: string]: Deployment } {
