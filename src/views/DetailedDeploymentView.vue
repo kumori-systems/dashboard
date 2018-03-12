@@ -257,6 +257,7 @@ import {
   Service,
   VolatileVolume
 } from "../store/stampstate/classes";
+import { Notification } from "../store/pagestate/classes";
 import SSGetters from "../store/stampstate/getters";
 import { utils } from "../api";
 import { setTimeout } from "timers";
@@ -497,11 +498,24 @@ export default class DetailedDeploymentView extends Vue {
           ];
           break;
         default:
-          console.error(
-            "Not expected channel type '%s' on  '%s:%s'",
-            type,
-            ser._urn,
-            channelId
+          this.$store.dispatch(
+            "addNotification",
+            new Notification(
+              Notification.LEVEL.ERROR,
+              "Not expected channel type",
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId,
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId
+            )
           );
       }
 
@@ -566,11 +580,24 @@ export default class DetailedDeploymentView extends Vue {
           break;
 
         default:
-          console.error(
-            "Not expected channel type '%s' on  '%s:%s'",
-            type,
-            ser._urn,
-            channelId
+          this.$store.dispatch(
+            "addNotification",
+            new Notification(
+              Notification.LEVEL.ERROR,
+              "Not expected channel type",
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId,
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId
+            )
           );
       }
 

@@ -168,6 +168,7 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
+import { Notification } from "../store/pagestate/classes";
 import {
   Certificate,
   Deployment,
@@ -208,7 +209,7 @@ export default class NewDeploymentView extends Vue {
   mounted() {
     // If there is a preselected service, load it
     this.selectedService = this.$store.getters.selectedService || null;
-    if(this.selectedService) this.$store.dispatch('selectedService', null);
+    if (this.selectedService) this.$store.dispatch("selectedService", null);
   }
 
   get deployments(): { [urn: string]: Deployment } {
@@ -250,9 +251,14 @@ export default class NewDeploymentView extends Vue {
             skeleton += '  "' + par + '": ""';
             break;
           default:
-            console.error(
-              "Unknown parameter type",
-              ser.parameters[par]._parameter_type
+            this.$store.dispatch(
+              "addNotification",
+              new Notification(
+                Notification.LEVEL.ERROR,
+                "Unknown parameter type",
+                "Unknown parameter type" + ser.parameters[par]._parameter_type,
+                "Unknown parameter type" + ser.parameters[par]._parameter_type
+              )
             );
         }
 
