@@ -70,14 +70,14 @@
                   <v-chip color="lime" @input="pro">
                     <span v-if="pro.role">{{ pro.role }} ~</span>
                     <span v-else>Service ~</span>
-                    <span v-if="pro.endpoint">{{ pro.endpoint }}</span>
+                    <span v-if="pro.endpoint">&nbsp;{{ pro.endpoint }}</span>
                   </v-chip>
                 </div>
                 <div v-for="(dep, index) in channel.depended" v-bind:key="index">
                   <v-chip color="light-blue lighten-3" @input="dep">
                     <span v-if="dep.role">{{ dep.role }} ~</span>
                     <span v-else>Service ~</span>
-                    <span v-if="dep.endpoint">{{ dep.endpoint }}</span>
+                    <span v-if="dep.endpoint">&nbsp;{{ dep.endpoint }}</span>
                   </v-chip>
                 </div>
               </v-layout>

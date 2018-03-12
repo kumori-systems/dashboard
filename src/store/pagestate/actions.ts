@@ -255,7 +255,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
-
       return ProxyConnection.instance.getRegisteredElements().then(() => {
         injectee.dispatch('addNotification',
           new Notification(
