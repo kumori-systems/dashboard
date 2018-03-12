@@ -1,4 +1,5 @@
 <template>
+<v-form ref="form" lazy-validation>
   <v-card>
     <v-card-title>
       
@@ -144,7 +145,8 @@
                       <v-select
                         v-model="serviceNewProvidedConnections[name]"
                         v-bind:items="totalDependedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
+                        multiple chips v-on:input="handleInput" autocomplete
+                        return-object>
 
                         <!-- Chips config-->
                         <template slot="selection" scope="items">
@@ -164,8 +166,8 @@
                     <th>
                       <v-select v-model="serviceNewDependedConnections[name]"
                         v-bind:items="totalProvidedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" return-object
-                        autocomplete>
+                        multiple chips v-on:input="handleInput" autocomplete
+                        return-object>
                   
                         <!-- Chips config-->
                         <template slot="selection" scope="items">
@@ -231,6 +233,7 @@
 
     </v-container>
   </v-card>
+</v-form>
 </template>
 <script lang="ts" scoped>
 import Vue from "vue";
@@ -320,9 +323,12 @@ export default class DetailedDeploymentView extends Vue {
   unwatch: () => void;
 
   mounted() {
+    this.cancelChanges();
     this.unwatch = this.$watch("$route.path", val => {
-      this.$forceUpdate();
       this.cancelChanges();
+
+      this.clear = true;
+      this.haveChanges = false;
     });
   }
 
@@ -388,10 +394,8 @@ export default class DetailedDeploymentView extends Vue {
       this.deployment.service
     ];
     if (!ser) {
-      /* This will be reached when deploying new services with bundles. */
+      // This will be reached when deploying new services with bundles.
       this.$store.dispatch("getElementInfo", this.deployment.service);
-    } else {
-      this.loadDeploymentConnections(this.deployment, ser);
     }
 
     return ser;
@@ -578,8 +582,8 @@ export default class DetailedDeploymentView extends Vue {
           deps[deploymentId] instanceof HTTPEntryPoint &&
           deps[deploymentId].channels["frontend"] &&
           deps[deploymentId].channels["frontend"].length > 0 &&
-          deps[deploymentId].channels["frontend"][0]
-            .destinyDeploymentId !== this.deployment._urn
+          deps[deploymentId].channels["frontend"][0].destinyDeploymentId !==
+            this.deployment._urn
         ) {
           // If it's an entrypoint in use, and I'm not using it,
           // it's not in the list of possibles
@@ -587,12 +591,10 @@ export default class DetailedDeploymentView extends Vue {
           let serviceId: string = deps[deploymentId].service;
           if (sers[serviceId]) {
             // if service exists
-            for (let requiredChannelId in sers[serviceId]
-              .dependedChannels) {
+            for (let requiredChannelId in sers[serviceId].dependedChannels) {
               if (
                 typeSearched.indexOf(
-                  sers[serviceId].dependedChannels[requiredChannelId]
-                    .type
+                  sers[serviceId].dependedChannels[requiredChannelId].type
                 ) !== -1
               ) {
                 let elem: {
@@ -603,10 +605,7 @@ export default class DetailedDeploymentView extends Vue {
                     deployment: deploymentId,
                     channel: requiredChannelId
                   }),
-                  text:
-                    deps[deploymentId].name +
-                    " ~ " +
-                    requiredChannelId
+                  text: deps[deploymentId].name + " ~ " + requiredChannelId
                 };
 
                 if (res.indexOf(elem) === -1) {
@@ -630,9 +629,7 @@ export default class DetailedDeploymentView extends Vue {
    * the differences.
    */
   applyChanges(): void {
-    /*
-    Remove links
-    */
+    // Remove links
     for (let chann in this.deployment.channels) {
       for (let realConn in this.deployment.channels[chann]) {
         let found = false; // Marks if the connection has been found
@@ -681,9 +678,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-    Add new provided links
-    */
+    // Add new provided links
     for (let chann in this.serviceNewProvidedConnections) {
       for (let tempConn in this.serviceNewProvidedConnections[chann]) {
         let found = false; // Checks if the connection has been found
@@ -722,9 +717,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-    Add new depended links
-    */
+    // Add new depended links
     for (let chann in this.serviceNewDependedConnections) {
       for (let tempConn in this.serviceNewDependedConnections[chann]) {
         let found = false; // Checks if the connection has been found
@@ -763,9 +756,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-      If the number of instances has changed, a petition is sent
-    */
+    // If the number of instances has changed, a petition is sent
     let changedNumInstances = false;
     for (let role in this.deployment.roles) {
       if (
@@ -791,14 +782,13 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   cancelChanges(): void {
-    this.roleNumInstances = {};
-    this.instanceKill = {};
-
-    // Clean links
-    this.serviceNewDependedConnections = {};
-    this.serviceNewProvidedConnections = {};
+    if (this.$refs.form) {
+      (<any>this.$refs.form).reset();
+    }
 
     this.clear = true;
+    this.loadDeploymentConnections(this.deployment, this.service);
+
     this.haveChanges = false;
   }
 
@@ -859,13 +849,13 @@ export default class DetailedDeploymentView extends Vue {
       this.instanceKill[tempRol] = {};
     }
     this.instanceKill[tempRol][tempInst] = value;
-    this.haveChanges = true;
+    // this.haveChanges = true;
   }
 
   /** Handles changes in the number of instances of role children. */
   handleNumInstancesChange([tempRol, value]): void {
     this.roleNumInstances[tempRol] = value;
-    this.haveChanges = true;
+    // this.haveChanges = true;
   }
 
   /** Handles changes in the input event of children components. */
