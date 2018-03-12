@@ -200,7 +200,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         let val: { [urn: string]: PersistentVolume } = {};
         val[resourceURN] = resource;
         injectee.commit('addPersistentVolume', val);
-        
+
       });
 
       ProxyConnection.instance.onAddVolatileVolume((resourceId: string,
@@ -255,23 +255,45 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
-
       return ProxyConnection.instance.getRegisteredElements().then(() => {
-        console.debug('Stored a reference to all elements from the platform');
+        injectee.dispatch('addNotification',
+          new Notification(
+            Notification.LEVEL.DEBUG,
+            'Stored reference to items',
+            'Stored a reference to all items in the platform',
+            null
+          )
+        );
         return user;
       });
 
     }).then((user) => { // Load all resources
 
       return ProxyConnection.instance.getResources().then(() => {
-        console.debug('Retrieved all resources from the platform');
+        injectee.dispatch('addNotification',
+          new Notification(
+            Notification.LEVEL.DEBUG,
+            'Retrieved resources data',
+            'Retrieved all resources data from the platform',
+            null
+          )
+        );
         return user;
       });
 
     }).then((user) => { // Load all deployments
 
       return ProxyConnection.instance.getDeploymentList().then(() => {
-        console.debug('Retrieved all deployments from the platform');
+
+        injectee.dispatch('addNotification',
+          new Notification(
+            Notification.LEVEL.DEBUG,
+            'Retrieved deployment data',
+            'Retrieved all deployment data from the platform',
+            null
+          )
+        );
+
         return user;
       });
 
@@ -323,7 +345,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               // So it's set a time out and when the timeout expires, the user
               // Will automatically signout of the page
               setTimeout(() => {
-                console.error('Error refreshing token', error);
+                injectee.dispatch('addNotification', new Notification(
+                  Notification.LEVEL.ERROR,
+                  'Error refreshing token',
+                  'The dashboard was unable to refresh the actual token',
+                  error
+                ));
                 injectee.dispatch('signOut').then(() => {
                   injectee.dispatch('finishBackgroundAction', {
                     'type': BackgroundAction.TYPE.SIGNIN,
@@ -366,18 +393,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       else if (error.message === 'Element not covered') {
 
         injectee.dispatch('signOut').then(() => {
-          console.error(error);
+
           return injectee.dispatch('finishBackgroundAction', {
             'type': BackgroundAction.TYPE.LOADING_DATA,
             'state': BackgroundAction.STATE.FAIL,
             'details': 'Error loading data, retry and if the problem '
               + 'persists, please contact your administrator'
           });
+
         });
 
       } else {
 
-        console.error(error);
         injectee.dispatch('finishBackgroundAction', {
           'type': BackgroundAction.TYPE.SIGNIN,
           'state': BackgroundAction.STATE.FAIL,

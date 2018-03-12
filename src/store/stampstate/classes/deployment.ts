@@ -1,5 +1,5 @@
 import urlencode from 'urlencode';
-import * as utils from '../../../api/utils';
+import { utils } from '../../../api';
 import { ECloudElement } from './ecloudelement';
 import {
   Resource, Service, VolatileVolume, Volume

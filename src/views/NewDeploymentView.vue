@@ -168,6 +168,7 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
+import { Notification } from "../store/pagestate/classes";
 import {
   Certificate,
   Deployment,
@@ -208,6 +209,7 @@ export default class NewDeploymentView extends Vue {
   mounted() {
     // If there is a preselected service, load it
     this.selectedService = this.$store.getters.selectedService || null;
+    if (this.selectedService) this.$store.dispatch("selectedService", null);
   }
 
   get deployments(): { [urn: string]: Deployment } {
@@ -217,9 +219,9 @@ export default class NewDeploymentView extends Vue {
   }
 
   get service(): Service {
-    let ser: Service = ((<SSGetters>this.$store.getters).service as any)(
+    let ser: Service = (<SSGetters>this.$store.getters).services[
       this.selectedService
-    );
+    ];
     if (!ser) {
       if (this.selectedService)
         this.$store.dispatch("getElementInfo", this.selectedService);
@@ -249,9 +251,14 @@ export default class NewDeploymentView extends Vue {
             skeleton += '  "' + par + '": ""';
             break;
           default:
-            console.error(
-              "Unknown parameter type",
-              ser.parameters[par]._parameter_type
+            this.$store.dispatch(
+              "addNotification",
+              new Notification(
+                Notification.LEVEL.ERROR,
+                "Unknown parameter type",
+                "Unknown parameter type" + ser.parameters[par]._parameter_type,
+                "Unknown parameter type" + ser.parameters[par]._parameter_type
+              )
             );
         }
 
@@ -285,9 +292,9 @@ export default class NewDeploymentView extends Vue {
   get services(): string[] {
     // All deployed services must be loaded to show available channels
     for (let deploymentURN in this.deployments) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.deployments[deploymentURN].service
-      );
+      ];
       if (!service)
         this.$store.dispatch(
           "getElementInfo",
@@ -308,9 +315,9 @@ export default class NewDeploymentView extends Vue {
   get serviceResourcesList(): [string, string][] {
     let resourcesList: [string, string][] = [];
     if (this.selectedService) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.selectedService
-      );
+      ];
       if (service) {
         for (let res in service.resources) {
           resourcesList.push([res, service.resources[res]]);
@@ -323,9 +330,9 @@ export default class NewDeploymentView extends Vue {
   get serviceRolesList(): string[] {
     let roleList: string[] = [];
     if (this.selectedService) {
-      let service: Service = ((<SSGetters>this.$store.getters).service as any)(
+      let service: Service = (<SSGetters>this.$store.getters).services[
         this.selectedService
-      );
+      ];
       if (service) {
         for (let role in service.roles) {
           roleList.push(role);

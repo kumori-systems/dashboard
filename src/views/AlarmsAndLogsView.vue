@@ -15,7 +15,25 @@
 
         <!-- Level filter -->
         <v-flex xs12 md1>
-          <v-select label="Minimum log level" v-model="selectedLogLevel" v-bind:items="logLevels"></v-select>
+          <v-select label="Minimum log level" v-model="selectedLogLevel" v-bind:items="logLevels">
+            
+            <template slot="selection" scope="items">
+              <v-icon v-bind:class="items.item.value+'--text'">stop</v-icon>
+              <span v-bind:class="items.item.value+'--text'">{{ items.item.text }}</span>
+            </template>
+            
+             <template slot="item" scope="items">
+                <template>
+                  <v-list-tile-content v-bind:class="items.item.value+'--text'">
+                    <v-list-tile-title>
+                      <v-icon v-bind:class="items.item.value+'--text'">stop</v-icon>
+                      {{ items.item.text }}
+                    </v-list-tile-title>
+                  </v-list-tile-content>
+                </template>
+              </template>
+            
+          </v-select>
         </v-flex>
 
         <!-- Date filter -->
@@ -104,7 +122,8 @@
           <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.text }}</td>
           <td class="text-xs-right">
-            <v-btn color="yellow darken-1" v-if="props.item.level===Notification.LEVEL.ERROR && !props.item.readed" flat v-on:click="markAlarmAsSeen(props.item)">
+            <v-btn color="yellow darken-1" v-if="props.item.level===Notification.LEVEL.ERROR
+            && !props.item.readed" flat v-on:click="markAlarmAsSeen(props.item)">
               <v-icon>visibility</v-icon>
             </v-btn>
             <v-btn color="blue darken-1" flat v-on:click="showLogInfoDialog(props.item.data)">
@@ -116,7 +135,7 @@
       </v-data-table>
 
       <div class="text-xs-center">
-        <v-pagination v-if="numPages>1" v-bind:length="numPages" v-model="actualPage"></v-pagination>
+        <v-pagination v-if="numPages>0" v-bind:length="numPages" v-model="actualPage"></v-pagination>
       </div>
 
     </v-container>
@@ -149,7 +168,6 @@ const NUM_ITEMS_PER_PAGE = 10;
   name: "alarms-and-logs-view"
 })
 export default class AlarmsAndLogsView extends Vue {
-
   Notification = Notification;
 
   /** Table headers. */
@@ -190,13 +208,33 @@ export default class AlarmsAndLogsView extends Vue {
   search: string = "";
 
   /** Selectable log levels. */
-  logLevels: string[] = ["Debug", "Info", "Warning", "Error"];
+  logLevels: object[] = [
+    {
+      text: "Debug",
+      value: Notification.LEVEL.DEBUG
+    },
+    {
+      text: "Info",
+      value: Notification.LEVEL.INFO
+    },
+    {
+      text: "Warning",
+      value: Notification.LEVEL.WARNING
+    },
+    {
+      text: "Error",
+      value: Notification.LEVEL.ERROR
+    }
+  ];
 
   /** Selected minimum log level. */
-  selectedLogLevel: string = "Debug";
+  selectedLogLevel: { text: string; value: string } = {
+    text: "Info",
+    value: Notification.LEVEL.INFO
+  };
 
   /** Total number of pages. */
-  numPages: number = 1;
+  numPages: number = 0;
 
   /** Actual page. */
   actualPage: number = 1;
@@ -237,10 +275,10 @@ export default class AlarmsAndLogsView extends Vue {
 
   /** Selected to date */
   toDate: string = null;
-  
+
   /** Selected to date formatted. */
   toDateFormatted: string = null;
-  
+
   /** Selected to time. */
   toTime: string = null;
 
@@ -295,7 +333,7 @@ export default class AlarmsAndLogsView extends Vue {
         return true;
       })
       .filter((item, index, arrayfun) => {
-        switch (this.selectedLogLevel) {
+        switch (this.selectedLogLevel.text) {
           case "Info":
             return (
               item.level === Notification.LEVEL.INFO ||
@@ -321,7 +359,9 @@ export default class AlarmsAndLogsView extends Vue {
       );
 
     // Switch the page
-    this.numPages = Math.trunc(loglist.length / NUM_ITEMS_PER_PAGE + 1);
+    this.numPages = Math.trunc(
+      loglist.length / NUM_ITEMS_PER_PAGE + this.actualPage
+    );
 
     return loglist;
   }

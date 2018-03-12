@@ -1,4 +1,5 @@
 <template>
+<v-form ref="form" lazy-validation>
   <v-card>
     <v-card-title>
       
@@ -144,7 +145,8 @@
                       <v-select
                         v-model="serviceNewProvidedConnections[name]"
                         v-bind:items="totalDependedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" return-object autocomplete>
+                        multiple chips v-on:input="handleInput" autocomplete
+                        return-object>
 
                         <!-- Chips config-->
                         <template slot="selection" scope="items">
@@ -164,8 +166,8 @@
                     <th>
                       <v-select v-model="serviceNewDependedConnections[name]"
                         v-bind:items="totalProvidedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" return-object
-                        autocomplete>
+                        multiple chips v-on:input="handleInput" autocomplete
+                        return-object>
                   
                         <!-- Chips config-->
                         <template slot="selection" scope="items">
@@ -231,6 +233,7 @@
 
     </v-container>
   </v-card>
+</v-form>
 </template>
 <script lang="ts" scoped>
 import Vue from "vue";
@@ -247,14 +250,16 @@ import {
   Certificate,
   Channel,
   Deployment,
+  EntryPoint,
   HTTPEntryPoint,
   PersistentVolume,
   Resource,
   Service,
   VolatileVolume
 } from "../store/stampstate/classes";
+import { Notification } from "../store/pagestate/classes";
 import SSGetters from "../store/stampstate/getters";
-import * as utils from "../api/utils";
+import { utils } from "../api";
 import { setTimeout } from "timers";
 
 @VueClassComponent({
@@ -265,7 +270,7 @@ import { setTimeout } from "timers";
   },
   filters: {
     truncateRight: function(text: string, value: number) {
-      if(text.length < value) return text;
+      if (text.length < value) return text;
       return text.substring(0, value) + "...";
     },
     year: function(text: string) {
@@ -319,9 +324,12 @@ export default class DetailedDeploymentView extends Vue {
   unwatch: () => void;
 
   mounted() {
+    this.cancelChanges();
     this.unwatch = this.$watch("$route.path", val => {
-      this.$forceUpdate();
       this.cancelChanges();
+
+      this.clear = true;
+      this.haveChanges = false;
     });
   }
 
@@ -331,16 +339,19 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Obtains the deployment from the storage. */
   get deployment(): Deployment {
-    return ((<SSGetters>this.$store.getters).deploymentFromPath as Function)(
-      this.$route.path
-    );
+    let deployments = (<SSGetters>this.$store.getters).deployments;
+    let res: Deployment = null;
+    for (let key in deployments) {
+      if (deployments[key]._path === this.$route.path) res = deployments[key];
+    }
+    return res;
   }
 
   get deploymentPersistentVolumes(): PersistentVolume[] {
     let res: PersistentVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.service(
+    let ser: Service = <Service>this.$store.getters.services[
       this.deployment.service
-    );
+    ];
     for (let resName in ser.resources) {
       if (
         utils.getResourceType(ser.resources[resName]) ===
@@ -359,9 +370,9 @@ export default class DetailedDeploymentView extends Vue {
 
   get deploymentVolatileVolumes(): VolatileVolume[] {
     let res: VolatileVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.service(
+    let ser: Service = <Service>this.$store.getters.services[
       this.deployment.service
-    );
+    ];
     for (let resName in ser.resources) {
       if (
         utils.getResourceType(ser.resources[resName]) ===
@@ -380,14 +391,12 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Required to obtain additional information of a role. */
   get service(): Service {
-    let ser: Service = ((<SSGetters>this.$store.getters).service as Function)(
+    let ser: Service = (<SSGetters>this.$store.getters).services[
       this.deployment.service
-    );
+    ];
     if (!ser) {
-      /* This will be reached when deploying new services with bundles. */
+      // This will be reached when deploying new services with bundles.
       this.$store.dispatch("getElementInfo", this.deployment.service);
-    } else {
-      this.loadDeploymentConnections(this.deployment, ser);
     }
 
     return ser;
@@ -468,22 +477,173 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Obtains all provided deployment channels of actual deployed services. */
   get totalProvidedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalProvidedDeploymentChannels(
-        this.deployment.service,
-        channel
-      );
+    return channelId => {
+      let sers = this.$store.getters.services;
+      let ser: Service = sers[this.deployment.service];
+      let type: string = ser.dependedChannels[channelId].type;
+      let typeSearched: Channel.CHANNEL_TYPE[] = [];
+      switch (type) {
+        case Channel.CHANNEL_TYPE.ENDPOINT_REQUEST:
+        case Channel.CHANNEL_TYPE.REQUEST:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REPLY,
+            Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+          ];
+          break;
+        case Channel.CHANNEL_TYPE.ENDPOINT_REPLY:
+        case Channel.CHANNEL_TYPE.REPLY:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REQUEST,
+            Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
+          ];
+          break;
+        default:
+          this.$store.dispatch(
+            "addNotification",
+            new Notification(
+              Notification.LEVEL.ERROR,
+              "Not expected channel type",
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId,
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId
+            )
+          );
+      }
+
+      let res: { value: string; text: string }[] = [];
+
+      let deps = this.$store.getters.deployments;
+
+      for (let deploymentId in deps) {
+        if (!(deps[deploymentId] instanceof EntryPoint)) {
+          let serviceId: string = deps[deploymentId].service;
+          if (sers[serviceId]) {
+            // if service exists
+            for (let providedChannelId in sers[serviceId].providedChannels) {
+              if (
+                typeSearched.indexOf(
+                  sers[serviceId].providedChannels[providedChannelId].type
+                ) !== -1
+              ) {
+                let elem: {
+                  value: string;
+                  text: string;
+                } = {
+                  value: JSON.stringify({
+                    deployment: deploymentId,
+                    channel: providedChannelId
+                  }),
+                  text: deps[deploymentId].name + " ~ " + providedChannelId
+                };
+
+                if (res.indexOf(elem) === -1) res.push(elem);
+              }
+            }
+          }
+        }
+      }
+      return res;
     };
   }
 
   /** Obtains all depended deployment channels of actual deployed services. */
   get totalDependedDeploymentChannels() {
-    return channel => {
-      return this.$store.getters.getTotalDependedDeploymentChannels(
-        this.deployment._urn,
-        this.deployment.service,
-        channel
-      );
+    return channelId => {
+      let sers = this.$store.getters.services;
+      let ser = sers[this.deployment.service];
+      // Depending on the channel type, the search will be different
+      let type: string = ser.providedChannels[channelId].type;
+      let typeSearched: Channel.CHANNEL_TYPE[] = [];
+      switch (type) {
+        case Channel.CHANNEL_TYPE.ENDPOINT_REQUEST:
+        case Channel.CHANNEL_TYPE.REQUEST:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REPLY,
+            Channel.CHANNEL_TYPE.ENDPOINT_REPLY
+          ];
+          break;
+        case Channel.CHANNEL_TYPE.ENDPOINT_REPLY:
+        case Channel.CHANNEL_TYPE.REPLY:
+          typeSearched = [
+            Channel.CHANNEL_TYPE.REQUEST,
+            Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
+          ];
+          break;
+
+        default:
+          this.$store.dispatch(
+            "addNotification",
+            new Notification(
+              Notification.LEVEL.ERROR,
+              "Not expected channel type",
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId,
+              "Not expected channel type " +
+                type +
+                " on " +
+                ser._urn +
+                ":" +
+                channelId
+            )
+          );
+      }
+
+      let res: { value: string; text: string }[] = [];
+      let deps = this.$store.getters.deployments;
+
+      for (let deploymentId in deps) {
+        if (
+          deps[deploymentId] instanceof HTTPEntryPoint &&
+          deps[deploymentId].channels["frontend"] &&
+          deps[deploymentId].channels["frontend"].length > 0 &&
+          deps[deploymentId].channels["frontend"][0].destinyDeploymentId !==
+            this.deployment._urn
+        ) {
+          // If it's an entrypoint in use, and I'm not using it,
+          // it's not in the list of possibles
+        } else {
+          let serviceId: string = deps[deploymentId].service;
+          if (sers[serviceId]) {
+            // if service exists
+            for (let requiredChannelId in sers[serviceId].dependedChannels) {
+              if (
+                typeSearched.indexOf(
+                  sers[serviceId].dependedChannels[requiredChannelId].type
+                ) !== -1
+              ) {
+                let elem: {
+                  value: string;
+                  text: string;
+                } = {
+                  value: JSON.stringify({
+                    deployment: deploymentId,
+                    channel: requiredChannelId
+                  }),
+                  text: deps[deploymentId].name + " ~ " + requiredChannelId
+                };
+
+                if (res.indexOf(elem) === -1) {
+                  res.push(elem);
+                }
+              }
+            }
+          }
+        }
+      }
+      return res;
     };
   }
 
@@ -496,9 +656,7 @@ export default class DetailedDeploymentView extends Vue {
    * the differences.
    */
   applyChanges(): void {
-    /*
-    Remove links
-    */
+    // Remove links
     for (let chann in this.deployment.channels) {
       for (let realConn in this.deployment.channels[chann]) {
         let found = false; // Marks if the connection has been found
@@ -547,9 +705,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-    Add new provided links
-    */
+    // Add new provided links
     for (let chann in this.serviceNewProvidedConnections) {
       for (let tempConn in this.serviceNewProvidedConnections[chann]) {
         let found = false; // Checks if the connection has been found
@@ -588,9 +744,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-    Add new depended links
-    */
+    // Add new depended links
     for (let chann in this.serviceNewDependedConnections) {
       for (let tempConn in this.serviceNewDependedConnections[chann]) {
         let found = false; // Checks if the connection has been found
@@ -629,9 +783,7 @@ export default class DetailedDeploymentView extends Vue {
       }
     }
 
-    /*
-      If the number of instances has changed, a petition is sent
-    */
+    // If the number of instances has changed, a petition is sent
     let changedNumInstances = false;
     for (let role in this.deployment.roles) {
       if (
@@ -657,14 +809,13 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   cancelChanges(): void {
-    this.roleNumInstances = {};
-    this.instanceKill = {};
-
-    // Clean links
-    this.serviceNewDependedConnections = {};
-    this.serviceNewProvidedConnections = {};
+    if (this.$refs.form) {
+      (<any>this.$refs.form).reset();
+    }
 
     this.clear = true;
+    this.loadDeploymentConnections(this.deployment, this.service);
+
     this.haveChanges = false;
   }
 
@@ -725,13 +876,13 @@ export default class DetailedDeploymentView extends Vue {
       this.instanceKill[tempRol] = {};
     }
     this.instanceKill[tempRol][tempInst] = value;
-    this.haveChanges = true;
+    // this.haveChanges = true;
   }
 
   /** Handles changes in the number of instances of role children. */
   handleNumInstancesChange([tempRol, value]): void {
     this.roleNumInstances[tempRol] = value;
-    this.haveChanges = true;
+    // this.haveChanges = true;
   }
 
   /** Handles changes in the input event of children components. */

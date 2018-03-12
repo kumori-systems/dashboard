@@ -76,6 +76,7 @@ import {
   components: {}
 })
 export default class AppbarComponent extends Vue {
+  
   /** Gets the user authenticated in the system. */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;

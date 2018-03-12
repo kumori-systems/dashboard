@@ -50,7 +50,7 @@ export function getElementType(urn: string): ECloudElement.ECLOUDELEMENT_TYPE {
         res = ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE;
         break;
       default:
-        console.error('Unknown element type %s of', splitted[i], urn);
+        throw Error('Unknown element type ' + splitted[i] + ' of ' + urn);
     }
 
   } catch (err) {

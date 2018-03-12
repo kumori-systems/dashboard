@@ -1,8 +1,7 @@
 import Vuex from 'vuex';
 import State from './state';
 
-import { ProxyConnection } from '../../api';
-import * as utils from '../../api/utils';
+import { ProxyConnection, utils } from '../../api';
 import { BackgroundAction, Notification } from '../pagestate/classes';
 import { Deployment, ECloudElement, Resource } from './classes';
 
@@ -67,8 +66,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     if (!res && res !== null) {
 
       ProxyConnection.instance.getElementInfo(elementURN).catch((err) => {
-        if (err.message !== 'Duplicated request')
-          console.error('Error getting info from element %s', elementURN, err);
+        if (err.message !== 'Duplicated request') {
+          injectee.dispatch('addNotification', new Notification(
+            Notification.LEVEL.ERROR,
+            'Error getting info from element',
+            'Error getting info from element ' + elementURN,
+            err
+          ));
+        }
       });
     }
 
@@ -248,7 +253,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         );
         break;
       default:
-      // console.error('Error deleting element: Unknown type of element');
+        injectee.dispatch('addNotification', new Notification(
+          Notification.LEVEL.ERROR,
+          'Error removing element',
+          'Error removing element ' + elementId + ', unkown element type',
+          null
+        ));
     }
 
     ProxyConnection.instance.deleteElement(elementId).then(() => {
@@ -276,7 +286,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           });
           break;
         default:
-          console.error('Error deleting element: Unknown type of element');
+          injectee.dispatch('addNotification', new Notification(
+            Notification.LEVEL.ERROR,
+            'Error removing element',
+            'Error removing element ' + elementId + ', unkown element type',
+            null
+          ));
       }
 
       injectee.commit(action, elementId);
@@ -302,7 +317,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           });
           break;
         default:
-        // console.error('Error deleting element: Unknown type of element');
+
       }
 
       injectee.dispatch('addNotification',
