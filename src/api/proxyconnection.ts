@@ -24,7 +24,7 @@ import {
 
 
 import { ACS_URL, ADMISSION_URL } from './config.js';
-import * as utils from './utils';
+import { utils } from './index';
 
 
 /**
@@ -268,7 +268,12 @@ export class ProxyConnection extends EventEmitter {
           user.token.accessToken);
 
         this.admission.onConnected(() => {
-          console.info('Successfully connected to the platform');
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.DEBUG,
+            'Successfully connected to the platform',
+            'Successfully connected to the platform',
+            null
+          ));
         });
 
         this.admission.onEcloudEvent((event: EcloudEvent) => {
@@ -459,14 +464,24 @@ export class ProxyConnection extends EventEmitter {
                   break;
 
                 default:
-                  console.error('Not espected ecloud event name: '
-                    + event.strType + '/' + event.strName);
+
+                  this.emit(this.onAddNotification, new Notification(
+                    Notification.LEVEL.WARNING,
+                    'Not expected ecloud event name',
+                    'Not expected ecloud event name ' + event.strType + '/'
+                    + event.strName,
+                    JSON.stringify(event, null, 2)
+                  ));
               }
               break;
 
             case EcloudEventType.node:
-              console.error('Not espected ecloud event type: ' + event.strType
-                + '/' + event.strName);
+              this.emit(this.onAddNotification, new Notification(
+                Notification.LEVEL.WARNING,
+                'Not expected ecloud event type',
+                'Not expected ecloud event type ' + event.strType,
+                JSON.stringify(event, null, 2)
+              ));
               break;
 
             case EcloudEventType.instance:
@@ -549,8 +564,13 @@ export class ProxyConnection extends EventEmitter {
                   break;
 
                 default:
-                  console.error('Not espected ecloud event name: '
-                    + event.strType + '/' + event.strName);
+                  this.emit(this.onAddNotification, new Notification(
+                    Notification.LEVEL.WARNING,
+                    'Not expected ecloud event name',
+                    'Not expected ecloud event name ' + event.strType + '/'
+                    + event.strName,
+                    JSON.stringify(event, null, 2)
+                  ));
               }
               break;
 
@@ -569,26 +589,49 @@ export class ProxyConnection extends EventEmitter {
                   );
                   break;
                 default:
-                  console.error('Not espected ecloud event name: %s/%s',
-                    event.strType, event.strName, event);
+
+                  this.emit(this.onAddNotification, new Notification(
+                    Notification.LEVEL.WARNING,
+                    'Not expected ecloud event name',
+                    'Not expected ecloud event name ' + event.strType + '/'
+                    + event.strName,
+                    JSON.stringify(event, null, 2)
+                  ));
+
               }
               break;
 
             default:
-              console.error('Not espected ecloud event type: %s',
-                event.strType, event);
+              this.emit(this.onAddNotification, new Notification(
+                Notification.LEVEL.WARNING,
+                'Not expected ecloud event type',
+                'Not expected ecloud event type ' + event.strType,
+                JSON.stringify(event, null, 2)
+              ));
           }
 
         });
 
         this.admission.onDisconnected(() => {
 
-          console.warn('Disconnected from the platform');
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.WARNING,
+            'Disconnected from the platform',
+            'Disconnected from the platform',
+            null
+          ));
 
         });
 
         this.admission.onError((error: any) => {
-          console.error('Error received from admission-client: ', error);
+
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.WARNING,
+            'Error received from admission client',
+            'Error',
+            JSON.stringify(error, null, 2)
+          ));
+
         });
 
         return this.admission.init().then(() => user);
@@ -807,7 +850,6 @@ export class ProxyConnection extends EventEmitter {
             this.emit(
               this.onAddRuntime, urn, ecloudElement);
           } catch (err) {
-            console.error(err);
             this.emit(
               this.onAddNotification,
               new Notification(Notification.LEVEL.WARNING,
@@ -835,7 +877,6 @@ export class ProxyConnection extends EventEmitter {
             return Promise.all(promiseArray);
 
           } catch (err) {
-            console.error(err);
             this.emit(
               this.onAddNotification,
               new Notification(Notification.LEVEL.WARNING,
@@ -854,7 +895,6 @@ export class ProxyConnection extends EventEmitter {
             );
             return this.getElementInfo((<Component>ecloudElement).runtime);
           } catch (err) {
-            console.error(err);
             this.emit(
               this.onAddNotification,
               new Notification(Notification.LEVEL.WARNING,
@@ -924,7 +964,14 @@ export class ProxyConnection extends EventEmitter {
             case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
             case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
               this.getElementInfo(urn).catch((err: Error) => {
-                if (err.message !== 'Duplicated request') console.error(err);
+                if (err.message !== 'Duplicated request') {
+                  this.emit(this.onAddNotification, new Notification(
+                    Notification.LEVEL.WARNING,
+                    'Error',
+                    'Error',
+                    JSON.stringify(err, null, 2)
+                  ));
+                }
               });
               break;
             default:
@@ -1001,7 +1048,7 @@ export class ProxyConnection extends EventEmitter {
 
       return Promise.all(promiseArray)
         .then((values) => { })
-        .catch(err => console.debug('Catched', err))
+        .catch(err => { })
         .then(() => { });
     });
     return pro;
@@ -1269,11 +1316,14 @@ export class ProxyConnection extends EventEmitter {
 
               default:
 
-                console.warn('Not expected resource \'%s\' inside instance',
-                  res,
-                  ecloudDeployment.roles[rolId].instances[instanceId]
-                    .configuration.resources[res]
-                );
+                this.emit(this.onAddNotification, new Notification(
+                  Notification.LEVEL.WARNING,
+                  'Resource not expected',
+                  'Not expected resource ' + res + ' inside instance',
+                  JSON.stringify(ecloudDeployment.roles[rolId]
+                    .instances[instanceId].configuration.resources[res], null,
+                    2)
+                ));
 
             }
           }
@@ -1554,8 +1604,14 @@ export class ProxyConnection extends EventEmitter {
           par = new StringParameter();
           break;
         default:
-          console.error('Parameter type not recognized: ',
-            manifest.configuration.parameters[paramIndex].type);
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.ERROR,
+            'Parameter not recognized',
+            'Parameter not recognized ' + manifest.configuration
+              .parameters[paramIndex].type
+            + ' when translating the manifest ' + manifest.spec,
+            JSON.stringify(manifest, null, 2)
+          ));
       }
       parameters[manifest.configuration.parameters[paramIndex].name] = par;
     }
@@ -1625,8 +1681,13 @@ export class ProxyConnection extends EventEmitter {
           );
           break;
         default:
-          console.error('Not expected channel type: %s',
-            manifest.channels.provides[i].type);
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.ERROR,
+            'Not expected channel type',
+            'Not expected channel type ' + manifest.channels.provides[i].type
+            + ' when translating the manifest ' + manifest.spec,
+            JSON.stringify(manifest, null, 2)
+          ));
       };
       proChannels[manifest.channels.provides[i].name] = res;
     }
@@ -1687,8 +1748,13 @@ export class ProxyConnection extends EventEmitter {
           );
           break;
         default:
-          console.error('Not expected channel type: %s',
-            manifest.channels.requires[i].type);
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.ERROR,
+            'Not expected channel type',
+            'Not expected channel type ' + manifest.channels.requires[i].type
+            + ' when translating the manifest ' + manifest.spec,
+            JSON.stringify(manifest, null, 2)
+          ));
       };
       depChannels[manifest.channels.requires[i].name] = res;
     }
@@ -1717,8 +1783,13 @@ export class ProxyConnection extends EventEmitter {
           );
           break;
         default:
-          console.error('Not expected connector type: %s',
-            manifest.connectors[conn].type);
+          this.emit(this.onAddNotification, new Notification(
+            Notification.LEVEL.ERROR,
+            'Not expected connector type',
+            'Not expected connector type ' + manifest.connectors[conn].type
+            + ' when translating the manifest ' + manifest.spec,
+            JSON.stringify(manifest, null, 2)
+          ));
       }
       connectors.push(res);
     }
@@ -1828,8 +1899,13 @@ export class ProxyConnection extends EventEmitter {
             );
             break;
           default:
-            console.error('Not expected channel type: %s',
-              manifest.channels.provides[i].type);
+            this.emit(this.onAddNotification, new Notification(
+              Notification.LEVEL.ERROR,
+              'Not expected channel type',
+              'Not expected channel type ' + manifest.channels.provides[i].type
+              + ' when translating the manifest ' + manifest.spec,
+              JSON.stringify(manifest, null, 2)
+            ));
         };
 
         proChannels[manifest.channels.provides[i].name] = res;
@@ -1891,8 +1967,13 @@ export class ProxyConnection extends EventEmitter {
             );
             break;
           default:
-            console.error('Not expected channel type: %s',
-              manifest.channels.requires[i].type);
+            this.emit(this.onAddNotification, new Notification(
+              Notification.LEVEL.ERROR,
+              'Not expected channel type',
+              'Not expected channel type ' + manifest.channels.requires[i].type
+              + ' when translating the manifest ' + manifest.spec,
+              JSON.stringify(manifest, null, 2)
+            ));
         };
         depChannels[manifest.channels.requires[i].name] = res;
       }
@@ -1946,10 +2027,13 @@ export class ProxyConnection extends EventEmitter {
 
         break;
       default:
-        console.error(
-          'Not expected resource type when translating a manifest',
-          manifest.spec
-        );
+        this.emit(this.onAddNotification, new Notification(
+          Notification.LEVEL.ERROR,
+          'Not expected resource type',
+          'Not expected resource type when translating the manifest '
+          + manifest.spec,
+          JSON.stringify(manifest, null, 2)
+        ));
     }
     return res;
   }
