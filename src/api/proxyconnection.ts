@@ -379,7 +379,7 @@ export class ProxyConnection extends EventEmitter {
                     this.onAddNotification,
                     new Notification(Notification.LEVEL.INFO,
                       'Deployed service',
-                      'The service ' + event.entity['serviceApp'] + 'has been '
+                      'The service ' + event.entity['serviceApp'] + ' has been '
                       + 'deployed as ' + event.entity['service'],
                       JSON.stringify(event, null, 4)
                     )
@@ -1466,8 +1466,8 @@ export class ProxyConnection extends EventEmitter {
             this.onAddVolatileVolume,
             volumeURN,
             new VolatileVolume(
-              res, // name
               volumeURN, // id
+              res, // name
               ecloudDeployment.resources[res].resource.parameters.size, // size
               volatileItems, // items
               // filesystem
