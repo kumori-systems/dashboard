@@ -113,7 +113,7 @@ export abstract class Volume extends Resource {
    * Phisical data volume
    * @param urn <string> The URN of the volume in the ECloud environment.
    * @param volumeType <Resource.RESOURCE_TYPE.PERSISTENT_VOLUME |
-   *  Resource.RESOURCE_TYPE.VOLATILE_VOLUME> Type of the volume beeing created.
+   *  Resource.RESOURCE_TYPE.VOLATILE_VOLUME> Type of the volume being created.
    * @param name <string> Name of the volume in the service.
    * @param size <number> Size of the volume in GB.
    * @param filesystem <Volume.FILESYSTEM> Filesystem associated to the volume.

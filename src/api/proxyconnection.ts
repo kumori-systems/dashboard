@@ -320,7 +320,7 @@ export class ProxyConnection extends EventEmitter {
                     this.onAddNotification,
                     new Notification(Notification.LEVEL.INFO,
                       'Deploying service',
-                      'The service ' + event.entity['serviceApp'] + 'is beeing '
+                      'The service ' + event.entity['serviceApp'] + ' is being '
                       + 'deployed as ' + event.entity['service'],
                       JSON.stringify(event, null, 4)
                     )
