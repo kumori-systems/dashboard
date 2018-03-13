@@ -256,8 +256,8 @@ export default class NewDeploymentView extends Vue {
               new Notification(
                 Notification.LEVEL.ERROR,
                 "Unknown parameter type",
-                "Unknown parameter type" + ser.parameters[par]._parameter_type,
-                "Unknown parameter type" + ser.parameters[par]._parameter_type
+                "Unknown parameter type " + ser.parameters[par]._parameter_type,
+                "Unknown parameter type " + ser.parameters[par]._parameter_type
               )
             );
         }
