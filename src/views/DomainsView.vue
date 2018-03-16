@@ -28,10 +28,14 @@
         <td class="text-xs-left">{{ props.item.url }}</td>
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
-          <router-link v-for="elem in props.item.usedBy" v-bind:key="elem"
-            v-bind:to="deployment(elem)._path">
-            {{ deployment(elem).name }}
-          </router-link>
+          <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
+            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).name">
+              {{ deployment(elem).name }}
+            </a>
+            <a v-else v-bind:href="'http://' + deployment(elem).name">
+              {{ deployment(elem).name }}
+            </a>
+          </div>
         </td>
         <td class="text-xs-left">
           <v-btn color="error" icon v-on:click="showDialog(props.item._urn)">
