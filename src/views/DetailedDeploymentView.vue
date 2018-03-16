@@ -876,13 +876,13 @@ export default class DetailedDeploymentView extends Vue {
       this.instanceKill[tempRol] = {};
     }
     this.instanceKill[tempRol][tempInst] = value;
-    // this.haveChanges = true;
+    this.haveChanges = true;
   }
 
   /** Handles changes in the number of instances of role children. */
   handleNumInstancesChange([tempRol, value]): void {
     this.roleNumInstances[tempRol] = value;
-    // this.haveChanges = true;
+    this.haveChanges = true;
   }
 
   /** Handles changes in the input event of children components. */
