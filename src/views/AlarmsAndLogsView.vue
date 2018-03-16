@@ -118,7 +118,7 @@
           <td v-bind:class="props.item.level" width=20px></td>
           <td class="text-xs-left">
             {{ props.item.time.getDate() }}-{{ props.item.time.getMonth() + 1 }}-{{ props.item.time.getFullYear() }}
-            {{ props.item.time.getHours() }}:{{ props.item.time.getMinutes() }}
+            {{ props.item.time.getHours() }}:{{ props.item.time.getMinutes() | minutesFilter }}
           </td>
           <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.text }}</td>
@@ -162,12 +162,17 @@ import { Notification } from "../store/pagestate/classes";
 const NUM_ITEMS_PER_PAGE = 10;
 
 @VueClassComponent({
-  name: "alarms-and-logs-view"
+  name: "alarms-and-logs-view",
+  filters:{
+    minutesFilter: function(value) {
+      return value < 10 ? '0' + value: value;
+    },
+  }
 })
 export default class AlarmsAndLogsView extends Vue {
   Notification = Notification;
 
-  rowsPerPageItems=[ 25, 50, { text: "All", value: -1 }];
+  rowsPerPageItems = [25, 50, { text: "All", value: -1 }];
 
   /** Table headers. */
   headers: any[] = [
