@@ -110,8 +110,9 @@
       </v-layout>
 
       <!-- Log table -->
-      <v-data-table v-bind:headers="headers" v-bind:items="logs" hide-actions 
-      v-bind:search="search" v-bind:pagination.sync="defaultPagination">
+      <v-data-table v-bind:headers="headers" v-bind:items="logs" must-sort
+      v-bind:rows-per-page-items="rowsPerPageItems" v-bind:pagination.sync="pagination"
+      v-bind:search="search">
 
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
@@ -133,10 +134,6 @@
         </template>
 
       </v-data-table>
-
-      <div class="text-xs-center">
-        <v-pagination v-if="numPages>0" v-bind:length="numPages" v-model="actualPage"></v-pagination>
-      </div>
 
     </v-container>
 
@@ -169,6 +166,8 @@ const NUM_ITEMS_PER_PAGE = 10;
 })
 export default class AlarmsAndLogsView extends Vue {
   Notification = Notification;
+
+  rowsPerPageItems=[ 25, 50, { text: "All", value: -1 }];
 
   /** Table headers. */
   headers: any[] = [
@@ -239,18 +238,10 @@ export default class AlarmsAndLogsView extends Vue {
   /** Actual page. */
   actualPage: number = 1;
 
-  _defPag = {
+  pagination = {
     sortBy: "time",
     descending: true
   };
-
-  get defaultPagination() {
-    return this._defPag;
-  }
-
-  set defaultPagination(value) {
-    this._defPag = value;
-  }
 
   /** Show/Hide from date selector. */
   showFromDateMenu: boolean = false;
@@ -352,17 +343,16 @@ export default class AlarmsAndLogsView extends Vue {
           default:
             return true;
         }
-      }, this)
-      .slice(
-        (this.actualPage - 1) * NUM_ITEMS_PER_PAGE,
-        (this.actualPage - 1) * NUM_ITEMS_PER_PAGE + NUM_ITEMS_PER_PAGE
-      );
+      }, this);
 
     // Switch the page
-    this.numPages = Math.trunc(
-      loglist.length / NUM_ITEMS_PER_PAGE + this.actualPage
-    );
 
+    let division = loglist.length / NUM_ITEMS_PER_PAGE;
+    if (division % 1 === 0) {
+      this.numPages = Math.trunc(division);
+    } else {
+      this.numPages = Math.trunc(division) + 1;
+    }
     return loglist;
   }
 
