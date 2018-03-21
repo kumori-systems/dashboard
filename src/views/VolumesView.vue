@@ -255,7 +255,7 @@ export default class VolumesView extends Vue {
     return (id: string) => {
       let res = null;
       let met = this.$store.getters.volumeMetrics[id];
-      if (met.length > 0)
+      if (met && met.length > 0)
         res = met[met.length - 1] ? met[met.length - 1].usage : "-";
       return res;
     };
