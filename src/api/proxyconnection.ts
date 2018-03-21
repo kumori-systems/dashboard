@@ -423,8 +423,8 @@ export class ProxyConnection extends EventEmitter {
                       'Service ' + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel
                       + ' has been linked with '
-                      + event.data.endpoints[0].deployment
-                      + ':' + event.data.endpoints[0].channel,
+                      + event.data.endpoints[1].deployment
+                      + ':' + event.data.endpoints[1].channel,
                       JSON.stringify(event, null, 4)
                     )
                   );
