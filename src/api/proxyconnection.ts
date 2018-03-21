@@ -1375,14 +1375,13 @@ export class ProxyConnection extends EventEmitter {
           // Ther's actually a bug in which deployments with no certificates
           // return a resource with null parameters
           if (ecloudDeployment.resources[res].resource.parameters) {
-            resources[res] = ecloudDeployment.resources[res].resource.parameters
-              .name;
+            resources[res] = ecloudDeployment.resources[res].resource.name;
 
             this.emit(
               this.onAddCertificate,
               ecloudDeployment.resources[res].resource.name,
               new Certificate(
-                ecloudDeployment.resources[res].resource.parameters.name, // urn
+                ecloudDeployment.resources[res].resource.name, // urn
                 ecloudDeployment.resources[res].resource.parameters.content
                   .key, // key
                 ecloudDeployment.resources[res].resource.parameters.content
