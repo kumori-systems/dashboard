@@ -309,10 +309,12 @@ import SSGetters from "../store/stampstate/getters";
 import {
   Certificate,
   Component,
-  Service,
-  Runtime,
   Deployment,
-  EntryPoint
+  ECloudElement,
+  EntryPoint,
+  Resource,
+  Runtime,
+  Service
 } from "../store/stampstate/classes";
 
 @VueClassComponent({
@@ -526,8 +528,28 @@ export default class ElementsView extends Vue {
    */
   get selectedElementInfo(): string {
     let res: string = "";
+    let getter: string = null;
     if (this.selectedElement) {
-      let item = this.$store.getters.elementInfo(this.selectedElement);
+      switch (utils.getElementType(this.selectedElement)) {
+        case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
+          getter = "components";
+          break;
+        case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
+          getter = "runtimes";
+          break;
+        case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
+          getter = "services";
+          break;
+        case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
+          getter = "resources";
+          switch (utils.getResourceType(this.selectedElement)) {
+            case Resource.RESOURCE_TYPE.CERTIFICATE:
+              getter = "certificates";
+              break;
+          }
+      }
+
+      let item = this.$store.getters[getter][this.selectedElement];
       if (!item) {
         this.$store.dispatch("getElementInfo", this.selectedElement);
       } else {
