@@ -657,8 +657,12 @@ export class ProxyConnection extends EventEmitter {
               registeredResIndex,
               new Certificate(
                 registeredResIndex, // urn
-                registeredResources[registeredResIndex].parameters.key, // key
-                registeredResources[registeredResIndex].parameters.cert, // cert
+                // key
+                registeredResources[registeredResIndex].parameters.content.key,
+                // cert
+                registeredResources[registeredResIndex].parameters.content.cert,
+                // ca
+                registeredResources[registeredResIndex].parameters.content.ca,
                 registeredResources[registeredResIndex].deployment // UsedBy
               )
             );
@@ -1386,6 +1390,8 @@ export class ProxyConnection extends EventEmitter {
                   .key, // key
                 ecloudDeployment.resources[res].resource.parameters.content
                   .cert, // certificate
+                ecloudDeployment.resources[res].resource.parameters.content
+                  .ca, // ca
                 ecloudDeployment.urn // usedBy
               )
             );
@@ -2008,6 +2014,7 @@ export class ProxyConnection extends EventEmitter {
           manifest.name, // urn
           manifest.parameters.content.key, // key
           manifest.parameters.content.cert, // certificate
+          manifest.parameters.content.ca, // certificate
           null // usedBy
         );
 
