@@ -331,6 +331,9 @@ export class Certificate extends Resource {
   /** Certificate. */
   readonly cert: string;
 
+  /** Certification authority. */
+  readonly ca: string;
+
   /**
    * A confirmation of veracity of the connection.
    * @param urn <string> Uniform Resource Identifier for this data volume.
@@ -338,13 +341,16 @@ export class Certificate extends Resource {
    * @param cert <string> Certificate itself.
    * @param usedBy <string> URN of the service which uses this certificate.
    */
-  constructor(urn: string, key: string, cert: string, usedBy: string) {
+  constructor(
+    urn: string, key: string, cert: string, ca?: string, usedBy?: string
+  ) {
 
     super(urn, Resource.RESOURCE_TYPE.CERTIFICATE, usedBy);
     if (!key) throw new Error('A certificate requires a key.');
     this.key = key;
     if (!cert) throw new Error('A certificate requires a cert.');
     this.cert = cert;
+    if (ca) this.ca = ca;
 
   }
 
