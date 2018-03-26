@@ -669,16 +669,22 @@ export class ProxyConnection extends EventEmitter {
             break;
 
           case Resource.RESOURCE_TYPE.DOMAIN:
-            this.emit(
-              this.onAddDomain,
-              registeredResIndex,
-              new Domain(
-                registeredResIndex, // urn
-                registeredResources[registeredResIndex].parameters.vhost, // url
-                Domain.STATE.SUCCESS, // State
-                registeredResources[registeredResIndex].deployment // UsedBy
-              )
-            );
+            try {
+              this.emit(
+                this.onAddDomain,
+                registeredResIndex,
+                new Domain(
+                  registeredResIndex, // urn
+                  // url
+                  registeredResources[registeredResIndex].parameters.vhost,
+                  Domain.STATE.SUCCESS, // State
+                  registeredResources[registeredResIndex].deployment // UsedBy
+                )
+              );
+            } catch (err) {
+              console.error('Error emmitting domain', registeredResIndex, err);
+            }
+
             break;
 
           case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
@@ -735,26 +741,32 @@ export class ProxyConnection extends EventEmitter {
                     .usage // usage
                 );
             }
-            this.emit(
-              this.onAddVolatileVolume,
-              registeredResIndex,
-              new VolatileVolume(
-                registeredResIndex, // id
-                registeredResources[registeredResIndex].name, // name
-                registeredResources[registeredResIndex].parameters.size, // size
-                volatileVolumeItems, // items
-                // filesystem
-                registeredResources[registeredResIndex].parameters.filesystem,
-                null, // associated role
-                registeredResources[registeredResIndex].deployment // usedBy
-              )
-            );
+
+            try {
+              this.emit(
+                this.onAddVolatileVolume,
+                registeredResIndex,
+                new VolatileVolume(
+                  registeredResIndex, // id
+                  registeredResources[registeredResIndex].name, // name
+                  // size
+                  registeredResources[registeredResIndex].parameters.size,
+                  volatileVolumeItems, // items
+                  // filesystem
+                  registeredResources[registeredResIndex].parameters.filesystem,
+                  null, // associated role
+                  registeredResources[registeredResIndex].deployment // usedBy
+                )
+              );
+            } catch (err) {
+              console.error('Error creating volume', registeredResIndex, err);
+            }
+
             break;
 
           default:
-            throw new Error(
-              'Unrecognized resource \'' + registeredResIndex + '\''
-            );
+            console.error('Unrecognized resource \'' + registeredResIndex
+              + '\'');
         }
       }
     });
@@ -768,7 +780,12 @@ export class ProxyConnection extends EventEmitter {
 
     return this.admission.findStorage().then((registeredElements) => {
 
+
+      console.debug('FindStorage responded', registeredElements);
+
       for (let i = 0; i < registeredElements.length; i++) {
+
+        console.debug('Analyzing element ', registeredElements[i]);
 
         switch (utils.getElementType(registeredElements[i])) {
 
@@ -811,15 +828,12 @@ export class ProxyConnection extends EventEmitter {
                 );
                 break;
               default:
-                throw new Error(
-                  'Unknown resource type ' + registeredElements[i]
-                );
+                console.error('Unknown resource type ' + registeredElements[i]);
             }
             break;
 
           default:
-
-            throw new Error('Unkown element: ' + registeredElements[i]);
+            console.error('Unkown element: ' + registeredElements[i]);
         }
       }
     });
@@ -1032,17 +1046,19 @@ export class ProxyConnection extends EventEmitter {
 
   /* DEPLOYMENTS */
   getDeploymentList(): Promise<any> {
-
-    let pro: Promise<any> = this.admission.findDeployments();
-    pro = pro.then((deploymentList) => {
+    return this.admission.findDeployments().then((deploymentList) => {
+      console.debug('Admission answered deployment request ');
       let promiseArray: Promise<any>[] = [];
-      for (let DeploymentURN in deploymentList) {
+      for (let deploymentURN in deploymentList) {
+        console.debug('Transforming deployment', deploymentURN,
+          deploymentList[deploymentURN]
+        );
         let deployment: Deployment =
           this.transformEcloudDeploymentToDeployment(
-            deploymentList[DeploymentURN] // Deployment
+            deploymentList[deploymentURN] // Deployment
           );
 
-        this.emit(this.onDeploy, DeploymentURN, deployment);
+        this.emit(this.onDeploy, deploymentURN, deployment);
 
         promiseArray.push(this.getElementInfo(deployment.service)
           .catch((err) => {
@@ -1055,7 +1071,6 @@ export class ProxyConnection extends EventEmitter {
         .catch(err => { })
         .then(() => { });
     });
-    return pro;
 
   }
 
@@ -1239,7 +1254,6 @@ export class ProxyConnection extends EventEmitter {
     return this.admission.sendBundle(new FileStream(file));
   }
 
-
   /**
    * Transforms the library class Ecloud Deployment to a local Deployment.
    * @param emitter <ProxyConnection> Emmiter to send notifications of events.
@@ -1400,17 +1414,24 @@ export class ProxyConnection extends EventEmitter {
 
         case Resource.RESOURCE_TYPE.DOMAIN:
           resources[res] = ecloudDeployment.resources[res].resource.name;
-          this.emit(
-            this.onAddDomain,
-            ecloudDeployment.resources[res].resource.name,
-            new Domain(
-              ecloudDeployment.resources[res].resource.name, // urn
-              // domain
-              ecloudDeployment.resources[res].resource.parameters.vhost,
-              Domain.STATE.SUCCESS, // state
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddDomain,
+              ecloudDeployment.resources[res].resource.name,
+              new Domain(
+                ecloudDeployment.resources[res].resource.name, // urn
+                // domain
+                ecloudDeployment.resources[res].resource.parameters ?
+                  ecloudDeployment.resources[res].resource.parameters.vhost :
+                  null,
+                Domain.STATE.SUCCESS, // state
+                ecloudDeployment.urn // usedBy
+              )
+            );
+          } catch (err) {
+            console.error('Error emitting a domain', err);
+          }
+
           break;
 
         case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
@@ -1460,33 +1481,40 @@ export class ProxyConnection extends EventEmitter {
 
               volumeURN =
                 volatileItems[resourceInstances[resInstIndex].id]._urn;
+
+              console.debug('Content:',
+                volatileItems[resourceInstances[resInstIndex].id]);
             }
           }
 
           resources[res] = volumeURN;
 
-          // Due to the identifier, volatile volumes can't be added when getting
-          // the info of a deployment and must be added in a different call
-          this.emit(
-            this.onAddVolatileVolume,
-            volumeURN,
-            new VolatileVolume(
-              volumeURN, // id
-              res, // name
-              ecloudDeployment.resources[res].resource.parameters.size, // size
-              volatileItems, // items
-              // filesystem
-              ecloudDeployment.resources[res].resource.parameters.filesystem,
-              null, // associated role
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddVolatileVolume,
+              volumeURN,
+              new VolatileVolume(
+                volumeURN, // id
+                res, // name
+                // size
+                ecloudDeployment.resources[res].resource.parameters.size,
+                volatileItems, // items
+                // filesystem
+                ecloudDeployment.resources[res].resource.parameters.filesystem,
+                null, // associated role
+                ecloudDeployment.urn // usedBy
+              )
+            );
+
+          } catch (err) {
+            console.error('Error creating volume', volumeURN, err);
+          }
+
           break;
 
         default:
-          throw new Error('Resource not following structure \'' + res + '\' ' +
-            ecloudDeployment.resources[res]
-          );
+          console.error('Resource not following structure \'' + res + '\' ' +
+            ecloudDeployment.resources[res]);
       }
     }
 
@@ -2062,7 +2090,13 @@ export class ProxyConnection extends EventEmitter {
       }
     }
   }): Runtime {
-    return new Runtime(manifest.name);
+    let res: Runtime = null;
+    try {
+      res = new Runtime(manifest.name);
+    } catch (err) {
+      console.error(err);
+    }
+    return res;
   }
 
   private transformEcloudEventDataToServiceMetrics(

@@ -16,9 +16,9 @@
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
         <v-layout>
-          <v-flex ma-1 xs2>{{ instance.memory }} MEM</v-flex>
-          <v-flex ma-1 xs2>{{ instance.cpu }} CPU</v-flex>
-          <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
+          <v-flex ma-1 xs2>{{ instance.memory }} <strong>MEM</strong></v-flex>
+          <v-flex ma-1 xs2>{{ instance.cpu }} <strong>CPU</strong></v-flex>
+          <v-flex ma-1 xs2>{{ instance.bandwidth }} <strong>NET</strong></v-flex>
         </v-layout>
 
         <v-layout>

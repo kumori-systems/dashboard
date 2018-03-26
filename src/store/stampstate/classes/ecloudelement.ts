@@ -12,7 +12,10 @@ export abstract class ECloudElement {
    */
   constructor(elementType: ECloudElement.ECLOUDELEMENT_TYPE) {
 
-    if (!elementType) throw new Error('Invalid Ecloud Type: ' + elementType);
+    if (!elementType) {
+      console.error('Invalid Ecloud Type: ' + elementType);
+      throw new Error('Invalid Ecloud Type: ' + elementType);
+    }
     this._element_type = elementType;
 
   }

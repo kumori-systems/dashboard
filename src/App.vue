@@ -10,16 +10,10 @@
 
       <!-- Content of the page -->
       <v-content>
-        <v-container fluid>
-          <router-view :key="$route.fullPath"></router-view>
+        <v-container fluid wrap>
+          <router-view :key="$route.fullPath" wrap></router-view>
         </v-container>
       </v-content>
-
-      <!-- Page's footer -->
-      <v-footer app>
-        <v-spacer></v-spacer>
-        <span>&copy; 2017</span>
-      </v-footer>
 
     </template>
     <template v-else>
@@ -119,6 +113,16 @@ export default class App extends Vue {
   }
 }
 </script>
+
 <style lang="stylus">
 @import './stylus/main';
+</style>
+
+<style lang="scss">
+#kumori-dashboard {
+  background: #d1406b;
+}
+.mybackground{
+  background:#fdfdfd;
+}
 </style>

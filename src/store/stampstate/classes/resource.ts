@@ -29,9 +29,15 @@ export class Resource extends ECloudElement {
     urn: string, resourceType: Resource.RESOURCE_TYPE, usedBy?: string
   ) {
     super(ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE);
-    if (!urn) throw new Error('A resource requires an URN');
+    if (!urn) {
+      console.error('A resource requires an URN');
+      throw new Error('A resource requires an URN');
+    }
     this._urn = urn;
-    if (!resourceType) throw new Error('A resource requires a resource type');
+    if (!resourceType) {
+      console.error('A resource requires a resource type');
+      throw new Error('A resource requires a resource type');
+    }
     this._resource_type = resourceType;
     if (usedBy) this.usedBy = [usedBy];
   }
@@ -137,8 +143,14 @@ export abstract class Volume extends Resource {
 
     if (name) this.name = name;
 
-    if (!size) throw new Error('A volume must have a size associated.');
-    if (size <= 0) throw new Error('A volume\'s size must be higher than 0.');
+    if (!size) {
+      console.error('A volume must have a size associated.');
+      throw new Error('A volume must have a size associated.');
+    }
+    if (size <= 0) {
+      console.error('A volume\'s size must be higher than 0.');
+      throw new Error('A volume\'s size must be higher than 0.');
+    }
     this.size = size;
 
     if (filesystem) this.filesystem = filesystem;
@@ -193,15 +205,21 @@ export module Volume {
       associatedRole?: string, associatedInstance?: string, usage?: number
     ) {
 
-      if (!id) throw new Error('A volume instance must have an id');
+      if (!id) {
+        console.error('A volume instance must have an id');
+        throw new Error('A volume instance must have an id');
+      }
       this.id = id;
-      if (!volumeName) throw new Error('A volume instance must reference a'
-        + ' volume');
+      if (!volumeName) {
+        console.error('A volume instance must reference a volume');
+        throw new Error('A volume instance must reference a volume');
+      }
       this.volumeName = volumeName;
       if (definitionURN) this._urn = definitionURN;
       if (associatedRole) this.associatedRole = associatedRole;
       if (associatedInstance) this.associatedInstance = associatedInstance;
       if (usage && usage < 0) {
+        console.error('A volume usage cant be negative');
         throw new Error('A volume usage cant be negative');
       }
       if (usage) this.usage = usage;
@@ -346,9 +364,15 @@ export class Certificate extends Resource {
   ) {
 
     super(urn, Resource.RESOURCE_TYPE.CERTIFICATE, usedBy);
-    if (!key) throw new Error('A certificate requires a key.');
+    if (!key) {
+      console.error('A certificate requires a key.');
+      throw new Error('A certificate requires a key.');
+    }
     this.key = key;
-    if (!cert) throw new Error('A certificate requires a cert.');
+    if (!cert) {
+      console.error('A certificate requires a cert.');
+      throw new Error('A certificate requires a cert.');
+    }
     this.cert = cert;
     if (ca) this.ca = ca;
 

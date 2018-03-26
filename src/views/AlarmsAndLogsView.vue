@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->

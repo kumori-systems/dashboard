@@ -1,5 +1,5 @@
 <template>
-  <v-card id="volumes-view">
+  <v-card id="volumes-view" style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->
@@ -11,12 +11,19 @@
       <!-- View actions -->
       <v-card-actions>
 
-        <!-- Cancels the action -->
-        <v-btn outline to="/addPersistentVolume">Add Volume</v-btn>
+        <!-- Add a volume -->
+        <v-btn outline color="primary" to="/addPersistentVolume">
+          <span>Add Volume</span>
+          <v-icon right>storage</v-icon>
+        </v-btn>
 
       </v-card-actions>
 
     </v-card-title>
+
+    <!-- Divides different sections of the view -->
+    <v-divider></v-divider>
+
     <v-container>
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">

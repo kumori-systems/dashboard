@@ -1,6 +1,6 @@
 <template>
   <v-form v-model="valid" ref="form">
-    <v-card>
+    <v-card style="max-width:1300px">
       <v-card-title>
 
         <!-- View title -->

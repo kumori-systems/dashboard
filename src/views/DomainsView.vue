@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->
@@ -19,6 +19,10 @@
         
       </v-card-actions>
     </v-card-title>
+
+    <!-- Divides different sections of the view -->
+    <v-divider></v-divider>
+
     <v-container>
     <v-data-table
       v-bind:headers="headers"

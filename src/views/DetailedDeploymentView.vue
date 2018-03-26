@@ -1,7 +1,7 @@
 <template>
 <v-form ref="form" lazy-validation>
-  <v-card v-if="deployment">
-    <v-card-title>
+  <v-card v-if="deployment" style="max-width:1300px">
+    <v-card-title class="mybackground">
       
       <!-- View title-->
       <h3 class="headline mb-0">
@@ -28,7 +28,7 @@
     <v-divider></v-divider>
 
     <!-- Main content of the view-->
-    <v-container fluid id="deployment-item-view">
+    <v-container fluid id="deployment-item-view" class="mybackground">
 
       <!-- Deployment general info -->
       <v-container fluid id="deployment-item-view">
@@ -41,36 +41,34 @@
           </v-flex>
 
           <!-- Detailed info -->
-          <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+          <v-flex ma-1 xs12 sm6>
 
             <!-- Deployment urn -->
             <v-layout wrap>
               <v-flex ma-1 xs12>
-                <span class="subheading">URN</span><p>{{ deployment._urn }}</p>
+                <strong>URN: </strong>{{ deployment._urn }}
               </v-flex>
-            </v-layout>
+            
 
             <!-- Deployment creation date -->
-            <v-layout wrap>
+            
               <v-flex ma-1 xs12>
-                <span class="subheading">Date</span>
-                <p>{{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}</p>
+                <strong>Date: </strong>{{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
               </v-flex>
-            </v-layout>
+            
 
             <!-- Deployment service -->
-            <v-layout wrap>
+            
               <v-flex ma-1 xs12>
-                <span class="subheading">Service</span>
-                <p>{{ deployment.service }}</p>
+                <strong>Service: </strong>{{ deployment.service }}
               </v-flex>
             </v-layout>
 
             <!-- Persistent Volumes -->
             <template v-if="deploymentPersistentVolumes.length > 0">
-              <span class="subheading">Persistent volumes</span>
-              <v-list>
-                <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div">
+              <strong class="ma-1">Persistent volumes:</strong>
+              <v-list class="pa-0">
+                <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div" class="mybackground">
                   <v-card-actions>
                     <v-icon class="indigo--text">storage</v-icon>
                   </v-card-actions>
@@ -91,9 +89,9 @@
             
              <!-- Volatile Volumes -->
             <template v-if="deploymentVolatileVolumes.length > 0">
-              <span class="subheading">Volatile volumes</span>
-              <v-list>
-                <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div">
+              <strong>Volatile volumes:</strong>
+              <v-list class="pa-0">
+                <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div" class="mybackground">
                   <v-card-actions>
                     <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
                   </v-card-actions>
@@ -112,9 +110,9 @@
             <!-- Websites -->
             <v-layout v-if="deployment instanceof HTTPEntryPoint">
               <v-flex ma-1 xs12>
-                <span class="subheading">Websites</span>
-                <v-list>
-                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index">
+                <strong>Websites:</strong>
+                <v-list class="pa-0">
+                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" class="mybackground">
                   <v-list-tile-title>
                     <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
                     <a v-else v-bind:href="'http://' + web">{{ web }}</a>
@@ -125,18 +123,12 @@
             </v-layout>
 
             <!-- Deployment links -->
-            <v-layout wrap>
+            <v-layout>
               <v-flex ma-1 xs12>
-                <span class="subheading">Connections</span>
+                <strong>Connections:</strong>
                   
                 <!-- Link table representation -->
                 <table>
-
-                  <!-- Headers-->
-                  <tr>
-                    <th>From</th>
-                    <th>To</th>
-                  </tr>
 
                   <!-- Provided Channels -->
                   <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
@@ -922,5 +914,9 @@ $icon_size: 80px;
 
 #unknown {
   font-size: $icon_size;
+}
+
+input, th, td, table{
+  padding:0px;
 }
 </style>

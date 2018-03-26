@@ -1,5 +1,5 @@
 <template>
-    <v-card id="upload-bundle-view">
+    <v-card id="upload-bundle-view" style="max-width:1300px">
       <v-card-title>
 
         <!-- View title -->

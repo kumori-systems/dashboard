@@ -2,32 +2,36 @@
   <v-layout id="signin-view">
 
     <!-- Resizes the view -->
-    <v-flex class="mt-5" xs12 sm8 offset-sm2 v-on:keyup.enter="signIn" wrap>
+    <v-flex class="mt-5" xs12 sm6 offset-sm3 v-on:keyup.enter="signIn" wrap v-if="!loading">
         
-        <!-- Signin form view -->
-        <v-card class="elevation-10" v-if="!loading">
+      <!-- Signin form view -->
+      <v-card class="elevation-10">
           
-          <!-- Card body-->
-          <v-card-text>
+        <!-- Card body-->
+        <v-card-text class="mybackground">
 
-            <v-layout>
+          <v-layout>
 
-              <v-flex xs6 wrap>
+            <v-flex xs6 wrap>
 
-                <!-- Logo image -->
-                <v-card-media class="mt-4 mb-4" src="/static/logo_text.png" height="100px" contain></v-card-media>
+              <!-- Logo image -->
+              <v-card-media class="mt-4 mb-4" src="/static/logo_text.png"
+                height="100px" contain></v-card-media>
 
-                <p class="subheading grey--text pt-4">
-                  Kumori's PAAS provides the best experience for your applications and services.
-                </p>
+              <p class="subheading grey--text pt-4">
+                Kumori's PAAS provides the best experience for your
+                applications and services.
+              </p>
 
-                <p class="subheading grey--text">
-                  Join now and enjoy our welcome offers.
-                </p>
+              <p class="subheading grey--text">
+                Join now and enjoy our welcome offers.
+              </p>
 
-              </v-flex>
-              <v-flex xs6 wrap>
-              
+            </v-flex>
+            <v-flex xs6 wrap>
+
+              <v-container>
+                  
                 <!-- Card title -->
                 <h3 class="headline">Sign in</h3>
                 <v-divider></v-divider>
@@ -35,69 +39,87 @@
                 <v-form ref="form" class="mt-4">
 
                   <!-- Username text field -->
-                  <v-text-field autocomplete="username" v-model="userName" v-bind:disabled="loading" prepend-icon="person" label="Enter your User" autofocus></v-text-field>
-                  
+                  <v-text-field autocomplete="username" v-model="userName"
+                    v-bind:disabled="loading" prepend-icon="person"
+                    label="Enter your User" autofocus></v-text-field>
+                    
                   <!-- Current password text field -->
-                  <v-text-field autocomplete="current-password" v-model="userPassword" v-bind:disabled="loading" prepend-icon="lock" label="Enter your password" min="1" v-bind:append-icon="viewPassword ? 'visibility' : 'visibility_off'" v-bind:append-icon-cb="() => (viewPassword = !viewPassword)" :type="viewPassword ? 'text' : 'password'"></v-text-field>                
-                  
+                  <v-text-field autocomplete="current-password"
+                    v-model="userPassword" v-bind:disabled="loading"
+                    prepend-icon="lock" label="Enter your password" min="1"
+                    v-bind:append-icon="viewPassword ? 'visibility' :
+                    'visibility_off'" v-bind:append-icon-cb="() =>
+                    (viewPassword = !viewPassword)" :type="viewPassword ? 'text'
+                    : 'password'"></v-text-field>                
+                    
                   <!-- Card actions -->
                   <v-card-actions>                    
-                  
+                    
                     <!-- Friendly result message -->
-                    <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
+                    <span class="ma-3" v-bind:class="friendlyMessageClass">
+                      {{ friendlyMessage }}</span>
                   
                     <!-- Adds space between components -->
                     <v-spacer></v-spacer>
                   
                     <!-- Main button -->
-                    <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
-                      Continue
-                    </v-btn>
-                  
+                    <v-btn color="primary" flat v-bind:loading="loading"
+                      class="primary--text ma-3" v-bind:disabled="loading"
+                      v-on:click="signIn">Continue</v-btn>
+                    
                   </v-card-actions>
-
                 </v-form>
 
-              </v-flex>
+                <!-- Sign in with google -->
+                <v-layout>
 
-            </v-layout>
+                  <v-spacer></v-spacer>
 
-          </v-card-text>
+                  <a class="ma-3" v-bind:href="googleOauthURN">
 
-          <!-- Sign in with google -->
-          <v-layout>
+                    <img src="/static/btn_google_signin_light_normal_web.png">
 
-            <v-spacer></v-spacer>
+                  </a>
 
-            <a class="ma-3" v-bind:href="googleOauthURN">
+                </v-layout>
 
-              <img src="/static/btn_google_signin_light_normal_web.png">
+              </v-container>
 
-            </a>
+            </v-flex>
 
           </v-layout>
 
-        </v-card>
+        </v-card-text>
+
+      </v-card>
+
+    </v-flex>
+
+    <v-flex class="mt-5" xs12 sm4 offset-sm4 wrap v-else>
 
         <!-- Loading view -->
-        <v-card class="elevation-10" v-else>
+        <v-card class="elevation-10" >
 
-          <!-- Logo image -->
-          <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
+          <!-- Card body-->
+          <v-card-text class="mybackground">
 
-          <!-- Card title -->
-          <v-card-title primary-title>
-
-              <h3 class="headline">Accessing Ecloud Dashboard</h3>
-
-              <div>
-
-                <v-btn color="primary" flat loading></v-btn>
-                <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
-                
-              </div>
+            <!-- Logo image -->
+            <v-card-media src="/static/logo_text.png"
+              height="100px" contain></v-card-media>
               
-          </v-card-title>
+            
+            <div class="text-xs-center ma-4">
+
+              <!-- Loading spinner -->
+              <v-btn color="info" flat loading></v-btn>
+
+              <!-- Friendly message -->
+              <span class="ma-3" v-bind:class="friendlyMessageClass">
+                {{ friendlyMessage }}</span>
+
+            </div>
+
+          </v-card-text>
 
         </v-card>
 
@@ -240,9 +262,5 @@ export default class SignInView extends Vue {
 
 #googleoauth {
   text-decoration: initial;
-}
-
-#signin-view {
-  background: #d1406b;
 }
 </style>

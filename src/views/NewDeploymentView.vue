@@ -1,6 +1,6 @@
 <template>
   <v-form v-model="valid" ref="form">
-    <v-card id="add-deployment-view">
+    <v-card id="add-deployment-view" style="max-width:1300px">
 
       <!-- Card tittle -->
       <v-card-title>

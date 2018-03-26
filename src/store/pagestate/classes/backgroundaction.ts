@@ -43,6 +43,7 @@ export class BackgroundAction {
 
     // Assign the background type
     if (!type) {
+      console.error('A type is required to create a BackgroundAction');
       throw new Error('A type is required to create a BackgroundAction');
     }
     this.type = type;

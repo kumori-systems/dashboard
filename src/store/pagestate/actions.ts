@@ -255,7 +255,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
+
+      console.debug('Going to get a reference to all elements from the stamp');
+
       return ProxyConnection.instance.getRegisteredElements().then(() => {
+
+        console.debug('Retrieved all elements from the stamp');
+
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -269,7 +275,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all resources
 
+      console.debug('Retrieving all resources from the stamp');
+
       return ProxyConnection.instance.getResources().then(() => {
+
+        console.debug('Retrieved all resources from the stamp');
+
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -279,11 +290,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           )
         );
         return user;
+      }).catch((err) => {
+        console.error(err);
+        return user;
       });
 
     }).then((user) => { // Load all deployments
-
+      
+      console.debug('Going to ask for deployment info');
       return ProxyConnection.instance.getDeploymentList().then(() => {
+        console.debug('Retrieved info from all deployments');
 
         injectee.dispatch('addNotification',
           new Notification(
