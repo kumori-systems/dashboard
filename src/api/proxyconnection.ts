@@ -22,8 +22,6 @@ import {
   Resource, Runtime, Service, StringParameter, VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
-
-import { ACS_URL, ADMISSION_URL } from './config.js';
 import { utils } from './index';
 
 
@@ -229,8 +227,10 @@ export class ProxyConnection extends EventEmitter {
     username: string, password: string, userId?: string, token?: User.Token
   ): Promise<any> {
 
+    let acsURL = localStorage.getItem('acsURL');
+
     // ACS will be used in both cases to refresh the token
-    this.acs = new EcloudAcsClient(ACS_URL);
+    this.acs = new EcloudAcsClient(acsURL);
     let signIn: Promise<User>;
     if (!token) {
 
@@ -264,7 +264,9 @@ export class ProxyConnection extends EventEmitter {
       .then(() => signIn)
       .then((user: User) => {
 
-        this.admission = new EcloudAdmissionClient(ADMISSION_URL,
+        let admissionURL = localStorage.getItem("admissionURL");
+
+        this.admission = new EcloudAdmissionClient(admissionURL,
           user.token.accessToken);
 
         this.admission.onConnected(() => {

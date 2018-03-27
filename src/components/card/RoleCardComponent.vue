@@ -15,11 +15,11 @@
       <!-- Num instances selector -->
       <span>Instances</span>
       
-        <v-btn flat class="pa-0 ma-0 black--text" v-on:click="lessInstances"><v-icon >remove</v-icon></v-btn>
+        <v-btn flat icon class="pa-0 ma-0 black--text" v-on:click="lessInstances"><v-icon >remove</v-icon></v-btn>
       
       {{ localNumInstances }}
       <v-flex xs1>
-        <v-btn flat class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
+        <v-btn flat icon class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
           <v-icon>add</v-icon>
         </v-btn>
       </v-flex>

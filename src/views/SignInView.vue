@@ -89,6 +89,8 @@
 
           </v-layout>
 
+          <v-btn flat icon v-on:click="showPannel=true"><v-icon>settings</v-icon></v-btn>
+
         </v-card-text>
 
       </v-card>
@@ -124,6 +126,25 @@
         </v-card>
 
     </v-flex>
+      
+      <v-dialog v-model="showPannel" max-width="800px">
+        <v-card>
+          <v-card-title class="headline">Configuration</v-card-title>
+          <v-card-text>
+              
+              <v-text-field label="acs URL" v-model="acsURL"></v-text-field>
+              <v-text-field label="admission URL" v-model="admissionURL"></v-text-field>
+
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn outline @click.native="updateConfig">Update</v-btn>
+            <v-btn outline @click.native="clearConfig">Clear</v-btn>
+            <v-btn flat @click.native="showPannel = false">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
 
   </v-layout>
 </template>
@@ -158,11 +179,22 @@ export default class SignInView extends Vue {
   /** <string> URL where the browser is redirected to procceed to google's oauth. */
   googleOauthURN: string = null;
 
+  /** <boolean> Shows the config pannel. */
+  showPannel: boolean = false;
+
+  /** <string> acs url. */
+  acsURL: string = null;
+
+  /** <string> admission url. */
+  admissionURL: string = null;
+
   /** Mounted hook. */
   mounted() {
+    this.loadURLS();
+
     // Set redirection path for google oauth
     this.googleOauthURN =
-      config.ACS_URL +
+      this.acsURL +
       "/auth/google?redirectOnSuccessUrl=" +
       urlencode(location.origin + "/#/overview") +
       "&redirectOnFailureUrl=" +
@@ -212,14 +244,44 @@ export default class SignInView extends Vue {
     return "";
   }
 
+  loadURLS() {
+    // Intentamos buscar la direccion de acs en el storage
+    this.acsURL = localStorage.getItem("acsURL");
+    this.admissionURL = localStorage.getItem("admissionURL");
+
+    if (!this.acsURL) {
+      this.acsURL = config.ACS_URL;
+      localStorage.setItem("acsURL", this.acsURL);
+    }
+    if (!this.admissionURL) {
+      this.admissionURL = config.ADMISSION_URL;
+      localStorage.setItem("admissionURL", this.admissionURL);
+    }
+  }
+
   /**
    * Function to sign in to the system.
    */
   signIn() {
+    if (!this.acsURL || !this.admissionURL) this.loadURLS();
     this.$store.dispatch("signIn", {
       username: this.userName,
       userpassword: this.userPassword
     });
+  }
+
+  updateConfig() {
+    localStorage.setItem("acsURL", this.acsURL);
+    localStorage.setItem("admissionURL", this.admissionURL);
+    this.showPannel = false;
+  }
+
+  clearConfig() {
+    this.acsURL = null;
+    this.admissionURL = null;
+    localStorage.removeItem("acsURL");
+    localStorage.removeItem("admissionURL");
+    this.showPannel = false;
   }
 }
 </script>
