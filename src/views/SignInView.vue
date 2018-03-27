@@ -140,7 +140,7 @@
             <v-spacer></v-spacer>
             <v-btn outline @click.native="updateConfig">Update</v-btn>
             <v-btn outline @click.native="clearConfig">Clear</v-btn>
-            <v-btn flat @click.native="showPannel = false">Cancel</v-btn>
+            <v-btn flat @click.native="showPannel = false">Close</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -277,11 +277,10 @@ export default class SignInView extends Vue {
   }
 
   clearConfig() {
-    this.acsURL = null;
-    this.admissionURL = null;
-    localStorage.removeItem("acsURL");
-    localStorage.removeItem("admissionURL");
-    this.showPannel = false;
+    this.acsURL = config.ACS_URL;
+    localStorage.setItem("acsURL", this.acsURL);
+    this.admissionURL = config.ADMISSION_URL;
+    localStorage.setItem("admissionURL", this.admissionURL);
   }
 }
 </script>
