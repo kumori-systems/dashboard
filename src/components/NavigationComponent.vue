@@ -54,7 +54,7 @@ export default class NavigationComponent extends Vue {
         "deployment",
         this.deployedServices
       ),
-      new NavigationItem("widgets", "Elements", "/elements"),
+      new NavigationItem("widgets", "Available elements", "/availableelements"),
       new NavigationItem("domain", "Domains", "/domains"),
       new NavigationItem("storage", "Data volumes", "/volumes"),
       new NavigationItem("alarm", "Alarms & logs", "/alarmsAndLogs"),

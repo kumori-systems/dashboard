@@ -12,13 +12,13 @@
       <v-card-actions>
 
         <!-- Adds a volume to the system -->
-        <v-btn class="elevation-0" color="primary" v-on:click="addPersistentVolume" v-bind:disabled="!valid">
+        <v-btn class="elevation-0" outline v-on:click="addPersistentVolume" v-bind:disabled="!valid">
           <span>Add Volume</span>
           <v-icon right>storage</v-icon>
         </v-btn>
 
         <!-- Cancels the action -->
-        <v-btn outline v-on:click="cancel">Cancel</v-btn>
+        <v-btn flat v-on:click="cancel">Cancel</v-btn>
 
       </v-card-actions>
 

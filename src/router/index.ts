@@ -23,7 +23,7 @@ export default new Router({
       component: DetailedDeploymentView
     },
     {
-      path: '/elements',
+      path: '/availableelements',
       component: ElementsView
     },
     {

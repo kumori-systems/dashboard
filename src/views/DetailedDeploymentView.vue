@@ -93,7 +93,7 @@
               <v-list class="pa-0">
                 <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div" class="mybackground">
                   <v-card-actions>
-                    <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
+                    <v-icon class="orange--text text--lighten-2">storage</v-icon>
                   </v-card-actions>
                   <v-list-tile-title>
 
@@ -132,7 +132,7 @@
 
                   <!-- Provided Channels -->
                   <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip color="lime">{{ name }}</v-chip></th>
+                    <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
                     <th>
                       <v-select
                         v-model="serviceNewProvidedConnections[name]"
@@ -144,7 +144,7 @@
                         <template slot="selection" scope="items">
                           <v-chip
                             @input="items.parent.selectItem(items.item)"
-                              close color="light-blue lighten-3">
+                              close color="light-blue lighten-1 white--text">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
@@ -165,14 +165,14 @@
                         <template slot="selection" scope="items">
                           <v-chip 
                             @input="items.parent.selectItem(items.item)"
-                            close color="light-blue lighten-3">
+                            close color="light-blue lighten-1 white--text">
                             {{ items.item.text }}
                           </v-chip>
                         </template>
                   
                       </v-select>
                     </th>
-                    <th><v-chip color="lime">{{ name }}</v-chip></th>
+                    <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
                   </tr>
 
                 </table>
@@ -197,9 +197,8 @@
 
       <!-- Deployment roles -->
       <v-layout wrap>
-        <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
-          <role-card-component v-for="(rolContent, rolId) in deployment.roles"
-          v-bind:key="rolId" v-bind:role="rolContent" v-bind:service="service"
+        <v-flex ma-1 xs12 sm12 md12 lg12 xl12 v-for="(rolContent, roleId) in deployment.roles" v-bind:key="roleId">
+          <role-card-component v-bind:role="rolContent" v-bind:service="service"
           v-bind:roleMetrics="deploymentMetrics.roles"
           v-on:killInstanceChange="handleKillInstanceChange"
           v-on:numInstancesChange="handleNumInstancesChange"

@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Add a volume -->
-        <v-btn outline color="primary" to="/addPersistentVolume">
+        <v-btn outline to="/addPersistentVolume">
           <span>Add Volume</span>
           <v-icon right>storage</v-icon>
         </v-btn>
@@ -31,7 +31,7 @@
 
           <td class="text-xs-left">
             <v-icon v-if="props.item[0]" class="indigo--text">storage</v-icon>
-            <v-icon v-else class="light-blue--text text--lighten-2">storage</v-icon>
+            <v-icon v-else class="orange--text text--lighten-2">storage</v-icon>
           </td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[1] }}</td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[2] }}</td>

@@ -12,7 +12,7 @@
         <v-card-actions>
 
           <!-- Upload bundle button -->
-          <v-btn color="primary" class="elevation-0"
+          <v-btn class="elevation-0" outline
           v-bind:disabled="fileList === null || fileList.length === 0"
           v-on:click="addElement">
             <span>Upload bundle</span>
@@ -20,7 +20,7 @@
           </v-btn>
 
           <!-- Cancels the action -->
-          <v-btn outline v-on:click="cancel">Cancel</v-btn>
+          <v-btn flat v-on:click="cancel">Cancel</v-btn>
           
         </v-card-actions>
       </v-card-title>

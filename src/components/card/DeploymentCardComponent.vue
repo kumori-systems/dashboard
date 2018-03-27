@@ -60,7 +60,6 @@
                 </v-list-tile-title>
               </v-list-tile>
             </template>
-            
 
              <!-- Volatile Volumes -->
             <template v-if="deploymentVolatileVolumes.length > 0">
@@ -94,8 +93,8 @@
             <template v-if="deployment instanceof HTTPEntryPoint">
               <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" tag="div">
                 <v-list-tile-title class="text-xs-center">
-                  <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
-                  <a v-else v-bind:href="'http://' + web">{{ web }}</a>
+                  <a class="info_link" v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
+                  <a class="info_link" v-else v-bind:href="'http://' + web">{{ web }}</a>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
@@ -304,7 +303,7 @@ $icon_size: 40px;
   font-size: $icon_size;
 }
 
-#info_link {
-  text-decoration: none;
+#info_link, a {
+  color: white;
 }
 </style>

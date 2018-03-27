@@ -13,10 +13,10 @@
         <v-card-actions>
 
           <!-- Submit button -->
-          <v-btn class="elevation-0" color="primary" v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
+          <v-btn class="elevation-0" outline v-on:click="submit" v-bind:disabled="!valid">Deploy</v-btn>
           
           <!-- Cancel button -->
-          <v-btn outline v-on:click="cancel">Cancel</v-btn>
+          <v-btn flat v-on:click="cancel">Cancel</v-btn>
 
         </v-card-actions>
 

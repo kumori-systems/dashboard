@@ -13,13 +13,13 @@
         <v-card-actions>
           
           <!-- Add Deployment -->
-          <v-btn color="primary" outline to="/addDeployment">
+          <v-btn outline to="/addDeployment">
             <span>Add Common Deployment</span>
             <v-icon right>cloud</v-icon>
           </v-btn>
 
           <!-- Add Entrypoint -->
-          <v-btn color="primary" outline to="/addHTTPEntrypoint">
+          <v-btn outline to="/addHTTPEntrypoint">
             <span>Add Entrypoint</span>
             <v-icon right>language</v-icon>
           </v-btn>

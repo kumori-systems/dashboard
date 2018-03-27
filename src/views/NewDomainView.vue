@@ -13,13 +13,13 @@
         <v-card-actions>
 
           <!-- Add domain button -->
-          <v-btn color="primary" class="elevation-0" v-on:click="submit" v-bind:disabled="!valid">
+          <v-btn outline class="elevation-0" v-on:click="submit" v-bind:disabled="!valid">
             <span>Add domain</span>
             <v-icon right>domain</v-icon>
           </v-btn>
           
           <!-- Cancels the action -->
-          <v-btn outline v-on:click="cancel">Cancel</v-btn>
+          <v-btn flat v-on:click="cancel">Cancel</v-btn>
 
         </v-card-actions>
       </v-card-title>

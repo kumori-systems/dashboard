@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar class="elevation-1" color="white" fixed clipped-left app>
+  <v-toolbar class="elevation-1" fixed clipped-left app>
 
     <!-- Corporative logo -->
     <v-toolbar-title>

@@ -1,11 +1,11 @@
 <template>
+  <v-card v-bind:id="state">
   <v-container fluid>
     <v-layout wrap>
       
       <!-- Instance name -->
-      <v-flex ma-1 xs12 sm5 md5 lg5 xl3>
-        <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
-        <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
+      <v-flex ma-1 xs12>
+        <v-progress-circular v-if="state==='unknown'" indeterminate color="light-blue lighten-4"></v-progress-circular>
         <span class="title">{{ instance.cnid }}</span>
       </v-flex>
 
@@ -13,20 +13,16 @@
     <v-layout wrap>
       
       <!-- Instance arrangement -->
-      <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+      <v-flex ma-1 xs12>
 
-        <v-layout>
-          <v-flex ma-1 xs2>{{ instance.memory }} <strong>MEM</strong></v-flex>
-          <v-flex ma-1 xs2>{{ instance.cpu }} <strong>CPU</strong></v-flex>
-          <v-flex ma-1 xs2>{{ instance.bandwidth }} <strong>NET</strong></v-flex>
-        </v-layout>
+        <strong>MEM</strong> {{ instance.memory }}
+        <strong>CPU</strong> {{ instance.cpu }}
+        <strong>NET</strong> {{ instance.bandwidth }}
 
-        <v-layout>
-          <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
-        </v-layout>
-
+      </v-flex>
+      <v-flex ma-1 xs12>
         
-        <v-list three-line>
+        <v-list three-line v-bind:id="state" class="mybackground pa-0">
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
               <!-- A persistent volume -->
               <v-list-tile-content v-if="vol instanceof PersistentVolume.Instance" >
@@ -35,10 +31,10 @@
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
-                  <v-flex xs12 class="ml-1">
-                  <span>{{ persistentVolumes[vol._urn].filesystem }}</span>
-                  <span>{{ persistentVolumes[vol._urn].size }} GB</span>
-                  </v-flex>
+                    <v-flex xs12 class="ml-1">
+                      <span>{{ persistentVolumes[vol._urn].filesystem }}</span>
+                      <span>{{ persistentVolumes[vol._urn].size }} GB</span>
+                    </v-flex>
                   
                   <v-flex xs6>
                   <span>Used: {{
@@ -58,7 +54,7 @@
               <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
 
                 <v-list-tile-title>
-                  <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}
+                  <v-icon class="orange--text text--lighten-2">storage</v-icon> {{ vol.id }}
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
@@ -81,17 +77,10 @@
           </v-list-tile>
         </v-list>
       </v-flex>
-      
-      <!-- Applies spaces between components -->
-      <v-spacer></v-spacer>
-
-      <!-- Instance chart data -->
-      <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-        <chart-component v-bind:chartData="instanceChartData.data" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
-      </v-flex>
 
     </v-layout>
   </v-container>
+  </v-card>
 </template>
 <script lang="ts">
 import Vue from "vue";
@@ -206,7 +195,7 @@ export default class InstanceCardComponent extends Vue {
     let res: string;
     switch (this.instance.state) {
       case Deployment.Role.Instance.STATE.CONNECTED:
-        res = "check_circle";
+        res = "good";
         break;
       case Deployment.Role.Instance.STATE.DISCONNECTED:
         res = "error";
@@ -234,19 +223,16 @@ $color_grey: #e0e0e0;
 $icon_size: 30px;
 $radius: 5px;
 
-#check_circle {
-  color: $color_green;
-  font-size: $icon_size;
+#good {
+  background: $color_green;
 }
 
 #warning {
-  color: $color_yellow;
-  font-size: $icon_size;
+  background: $color_yellow;
 }
 
 #error {
-  color: $color_red;
-  font-size: $icon_size;
+  background: $color_red;
 }
 
 #unknown {

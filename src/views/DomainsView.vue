@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Upload bundle button -->
-        <v-btn outline color="primary" class="elevation-0" to="/adddomain">
+        <v-btn outline class="elevation-0" to="/adddomain">
           <span>Add domain</span>
           <v-icon right>domain</v-icon>
         </v-btn>
