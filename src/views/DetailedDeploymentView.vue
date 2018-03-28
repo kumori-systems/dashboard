@@ -339,8 +339,8 @@ export default class DetailedDeploymentView extends Vue {
     for (let key in deployments) {
       if (deployments[key]._path === this.$route.path) res = deployments[key];
     }
-    if(!res){
-      this.$router.push('/overview');
+    if (!res) {
+      this.$router.push("/overview");
     }
     return res;
   }
@@ -494,7 +494,15 @@ export default class DetailedDeploymentView extends Vue {
             Channel.CHANNEL_TYPE.REQUEST,
             Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
           ];
+
+        case Channel.CHANNEL_TYPE.SEND:
+          typeSearched = [Channel.CHANNEL_TYPE.RECEIVE];
           break;
+
+        case Channel.CHANNEL_TYPE.RECEIVE:
+          typeSearched = [Channel.CHANNEL_TYPE.SEND];
+          break;
+
         default:
           this.$store.dispatch(
             "addNotification",
@@ -575,6 +583,14 @@ export default class DetailedDeploymentView extends Vue {
             Channel.CHANNEL_TYPE.REQUEST,
             Channel.CHANNEL_TYPE.ENDPOINT_REQUEST
           ];
+          break;
+
+          case Channel.CHANNEL_TYPE.SEND:
+          typeSearched = [Channel.CHANNEL_TYPE.RECEIVE];
+          break;
+
+        case Channel.CHANNEL_TYPE.RECEIVE:
+          typeSearched = [Channel.CHANNEL_TYPE.SEND];
           break;
 
         default:
@@ -915,7 +931,10 @@ $icon_size: 80px;
   font-size: $icon_size;
 }
 
-input, th, td, table{
-  padding:0px;
+input,
+th,
+td,
+table {
+  padding: 0px;
 }
 </style>

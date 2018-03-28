@@ -264,7 +264,7 @@ export class ProxyConnection extends EventEmitter {
       .then(() => signIn)
       .then((user: User) => {
 
-        let admissionURL = localStorage.getItem("admissionURL");
+        let admissionURL = localStorage.getItem('admissionURL');
 
         this.admission = new EcloudAdmissionClient(admissionURL,
           user.token.accessToken);

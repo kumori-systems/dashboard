@@ -53,7 +53,8 @@ export class ProvidedChannel extends Channel {
 
   /** Allowed type of channels for a ProvidedChannel */
   readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
-    Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.SEND,
+    Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.RECEIVE,
+    Channel.CHANNEL_TYPE.SEND,
     Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
     Channel.CHANNEL_TYPE.ENDPOINT_REPLY
   ];
@@ -79,7 +80,9 @@ export class DependedChannel extends Channel {
 
   /** Allowed type of channels for a DependedChannel */
   readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
-    Channel.CHANNEL_TYPE.REQUEST, Channel.CHANNEL_TYPE.RECEIVE,
+    Channel.CHANNEL_TYPE.SEND,
+    Channel.CHANNEL_TYPE.RECEIVE,
+     Channel.CHANNEL_TYPE.REQUEST,
     Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
     Channel.CHANNEL_TYPE.ENDPOINT_REPLY
   ];
