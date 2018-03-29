@@ -3,8 +3,9 @@ import Router from 'vue-router';
 
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
-  NewBundleView, NewDeploymentView, NewDomainView, NewHTTPEntrypointView,
-  NewVolumeView, OverviewView, SignInView, UserSettingsView, VolumesView
+  ManifestEditor, NewBundleView, NewDeploymentView, NewDomainView,
+  NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
+  UserSettingsView, VolumesView
 } from '../views';
 
 Vue.use(Router);
@@ -65,6 +66,10 @@ export default new Router({
     {
       path: '/userSettings',
       component: UserSettingsView
+    },
+    {
+      path: '/manifestEditor',
+      component: ManifestEditor
     },
     // If not found, go to main view
     { path: '*', redirect: '/overview' }

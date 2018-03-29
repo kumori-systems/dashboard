@@ -12,10 +12,11 @@ import OverviewView from './OverviewView.vue';
 import SignInView from './SignInView.vue';
 import UserSettingsView from './UserSettingsView.vue';
 import VolumesView from './VolumesView.vue';
+import ManifestEditor from './ManifestEditor.vue';
 
 export {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
-  HelpView, NewBundleView, NewDeploymentView, NewDomainView,
+  HelpView, ManifestEditor, NewBundleView, NewDeploymentView, NewDomainView,
   NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
   UserSettingsView, VolumesView
 }
