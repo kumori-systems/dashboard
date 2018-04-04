@@ -678,13 +678,15 @@ export class ProxyConnection extends EventEmitter {
                 new Domain(
                   registeredResIndex, // urn
                   // url
-                  registeredResources[registeredResIndex].parameters.vhost,
+                  registeredResources[registeredResIndex].parameters ?
+                    registeredResources[registeredResIndex].parameters.vhost :
+                    null,
                   Domain.STATE.SUCCESS, // State
                   registeredResources[registeredResIndex].deployment // UsedBy
                 )
               );
             } catch (err) {
-              console.error('Error emmitting domain', registeredResIndex, err);
+              console.error('Error emitting domain', registeredResIndex, err);
             }
 
             break;
@@ -1295,42 +1297,50 @@ export class ProxyConnection extends EventEmitter {
               .instances[instanceId].configuration.resources[res].type)) {
 
               case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
-                let volInst: PersistentVolume.Instance =
-                  new PersistentVolume.Instance(
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.id, // id
-                    res, // volume name
-                    // definition URN
-                    ecloudDeployment.resources[res].resource.name,
-                    rolId, // associated role
-                    instanceId, // associated instance
-                    null // usage
-                  );
+                try {
+                  let volInst: PersistentVolume.Instance =
+                    new PersistentVolume.Instance(
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.id, // id
+                      res, // volume name
+                      // definition URN
+                      ecloudDeployment.resources[res].resource.name,
+                      rolId, // associated role
+                      instanceId, // associated instance
+                      null // usage
+                    );
 
-                instanceResources[res] = volInst;
+                  instanceResources[res] = volInst;
 
-                resourceInstances.push(volInst);
-
+                  resourceInstances.push(volInst);
+                } catch (error) {
+                  console.error('Error transforming a persistent volume', res,
+                    error);
+                }
                 break;
 
               case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
+                try {
+                  let volatileVolInst: VolatileVolume.Instance =
+                    new VolatileVolume.Instance(
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.id, // id
+                      res, // volume name,
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].name,
+                      rolId, // associated role
+                      instanceId, // associated instance
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.filesystem
+                    );
 
-                let volatileVolInst: VolatileVolume.Instance =
-                  new VolatileVolume.Instance(
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.id, // id
-                    res, // volume name,
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].name,
-                    rolId, // associated role
-                    instanceId, // associated instance
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.filesystem
-                  );
+                  instanceResources[res] = volatileVolInst;
 
-                instanceResources[res] = volatileVolInst;
-
-                resourceInstances.push(volatileVolInst);
+                  resourceInstances.push(volatileVolInst);
+                } catch (error) {
+                  console.error('Error transforming a volatile volume', res,
+                    error);
+                }
 
                 break;
 

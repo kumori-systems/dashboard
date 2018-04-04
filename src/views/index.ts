@@ -3,6 +3,7 @@ import DetailedDeploymentView from './DetailedDeploymentView.vue';
 import DomainsView from './DomainsView.vue';
 import ElementsView from './ElementsView.vue';
 import HelpView from './HelpView.vue';
+import ManifestEditor from './ManifestEditor.vue';
 import NewBundleView from './NewBundleView.vue';
 import NewDeploymentView from './NewDeploymentView.vue';
 import NewDomainView from './NewDomainView.vue';
@@ -12,7 +13,6 @@ import OverviewView from './OverviewView.vue';
 import SignInView from './SignInView.vue';
 import UserSettingsView from './UserSettingsView.vue';
 import VolumesView from './VolumesView.vue';
-import ManifestEditor from './ManifestEditor.vue';
 
 export {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,

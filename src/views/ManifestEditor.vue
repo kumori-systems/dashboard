@@ -1,25 +1,180 @@
 <template>
-    <v-layout id="manifest-editor-view" pa-0 ma-0>
-      <v-flex xs-12 pa-0 ma-0 ref="wrapper">
-        <iframe pa-0 ma-0  src="http://localhost:8080/" style="border-style:none; width:100%; height:100vmin;"></iframe> 
-      </v-flex>
-    </v-layout>
+  <v-card style="max-width:1300px">
+    <v-container>
+    <div class="notifier alertNoty">
+      <notifier></notifier>
+    </div>
+    <div id="container">
+      <alertpan v-show="alertPan"></alertpan>
+      <graph v-if="false" @d3-event="listener"></graph>
+      <appmenu v-if="currentManifest!=''">
+        <menuservice v-if="getManifest.type=='service'" slot="menu"></menuservice>
+        <menucomp v-if="getManifest.type=='component'" slot="menu"></menucomp>
+        <menudep v-if="getManifest.type=='deployment'" slot="menu"></menudep>
+        <menures v-if="getManifest.type=='resource'" slot="menu"></menures>
+        <menurun v-if="getManifest.type=='runtime'" slot="menu"></menurun>
+      </appmenu>
+      <div v-if="currentManifest==''" class="panel panel-default alertModal">
+        <div class="panel-heading">{{ $t('panel.selector.title') }}</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="checkbox-inline">
+              <input type="checkbox" value="service" v-model="filterManifests">{{$t('panel.selector.options.services')}}
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" value="component"  v-model="filterManifests">{{$t('panel.selector.options.components')}}
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" value="deployment"  v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" value="resource"  v-model="filterManifests">{{$t('panel.selector.options.resources')}}
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
+            </label>
+          </div>
+          <v-select v-model="selected" :on-change="setSelect" v-bind:items="options" ref="select"></v-select>
+        </div>
+        <div class="panel-footer">
+          <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
+        </div>
+      </div>
+    </div>
+    <maindep v-if=" currentManifest!=='' && getManifest.type=='deployment'">{{setDeployCharts()}}</maindep>
+    <footer v-if="currentManifest!==''" id="footer" >
+      <div>
+        <p class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; Path:
+          {{manifests[currentManifest].filePath}}</p>
+      </div>
+    </footer>
+    </v-container>
+  </v-card>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import VueClassComponent from "vue-class-component";
+<script>
+// import Vue from "vue";
+/*
+import vSelect from "vue-select";
+*/
+import {
+  // Graph,
+  // Menu,
+  // RowList,
+  // RGridForm,
+  // AlertPanel,
+  // Collapsegrp,
+  Notifier,
+  // MenuService,
+  // MenuComponent,
+  // MenuResource,
+  // MenuRuntime,
+  // MenuDeployment,
+  // MainDeployment
+  HelperAlertPanel
+} from "../components";
 
-@VueClassComponent({
-  name: "manifest-editor-view"
-})
-export default class ManifestEditorView extends Vue {
-  windowSize: { x: number; y: number } = { x: -1, y: -1 };
+import i18n from "../store/manifesteditor/i18n";
+
+export default {
   mounted() {
-    this.onResize();
+    console.debug("Manifest Editor has been mounted");
+    this.clear();
+  },
+  i18n: i18n,
+  components: {
+    alertpan: HelperAlertPanel,
+    // appmenu: Menu,
+    // graph: Graph,
+    notifier: Notifier
+    // menuservice: MenuService,
+    // menucomp: MenuComponent,
+    // menudep: MenuDeployment,
+    // menures: MenuResource,
+    // maindep: MainDeployment,
+    // menurun: MenuRuntime,
+    // vSelect
+  },
+  data() {
+    return {
+      filterManifests: [
+        "service",
+        "component",
+        "deployment",
+        "resource",
+        "runtime"
+      ],
+      selectedManifest: null,
+      selected: null
+    };
+  },
+  computed: {
+    alertPan() {
+      return this.$store.getters.alertPan;
+    },
+    /*
+    getManifest() {
+      return this.$store.getters.getManifest;
+    },
+
+    manifests() {
+      return this.$store.getters.manifests;
+    },
+    */
+    currentManifest() {
+      return this.$store.getters.currentManifest;
+    },
+
+    manifestList() {
+      let res = Object.keys(this.$store.getters.services);
+      console.debug("ManifestList returns", res);
+      return res;
+    },
+    clearAllModals() {
+      return this.$store.getters.clearModals;
+    },
+
+    options() {
+      return this.manifestList;
+      /*
+      .filter(x => {
+        return this.filterManifests.indexOf(x.type) > -1;
+      });
+      */
+    }
+  },
+  methods: {
+    clear() {
+      if (this.clearAllModals) {
+        console.debug("Clear method is called");
+        $(".modal").modal("hide");
+      }
+      this.clearModals(false);
+    },
+    /*
+
+    listener(data) {},
+
+    setManifest(manifest) {
+      this.$store.dispatch("setManifest", manifest);
+    },
+    */
+    setDeployCharts() {
+      this.$store.dispatch("setDeployCharts");
+    },
+
+    clearModals(modals) {
+      this.$store.dispatch("clearModals", modals);
+    },
+
+    setSelect(val) {
+      this.selectedManifest = val;
+      this.$refs.btnaccept.focus();
+    },
+
+    selectModal() {
+      if (this.manifestList.length > 0 && this.selectedManifest != null)
+        this.setManifest(this.selectedManifest.label);
+    }
   }
-  onResize() {
-    console.log('(<any>this.$refs.wrapper)', this.$refs);
-    this.windowSize = { x: (<any>this.$refs.wrapper).x, y: (<any>this.$refs.wrapper).y };
-  }
-}
+};
 </script>
