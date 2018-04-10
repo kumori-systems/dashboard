@@ -5,7 +5,7 @@ export default class ManifestUpdater {
   static save(path, jsonPath, data, callback) {
     try {
       // let file = editJsonFile(path);
-      if (data.constructor === Object){
+      if (data.constructor === Object) {
         // file.set(jsonPath, undefined);
       }
       // file.set(jsonPath, data);
@@ -15,5 +15,5 @@ export default class ManifestUpdater {
       callback({ status: 500, err: err });
     }
   }
-  
+
 }

@@ -1,27 +1,27 @@
-import ManifestHunter from "./manifestHunter";
+import ManifestHunter from './manifestHunter';
 let Mhunter = new ManifestHunter();
-import ManiStruct from "./autoCompleteTree";
+import ManiStruct from './autoCompleteTree';
 
 let verbose = false;
 
 function Normalize(text: string) {
 
   text = text.replace(/\n|\s/g, '');
-  text = text.replace(/:\[/g, ":\[\n");
-  text = text.replace(/:\{/g, ":\{\n");
+  text = text.replace(/:\[/g, ':\[\n');
+  text = text.replace(/:\{/g, ':\{\n');
 
-  text = text.replace(/},{/g, "}\n{");
-  text = text.replace(/},"/g, "}\n\"");
-  text = text.replace(/],"/g, "]\n\"");
-  text = text.replace(/,"/g, "\n");
+  text = text.replace(/},{/g, '}\n{');
+  text = text.replace(/},"/g, '}\n\"');
+  text = text.replace(/],"/g, ']\n\"');
+  text = text.replace(/,"/g, '\n');
 
-  text = text.replace(/{/g, "{\n");
-  text = text.replace(/}/g, "\n}");
-  text = text.replace(/]/g, "\n]");
+  text = text.replace(/{/g, '{\n');
+  text = text.replace(/}/g, '\n}');
+  text = text.replace(/]/g, '\n]');
 
-  text = text.replace(/"/g, "");
-  text = text.replace(/\n\n/g, "\n");
-  text = text.replace(/\"\"/g, "\"");
+  text = text.replace(/"/g, '');
+  text = text.replace(/\n\n/g, '\n');
+  text = text.replace(/\"\"/g, '\"');
 
 
 
@@ -33,8 +33,8 @@ function getPath(text: string) {
 
   let match;
   let options = { a: 0, b: 0 };
-  let chars = { "{": "a", "}": "a", "[": "b", "]": "b" }
-  let firstChar = "";
+  let chars = { '{': 'a', '}': 'a', '[': 'b', ']': 'b' };
+  let firstChar = '';
   let parent = /(\w*)\s*:\s*([\[|\{])/;
   let rExit = /(]|})/;
   let rEnter = /(\{|\[)/;
@@ -44,7 +44,7 @@ function getPath(text: string) {
   }
 
   function restOpt(char) {
-    if (firstChar == "" && options[chars[char]] == 0)
+    if (firstChar === '' && options[chars[char]] === 0)
       firstChar = char;
     if (options[chars[char]] > 0)
       options[chars[char]]--;
@@ -52,10 +52,10 @@ function getPath(text: string) {
 
   function isParent(char) {
 
-    if (firstChar == "" && options[chars[char]] == 0)
+    if (firstChar === '' && options[chars[char]] === 0)
       firstChar = char;
 
-    let parent = options[chars[char]] == 0;
+    let parent = options[chars[char]] === 0;
     if (!parent && options[chars[char]] > 0) {
       options[chars[char]]--;
     }
@@ -73,7 +73,7 @@ function getPath(text: string) {
 
     if (match) {
       if (isParent(match[2])) {
-        path.unshift(match[1])
+        path.unshift(match[1]);
       }
     } else {
       match = rExit.exec(element);
@@ -94,15 +94,15 @@ function getPath(text: string) {
 }
 
 let depStruct = {
-  "service": {},
-  "component": {},
-  "resource": {
+  'service': {},
+  'component': {},
+  'resource': {
     type: /spec"\s*:\s*"eslap:\/\/[\w.]*\/resource\/([\w/]*)\/[\d_]*/
   },
-  "deployment": {
+  'deployment': {
     servicename: /"servicename"\s*:\s*"([\w:/]*)"/g
   },
-  "runtime": {}
+  'runtime': {}
 };
 let Manifests;
 let siblings = {};
@@ -117,7 +117,7 @@ setManifests();
 
 function getDependencies(text: string, type: string) {
   if (verbose)
-    console.log("getDependencies")
+    console.log('getDependencies');
   let dependencies = {};
   let struct = depStruct[type];
   if (struct) {
@@ -133,8 +133,8 @@ function getDependencies(text: string, type: string) {
 }
 
 function getSpecType(text: string) {
-  let spec = text.split("/");
-  if (spec[3] == 'manifest')
+  let spec = text.split('/');
+  if (spec[3] === 'manifest')
     return spec[spec.length - 2];
   else return spec[3];
 }
@@ -143,38 +143,38 @@ function navToState(type: string, path: any[], dependecies: object) {
   let struct = ManiStruct[type];
   let exit = false;
 
-  if (path.length == 1 && path[0] == '{') {
+  if (path.length === 1 && path[0] === '{') {
     return struct;
   }
 
   for (let i = 0; i < path.length && !exit; i++) {
     try {
 
-      if (struct[path[i]] == undefined) {
+      if (struct[path[i]] === undefined) {
         if (verbose)
-          console.log("no childrens")
-        if (path[i] == "{") {
+          console.log('no childrens');
+        if (path[i] === '{') {
           if (struct.linked) {
             if (verbose)
-              console.log("has linked")
+              console.log('has linked');
             struct = struct.linked(Manifests, dependecies);
           }
         }
         else {
-          if (struct["*wildcard"]) {
+          if (struct['*wildcard']) {
             if (verbose)
-              console.log("****" + path[i])
-            dependecies["self"] = path[i];
-            struct = struct["*wildcard"];
-            if (struct["{"])
-              struct = struct["{"]
+              console.log('****' + path[i]);
+            dependecies['self'] = path[i];
+            struct = struct['*wildcard'];
+            if (struct['{'])
+              struct = struct['{'];
           }
         }
       }
       else {
         struct = struct[path[i]];
-        if (path.length - (i + 1) > 1 && struct["{"])
-          struct = struct["{"];
+        if (path.length - (i + 1) > 1 && struct['{'])
+          struct = struct['{'];
       }
 
     } catch (e) {
@@ -189,12 +189,12 @@ function navToState(type: string, path: any[], dependecies: object) {
 
 function manifestsByFilter(filter: string) {
   return Object.keys(Manifests).map(x => {
-    let type = getSpecType(Manifests[x].spec)
-    //console.log(type);
-    if (type == filter)
+    let type = getSpecType(Manifests[x].spec);
+    // console.log(type);
+    if (type === filter)
       return Manifests[x].name;
 
-  }).filter(x => { return x != null });
+  }).filter(x => { return x !== null; });
 
 }
 
@@ -202,20 +202,20 @@ function Sugestions(path: any[], line: string, fullText: string) {
   let regSpec = /\"spec\"\s*\:\s*"([:/\w.-_\d]*)"/g;
   let matchSpec = regSpec.exec(fullText);
   if (verbose) {
-    console.log("PATH: " + JSON.stringify(path));
-    console.log(matchSpec)
+    console.log('PATH: ' + JSON.stringify(path));
+    console.log(matchSpec);
   }
   if (matchSpec) {
 
     let type = getSpecType(matchSpec[1]);
     if (verbose)
-      console.log(type)
+      console.log(type);
     let dependecies = getDependencies(fullText, type);
     if (verbose)
-      console.log(dependecies)
+      console.log(dependecies);
     // RETURN ARRAY ELEMENT { }
-    if (path[path.length - 1] == "[") {
-      // return [new vs.CompletionItem("{ }", vs.CompletionItemKind.Struct)];
+    if (path[path.length - 1] === '[') {
+      // return [new vs.CompletionItem('{ }', vs.CompletionItemKind.Struct)];
     }
 
     let result = [];
@@ -226,43 +226,49 @@ function Sugestions(path: any[], line: string, fullText: string) {
     // IF IS PROP
     if (matchLine) {
       if (verbose)
-        console.log("IS PROP")
+        console.log('IS PROP');
       // NEED TO FILTER WORCKSPACE MANIFESTS
       try {
         let filter = struct[matchLine[1]].filter;
-        if (filter != undefined) {
+        if (filter !== undefined) {
           let filtered = manifestsByFilter(filter);
-          // filtered.map(x => { result.push(new vs.CompletionItem('"' + x + '"', vs.CompletionItemKind.Field)) });
+          // filtered.map(x => { result.push(new vs.CompletionItem('"' + x 
+          // + '"', vs.CompletionItemKind.Field)) });
         }
 
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       // HAS LIST OF ELEMENTS TO SUGEST
       try {
         let enumItems = struct[matchLine[1]].enum;
-        if (enumItems != undefined) {
+        if (enumItems !== undefined) {
           for (let i = 0; i < enumItems.length; i++) {
-            // result.push(new vs.CompletionItem('"' + enumItems[i] + '"', vs.CompletionItemKind.Field));
+            // result.push(new vs.CompletionItem('"' + enumItems[i] + '"',
+            // vs.CompletionItemKind.Field));
           }
         }
 
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-      //console.log(result)
+      // console.log(result)
       return result;
 
     }
     // SHOW CHILDS
     else {
       Object.keys(struct).map(x => {
-        if (siblings[x] === undefined) {
-          let flag = struct[x].condition != undefined; // HAS CONDITION
-          flag = (flag && struct[x].condition.funct(dependecies, struct[x].condition.params)); // APPLY CONDITION TO SHOW
-          flag = flag || struct[x].condition == undefined; // IF CHILD DONT HAVE CONDITION         
-          if (flag) { // Show elements without condition or when condition is fulfilled
-            // result.push(new vs.CompletionItem('"' + x + '": ' + struct[x].type, vs.CompletionItemKind.Field));
+        if (!siblings[x]) {
+          let flag = struct[x].condition !== undefined; // HAS CONDITION
+          flag = (flag && struct[x].condition.funct(dependecies,
+            struct[x].condition.params)); // APPLY CONDITION TO SHOW
+          // IF CHILD DONT HAVE CONDITION
+          flag = flag || struct[x].condition === undefined;
+          if (flag) {
+            // Show elements without condition or when condition is fulfilled
+            // result.push(new vs.CompletionItem('"' + x + '": '
+            // + struct[x].type, vs.CompletionItemKind.Field));
           }
         }
 
@@ -270,7 +276,6 @@ function Sugestions(path: any[], line: string, fullText: string) {
       return result;
     }
 
-    //    console.log(JSON.stringify(path));
   }
   else
     return [];
@@ -279,11 +284,15 @@ function Sugestions(path: any[], line: string, fullText: string) {
 function getAllSiblings(document, position) {
 
   let top = Normalize(document.getText(
-    null, null // new vs.Range(new vs.Position(0, 0), new vs.Position(position.line, position.character))
+    null, null
+    // new vs.Range(new vs.Position(0, 0),
+    // new vs.Position(position.line, position.character))
   ));
 
   let bot = Normalize(document.getText(
-    null, null // new vs.Range(new vs.Position(position.line, position.character + 1), new vs.Position(document.lineCount, 0))
+    null, null
+    // new vs.Range(new vs.Position(position.line, position.character + 1),
+    // new vs.Position(document.lineCount, 0))
   ));
 
   if (verbose) {
@@ -291,9 +300,8 @@ function getAllSiblings(document, position) {
     console.log(bot);
   }
 
-
   let options = { a: 0, b: 0 };
-  let chars = { "{": "a", "}": "a", "[": "b", "]": "b" }
+  let chars = { '{': 'a', '}': 'a', '[': 'b', ']': 'b' };
   let rExit = /(]|})/;
   let rEnter = /(\{|\[)/;
   let key = /(\w+)\s*:\s*[:\w/.-]*/;
@@ -308,13 +316,13 @@ function getAllSiblings(document, position) {
   function topControl(char) {
     //   chars[char]
 
-    if (char == "{" || char == "[") {
+    if (char === '{' || char === '[') {
       options[chars[char]]--;
       if (options[chars[char]] < 0)
         return true;
     }
 
-    if (char == "}" || char == "]") {
+    if (char === '}' || char === ']') {
       options[chars[char]]++;
     }
 
@@ -323,11 +331,11 @@ function getAllSiblings(document, position) {
 
   function botControl(char) {
     //   chars[char]   
-    if (char == "{" || char == "[") {
+    if (char === '{' || char === '[') {
       options[chars[char]]++;
     }
 
-    if (char == "}" || char == "]") {
+    if (char === '}' || char === ']') {
       options[chars[char]]--;
       if (options[chars[char]] < 0)
         return true;
@@ -336,15 +344,12 @@ function getAllSiblings(document, position) {
   }
 
   function registerKey(key) {
-    if (options.a == 0) {
+    if (options.a === 0) {
       siblings[key] = true;
       if (verbose)
-        console.log(key)
+        console.log(key);
     }
   }
-
-
-
 
   for (let i = top.length - 1; i > 0 && !stop; i--) {
     element = top[i];
@@ -359,15 +364,12 @@ function getAllSiblings(document, position) {
 
     if (verbose)
       if (stop)
-        console.log(i)
+        console.log(i);
 
     match = key.exec(element);
     if (match) {
       registerKey(match[1]);
     }
-
-
-
   }
 
   stop = false;
@@ -391,7 +393,7 @@ function getAllSiblings(document, position) {
 
     if (verbose)
       if (stop)
-        console.log(i)
+        console.log(i);
   }
 
   if (verbose)
@@ -399,23 +401,11 @@ function getAllSiblings(document, position) {
 
 }
 
-
-let watcher = null; // vs.workspace.createFileSystemWatcher("**/*.json", false, false, false)
-watcher.onDidCreate(e => {
-  setManifests();
-})
-watcher.onDidDelete(e => {
-  setManifests();
-})
-
-
-
 export default class ManifestAutoComplete {
 
   currentFile: string;
 
   provideCompletionItems(document, position, token) {
-
 
     let currentLine = document.getText(document.lineAt(position).range);
     let subLine = document.getText(
@@ -431,14 +421,8 @@ export default class ManifestAutoComplete {
 
     let path = getPath(txtFromStart);
     if (verbose)
-      console.log("================================================")
+      console.log('=================================================='
+        + '======================');
     return Promise.resolve(Sugestions(path, subLine.trim(), fullText));
-
-
-
   }
-
-
-
 }
-

@@ -17,9 +17,10 @@ import { Notification, User } from '../store/pagestate/classes';
 import {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
   Deployment, Domain, ECloudElement, HTTPEntryPoint, IntegerParameter,
-  JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
-  Parameter, PersistentVolume, ProvidedChannel, PublishSubscribeConnector,
-  Resource, Runtime, Service, StringParameter, VolatileVolume, Volume
+  JsonParameter, ListParameter, LoadBalancerConnector, Manifest,
+  NumberParameter, Parameter, PersistentVolume, ProvidedChannel,
+  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter,
+  VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
 import { utils } from './index';
@@ -45,6 +46,9 @@ export class ProxyConnection extends EventEmitter {
 
   /** The user tries to refresh the already taken token. */
   public onRefreshToken: Function;
+
+  /** Notification to add a manifest. */
+  public onAddManifest: Function;
 
   /** Notification of deployment added. */
   public onDeploy: Function;
@@ -104,6 +108,7 @@ export class ProxyConnection extends EventEmitter {
   private constructor() {
 
     super();
+    this.onAddManifest = this.registerEvent<(manifest: Manifest) => void>();
     this.onAddComponent =
       this.registerEvent<(componentId: string, component: Component) => void>();
     this.onDeploy = this.registerEvent<(
@@ -650,6 +655,15 @@ export class ProxyConnection extends EventEmitter {
     return this.admission.getResources().then((registeredResources) => {
 
       for (let registeredResIndex in registeredResources) {
+
+        this.emit(
+          this.onAddManifest,
+          new Manifest(
+            registeredResIndex, // urn
+            registeredResources[registeredResIndex] // manifest
+          )
+        );
+
         switch (
         utils.getResourceType(registeredResources[registeredResIndex].type)
         ) {
@@ -795,17 +809,17 @@ export class ProxyConnection extends EventEmitter {
 
           case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
 
-            this.emit(this.onAddRuntime, registeredElements[i], undefined);
+            this.emit(this.onAddRuntime, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
 
-            this.emit(this.onAddService, registeredElements[i], undefined);
+            this.emit(this.onAddService, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
 
-            this.emit(this.onAddComponent, registeredElements[i], undefined);
+            this.emit(this.onAddComponent, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
@@ -813,22 +827,22 @@ export class ProxyConnection extends EventEmitter {
             switch (utils.getResourceType(registeredElements[i])) {
               case Resource.RESOURCE_TYPE.CERTIFICATE:
                 this.emit(
-                  this.onAddCertificate, registeredElements[i], undefined
+                  this.onAddCertificate, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.DOMAIN:
                 this.emit(
-                  this.onAddDomain, registeredElements[i], undefined
+                  this.onAddDomain, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
                 this.emit(
-                  this.onAddPersistentVolume, registeredElements[i], undefined
+                  this.onAddPersistentVolume, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
                 this.emit(
-                  this.onAddVolatileVolume, registeredElements[i], undefined
+                  this.onAddVolatileVolume, registeredElements[i], null
                 );
                 break;
               default:
@@ -864,6 +878,8 @@ export class ProxyConnection extends EventEmitter {
 
     }).then((element) => {
       let ecloudElement: ECloudElement;
+
+      this.emit(this.onAddManifest, new Manifest(element.name, element));
 
       switch (utils.getElementType(element.spec)) {
         case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
@@ -1062,6 +1078,11 @@ export class ProxyConnection extends EventEmitter {
             deploymentList[deploymentURN] // Deployment
           );
 
+        this.emit(
+          this.onAddManifest,
+          new Manifest(deploymentURN, deploymentList[deploymentURN])
+        );
+        
         this.emit(this.onDeploy, deploymentURN, deployment);
 
         promiseArray.push(this.getElementInfo(deployment.service)
@@ -1081,14 +1102,17 @@ export class ProxyConnection extends EventEmitter {
   getDeployment(urn: string): Promise<any> {
 
     return this.admission.findDeployments(urn).then((deploymentList) => {
-      for (let DeploymentURN in deploymentList) {
+      for (let deploymentURN in deploymentList) {
+
+        this.emit(this.onAddManifest,
+          new Manifest(deploymentURN, deploymentList[deploymentURN]));
 
         let deployment: Deployment =
           this.transformEcloudDeploymentToDeployment(
-            deploymentList[DeploymentURN] // Deployment
+            deploymentList[deploymentURN] // Deployment
           );
 
-        this.emit(this.onDeploy, DeploymentURN, deployment);
+        this.emit(this.onDeploy, deploymentURN, deployment);
       }
     });
 
@@ -1407,20 +1431,22 @@ export class ProxyConnection extends EventEmitter {
           if (ecloudDeployment.resources[res].resource.parameters) {
             resources[res] = ecloudDeployment.resources[res].resource.name;
 
-            this.emit(
-              this.onAddCertificate,
-              ecloudDeployment.resources[res].resource.name,
-              new Certificate(
-                ecloudDeployment.resources[res].resource.name, // urn
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .key, // key
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .cert, // certificate
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .ca, // ca
-                ecloudDeployment.urn // usedBy
-              )
-            );
+            try {
+              this.emit(
+                this.onAddCertificate,
+                ecloudDeployment.resources[res].resource.name,
+                new Certificate(
+                  ecloudDeployment.resources[res].resource.name, // urn
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .key, // key
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .cert, // certificate
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .ca, // ca
+                  ecloudDeployment.urn // usedBy
+                )
+              );
+            } catch (error) { console.error('Error: ' + error); }
           }
           break;
 
@@ -1459,20 +1485,26 @@ export class ProxyConnection extends EventEmitter {
             }
           }
 
-          this.emit(
-            this.onAddPersistentVolume,
-            ecloudDeployment.resources[res].resource.name,
-            new PersistentVolume(
-              ecloudDeployment.resources[res].resource.name, // urn
-              res, // name
-              ecloudDeployment.resources[res].resource.parameters.size, // size
-              persistentItems, // items
-              null, // associated role
-              ecloudDeployment.resources[res].resource.parameters.filesystem
-              || Volume.FILESYSTEM.XFS, // filesystem
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddPersistentVolume,
+              ecloudDeployment.resources[res].resource.name,
+              new PersistentVolume(
+                ecloudDeployment.resources[res].resource.name, // urn
+                res, // name
+                // size
+                ecloudDeployment.resources[res].resource.parameters.size,
+                persistentItems, // items
+                null, // associated role
+                ecloudDeployment.resources[res].resource.parameters.filesystem
+                || Volume.FILESYSTEM.XFS, // filesystem
+                ecloudDeployment.urn // usedBy
+              )
+            );
+          } catch (error) {
+            console.error('Error: ' + error);
+          }
+
           break;
 
         case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
@@ -1560,23 +1592,32 @@ export class ProxyConnection extends EventEmitter {
 
 
     if (utils.isServiceEntrypoint(ecloudDeployment.service)) {
-      res = new HTTPEntryPoint(
-        ecloudDeployment.urn, // urn
-        parameters, // parameters: any
-        roles, // roles: { [rolName: string]: DeploymentRol }
-        resources, // resources: { [resource: string]: Resource }
-        channels // channels
-      );
+      try {
+        res = new HTTPEntryPoint(
+          ecloudDeployment.urn, // urn
+          parameters, // parameters: any
+          roles, // roles: { [rolName: string]: DeploymentRol }
+          resources, // resources: { [resource: string]: Resource }
+          channels // channels
+        );
+      } catch (error) {
+        console.error('Error: ' + error);
+      }
+
     } else {
-      res = new Deployment(
-        ecloudDeployment.urn, // urn
-        ecloudDeployment.nickname, // name: string
-        parameters, // parameters: any
-        ecloudDeployment.service, // serviceId: string
-        roles, // roles: { [rolName: string]: DeploymentRol }
-        resources, // resources: { [resource: string]: Resource }
-        channels // channels
-      );
+      try {
+        res = new Deployment(
+          ecloudDeployment.urn, // urn
+          ecloudDeployment.nickname, // name: string
+          parameters, // parameters: any
+          ecloudDeployment.service, // serviceId: string
+          roles, // roles: { [rolName: string]: DeploymentRol }
+          resources, // resources: { [resource: string]: Resource }
+          channels // channels
+        );
+      } catch (error) {
+        console.error('Error: ' + error);
+      }
     }
 
     return res;

@@ -1,18 +1,19 @@
-import fs from 'fs';
 import url from 'url';
 import path from 'path';
-import express from 'express';
 import { Server } from 'http';
+import express from 'express';
+import fs from 'fs';
+
+import ManifestHunter from "./manifestHunter";
+import ManifestUpdater from "./manifestUpdater";
 
 let app = express();
 let server = new Server(app);
 
-// Busca manifiestos
-import ManifestHunter from "./manifestHunter";
 let Mhunter = new ManifestHunter();
 
 // Actualiza manifiestos
-import ManifestUpdater from "./manifestUpdater";
+
 let io = require("socket.io")(server);
 
 export default class webServer {
@@ -43,7 +44,6 @@ export default class webServer {
 
     });
 
-
     app.get('/getmanifests', function (req, res) {
 
       try {
@@ -66,11 +66,9 @@ export default class webServer {
 
     app.use(express.static(path.join(__dirname, "../")));
 
-
     app.get('/hello', function (req, res) {
       res.status(200).send("Hello World!");
     });
-
 
     app.post('/updatemanifest', function (req, res) {
       req.setEncoding('utf8');

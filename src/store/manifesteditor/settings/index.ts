@@ -3,43 +3,43 @@ let alerts = {
   info: 'alert-info',
   warning: 'alert-warning',
   danger: 'alert-danger'
-}
+};
 
 let modalProps = {
   roles: {
-    id: "modalRoles", icon: "fa fa-tags", title: "Roles"
+    id: 'modalRoles', icon: 'fa fa-tags', title: 'Roles'
   },
   channels: {
-    id: "modalChannels", icon: "glyphicon glyphicon-transfer", title: "Channels"
+    id: 'modalChannels', icon: 'glyphicon glyphicon-transfer', title: 'Channels'
   },
   connectors: {
-    id: "modalConnectors", icon: "fa fa-chain", title: "Connectors"
+    id: 'modalConnectors', icon: 'fa fa-chain', title: 'Connectors'
   },
   runtimes: {
-    id: "modalRuntimes", icon: 'fa fa-dashboard', title: "Runtime"
+    id: 'modalRuntimes', icon: 'fa fa-dashboard', title: 'Runtime'
   },
   configuration: {
-    id: "modalConfiguration", icon: 'fa fa-gear', title: "Configuration"
+    id: 'modalConfiguration', icon: 'fa fa-gear', title: 'Configuration'
   },
   resources: {
-    id: "modalResources", icon: 'fa fa-cubes', title: "Resources"
+    id: 'modalResources', icon: 'fa fa-cubes', title: 'Resources'
   },
   parameters: {
-    id: "modalParameters", icon: 'fa fa-sliders', title: "Parameters"
+    id: 'modalParameters', icon: 'fa fa-sliders', title: 'Parameters'
   },
   arrangement: {
-    id: "modalArrangement", icon: 'fa fa-list', title: "Arrangement"
+    id: 'modalArrangement', icon: 'fa fa-list', title: 'Arrangement'
   },
   runtimeDerived: {
-    id: "runtimeDerived", icon: 'glyphicon glyphicon-import', title: "Derived"
+    id: 'runtimeDerived', icon: 'glyphicon glyphicon-import', title: 'Derived'
   },
   runtimeSettings: {
-    id: "runtimeSettings", icon: 'glyphicon glyphicon-list-alt',
-    title: "Runtimes Settings"
+    id: 'runtimeSettings', icon: 'glyphicon glyphicon-list-alt',
+    title: 'Runtimes Settings'
   },
   runtimeMetadata: {
-    id: "runtimeMetadata", icon: 'glyphicon glyphicon-barcode',
-    title: "Metadata"
+    id: 'runtimeMetadata', icon: 'glyphicon glyphicon-barcode',
+    title: 'Metadata'
   },
 
 };
@@ -65,58 +65,58 @@ let listTypes = {
     parameters: 'dep-params'
   },
   default: 'def'
-}
+};
 
 let listProps = {
   'ch-prov': {
-    target: "#" + modalProps.channels.id, icon: true, iconImg: 'fa-arrow-left',
+    target: '#' + modalProps.channels.id, icon: true, iconImg: 'fa-arrow-left',
     fullSize: '6', btnsSize: '4', channelType: 'provides',
     buttons: { edit: true, delete: true, save: false }, rowSelection: false
   },
   'ch-req': {
-    target: "#" + modalProps.channels.id, icon: true, iconImg: 'fa-arrow-right',
+    target: '#' + modalProps.channels.id, icon: true, iconImg: 'fa-arrow-right',
     fullSize: '6', btnsSize: '4', channelType: 'requires',
     buttons: { edit: true, delete: true, save: false }, rowSelection: false
   },
   'role': {
-    target: "#" + modalProps.roles.id, icon: false, fullSize: '8',
+    target: '#' + modalProps.roles.id, icon: false, fullSize: '8',
     btnsSize: '4', buttons: { edit: true, delete: true, save: false },
     rowSelection: false
   },
   'arrang': {
-    target: "#" + modalProps.arrangement.id, icon: false, fullSize: '8',
+    target: '#' + modalProps.arrangement.id, icon: false, fullSize: '8',
     btnsSize: '4', buttons: { edit: true, delete: false, save: false },
     rowSelection: false
   },
   'dep-params': {
-    target: "", icon: false, fullSize: '12', btnsSize: '0',
+    target: '', icon: false, fullSize: '12', btnsSize: '0',
     buttons: { edit: false, delete: false, save: false }, rowSelection: true
   },
   'conn': {
-    target: "", icon: false, fullSize: '8', btnsSize: '4',
+    target: '', icon: false, fullSize: '8', btnsSize: '4',
     buttons: { edit: false, delete: true, save: false }, rowSelection: true
   },
   'connlist-prov': {
-    target: "", icon: false, fullSize: '10', btnsSize: '2',
+    target: '', icon: false, fullSize: '10', btnsSize: '2',
     buttons: { edit: false, delete: true, save: false }, rowSelection: false
   },
   'connlist-dep': {
-    target: "", icon: false, fullSize: '10', btnsSize: '2',
+    target: '', icon: false, fullSize: '10', btnsSize: '2',
     buttons: { edit: false, delete: true, save: false }, rowSelection: false
   },
   'c-resources': {
-    target: "", icon: false, fullSize: '3', extraCol: '8', btnsSize: '1',
+    target: '', icon: false, fullSize: '3', extraCol: '8', btnsSize: '1',
     buttons: { edit: false, delete: true, save: false }, rowSelection: false
   },
   'c-parameters': {
-    target: "", icon: false, fullSize: '3', extraCol: '8', btnsSize: '1',
+    target: '', icon: false, fullSize: '3', extraCol: '8', btnsSize: '1',
     buttons: { edit: false, delete: true, save: false }, rowSelection: false
   },
   'def': {
-    target: "", icon: false, fullSize: '8', btnsSize: '4',
+    target: '', icon: false, fullSize: '8', btnsSize: '4',
     buttons: { edit: true, delete: true, save: false }, rowSelection: false
   }
-}
+};
 
 let inlineForms = {
   headers: {
@@ -126,11 +126,11 @@ let inlineForms = {
     resource: 'resource'
   },
   valueTypes: {
-    text: "text",
-    input: "input",
-    select: "select"
+    text: 'text',
+    input: 'input',
+    select: 'select'
   }
-}
+};
 
 let menuOptions = {
   service: [
@@ -148,7 +148,7 @@ let menuOptions = {
       add: {
         type: 'button',
         id: 'addRole',
-        target: "#" + modalProps.roles.id,
+        target: '#' + modalProps.roles.id,
         icon: 'glyphicon glyphicon-plus',
         fieldSize: 'col-sm-10'
       }
@@ -161,7 +161,7 @@ let menuOptions = {
       add: {
         type: 'button',
         id: 'addChannel',
-        target: "#" + modalProps.channels.id,
+        target: '#' + modalProps.channels.id,
         icon: 'glyphicon glyphicon-plus',
         fieldSize: 'col-sm-10'
       }
@@ -172,7 +172,7 @@ let menuOptions = {
       icon: 'fa fa-chain',
       clear: true,
       secondLevel: false,
-      target: "#" + modalProps.connectors.id
+      target: '#' + modalProps.connectors.id
 
     }
   ],
@@ -187,7 +187,7 @@ let menuOptions = {
       id: 'runtime',
       name: 'menu.runtime.label',
       icon: 'fa fa-dashboard',
-      target: "#" + modalProps.runtimes.id,
+      target: '#' + modalProps.runtimes.id,
       secondLevel: false
     },
     {
@@ -198,7 +198,7 @@ let menuOptions = {
       add: {
         type: 'button',
         id: 'addChannel',
-        target: "#" + modalProps.channels.id,
+        target: '#' + modalProps.channels.id,
         icon: 'glyphicon glyphicon-plus',
         fieldSize: 'col-sm-10'
       }
@@ -207,7 +207,7 @@ let menuOptions = {
       id: 'config',
       name: 'menu.config.label',
       icon: 'fa fa-gear',
-      target: "#" + modalProps.configuration.id,
+      target: '#' + modalProps.configuration.id,
       secondLevel: false,
     },
   ],
@@ -222,13 +222,13 @@ let menuOptions = {
       id: 'resources',
       name: 'menu.resources.label',
       icon: 'fa fa-cubes',
-      target: "#" + modalProps.resources.id,
+      target: '#' + modalProps.resources.id,
       secondLevel: false,
     }, {
       id: 'parameters',
       name: 'menu.parameters.label',
       icon: 'fa fa-sliders',
-      target: "#" + modalProps.parameters.id,
+      target: '#' + modalProps.parameters.id,
       secondLevel: false,
     },
     {
@@ -248,7 +248,7 @@ let menuOptions = {
       id: 'parameters',
       name: 'menu.parameters.label',
       icon: 'fa fa-sliders',
-      target: "#" + modalProps.parameters.id,
+      target: '#' + modalProps.parameters.id,
       secondLevel: false,
     }
   ],
@@ -263,14 +263,14 @@ let menuOptions = {
       id: 'derived',
       name: 'menu.runtime.derived',
       icon: 'glyphicon glyphicon-import',
-      target: "#" + modalProps.runtimeDerived.id,
+      target: '#' + modalProps.runtimeDerived.id,
       secondLevel: false
     },
     {
       id: 'runsettings',
       name: 'menu.runtime.runsettings',
       icon: 'glyphicon glyphicon-list-alt',
-      target: "#" + modalProps.runtimeSettings.id,
+      target: '#' + modalProps.runtimeSettings.id,
       secondLevel: false
     },
 
@@ -278,7 +278,7 @@ let menuOptions = {
       id: 'metadata',
       name: 'menu.runtime.metadata',
       icon: 'glyphicon glyphicon-barcode',
-      target: "#" + modalProps.runtimeMetadata.id,
+      target: '#' + modalProps.runtimeMetadata.id,
       secondLevel: false,
     }
   ],
@@ -307,7 +307,7 @@ let manifestStructure = {
   domain: 'eslap.cloud',
   elementtype: {
     channel: {
-      name: 'channel', label: "Channel", enum: [
+      name: 'channel', label: 'Channel', enum: [
         {
           name: 'DUPLEX',
           eslap: 'eslap://eslap.cloud/channel/duplex/' + version,
@@ -336,7 +336,7 @@ let manifestStructure = {
       ]
     },
     protocol: {
-      name: 'protocol', label: "Channel Protocol", enum: [
+      name: 'protocol', label: 'Channel Protocol', enum: [
         {
           name: 'DEFAULT',
           eslap: 'eslap://eslap.cloud/protocol/message/http/' + version
@@ -360,7 +360,7 @@ let manifestStructure = {
       ]
     },
     connector: {
-      name: 'Connectors', label: "Connectors", enum: [
+      name: 'Connectors', label: 'Connectors', enum: [
         {
           name: 'COMPLETE',
           eslap: 'eslap://eslap.cloud/connector/complete/' + version
@@ -411,27 +411,27 @@ let manifestStructure = {
       name: 'resource', enum: [
         {
           name: 'Cert/Client',
-          eslap: "eslap://eslap.cloud/resource/cert/client/" + version
+          eslap: 'eslap://eslap.cloud/resource/cert/client/' + version
         },
         {
           name: 'Cert/Server',
-          eslap: "eslap://eslap.cloud/resource/cert/server/" + version
+          eslap: 'eslap://eslap.cloud/resource/cert/server/' + version
         },
         {
           name: 'Faultgroups',
-          eslap: "eslap://eslap.cloud/resource/faultgroups/" + version
+          eslap: 'eslap://eslap.cloud/resource/faultgroups/' + version
         },
         {
           name: 'VHost',
-          eslap: "eslap://eslap.cloud/resource/vhost/" + version
+          eslap: 'eslap://eslap.cloud/resource/vhost/' + version
         },
         {
           name: 'Volume/Persistent',
-          eslap: "eslap://eslap.cloud/resource/volume/persistent/" + version
+          eslap: 'eslap://eslap.cloud/resource/volume/persistent/' + version
         },
         {
           name: 'Volume/Volatile',
-          eslap: "eslap://eslap.cloud/resource/volume/volatile/" + version
+          eslap: 'eslap://eslap.cloud/resource/volume/volatile/' + version
         }
       ]
     },
@@ -439,66 +439,66 @@ let manifestStructure = {
     component: { name: 'component' },
     runtime: {
       name: 'runtime', enum: [
-        { eslap: "eslap://eslap.cloud/runtime/java/1_0_1" },
-        { eslap: "eslap://eslap.cloud/runtime/java/1_1_1" },
-        { eslap: "eslap://eslap.cloud/runtime/native/1_0_1" },
-        { eslap: "eslap://eslap.cloud/runtime/native/1_1_1" },
-        { eslap: "eslap://c2netproject.eu/runtime/nodejs/1_0_0" },
-        { eslap: "eslap://c2netproject.eu/runtime/nodejs/1_0_2" },
-        { eslap: "eslap://c2netproject.eu/runtime/mariadb/1_0_2" },
-        { eslap: "eslap://linagora.c2netproject.eu/runtime/ucp/1_0_0" },
-        { eslap: "eslap://linagora.c2netproject.eu/runtime/ucp/1_0_4" },
-        { eslap: "eslap://c2netproject.eu/runtime/java/1_0_0" },
-        { eslap: "eslap://c2netproject.eu/runtime/java/1_0_2" }
+        { eslap: 'eslap://eslap.cloud/runtime/java/1_0_1' },
+        { eslap: 'eslap://eslap.cloud/runtime/java/1_1_1' },
+        { eslap: 'eslap://eslap.cloud/runtime/native/1_0_1' },
+        { eslap: 'eslap://eslap.cloud/runtime/native/1_1_1' },
+        { eslap: 'eslap://c2netproject.eu/runtime/nodejs/1_0_0' },
+        { eslap: 'eslap://c2netproject.eu/runtime/nodejs/1_0_2' },
+        { eslap: 'eslap://c2netproject.eu/runtime/mariadb/1_0_2' },
+        { eslap: 'eslap://linagora.c2netproject.eu/runtime/ucp/1_0_0' },
+        { eslap: 'eslap://linagora.c2netproject.eu/runtime/ucp/1_0_4' },
+        { eslap: 'eslap://c2netproject.eu/runtime/java/1_0_0' },
+        { eslap: 'eslap://c2netproject.eu/runtime/java/1_0_2' }
       ]
     },
     arrangements: {
       types: {
-        __instances: { type: "integer", default: 1 },
-        __cpu: { type: "integer", default: 1 },
-        __memory: { type: "integer", default: 1 },
-        __ioperf: { type: "integer", default: 1 },
-        __iopsintensive: { type: "boolean", default: false },
-        __bandwidth: { type: "integer", default: 1 },
-        __resilience: { type: "integer", default: 1 },
-        __maxinstances: { type: "integer", default: 1 }
+        __instances: { type: 'integer', default: 1 },
+        __cpu: { type: 'integer', default: 1 },
+        __memory: { type: 'integer', default: 1 },
+        __ioperf: { type: 'integer', default: 1 },
+        __iopsintensive: { type: 'boolean', default: false },
+        __bandwidth: { type: 'integer', default: 1 },
+        __resilience: { type: 'integer', default: 1 },
+        __maxinstances: { type: 'integer', default: 1 }
       },
       main_enum: [
-        "__instances",
-        "__cpu",
-        "__memory",
-        "__ioperf",
-        "__iopsintensive",
-        "__bandwidth",
-        "__resilience"
+        '__instances',
+        '__cpu',
+        '__memory',
+        '__ioperf',
+        '__iopsintensive',
+        '__bandwidth',
+        '__resilience'
       ],
       opt_enum:
-        ["__maxinstances"]
+        ['__maxinstances']
 
     },
 
 
   }
-}
+};
 
 let resourceFields = {
   // CERT 
-  content: { type: "json", default: null, computed: null },
+  content: { type: 'json', default: null, computed: null },
 
   // VHOST
-  vhost: { type: "string", default: null, computed: null },
+  vhost: { type: 'string', default: null, computed: null },
 
-  //VOLUME
-  size: { type: "string", default: null, computed: null },
-  prefix: { type: "string", default: null, computed: null },
-  mountpoint: { type: "string", default: null, computed: true },
-  best_effort: { type: "boolean", default: false, computed: null },
-  follows_instance: { type: "boolean", default: false, computed: null },
+  // VOLUME
+  size: { type: 'string', default: null, computed: null },
+  prefix: { type: 'string', default: null, computed: null },
+  mountpoint: { type: 'string', default: null, computed: true },
+  best_effort: { type: 'boolean', default: false, computed: null },
+  follows_instance: { type: 'boolean', default: false, computed: null },
 
-  //FAULTGROUPS
-  number: { type: "integer", default: 1, computed: null }
+  // FAULTGROUPS
+  number: { type: 'integer', default: 1, computed: null }
 
-}
+};
 
 export default {
   alerts,

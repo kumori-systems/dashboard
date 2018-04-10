@@ -5,7 +5,8 @@ import State from './state';
 import { ProxyConnection } from '../../api';
 import { getResourceType } from '../../api/utils';
 import {
-  Certificate, Component, Deployment, Domain, Resource, Runtime, Service, Volume
+  Certificate, Component, Deployment, Domain, Manifest, Resource, Runtime,
+  Service, Volume
 } from '../stampstate/classes';
 import { BackgroundAction, Notification, User } from './classes';
 
@@ -96,12 +97,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Finish signIn action in the state
 
+      console.debug('Sucessfully signed in');
+
       return injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.SIGNIN,
         'state': BackgroundAction.STATE.SUCCESS
       }).then(() => user);
 
     }).then((user) => { // Define all listeners
+      console.debug('Defining listeners');
 
       ProxyConnection.instance.onMustSignOut((reason: string) => {
 
@@ -120,6 +124,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         injectee.dispatch('refreshToken', token);
 
       });
+
+      console.debug('sfdsaf');
+      ProxyConnection.instance.onAddManifest((manifest: Manifest) => {
+
+        injectee.commit('addManifest', manifest);
+
+      });
+      console.debug('ENDsfdsaf');
 
       ProxyConnection.instance.onDeploy((deploymentId: string,
         deployment: Deployment) => {
@@ -243,6 +255,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           injectee.dispatch('addNotification', notification);
 
         });
+
+      console.debug('Finished defining listeners');
+
       return user;
 
     }).then((user) => { // Start loading action in the state
@@ -296,7 +311,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
 
     }).then((user) => { // Load all deployments
-      
+
       console.debug('Going to ask for deployment info');
       return ProxyConnection.instance.getDeploymentList().then(() => {
         console.debug('Retrieved info from all deployments');

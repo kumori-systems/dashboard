@@ -9,8 +9,9 @@ let linkedFunctions = {
       roles = Object.keys(serv.roles).filter((x) => {
         let role = serv.roles[x];
         try {
-          if (state[role.component].configuration.parameters.length > 0)
-            result[role.name] = { type: "{ }" }
+          if (state[role.component].configuration.parameters.length > 0) {
+            result[role.name] = { type: '{ }' };
+          }
           return state[role.component].configuration.parameters.length > 0;
         } catch (error) {
           return false;
@@ -31,8 +32,10 @@ let linkedFunctions = {
     try {
       let resources = serv.configuration.resources;
 
-      for (let i = 0; i < resources.length; i++)
-        result[resources[i].name] = { type: "\" \"" }
+      for (let i = 0; i < resources.length; i++) {
+        result[resources[i].name] = { type: '\" \"' };
+      }
+
 
     } catch (error) {
       return {};
@@ -49,13 +52,13 @@ let linkedFunctions = {
     let roles;
     try {
       let roles = serv.roles.filter(role => {
-        return role.name == dep.self;
+        return role.name === dep.self;
       });
 
-      if (roles.length == 1) {
+      if (roles.length === 1) {
         let params = state[roles[0].component].configuration.parameters;
         for (let i = 0; i < params.length; i++) {
-          result[params[i].name] = { type: "\" \"" };
+          result[params[i].name] = { type: '\" \"' };
         }
       }
     } catch (error) {
@@ -70,7 +73,7 @@ let conditionFunctions = {
 
   checkType(dep, params) {
     for (let i = 0; i < params.type.length; i++) {
-      if (params.type[i] == dep.type)
+      if (params.type[i] === dep.type)
         return true;
     }
     return false;
@@ -81,28 +84,28 @@ let conditionFunctions = {
 let service = {
 
   configuration: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       resources: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            filter: "resource",
-            type: "\"\"",
+            filter: 'resource',
+            type: '\"\"',
           },
         }
       },
       parameters: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/parameter/boolean/1_0_0',
               'eslap://eslap.cloud/parameter/integer/1_0_0',
@@ -118,34 +121,34 @@ let service = {
     }
   },
   roles: {
-    type: "[]",
-    "{": {
+    type: '[]',
+    '{': {
       name: {
-        type: "\"\"",
+        type: '\"\"',
       },
       component: {
-        type: "\"\"",
-        filter: "component"
+        type: '\"\"',
+        filter: 'component'
       },
       resources: {
-        type: "\"\"",
+        type: '\"\"',
       },
       parameters: {
-        type: "\"\"",
+        type: '\"\"',
       }
     }
   },
   channels: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       provides: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/channel/duplex/1_0_0',
               'eslap://eslap.cloud/channel/reply/1_0_0',
@@ -154,7 +157,7 @@ let service = {
 
           },
           protocol: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/protocol/message/http/1_0_0',
               'eslap://eslap.cloud/protocol/tcp/1_0_0',
@@ -166,20 +169,20 @@ let service = {
         }
       },
       requires: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/channel/duplex/1_0_0',
               'eslap://eslap.cloud/channel/receive/1_0_0',
               'eslap://eslap.cloud/channel/request/1_0_0']
           },
           protocol: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/protocol/message/http/1_0_0',
               'eslap://eslap.cloud/protocol/tcp/1_0_0',
@@ -193,10 +196,10 @@ let service = {
     }
   },
   connectors: {
-    type: "[]",
-    "{": {
+    type: '[]',
+    '{': {
       type: {
-        type: "\"\"",
+        type: '\"\"',
         enum: [
           'eslap://eslap.cloud/connector/complete/1_0_0',
           'eslap://eslap.cloud/connector/loadbalancer/1_0_0',
@@ -204,24 +207,24 @@ let service = {
         ]
       },
       provided: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           role: {
-            type: "\"\"",
+            type: '\"\"',
           },
           endpoint: {
-            type: "\"\"",
+            type: '\"\"',
           }
         }
       },
       depended: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           role: {
-            type: "\"\"",
+            type: '\"\"',
           },
           endpoint: {
-            type: "\"\"",
+            type: '\"\"',
           }
         }
       }
@@ -229,46 +232,46 @@ let service = {
 
   },
   name: {
-    type: "\"\"",
+    type: '\"\"',
   },
   spec: {
-    type: "\"\"",
+    type: '\"\"',
   }
 
-}
+};
 
 let component = {
 
   spec: {
-    type: "\"\""
+    type: '\"\"'
   },
   name: {
-    type: "\"\""
+    type: '\"\"'
   },
   runtime: {
-    type: "\"\""
+    type: '\"\"'
   },
   code: {
-    type: "\"\"", // List blobs
-    filter: "blob"
+    type: '\"\"', // List blobs
+    filter: 'blob'
   },
   channels: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       provides: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: ['eslap://eslap.cloud/channel/duplex/1_0_0',
               'eslap://eslap.cloud/channel/reply/1_0_0',
               'eslap://eslap.cloud/channel/send/1_0_0']
           },
           protocol: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/protocol/message/http/1_0_0',
               'eslap://eslap.cloud/protocol/tcp/1_0_0',
@@ -280,13 +283,13 @@ let component = {
         }
       },
       requires: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/channel/duplex/1_0_0',
               'eslap://eslap.cloud/channel/receive/1_0_0',
@@ -294,7 +297,7 @@ let component = {
             ]
           },
           protocol: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/protocol/message/http/1_0_0',
               'eslap://eslap.cloud/protocol/tcp/1_0_0',
@@ -308,28 +311,28 @@ let component = {
     }
   },
   configuration: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       resources: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            filter: "resource",
-            type: "\"\"",
+            filter: 'resource',
+            type: '\"\"',
           },
         }
       },
       parameters: {
-        type: "[]",
-        "{": {
+        type: '[]',
+        '{': {
           name: {
-            type: "\"\"",
+            type: '\"\"',
           },
           type: {
-            type: "\"\"",
+            type: '\"\"',
             enum: [
               'eslap://eslap.cloud/parameter/boolean/1_0_0',
               'eslap://eslap.cloud/parameter/integer/1_0_0',
@@ -345,185 +348,185 @@ let component = {
     }
   },
   profile: {
-    type: "{ }",
-    "{": {
+    type: '{ }',
+    '{': {
       threadability: {
-        type: "\"*\"",
+        type: '\"*\"',
       }
     }
   }
 
-}
+};
 
 let deployment = {
   spec: {
-    type: "\"\""
+    type: '\"\"'
   },
   servicename: {
-    type: "\"\""
+    type: '\"\"'
   },
   name: {
-    type: "\"\""
+    type: '\"\"'
   },
   configuration: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       resources: {
-        type: "{ }",
+        type: '{ }',
         linked: linkedFunctions.deployRes
       },
       parameters: {
-        type: "{ }",
+        type: '{ }',
         linked: linkedFunctions.deployParams,
-        "*wildcard": {
+        '*wildcard': {
           linked: linkedFunctions.roleParams
         }
       }
     }
   },
   roles: {
-    type: "{ }",
-    "*wildcard": {
-      type: "{ }",
-      "{": {
+    type: '{ }',
+    '*wildcard': {
+      type: '{ }',
+      '{': {
         resources: {
-          type: "{ }",
-          "{": {
-            __instances: { type: " int" },
-            __cpu: { type: " int" },
-            __memory: { type: " int" },
-            __ioperf: { type: " int" },
-            __iopsintensive: { type: " boolean" },
-            __bandwidth: { type: " int" },
-            __resilience: { type: " int" }
+          type: '{ }',
+          '{': {
+            __instances: { type: ' int' },
+            __cpu: { type: ' int' },
+            __memory: { type: ' int' },
+            __ioperf: { type: ' int' },
+            __iopsintensive: { type: ' boolean' },
+            __bandwidth: { type: ' int' },
+            __resilience: { type: ' int' }
           }
         }
       }
     }
   }
 
-}
+};
 
 let resource = {
   spec: {
-    type: "\"\""
+    type: '\"\"'
   },
   name: {
-    type: "\"\""
+    type: '\"\"'
   },
   parameters: {
-    type: "{ }",
-    "{": {
+    type: '{ }',
+    '{': {
       content: {
-        type: "{ }",
+        type: '{ }',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["cert/server", "cert/client"] }
+          params: { type: ['cert/server', 'cert/client'] }
         }
       },
       name: {
-        type: "\" \"",
+        type: '\" \"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["faultgroups", "vhost"] }
+          params: { type: ['faultgroups', 'vhost'] }
         }
       },
       type: {
-        type: "\" \"",
+        type: '\" \"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["faultgroups", "vhost"] }
+          params: { type: ['faultgroups', 'vhost'] }
         }
       },
       size: {
-        type: "int",
+        type: 'int',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["volume/persistent", "volume/volatile"] }
+          params: { type: ['volume/persistent', 'volume/volatile'] }
         }
       },
       mountpoint: {
-        type: "\"\"",
+        type: '\"\"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["volume/persistent", "volume/volatile"] }
+          params: { type: ['volume/persistent', 'volume/volatile'] }
         }
       },
       prefix: {
-        type: "\" \"",
+        type: '\" \"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["volume/persistent", "volume/volatile"] }
+          params: { type: ['volume/persistent', 'volume/volatile'] }
         }
       },
       best_effort: {
-        type: "\" \"",
+        type: '\" \"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["volume/persistent", "volume/volatile"] }
+          params: { type: ['volume/persistent', 'volume/volatile'] }
         }
       },
       follows_instance: {
-        type: "\" \"",
+        type: '\" \"',
         condition: {
           funct: conditionFunctions.checkType,
-          params: { type: ["volume/persistent", "volume/volatile"] }
+          params: { type: ['volume/persistent', 'volume/volatile'] }
         }
       }
     }
   }
-}
+};
 
 let runtime = {
   spec: {
-    type: "\"\"",
+    type: '\"\"',
   },
   name: {
-    type: "\"\"",
+    type: '\"\"',
   },
   derived: {
-    type: "{}",
-    "{": {
+    type: '{}',
+    '{': {
       from: {
-        type: "\"\"",
-        filter: "runtime"
+        type: '\"\"',
+        filter: 'runtime'
 
       }
     }
   },
   agent: {
-    type: "\"\"",
+    type: '\"\"',
   },
   sourcedir: {
-    type: "\"\"",
+    type: '\"\"',
   },
   entrypoint: {
-    type: "\"\"",
+    type: '\"\"',
   },
   metadata: {
-    type: "{ }",
-    "{": {
+    type: '{ }',
+    '{': {
       description: {
-        type: "\"\"",
+        type: '\"\"',
       },
       os_name: {
-        type: "\"\"",
+        type: '\"\"',
       },
       os_version: {
-        type: "\"\"",
+        type: '\"\"',
       },
       os_release: {
-        type: "\"\"",
+        type: '\"\"',
       },
       software: {
-        type: "{ }",
+        type: '{ }',
       },
       layerId: {
-        type: "\"\"",
+        type: '\"\"',
       }
     }
   }
-}
+};
 
 export default {
   service,

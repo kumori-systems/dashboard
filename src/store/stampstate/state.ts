@@ -1,6 +1,6 @@
 import {
   Certificate, Component, Connector, Deployment, Domain, LoadBalancerConnector,
-  PersistentVolume, ProvidedChannel, Runtime, Service, VolatileVolume
+  Manifest, PersistentVolume, ProvidedChannel, Runtime, Service, VolatileVolume
 } from './classes';
 
 /**
@@ -31,6 +31,8 @@ export default class State {
 
   /** Map of domains. */
   domains: { [urn: string]: Domain };
+
+  manifests: { [urn: string]: Manifest };
 
   /** Map of service metrics. */
   serviceMetrics: {
@@ -69,6 +71,7 @@ export default class State {
     this.deployments = {};
     this.services = {};
     this.components = {};
+    this.manifests = {};
     this.runtimes = {};
     this.persistentVolumes = {};
     this.volatileVolumes = {};

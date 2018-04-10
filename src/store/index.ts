@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import manifesteditor from './manifesteditor';
 import pagestate from './pagestate';
 import stampstate from './stampstate';
-import manifesteditor from './manifesteditor';
 
 Vue.use(Vuex);
 

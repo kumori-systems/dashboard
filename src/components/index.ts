@@ -26,8 +26,10 @@ import ModalArrangements from './manifesteditor/_modal_arrangements.vue';
 import ModalChannels from './manifesteditor/_modal_channels.vue';
 import MoldalConfiguration from './manifesteditor/_modal_configuration.vue';
 import ModalConnectors from './manifesteditor/_modal_connectors.vue';
-import ModalDeployParameters from './manifesteditor/_modal_deploy_parameters.vue';
-import ModalResourceParameters from './manifesteditor/_modal_resource_parameters.vue';
+import ModalDeployParameters from
+  './manifesteditor/_modal_deploy_parameters.vue';
+import ModalResourceParameters from
+  './manifesteditor/_modal_resource_parameters.vue';
 import ModalResources from './manifesteditor/_modal_resources.vue';
 import ModalRoles from './manifesteditor/_modal_roles.vue';
 import ModalRuntimeDerived from './manifesteditor/_modal_runtime_derived.vue';
@@ -45,11 +47,31 @@ import Menu from './manifesteditor/menu.vue';
 import Notifier from './manifesteditor/notifier.vue';
 
 export {
-  MainDeployment, MenuComponent, MenuDeployment, MenuResource, MenuRuntime,
-  MenuService, ModalArrangements, ModalChannels, MoldalConfiguration,
-  ModalConnectors, ModalDeployParameters, ModalResourceParameters,
-  ModalResources, ModalRoles, ModalRuntimeDerived, ModalRuntimeMetadata,
-  ModalRuntimeSettings, ModalRuntimes, Graph, HelperAlertPanel,
-  HelperCollapseGrp, HelperGridForm, HelperList, HelperModal, HelperSearch,
-  Menu, Notifier
+  MainDeployment,
+  MenuComponent,
+  MenuDeployment,
+  MenuResource,
+  MenuRuntime,
+  MenuService,
+  ModalArrangements,
+  ModalChannels,
+  MoldalConfiguration,
+  ModalConnectors,
+  ModalDeployParameters,
+  ModalResourceParameters,
+  ModalResources,
+  ModalRoles,
+  ModalRuntimeDerived,
+  ModalRuntimeMetadata,
+  ModalRuntimeSettings,
+  ModalRuntimes,
+  Graph,
+  HelperAlertPanel,
+  HelperCollapseGrp,
+  HelperGridForm,
+  HelperList,
+  HelperModal,
+  HelperSearch,
+  Menu,
+  Notifier
 }

@@ -4,7 +4,6 @@ import webSettings from './settings';
  * Representation of the stamp state.
  */
 export default class State {
-  manifests: any;
   mDependencies: any;
   confirm: { accept: any, deny: any };
   alerts: any[];
@@ -52,7 +51,10 @@ export default class State {
   };
 
   channelState: {
-    channel: { index: number, inout: string, data: { name: string, type: string, protocol: string } },
+    channel: {
+      index: number, inout: string,
+      data: { name: string, type: string, protocol: string }
+    },
     validation: {
       name: { err: boolean, msg: string },
       type: { err: boolean, msg: string },
@@ -135,14 +137,12 @@ export default class State {
       domain: { err: boolean, msg: string },
       name: { err: boolean, msg: string },
       version: { err: boolean, msg: string }
-
     },
     updater: boolean
-  }
+  };
 
   /** Constructor of the state. */
   constructor() {
-    this.manifests = {};
     this.mDependencies = {};
     this.confirm = {
       accept: null,
@@ -154,7 +154,7 @@ export default class State {
     this.Settings = webSettings;
     this.socket = null;
     this.manifestList = [];
-    this.currentManifest = "";
+    this.currentManifest = '';
     this.clearModals = false;
 
     // DEPLOYMENT
@@ -179,7 +179,7 @@ export default class State {
       updater: false
     };
 
-    this.currentArrangement = "";
+    this.currentArrangement = '';
 
     // SERVICE 
     this.currentRole = -1;
@@ -199,7 +199,7 @@ export default class State {
       channel: {
         index: -1,
         inout: 'provides',
-        data: { name: "", type: "", protocol: "" }
+        data: { name: '', type: '', protocol: '' }
       },
       validation: {
         name: { err: false, msg: '' },
