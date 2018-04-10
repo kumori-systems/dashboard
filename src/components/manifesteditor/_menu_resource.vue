@@ -57,16 +57,21 @@
         </li>
       </ul>
       <modal :modalProp="getSettings.modalProps.parameters" modalSize="xs">
-        <modalParameters slot="body"></modalParameters>
+        <modal-parameters slot="body"></modal-parameters>
       </modal>
     </div>
   </div>
 </template>
 <script>
-import ModalParameters from "./_modal_resource_parameters.vue";
+
+import  HelperModal  from "./helper_modal.vue";
+
+import ModalDeployParameters from "./_modal_deploy_parameters.vue";
+
 export default {
   components: {
-    modalParameters: ModalParameters
+    'modal': HelperModal,
+    'modal-parameters': ModalDeployParameters
   },
   data() {
     return {
@@ -102,19 +107,19 @@ export default {
     },
 
     nameMani() {
-      return this.$store.state.resourceState.name;
+      return this.$store.state.manifesteditor.resourceState.name;
     },
 
     validation() {
-      return this.$store.state.resourceState.validation;
+      return this.$store.state.manifesteditor.resourceState.validation;
     },
 
     updater() {
-      return this.$store.state.resourceState.updater;
+      return this.$store.state.manifesteditor.resourceState.updater;
     },
 
     state() {
-      return this.$store.state.resourceState;
+      return this.$store.state.manifesteditor.resourceState;
     }
   },
   methods: {

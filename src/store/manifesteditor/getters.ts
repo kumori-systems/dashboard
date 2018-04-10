@@ -123,10 +123,13 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   // ROLES
   getCurrentRole = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
+
+    let res: { name: string, component: string, resources: any[] };
     if (state.currentRole >= 0) {
+
       let service = getters.manifests[state.currentManifest];
       let role = service.roles[state.currentRole];
-      state.roleState.role = {
+      res = {
         name: role.name,
         component: role.component,
         resources: role.resources ?
@@ -134,12 +137,14 @@ export default class Getters implements Vuex.GetterTree<State, any> {
             return { name: role.resources[key], key: key };
           }) : []
       };
-    }
-    else {
-      state.roleState.role = { name: '', component: '', resources: [] };
-    }
 
-    return state.roleState.role;
+    } else {
+
+      res = { name: '', component: '', resources: [] };
+
+    }
+    return res;
+
   }
 
   getCurrentRoleIndex = (state?: State, getters?: Getters, rootState?: any,

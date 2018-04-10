@@ -32,12 +32,14 @@ let regex = {
     errMsg: 'invalidc'
   }
 
-}
+};
 
 let cheCker = (check, value) => {
   let status = value.match(regex[check].r);
-  return { err: (status == null), msg: status == null ? regex[check].errMsg : '' };
-}
+  return {
+    err: (status == null), msg: status == null ? regex[check].errMsg : ''
+  };
+};
 
 let props = {
   role: {
@@ -76,23 +78,23 @@ let props = {
     name: ['noSpecialChars']
   }
 
-}
+};
 
 let validator = (conditions, value) => {
   for (let cond of conditions) {
-    let res = cheCker(cond, value)
-    console.log(res)
+    let res = cheCker(cond, value);
+    console.log(res);
     if (res.err)
       return res;
   }
   return { err: false, msg: '' };
-}
+};
 
 
 let validType = (type, value) => {
   let res = { err: false, msg: '' };
 
-  if (type != 'string') {
+  if (type !== 'string') {
     if (['list', 'json', 'vhost'].indexOf(type) > -1) {
       res = cheCker('json', value);
       if (!res.err)
@@ -103,7 +105,7 @@ let validType = (type, value) => {
         }
     }
     else {
-      if ('notNull' != type) {
+      if ('notNull' !== type) {
         res = cheCker('notNull', value);
         if (res.err)
           return res;
@@ -113,7 +115,7 @@ let validType = (type, value) => {
   }
 
   return res;
-}
+};
 
 let validProp = (type, prop, value) => {
   /*      console.log("------VALIDADTOR------")
@@ -123,17 +125,22 @@ let validProp = (type, prop, value) => {
       console.log("----------------------")  */
   let conditions = props[type][prop];
   for (let cond of conditions) {
-    let res = cheCker(cond, value)
+    let res = cheCker(cond, value);
     if (res.err)
       return res;
   }
   return { err: false, msg: '' };
-}
+};
 
 export { validProp, validType };
 
-{/* <div :class="{'form-group':true, 'has-error':validation.name.err, 'has-feedback':validation.name.err}">
-    <input class="form-control" @input="updateName" ref="name" v-bind:value="name">
-                          <span v-if="validation.name.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-    <span v-if="validation.name.err" class="help-block">{{ validation.name.msg }}</span>
+{/* <div :class="{'form-group':true, 'has-error':validation.name.err,
+  'has-feedback':validation.name.err}">
+   <input class="form-control" @input="updateName" ref="name"
+    v-bind:value="name">
+      <span v-if="validation.name.err" class="glyphicon glyphicon-remove
+        form-control-feedback"></span>
+      <span v-if="validation.name.err" class="help-block">
+      {{ validation.name.msg }}
+      </span>
 </div> */}

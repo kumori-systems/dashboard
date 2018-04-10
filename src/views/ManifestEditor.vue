@@ -8,11 +8,11 @@
         <alertpan v-show="alertPan"></alertpan>
         <graph v-if="false" v-on:d3-event="listener"></graph>
         <appmenu v-if="currentManifest!=''">
-          <menuservice v-if="getManifest.type==='service'" slot="menu"></menuservice>
-          <menucomp v-else-if="getManifest.type==='component'" slot="menu"></menucomp>
-          <menudep v-else-if="getManifest.type==='deployment'" slot="menu"></menudep>
-          <menures v-else-if="getManifest.type==='resource'" slot="menu"></menures>
-          <menurun v-else-if="getManifest.type==='runtime'" slot="menu"></menurun>
+          <menuservice v-if="getManifest._type==='service'" slot="menu"></menuservice>
+          <menucomp v-else-if="getManifest._type==='component'" slot="menu"></menucomp>
+          <menudep v-else-if="getManifest._type==='deployment'" slot="menu"></menudep>
+          <menures v-else-if="getManifest._type==='resource'" slot="menu"></menures>
+          <menurun v-else-if="getManifest._type==='runtime'" slot="menu"></menurun>
         </appmenu>
         <div v-if="currentManifest==''" class="panel panel-default alertModal">
           <div class="panel-heading">{{ $t('panel.selector.title') }}</div>
@@ -25,7 +25,7 @@
                 <input type="checkbox" value="component" v-model="filterManifests">{{$t('panel.selector.options.components')}}
               </label>
               <label class="checkbox-inline">
-                <input type="checkbox" value="deployment" v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
+                <input type="checkbox" value="deployments" v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
               </label>
               <label class="checkbox-inline">
                 <input type="checkbox" value="resource" v-model="filterManifests">{{$t('panel.selector.options.resources')}}
@@ -34,31 +34,27 @@
                 <input type="checkbox" value="runtime" v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
               </label>
             </div>
-            <v-select v-model="selectedManifest" v-bind:items="options" ref="select"></v-select>
+            <v-select v-model="selectedManifest" item-value="_urn" item-text="_urn" v-bind:items="options" ref="select"></v-select>
           </div>
           <div class="panel-footer">
             <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
           </div>
         </div>
       </div>
-      <maindep v-if=" currentManifest!=='' && getManifest.type=='deployment'">{{setDeployCharts()}}</maindep>
+      <maindep v-if=" currentManifest!=='' && getManifest._type=='deployments'">{{ setDeployCharts() }}</maindep>
       <footer v-if="currentManifest!==''" id="footer" >
         <div>
-          <p class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; Path:
-            {{ manifests[currentManifest].filePath }}</p>
+          <p class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; URN:
+            {{ manifests[currentManifest]._urn }}</p>
         </div>
       </footer>
     </v-container>
   </v-card>
 </template>
 <script>
-// import Vue from "vue";
-/*
-import vSelect from "vue-select";
-*/
 import {
   // Graph,
-  // Menu,
+  Menu,
   // RowList,
   // RGridForm,
   // AlertPanel,
@@ -66,7 +62,7 @@ import {
   Notifier,
   // MenuService,
   // MenuComponent,
-  // MenuResource,
+  MenuResource,
   // MenuRuntime,
   // MenuDeployment,
   // MainDeployment
@@ -83,13 +79,13 @@ export default {
   i18n: i18n,
   components: {
     alertpan: HelperAlertPanel,
-    // appmenu: Menu,
+    appmenu: Menu,
     // graph: Graph,
-    notifier: Notifier
+    notifier: Notifier,
     // menuservice: MenuService,
     // menucomp: MenuComponent,
     // menudep: MenuDeployment,
-    // menures: MenuResource,
+    menures: MenuResource
     // maindep: MainDeployment,
     // menurun: MenuRuntime,
     // vSelect
@@ -111,7 +107,6 @@ export default {
       return this.$store.getters.alertPan;
     },
 
-    /*
     getManifest() {
       return this.$store.getters.getManifest;
     },
@@ -119,7 +114,6 @@ export default {
     manifests() {
       return this.$store.getters.manifests;
     },
-    */
 
     currentManifest() {
       return this.$store.getters.currentManifest;
@@ -127,11 +121,10 @@ export default {
 
     manifestList() {
       let res = [];
-      let manifests = this.$store.getters.manifests;
-      for (let man in manifests) {
-        res.push(manifests[man].manifest);
+      let manifests = this.manifests;
+      for (let i in manifests) {
+        res.push(manifests[i]);
       }
-      console.debug("Res contains ", res);
       return res;
     },
 
@@ -141,7 +134,7 @@ export default {
 
     options() {
       return this.manifestList.filter(x => {
-        return this.filterManifests.indexOf(x.type) > -1;
+        return this.filterManifests.indexOf(x._type) > -1;
       });
     }
   },
@@ -154,13 +147,11 @@ export default {
       this.clearModals(false);
     },
 
-    /*
     listener(data) {},
 
     setManifest(manifest) {
       this.$store.dispatch("setManifest", manifest);
     },
-    */
 
     setDeployCharts() {
       this.$store.dispatch("setDeployCharts");
@@ -171,8 +162,9 @@ export default {
     },
 
     selectModal() {
-      if (this.manifestList.length > 0 && this.selectedManifest != null)
-        this.setManifest(this.selectedManifest.label);
+      if (this.manifestList.length > 0 && this.selectedManifest != null) {
+        this.setManifest(this.selectedManifest);
+      }
     }
   }
 };
