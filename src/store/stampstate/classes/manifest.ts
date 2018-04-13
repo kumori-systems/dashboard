@@ -8,8 +8,14 @@ export class Manifest extends ECloudElement {
   /** Uniform Resource Name which identifies this manifest in the stamp. */
   readonly _urn: string;
 
-  /** Type of manifest for manifest editor. */
-  readonly _type: string;
+  /** Label used for manifest editor. */
+  readonly label: string;
+
+  /** This holds the real type */
+  _type: string = null;
+
+  /** Type used for the manifest editor. */
+  type: string = null;
 
   /** Deployment which uses this element. */
   deployment: string = null;
@@ -26,8 +32,6 @@ export class Manifest extends ECloudElement {
   /** Parameters of this element. */
   parameters: string = null;
 
-  /** Type of this element. */
-  type: string = null;
 
   /** Channels of a service or a component. */
   channels: any = null;
@@ -50,6 +54,9 @@ export class Manifest extends ECloudElement {
   /** This element's profile. */
   profile: any = {};
 
+  /** Service roles. */
+  roles: any = null;
+
   /** Component's runtime */
   runtime: string = null;
 
@@ -67,7 +74,7 @@ export class Manifest extends ECloudElement {
     if (manifest.name) { this.name = manifest.name; }
     if (manifest.owner) { this.owner = manifest.owner; }
     if (manifest.parameters) { this.parameters = manifest.parameters; }
-    if (manifest.type) { this.type = manifest.type; }
+    if (manifest.type) { this._type = manifest.type; }
     if (manifest.channels) { this.channels = manifest.channels; }
     if (manifest.connectors) { this.connectors = manifest.connectors; }
     if (manifest.code) { this.code = manifest.code; }
@@ -75,19 +82,21 @@ export class Manifest extends ECloudElement {
     if (manifest.configuration) { this.configuration = manifest.configuration; }
     if (manifest.metadata) { this.metadata = manifest.metadata; }
     if (manifest.profile) { this.profile = manifest.profile; }
+    if (manifest.roles) { this.roles = manifest.roles; }
     if (manifest.runtime) { this.runtime = manifest.runtime; }
     if (manifest.spec) { this.spec = manifest.spec; }
 
     /* For manifest editor - INIT */
+    this.label = this._urn;
     try {
       let spec = this.spec ? this.spec.split('/') :
-        this.type ? this.type.split('/') :
+        this._type ? this._type.split('/') :
           this._urn.split('/');
 
       if (spec[3] === 'manifest') {
-        this._type = spec[spec.length - 2];
+        this.type = spec[spec.length - 2];
       } else {
-        this._type = spec[3];
+        this.type = spec[3];
       }
     } catch (error) {
       console.error('Error: ' + error);

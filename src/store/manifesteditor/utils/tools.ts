@@ -62,49 +62,50 @@ function paseSugestionChannels(list, role) {
 }
 
 function getAllChannels(state, getters, type) {
-  // console.log(type)
   let list = [];
-  let excludeRolChann = {};
-  let excludeSrvChann = {};
+  if (state.currentManifest) {
+    let excludeRolChann = {};
+    let excludeSrvChann = {};
 
-  let connType = type === 'requires' ? 'depended' : 'provided';
-  let service = state.manifests[state.currentManifest];
+    let connType = type === 'requires' ? 'depended' : 'provided';
+    let service = getters.manifests[state.currentManifest];
 
-  // Create exclusions
-  for (let conn of service.connectors) {
-    for (let entry of conn[connType]) {
-      if (entry.role) {
-        excludeRolChann[entry.role + ':' + entry.endpoint] = true;
-      }
-    }
-    if (type === 'requires')
+    // Create exclusions
+    for (let conn of service.connectors) {
       for (let entry of conn[connType]) {
-        if (entry.role === undefined) {
-          excludeSrvChann[':' + entry.endpoint] = true;
+        if (entry.role) {
+          excludeRolChann[entry.role + ':' + entry.endpoint] = true;
         }
       }
-  }
-  //  console.log(excludeRolChann)
+      if (type === 'requires')
+        for (let entry of conn[connType]) {
+          if (entry.role === undefined) {
+            excludeSrvChann[':' + entry.endpoint] = true;
+          }
+        }
+    }
 
-
-
-  for (let role of service.roles) {
-    if (getters.getComponents[role.component]) {
-      let comChannels = getters.getComponents[role.component].channels[type];
-      if (comChannels && comChannels.length > 0) {
-        list = list.concat(paseSugestionChannels(comChannels, role.name));
+    for (let role of service.roles) {
+      if (getters.getComponents[role.component]) {
+        let comChannels = getters.getComponents[role.component].channels[type];
+        if (comChannels && comChannels.length > 0) {
+          list = list.concat(paseSugestionChannels(comChannels, role.name));
+        }
       }
     }
 
+    if (type === 'requires' && service.channels['provides']) {
+      list = list.concat(
+        paseSugestionChannels(service.channels['provides'], '')
+      );
+    }
+
+    list = list.filter((x) => {
+      return excludeRolChann[x.fullName] && excludeSrvChann[x.fullName];
+    });
+
   }
-  if (type === 'requires' && service.channels['provides'])
-    list = list.concat(paseSugestionChannels(service.channels['provides'], ''));
 
-
-
-  list = list.filter((x) => {
-    return excludeRolChann[x.fullName] && excludeSrvChann[x.fullName];
-  });
   return list;
 }
 

@@ -53,7 +53,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let res = [];
     if (state.currentManifest) {
       let manifest = getters.manifests[state.currentManifest];
-      res = res.concat(state.Settings.menuOptions[manifest._type])
+      res = res.concat(state.Settings.menuOptions[manifest.type])
         .concat(state.Settings.menuOptions['shared']);
     }
 
@@ -81,21 +81,23 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return true;
   }
 
-  /*  
-  //DEPLOYMENT
+  // DEPLOYMENT
   getArrangements = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
- 
-    let deploy = state.manifests[state.currentManifest];
-    let arrangements = [];
-    Object.keys(deploy.roles).map(function (key, index) {
-      arrangements.push({ name: key });
-      return true;
-    })
- 
-    return arrangements;
-  };
-  */
+    let res = [];
+    if (state.currentManifest) {
+      let deploy = getters.manifests[state.currentManifest];
+      console.debug('Deploy contains', deploy);
+      Object.keys(deploy.roles).map((key, index) => {
+        res.push({ name: key });
+        return true;
+      });
+    }
+
+    console.debug('res contains', res);
+    return res;
+  }
+
 
   getDeployParams = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
@@ -220,13 +222,17 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return [];
   }
 
-  /*
+
   // CHANNELS 
   getChannels = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    return state.manifests[state.currentManifest].channels;
-  };
-  */
+    let res = [];
+    if (state.currentManifest) {
+      res = getters.manifests[state.currentManifest].channels;
+    }
+    return res;
+  }
+
 
   getCurrentConnector = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
@@ -255,21 +261,16 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       }
     }
   }
-
-  /*
+ 
   getAllConnProvided = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     return tools.getAllChannels(state, getters, 'provides');
-  };
-  */
+  }
 
-  /* 
   getAllConnDepended = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     return tools.getAllChannels(state, getters, 'requires');
-  };
-  */
-
+  }
 
   getConnectors = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any): {
@@ -303,7 +304,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
     let components = {};
     Object.keys(getters.manifests).map(function (key, index) {
-      if (getters.manifests[key]._type === 'component') {
+      if (getters.manifests[key].type === 'component') {
         components[key] = getters.manifests[key];
       }
       return true;
@@ -317,7 +318,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
     let res = [];
     Object.keys(getters.manifests).map(function (key, index) {
-      if (getters.manifests[key]._type === 'resource') {
+      if (getters.manifests[key].type === 'resource') {
         res.push(getters.manifests[key]);
       }
       return true;
@@ -335,6 +336,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       return getters.manifests[state.currentManifest].configuration.parameters
         .findIndex(x => x.name === role.name) !== -1;
     }
+    return null;
   }
 
   currentManifest = (state?: State, getters?: Getters, rootState?: any,

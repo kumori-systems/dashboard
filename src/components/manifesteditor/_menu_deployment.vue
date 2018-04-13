@@ -140,6 +140,7 @@ export default {
     }
   },
   methods: {
+
     cleanCurrent() {
       this.$store.dispatch("cleanCurrent", payload);
     },

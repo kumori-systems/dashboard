@@ -6,7 +6,6 @@
     <div id="container">
       <alertpan  v-show="alertPan"></alertpan>
       <graph v-if="false" @d3-event="listener"></graph>
-      
       <appmenu v-if="currentManifest!=''">
         <menuservice v-if="getManifest.type=='service'" slot="menu"></menuservice>
         <menucomp v-if="getManifest.type=='component'" slot="menu"></menucomp>
@@ -18,37 +17,36 @@
         <div class="panel-heading">{{$t('panel.selector.title')}}</div>
         <div class="panel-body">
           <div class="form-group">
-            <label class="checkbox-inline">
-              <input type="checkbox" value="service" v-model="filterManifests">{{$t('panel.selector.options.services')}}
+            <label class="checkbox-inline black--text">
+              <input type="checkbox" value="service" v-model="filterManifests">
+              {{ $t('panel.selector.options.services') }}
             </label>
-            <label class="checkbox-inline">
+            <label class="checkbox-inline black--text">
               <input type="checkbox"  value="component"  v-model="filterManifests">{{$t('panel.selector.options.components')}}
             </label>
-            <label class="checkbox-inline">
+            <label class="checkbox-inline black--text">
               <input type="checkbox"  value="deployment"  v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
             </label>
-            <label class="checkbox-inline">
+            <label class="checkbox-inline black--text">
               <input type="checkbox"  value="resource"  v-model="filterManifests">{{$t('panel.selector.options.resources')}}
             </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox"  value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
-                </label>
-                </div>
-              <v-select :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
-            </div>
-            <div class="panel-footer">
-              <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
-            </div>
+            <label class="checkbox-inline black--text">
+              <input type="checkbox"  value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
+            </label>
+          </div>
+          <v-select :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
+        </div>
+        <div class="panel-footer">
+          <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
         </div>
       </div>
-    
-      <maindep v-if=" currentManifest!='' && getManifest.type=='deployment'" >{{setDeployCharts()}}</maindep>
-  
-      <footer v-if="currentManifest!=''" id="footer" >
-        <div>
-          <p  class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; Path: {{manifests[currentManifest].filePath}}</p>
-        </div>
-      </footer>
+    </div>
+    <maindep v-if=" currentManifest!='' && getManifest.type=='deployment'">{{setDeployCharts()}}</maindep>
+    <footer v-if="currentManifest!=''" id="footer">
+      <div>
+        <p class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; Path: {{manifests[currentManifest].filePath}}</p>
+      </div>
+    </footer>
   </div>
 </template>
 <script>
@@ -135,7 +133,7 @@ export default {
 
     options() {
       return this.manifestList.filter(x => {
-        return this.filterManifests.indexOf(x._type) > -1;
+        return this.filterManifests.indexOf(x.type) > -1;
       });
     }
   },
@@ -168,7 +166,7 @@ export default {
       }
     },
     setSelect(val) {
-      this.selectedManifest = val;
+      this.selectedManifest = val._urn;
       this.$refs.btnaccept.focus();
     }
   }

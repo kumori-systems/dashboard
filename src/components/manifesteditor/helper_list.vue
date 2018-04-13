@@ -17,7 +17,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
@@ -41,7 +40,7 @@ export default {
       return this.$store.getters.getCurrentDeployParam;
     },
     Settings() {
-      return this.$store.state.Settings;
+      return this.$store.state.manifesteditor.Settings;
     }
   },
   methods: {

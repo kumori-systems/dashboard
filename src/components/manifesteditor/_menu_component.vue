@@ -117,32 +117,41 @@ export default {
     blockEditName() {
       return this.$store.getters.blockEditName;
     },
+
     validation() {
       return this.$store.state.serviceState.validation;
     },
+
     nameMani() {
       return this.$store.state.componentState.name;
     },
+
     updater() {
       return this.$store.state.serviceState.updater;
     }
   },
   methods: {
+
     cleanCurrent() {
       this.$store.dispatch("cleanCurrent", payload);
     },
+
     updateServiceName() {
       this.$store.dispatch("updateServiceName", payload);
     },
+
     updateServState() {
       this.$store.dispatch("updateServState", payload);
     },
+
     resetService() {
       this.$store.dispatch("resetService", payload);
     },
+
     optLink(action) {
       this[action]();
     },
+
     updateName(prop) {
       this.$refs.version[0].value.replace("/", "");
       this.$refs.domain[0].value.replace("/", "");
@@ -156,6 +165,7 @@ export default {
       };
       this.updateServiceName(fullName);
     },
+
     openAdd(target, event) {
       if (event.stopPropagation) {
         event.stopPropagation();
@@ -164,6 +174,7 @@ export default {
       this.cleanCurrent(target);
       this.$refs["simulate-" + target][0].click();
     },
+
     updateActive(name, event) {
       this.clicks++;
       if (this.clicks == 1) {
@@ -173,6 +184,7 @@ export default {
         }, 400);
       }
     },
+
     activeList(name, event) {
       let nameFilter = name.replace(/(:|\.|\[|\])/g, "\\$1");
       let activeFilter = this.active.replace(/(:|\.|\[|\])/g, "\\$1");

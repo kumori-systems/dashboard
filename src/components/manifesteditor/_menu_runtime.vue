@@ -87,7 +87,6 @@ export default {
     };
   },
   computed: {
-
     getChannels() {
       return this.$store.getters.getChannels;
     },
@@ -133,7 +132,6 @@ export default {
     }
   },
   methods: {
-
     cleanCurrent(payload) {
       return this.$store.dispatch("cleanCurrent", payload);
     },
@@ -189,7 +187,6 @@ export default {
         $("#" + nameFilter).collapse("show");
       }
     }
-
   }
 };
 </script>

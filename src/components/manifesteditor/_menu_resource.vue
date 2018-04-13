@@ -63,15 +63,14 @@
   </div>
 </template>
 <script>
-
-import  HelperModal  from "./helper_modal.vue";
+import HelperModal from "./helper_modal.vue";
 
 import ModalDeployParameters from "./_modal_deploy_parameters.vue";
 
 export default {
   components: {
-    'modal': HelperModal,
-    'modal-parameters': ModalDeployParameters
+    modal: HelperModal,
+    "modal-parameters": ModalDeployParameters
   },
   data() {
     return {
@@ -123,6 +122,7 @@ export default {
     }
   },
   methods: {
+
     cleanCurrent(payload) {
       this.$store.dispatch("cleanCurrent", payload);
     },

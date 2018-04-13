@@ -412,6 +412,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   // ROLES
   setRole = (state: State, payload: any): void => {
+    console.debug('Llamamos a set role con el payload', payload);
     if (payload < (<any>state).manifests[state.currentManifest].roles.length) {
       state.currentRole = payload;
 

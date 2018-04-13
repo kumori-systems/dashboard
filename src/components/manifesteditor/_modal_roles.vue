@@ -1,5 +1,5 @@
 <template>
-  <div :class="'modal-content content'+'xs'" heith="100" :updater="updater">
+  <div :class="'modal-content content'+'xs'" height="100px" :updater="updater">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
@@ -94,23 +94,23 @@ export default {
     },
 
     role() {
-      return this.$store.state.role;
+      return this.$store.state.manifesteditor.roleState.role;
     },
 
     validation() {
-      return this.$store.state.roleState.validation;
+      return this.$store.state.manifesteditor.roleState.validation;
     },
 
     resourceValidation() {
-      return this.$store.state.roleState.resourceValidation;
+      return this.$store.state.manifesteditor.roleState.resourceValidation;
     },
 
     updater() {
-      return this.$store.state.roleState.updater;
+      return this.$store.state.manifesteditor.roleState.updater;
     },
 
     roleName() {
-      return this.$store.state.currentRole.name;
+      return this.$store.state.manifesteditor.currentRole.name;
     },
 
     modalProp() {

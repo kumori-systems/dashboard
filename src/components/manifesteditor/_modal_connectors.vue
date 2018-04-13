@@ -75,9 +75,13 @@
 </template>
 <script>
 import search from "./helper_search.vue";
+import RowList from "./helper_list.vue";
+import Modal from "./helper_modal.vue";
 export default {
   components: {
-    search: search
+    search: search,
+    modal: Modal,
+    rowlist: RowList
   },
   props: ["roles"],
   data() {

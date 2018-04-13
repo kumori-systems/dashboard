@@ -77,15 +77,15 @@ export default {
     },
 
     channel() {
-      return this.$store.state.channelState.channel;
+      return this.$store.state.manifesteditor.channelState.channel;
     },
 
     validation() {
-      return this.$store.state.channelState.validation;
+      return this.$store.state.manifesteditor.channelState.validation;
     },
 
     updater() {
-      return this.$store.state.channelState.updater;
+      return this.$store.state.manifesteditor.channelState.updater;
     },
 
     modalProp() {

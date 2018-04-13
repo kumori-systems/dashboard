@@ -834,15 +834,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   setManifest = (injectee: Vuex.ActionContext<State, any>,
     manifestURN: string): void => {
-
+ 
     injectee.commit('setManifest', manifestURN);
     let service = injectee.getters.manifests[manifestURN];
     let state = null;
 
+    console.debug('El servicio contiene', service);
 
-    switch (service._type) {
+
+    switch (service.type) {
       case 'service':
         state = injectee.state.serviceState;
+        console.debug('Se ha reconocido un servicio');
         injectee.commit('resetConnector', injectee.getters.manifests);
         break;
       case 'component':
