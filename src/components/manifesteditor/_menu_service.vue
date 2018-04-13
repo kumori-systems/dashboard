@@ -93,6 +93,11 @@ export default {
       timer: null
     };
   },
+  mounted() {
+    console.debug("Se monta un servicio");
+    require("../../../static/css/dist/js/sb-admin-2");
+    console.debug("Se ha llamado lo que toca");
+  },
   computed: {
     getManifest() {
       return this.$store.getters.getManifest;
@@ -196,12 +201,12 @@ export default {
         }
         this.active = name;
 
-        console.debug('Active contains', this.active);
+        console.debug("Active contains", this.active);
         let filter = "#" + nameFilter;
-        console.debug('Filter contains', filter);
+        console.debug("Filter contains", filter);
         let item = $(filter);
         // let item=$("#menu\\.service\\.label");
-        console.debug('item contains', item);
+        console.debug("item contains", item);
         item.collapse("show");
       }
     }

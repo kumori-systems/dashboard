@@ -66,9 +66,9 @@ import {
   MainDeployment,
   HelperAlertPanel
 } from "../components";
-
 import i18n from "../store/manifesteditor/i18n";
 import vSelect from "vue-select";
+
 export default {
   mounted() {
     console.debug("Manifest Editor has been mounted");

@@ -77,7 +77,6 @@
     "karma-spec-reporter": "0.0.26",
     "karma-webpack": "^2.0.2",
     "lolex": "^1.5.2",
-    "metismenu": "^2.7.4",
     "mocha": "^3.2.0",
     "net": "^1.0.2",
     "nightwatch": "^0.9.12",
