@@ -1,13 +1,11 @@
 <template>
-  <div id="control">
-    <div id="control-panel" class="panel panel-default menuPannel">
-      <div class="panel-heading text-center">
-        <label> {{ $t('menu.' + manifests[currentManifest]._type + '.label' )}}</label>
-      </div>
-      <div class="panel-body">
-        <slot name="menu" ></slot>
-      </div>
-    </div>
+  <div>
+    <v-card-title class="mybackground"> <!-- View title-->
+      <h3 class="headline mb-0">{{ $t('menu.' + manifests[currentManifest]._type + '.label' )}} {{ manifests[currentManifest].name }}</h3>
+    </v-card-title>
+    <v-card-text> <!-- View body -->
+      <slot name="menu"></slot>
+    </v-card-text>
   </div>
 </template>
 <script>

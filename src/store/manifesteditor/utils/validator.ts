@@ -1,47 +1,15 @@
-let regex = {
-  notNull: {
-    r: /^.+$/,
-    errMsg: 'empty'
-  },
-  validVersion: {
-    r: /^\d+_\d+_\d+$/,
-    errMsg: 'invalidf'
-  },
-  noSpecialChars: {
-    r: /^[a-zA-Z0-9_.-]*$/,
-    errMsg: 'invalidc'
-  },
-  integer: {
-    r: /^[-+]?\d+$/,
-    errMsg: 'invalidc'
-  },
-  uinteger: {
-    r: /^\d+$/,
-    errMsg: 'invalidc'
-  },
-  number: {
-    r: /^[-+]?\d+(\.?\d+|\d*)$/,
-    errMsg: 'invalidc'
-  },
-  json: {
-    r: /(.|\s)*\S(.|\s)*/,
-    errMsg: 'empty'
-  },
-  boolean: {
-    r: /^true$|^false$/,
-    errMsg: 'invalidc'
-  }
-
+const regex = {
+  notNull: { r: /^.+$/, errMsg: 'empty' },
+  validVersion: { r: /^\d+_\d+_\d+$/, errMsg: 'invalidf' },
+  noSpecialChars: { r: /^[a-zA-Z0-9_.-]*$/, errMsg: 'invalidc' },
+  integer: { r: /^[-+]?\d+$/, errMsg: 'invalidc' },
+  uinteger: { r: /^\d+$/, errMsg: 'invalidc' },
+  number: { r: /^[-+]?\d+(\.?\d+|\d*)$/, errMsg: 'invalidc' },
+  json: { r: /(.|\s)*\S(.|\s)*/, errMsg: 'empty' },
+  boolean: { r: /^true$|^false$/, errMsg: 'invalidc' }
 };
 
-let cheCker = (check, value) => {
-  let status = value.match(regex[check].r);
-  return {
-    err: (status == null), msg: status == null ? regex[check].errMsg : ''
-  };
-};
-
-let props = {
+const props = {
   role: {
     name: ['notNull', 'noSpecialChars'],
     component: ['notNull'],
@@ -77,70 +45,52 @@ let props = {
   deployment: {
     name: ['noSpecialChars']
   }
+};
+
+function checker(check, value) {
+
+  let status = value.match(regex[check].r);
+  return {
+    err: (status == null), msg: status == null ? regex[check].errMsg : ''
+  };
 
 };
 
-let validator = (conditions, value) => {
-  for (let cond of conditions) {
-    let res = cheCker(cond, value);
-    console.log(res);
-    if (res.err)
-      return res;
-  }
-  return { err: false, msg: '' };
-};
+function validType(type, value) {
 
-
-let validType = (type, value) => {
   let res = { err: false, msg: '' };
-
   if (type !== 'string') {
     if (['list', 'json', 'vhost'].indexOf(type) > -1) {
-      res = cheCker('json', value);
+      res = checker('json', value);
       if (!res.err)
         try {
           let json = JSON.parse(value);
         } catch (error) {
           return { err: true, msg: 'invjson' };
         }
-    }
-    else {
+    } else {
       if ('notNull' !== type) {
-        res = cheCker('notNull', value);
+        res = checker('notNull', value);
         if (res.err)
           return res;
       }
-      res = cheCker(type, value);
+      res = checker(type, value);
     }
   }
-
   return res;
+
 };
 
-let validProp = (type, prop, value) => {
-  /*      console.log("------VALIDADTOR------")
-      console.log(type)
-      console.log(prop)
-      console.log(value)
-      console.log("----------------------")  */
+function validProp(type, prop, value) {
+
   let conditions = props[type][prop];
   for (let cond of conditions) {
-    let res = cheCker(cond, value);
+    let res = checker(cond, value);
     if (res.err)
       return res;
   }
   return { err: false, msg: '' };
+
 };
 
 export { validProp, validType };
-
-{/* <div :class="{'form-group':true, 'has-error':validation.name.err,
-  'has-feedback':validation.name.err}">
-   <input class="form-control" @input="updateName" ref="name"
-    v-bind:value="name">
-      <span v-if="validation.name.err" class="glyphicon glyphicon-remove
-        form-control-feedback"></span>
-      <span v-if="validation.name.err" class="help-block">
-      {{ validation.name.msg }}
-      </span>
-</div> */}

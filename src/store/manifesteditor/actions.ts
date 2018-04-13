@@ -843,7 +843,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     switch (service._type) {
       case 'service':
         state = injectee.state.serviceState;
-        injectee.commit('resetConnector');
+        injectee.commit('resetConnector', injectee.getters.manifests);
         break;
       case 'component':
         state = injectee.state.componentState;

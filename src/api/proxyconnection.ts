@@ -798,12 +798,7 @@ export class ProxyConnection extends EventEmitter {
 
     return this.admission.findStorage().then((registeredElements) => {
 
-
-      console.debug('FindStorage responded', registeredElements);
-
       for (let i = 0; i < registeredElements.length; i++) {
-
-        console.debug('Analyzing element ', registeredElements[i]);
 
         switch (utils.getElementType(registeredElements[i])) {
 
@@ -1067,12 +1062,10 @@ export class ProxyConnection extends EventEmitter {
   /* DEPLOYMENTS */
   getDeploymentList(): Promise<any> {
     return this.admission.findDeployments().then((deploymentList) => {
-      console.debug('Admission answered deployment request ');
+
       let promiseArray: Promise<any>[] = [];
       for (let deploymentURN in deploymentList) {
-        console.debug('Transforming deployment', deploymentURN,
-          deploymentList[deploymentURN]
-        );
+
         let deployment: Deployment =
           this.transformEcloudDeploymentToDeployment(
             deploymentList[deploymentURN] // Deployment
@@ -1082,7 +1075,7 @@ export class ProxyConnection extends EventEmitter {
           this.onAddManifest,
           new Manifest(deploymentURN, deploymentList[deploymentURN])
         );
-        
+
         this.emit(this.onDeploy, deploymentURN, deployment);
 
         promiseArray.push(this.getElementInfo(deployment.service)
@@ -1095,6 +1088,7 @@ export class ProxyConnection extends EventEmitter {
         .then((values) => { })
         .catch(err => { })
         .then(() => { });
+
     });
 
   }
@@ -1512,25 +1506,25 @@ export class ProxyConnection extends EventEmitter {
             [volatileVolInstance: string]: VolatileVolume.Instance
           } = {};
 
-          /* There is a problem in which the identifier of the volume must be
-          taken from the instances and not from the volume in the deployment
-          definition */
+          /*
+            There is a problem in which the identifier of the volume must be
+            taken from the instances and not from the volume in the deployment
+            definition
+          */
           let volumeURN: string;
 
-
           for (let resInstIndex in resourceInstances) {
+
             if (resourceInstances[resInstIndex].volumeName === res) {
+
               volatileItems[resourceInstances[resInstIndex].id] =
                 resourceInstances[resInstIndex];
+              volumeURN = volatileItems[resourceInstances[resInstIndex].id]
+                ._urn;
 
-              volumeURN =
-                volatileItems[resourceInstances[resInstIndex].id]._urn;
-
-              console.debug('Content:',
-                volatileItems[resourceInstances[resInstIndex].id]);
             }
-          }
 
+          }
           resources[res] = volumeURN;
 
           try {

@@ -5,6 +5,8 @@ import State from './state';
 import webSettings from './settings';
 import { validProp, validType } from './utils/validator';
 
+import { Manifest } from '../stampstate/classes';
+
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
 
@@ -156,7 +158,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
-
   // APP
   setState = (state: State, payload: any): void => {
     (<any>state).manifests = payload;
@@ -193,14 +194,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateAllValidation = (state: State, payload: any): void => {
-    payload.currState.valid = true;
+    console.debug('payload in updateAllValidation contains', payload);
+    payload.currState.valid = false;
     for (let prop in payload.currState.validation) {
       payload.currState.validation[prop] =
         validProp(payload.type, prop, payload.data[prop]);
 
-      if (payload.currState.validation[prop].err)
-        payload.currState.valid = false;
+      if (!payload.currState.validation[prop].err) {
+        payload.currState.valid = true;
+      }
     }
+
   }
 
   updateValidation = (state: State, payload: any): void => {
@@ -509,12 +513,18 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   }
 
-  resetConnector = (state: State, payload: any): void => {
-    let service = (<any>state).manifests[state.currentManifest];
-    if (service.connectors.length > 0)
+  resetConnector = (state: State, manifests: {
+    [urn: string]: Manifest
+  }): void => {
+
+    let service = manifests[state.currentManifest];
+
+    if (service.connectors.length > 0) {
       state.currentConnector = 0;
-    else
+    } else {
       state.currentConnector = 1;
+    }
+
   }
 
   // RESOURCES

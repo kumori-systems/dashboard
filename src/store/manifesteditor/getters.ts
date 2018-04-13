@@ -1,6 +1,11 @@
 import Vuex from 'vuex';
 import State from './state';
 
+import {
+  getElementDomain, getElementName, getElementVersion
+} from '../../api/utils';
+import { Manifest } from '../stampstate/classes';
+
 import { tools } from './utils';
 
 /**
@@ -42,14 +47,18 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.alerts;
   }
 
-  /*
+
   menuOptions = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let manifest = state.manifests[state.currentManifest];
-    return state.Settings.menuOptions[manifest.type]
-      .concat(state.Settings.menuOptions['shared']);
-  };
-  */
+    let res = [];
+    if (state.currentManifest) {
+      let manifest = getters.manifests[state.currentManifest];
+      res = res.concat(state.Settings.menuOptions[manifest._type])
+        .concat(state.Settings.menuOptions['shared']);
+    }
+
+    return res;
+  }
 
   getSettings = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
@@ -108,17 +117,22 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.Settings.manifestStructure.elementtype.arrangements.opt_enum;
   }
 
-  /*
-    // SERVICE
-    getServiceName = (state?: State, getters?: Getters, rootState?: any,
-      rootGetters?: any) => {
-      return {
-        name: state.manifests[state.currentManifest].name.split('/')[4],
-        domain: state.manifests[state.currentManifest].name.split('/')[2],
-        version: state.manifests[state.currentManifest].name.split('/')[5]
-      }
-    };
-  */
+  // SERVICE
+  getServiceName = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any) => {
+    let res = null;
+    if (state.currentManifest) {
+      let name: string = getters.manifests[state.currentManifest].name;
+
+      res = {
+        'name': getElementName(name),
+        'domain': getElementDomain(name),
+        'version': getElementVersion(name)
+      };
+
+    }
+    return res;
+  }
 
   // ROLES
   getCurrentRole = (state?: State, getters?: Getters, rootState?: any,
@@ -249,35 +263,47 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   };
   */
 
-  /*
+  /* 
   getAllConnDepended = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     return tools.getAllChannels(state, getters, 'requires');
   };
   */
 
-  /*
+
   getConnectors = (state?: State, getters?: Getters, rootState?: any,
-    rootGetters?: any) => {
-    let connectors = state.manifests[state.currentManifest].connectors;
-    let genId = -1;
-    return Object.keys(connectors).map(function (key) {
-      return {
-        id: ++genId,
-        name: connectors[key].type.split("/")[4],
-        depended: connectors[key].depended,
-        provided: connectors[key].provided
-      };
-    });
-  };
-  */
+    rootGetters?: any): {
+      name: string, id: string, depended: any[], provided: any[]
+    }[] => {
+
+    let res = [];
+    let currentManifest = state.currentManifest;
+    if (currentManifest) {
+
+      let connectors = getters.manifests[currentManifest].connectors;
+      let genId = -1;
+      for (let conn in connectors) {
+
+        res.push({
+          'id': ++genId,
+          'name': connectors[conn].type.split('/')[4],
+          'depended': connectors[conn].depended,
+          'provided': connectors[conn].provided
+        });
+
+      }
+
+    }
+    return res;
+
+  }
 
   // COMPONENTS
   getComponents = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     let components = {};
     Object.keys(getters.manifests).map(function (key, index) {
-      if (getters.manifests[key].type === 'component') {
+      if (getters.manifests[key]._type === 'component') {
         components[key] = getters.manifests[key];
       }
       return true;
@@ -291,7 +317,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
     let res = [];
     Object.keys(getters.manifests).map(function (key, index) {
-      if (getters.manifests[key].type === 'resource') {
+      if (getters.manifests[key]._type === 'resource') {
         res.push(getters.manifests[key]);
       }
       return true;

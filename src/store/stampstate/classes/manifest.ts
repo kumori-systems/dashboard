@@ -32,6 +32,9 @@ export class Manifest extends ECloudElement {
   /** Channels of a service or a component. */
   channels: any = null;
 
+  /** Connectors of a service. */
+  connectors: any = null;
+
   /** Component or runtime code. */
   code: string = null;
 
@@ -66,6 +69,7 @@ export class Manifest extends ECloudElement {
     if (manifest.parameters) { this.parameters = manifest.parameters; }
     if (manifest.type) { this.type = manifest.type; }
     if (manifest.channels) { this.channels = manifest.channels; }
+    if (manifest.connectors) { this.connectors = manifest.connectors; }
     if (manifest.code) { this.code = manifest.code; }
     if (manifest.codelocator) { this.codelocator = manifest.codelocator; }
     if (manifest.configuration) { this.configuration = manifest.configuration; }

@@ -105,7 +105,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       }).then(() => user);
 
     }).then((user) => { // Define all listeners
-      console.debug('Defining listeners');
 
       ProxyConnection.instance.onMustSignOut((reason: string) => {
 
@@ -125,13 +124,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
-      console.debug('sfdsaf');
       ProxyConnection.instance.onAddManifest((manifest: Manifest) => {
 
         injectee.commit('addManifest', manifest);
 
       });
-      console.debug('ENDsfdsaf');
 
       ProxyConnection.instance.onDeploy((deploymentId: string,
         deployment: Deployment) => {
@@ -256,8 +253,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
         });
 
-      console.debug('Finished defining listeners');
-
       return user;
 
     }).then((user) => { // Start loading action in the state
@@ -312,7 +307,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all deployments
 
-      console.debug('Going to ask for deployment info');
       return ProxyConnection.instance.getDeploymentList().then(() => {
         console.debug('Retrieved info from all deployments');
 
@@ -445,6 +439,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       }
 
     });
+
   }
 
   /** Marks a notification as readed. */
