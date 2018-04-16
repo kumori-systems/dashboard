@@ -1,15 +1,15 @@
 <template>
   <div :class="'modal-content content'+'xl'" heith="100">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-header my-background">
+      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-    <div class="modal-body">
+    <div class="modal-body my-background">
       <div class="row">
         <div class="col-sm-3">
-          <div class="panel panel-default">
-            <div class="panel-heading text-center"> {{ $t('modals.connectors.labels.cons')}} </div>
-              <div class="row addNewOnTop">
+          <div class="panel panel-default my-background">
+            <div class="panel-heading text-center white--text my-background headline"> {{ $t('modals.connectors.labels.cons')}} </div>
+              <div class="row addNewOnTop my-background">
                 <div class="col-sm-12">
                   <div class="form-group input-group">
                     <select id="componentsList" class="form-control" value="" ref ="connector">
@@ -18,7 +18,7 @@
                       </optgroup>
                     </select>
                     <span class="input-group-btn">
-                      <button class="btn btn-default" type="button" @click="addNewConnector()"><i class="blue fa fa-plus"></i></button>
+                      <button class="btn btn-default blue" type="button" @click="addNewConnector()"><i class="blue fa fa-plus white--text"></i></button>
                     </span>
                   </div>
                 </div>
@@ -30,45 +30,45 @@
           </div>
           <div class="col-sm-9">
             <div class="col-sm-6">
-              <div class="panel panel-default">
-                <div class="panel-heading text-center">  {{ $t('modals.connectors.labels.prov')}}  </div>
-                <div class="row addNewOnTop">
+              <div class="panel panel-default my-background">
+                <div class="panel-heading text-center my-background white--text headline">  {{ $t('modals.connectors.labels.prov')}}  </div>
+                <div class="row addNewOnTop my-background">
                   <div class="col-sm-12">
                     <div class="form-group input-group">
                       <search @reset="(data)=>{manageReset('provided',data)}" @update="(data)=>{setCurrent('provided',data)}" :reset="reset.provided" :disabled="getCurrentConnector==-1" :suggestions="getAllConnProvided"></search>
                       <span class="input-group-btn">
-                        <button class="btn btn-default" @click="makeConnection('provided')" type="button"><i class="blue fa fa-plus"></i></button>
+                        <button class="btn btn-default blue" @click="makeConnection('provided')" type="button"><i class="white--text blue fa fa-plus"></i></button>
                       </span>
                     </div>
                   </div>
               </div>
-              <div class="panel-body hlimited" >
+              <div class="panel-body hlimited">
                 <rowlist v-bind:list="getCurrConnProvided"  v-bind:type="getSettings.listTypes.connectorList.provided"> </rowlist>
               </div>
             </div>   
           </div>
           <div class="col-sm-6">
-            <div class="panel panel-default">
-              <div class="panel-heading text-center">  {{ $t('modals.connectors.labels.dep')}}  </div>
-              <div class="row addNewOnTop">
+            <div class="panel panel-default my-background">
+              <div class="panel-heading text-center my-background white--text headline">  {{ $t('modals.connectors.labels.dep')}}  </div>
+              <div class="row addNewOnTop my-background">
                 <div class="col-sm-12">
-                  <div class="form-group input-group">
+                  <div class="form-group input-group my-background">
                     <search @reset="(data)=>{manageReset('depended',data)}" @update="(data)=>{setCurrent('depended',data)}" :reset="reset.depended" :disabled="getCurrentConnector==-1" :suggestions="getAllConnDepended"></search>
                     <span class="input-group-btn">
-                      <button class="btn btn-default" @click="makeConnection('depended')" type="button"><i class=" blue fa fa-plus"></i></button>
+                      <button class="btn btn-default blue" @click="makeConnection('depended')" type="button"><i class="white--text blue fa fa-plus"></i></button>
                     </span>
                   </div>
                 </div>
               </div>
-              <div class="panel-body hlimited" >
+              <div class="panel-body hlimited">
                 <rowlist v-bind:list="getCurrConnDepended"  v-bind:type="getSettings.listTypes.connectorList.depended"> </rowlist>
               </div>
             </div>   
           </div>
         </div>
       </div> 
-      <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <div class="modal-footer my-background">
+          <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
       </div>
     </div>
   </div>
@@ -170,3 +170,8 @@ export default {
   }
 };
 </script>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>

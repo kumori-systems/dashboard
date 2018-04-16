@@ -34,7 +34,7 @@
               <input type="checkbox"  value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
             </label>
           </div>
-          <v-select id="maininput" :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
+          <v-select class="searchinput" :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
         </div>
         <div class="panel-footer">
           <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
@@ -44,7 +44,7 @@
     <maindep v-if=" currentManifest!='' && getManifest.type=='deployment'">{{setDeployCharts()}}</maindep>
     <footer v-if="currentManifest!=''" id="footer">
       <div>
-        <p class="footext">Manifest: {{manifests[currentManifest].name}} &nbsp;&nbsp;|&nbsp;&nbsp; Path: {{manifests[currentManifest].filePath}}</p>
+        <p class="footext">Manifest: {{manifests[currentManifest].name}}</p>
       </div>
     </footer>
   </div>
@@ -63,7 +63,6 @@ import {
   Graph,
   Menu,
   RowList,
-  RGridForm,
   AlertPanel,
   Collapsegrp,
   Notifier,
@@ -175,8 +174,12 @@ export default {
       }
     },
     setSelect(val) {
-      this.selectedManifest = val._urn;
-      this.$refs.btnaccept.focus();
+      if (val) {
+        this.selectedManifest = val._urn;
+        this.$refs.btnaccept.focus();
+      } else {
+        this.selectedManifest = null;
+      }
     }
   }
 };
@@ -191,26 +194,42 @@ export default {
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
 
 <!-- Custom Fonts -->
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/font-awesome/css/font-awesome.min.css"></style>
+<style src="/home/osmuogar/workspace/dashboard/static/css/font-awesome/css/font-awesome.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
 <style scoped>
 .panel,
 .panel-default,
 .panel-footer,
 .panel-heading {
-  background-color: #303030 !important;
-  border-color: #303030 !important;
+  background-color: #424242 !important;
+  border-color: #424242 !important;
 }
-#manifesteditor{
-  position:inherit !important;
-}
-#maininput{
-  background-color:#fdfdfd;
+#manifesteditor {
+  position: inherit !important;
 }
 </style>
 <style>
-.clear{
+.clear {
   bottom: 0px !important;
   top: 7px;
+}
+
+#control {
+  background-color: #424242 !important;
+  border-color: #424242 !important;
+  max-height: 840px;
+}
+
+#footer {
+  overflow: hidden !important;
+}
+
+.my-background {
+  background-color: #424242 !important;
+  border-color: #424242 !important;
+}
+
+.searchinput {
+  background-color: #fdfdfd;
 }
 </style>

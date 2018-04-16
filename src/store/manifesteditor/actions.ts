@@ -834,18 +834,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   setManifest = (injectee: Vuex.ActionContext<State, any>,
     manifestURN: string): void => {
- 
+
     injectee.commit('setManifest', manifestURN);
     let service = injectee.getters.manifests[manifestURN];
     let state = null;
 
-    console.debug('El servicio contiene', service);
-
-
     switch (service.type) {
       case 'service':
         state = injectee.state.serviceState;
-        console.debug('Se ha reconocido un servicio');
         injectee.commit('resetConnector', injectee.getters.manifests);
         break;
       case 'component':
@@ -939,10 +935,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     injectee.commit(
       'deleteValidation', injectee.state.roleState.resourceValidation
     );
-    injectee.commit('setRole', payload);
-    let role = injectee.getters.manifests[injectee.state.currentManifest]
-      .roles[injectee.state.currentRole];
+    injectee.commit('setRole', {
+      manifests: injectee.getters.manifests,
+      role: payload
+    });
+
+    let currentManifest = injectee.getters
+      .manifests[injectee.state.currentManifest];
+    console.debug('The current manifest is', currentManifest);
+    let role = currentManifest.roles[injectee.state.currentRole];
+    console.debug('The current role is', role);
     let component = injectee.getters.manifests[role.component];
+    console.debug('The component is', component);
 
     if (component.configuration.resources) {
       component.configuration.resources.map((elem) => {
@@ -1899,7 +1903,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         );
         break;
       case injectee.state.Settings.modalProps.connectors.id:
-        injectee.commit('resetConnector');
+        injectee.commit('resetConnector', injectee.getters.manifests);
         break;
       default:
         break;

@@ -2,8 +2,8 @@
   <div class="sidebar-nav navbar-collapse">
     <ul class="nav in" id="side-menu">
       <li v-for="(option, index) in menuOptions"  v-bind:key="index" :class="{active: option.name == active}" :ref="option.name" @click="updateActive(option.name, $event)" >
-        <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator">
-          <i v-bind:class="option.icon + ' activator'"></i>{{ $t(option.name) }}
+        <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator subheading white--text">
+          <v-icon class="activator">{{option.icon}}</v-icon> {{ $t(option.name) }}
           <span v-if="option.secondLevel || option.id == 'service'" class="fa arrow activator"></span>
           <i v-if="option.add && active == option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator" @click="openAdd(option.add.target, $event)"></i>
         </a>
@@ -53,7 +53,7 @@
               <a id="show-channels" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
             </template>
             <template v-if="secondOpt.type=='other'">
-              <a id="show-channels" href="#" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
+              <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
             </template>
           </li>
         </ul>
@@ -92,11 +92,6 @@ export default {
       clicks: 0,
       timer: null
     };
-  },
-  mounted() {
-    console.debug("Se monta un servicio");
-    require("../../../static/css/dist/js/sb-admin-2");
-    console.debug("Se ha llamado lo que toca");
   },
   computed: {
     getManifest() {
@@ -213,3 +208,18 @@ export default {
   }
 };
 </script>
+<style scoped>
+ul {
+  list-style-type: none;
+  padding-left: 0px;
+}
+a {
+  text-decoration-color: white !important;
+  color: white !important;
+}
+</style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>

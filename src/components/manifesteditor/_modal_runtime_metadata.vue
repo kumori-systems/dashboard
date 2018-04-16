@@ -10,7 +10,7 @@
           <label> {{key[0].toUpperCase() + key.substring(1)}} </label>
           <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
             <div  class="form-group input-group">
-              <textarea class="form-control" rows="3" :ref="key" style=" min-height: 35px; height: 300px; resize: vertical;" @input="updatedField(key)" >{{metadata}}</textarea>
+              <textarea class="form-control" rows="3" :ref="key" style=" min-height: 35px; height: 300px; resize: vertical;" @input="updatedField(key)" v-model="metadata"></textarea>
               <span class="input-group-addon">{{$t('modals.deployParams.labels.json')}}</span>                   
             </div>
             <span v-if="validation[key].err" class="help-block">{{$t('validation.'+validation[key].msg)}}</span>
@@ -64,3 +64,8 @@ export default {
   }
 };
 </script>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>

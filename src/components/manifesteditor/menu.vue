@@ -1,7 +1,7 @@
 <template>
   <div id="control">
     <div id="control-panel" class="panel panel-default menuPannel">
-      <div class="panel-heading text-center">
+      <div class="panel-heading headline text-center">
         <label>{{$t('menu.'+manifests[currentManifest].type+'.label')}}</label>
       </div>
       <div class="panel-body">
@@ -25,10 +25,8 @@ export default {
   }
 };
 </script>
-
-
-
-
-
-
-
+<style>
+.text-center {
+  text-align: center;
+}
+</style>

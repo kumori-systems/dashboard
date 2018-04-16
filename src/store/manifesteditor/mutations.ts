@@ -194,7 +194,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateAllValidation = (state: State, payload: any): void => {
-    console.debug('payload in updateAllValidation contains', payload);
     payload.currState.valid = false;
     for (let prop in payload.currState.validation) {
       payload.currState.validation[prop] =
@@ -411,13 +410,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   // ROLES
-  setRole = (state: State, payload: any): void => {
+  setRole = (state: State, payload: {
+    manifests: any,
+    role: number
+  }
+  ): void => {
     console.debug('Llamamos a set role con el payload', payload);
-    if (payload < (<any>state).manifests[state.currentManifest].roles.length) {
-      state.currentRole = payload;
+    if (payload.role < payload.manifests[state.currentManifest].roles.length) {
+      state.currentRole = payload.role;
 
       if (state.currentRole >= 0) {
-        let role = (<any>state).manifests[state.currentManifest]
+        let role = payload.manifests[state.currentManifest]
           .roles[state.currentRole];
         state.roleState.role = {
           name: role.name,

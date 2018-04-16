@@ -1,5 +1,5 @@
 <template>
-  <div :class="'modal-content content'+'xs'" heith="100" :updater="updater">
+  <div :class="'my-background modal-content content'+'xs'" heith="100" :updater="updater">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
@@ -11,11 +11,11 @@
           <li v-if="channel.index==-1 || (channel.index>=0 && channel.inout=='provides')" 
             v-bind:class="{active: channel.inout=='provides' }"
             v-on:click="changeDir('provides')">
-            <a href="#tab" data-toggle="tab" aria-expanded="true">{{$t('modals.channels.labels.prov')}} </a>
+            <a v-bind:class="{active: 'black--text'}" data-toggle="tab" aria-expanded="true">{{$t('modals.channels.labels.prov')}} </a>
           </li>
           <li v-if="channel.index==-1 || (channel.index>=0 && channel.inout=='requires')"
             v-bind:class="{active: channel.inout=='requires'}" v-on:click="changeDir('requires')">
-            <a href="#tab" data-toggle="tab" aria-expanded="false">{{$t('modals.channels.labels.req')}}</a>
+            <a data-toggle="tab" aria-expanded="false">{{$t('modals.channels.labels.req')}}</a>
           </li>
         </ul>
         <!-- Tab panes -->
@@ -62,7 +62,7 @@
     </div>
     <div class="modal-footer">
       <button v-if="channel.index==-1" @click="createChannel()" type="button" class="btn btn-primary" slot="add">  <i class="fa fa-plus"></i> {{$t('panel.buttons.add')}}</button>
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button type="button" class="white--text btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
@@ -178,3 +178,13 @@ export default {
   }
 };
 </script>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
+<style scoped>
+a{
+  color: white;
+}
+</style>

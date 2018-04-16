@@ -1,15 +1,15 @@
 <template>
-  <div :class="'modal-content content'+'xs'" height="100px" :updater="updater">
+  <div :class="'my-background modal-content content'+'xs'" height="100px" :updater="updater">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
     <div class="modal-body">
       <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading my-background white--text">
           <i class="fa fa-gears fa-fw"></i> {{getCurrentRoleIndex>-1 ? $t('modals.heads.settings') : $t('modals.heads.new')+' '+$t('modals.roles.name') }}
         </div>
-        <div class="panel-body">
+        <div class="panel-body my-background">
           <div class="row">
             <div class="col-sm-3"><label  class="rowText">{{$t('modals.roles.labels.name')}}</label></div>
             <div class="col-sm-9">
@@ -37,18 +37,18 @@
         </div>
       </div>
       <div class="panel panel-default" v-if="getCurrentRoleResource.rows.length>0">
-        <div class="panel-heading">
+        <div class="panel-heading my-background white--text">
           <i class="fa fa-cubes fa-fw"></i> {{$t('modals.roles.labels.res')}}
         </div> 
-        <div class="panel-body">
+        <div class="panel-body my-background white--text">
           <gridform v-bind:form="getCurrentRoleResource" :type="getSettings.inlineForms.types.resource" :validation="resourceValidation"> </gridform>
         </div>
       </div>
       <div class="panel panel-default" v-if="getCurrentRoleParams.length>0">
-        <div class="panel-heading">
+        <div class="panel-heading my-background white--text">
           <i class="fa fa-sliders fa-fw"></i> {{$t('modals.roles.labels.param')}}
         </div>
-        <div class="panel-body">
+        <div class="panel-body my-background white--text">
           <div class="row">
             <div class="col-sm-2"> <label class="rowText">{{$t('modals.roles.labels.byPass')}}</label></div>
             <div class="col-sm-1"><input  type="checkbox" :checked="getBypassParams ? 'checked':null" @change="changeParams()"></div>
@@ -58,12 +58,16 @@
     </div>
     <div class="modal-footer">
       <button v-if="getCurrentRoleIndex==-1" @click="addValidRole" type="button" class="btn btn-primary" slot="add">  <i class="fa fa-plus"></i> {{$t('panel.buttons.add')}}</button>
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
 <script>
+import GridForm from './helper_grid_form.vue';
 export default {
+  components:{
+    'gridform': GridForm
+  },
   data() {
     return {};
   },
@@ -170,3 +174,8 @@ export default {
   }
 };
 </script>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>

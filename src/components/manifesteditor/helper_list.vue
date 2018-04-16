@@ -1,17 +1,17 @@
 <template>
   <div>
-    <div v-for="(elem, index) in list" v-bind:key="index"
+    <div v-for="(elem, index) in list" v-bind:key="index" class="my-background"
       v-bind:class="{row: true, 'bg-info': index%2==0 && getCurrent(type)!=elem.id, 'bg-success': getCurrent(type)==elem.id}" 
       @click="Settings.listProps[type].rowSelection ? setDef(elem.id,type,$event) : null ">
       <div v-if="Settings.listProps[type].icon"  class="" v-bind:class="{'col-sm-2': true, listElem: true}">
-        <i  :class ="'ico-private blue fa '+Settings.listProps[type].iconImg"></i>
+        <i class="my-background" :class ="'ico-private blue fa '+Settings.listProps[type].iconImg"></i>
       </div>
       <div :class="'col-sm-'+Settings.listProps[type].fullSize+ ' listElem'"><div v-html="getName(elem, type)"></div></div>
       <div v-if="Settings.listProps[type].extraCol" :class="'col-sm-'+Settings.listProps[type].extraCol+ ' listElem'"><div v-html="getExtra(elem, type)"></div></div>
       <div :class="'col-sm-'+Settings.listProps[type].btnsSize+ ' listElem'">
         <div class="action-btn">
-          <i v-if="Settings.listProps[type].buttons.edit" class="btn-private yellow fa fa-pencil-square" @click="setDef(index,type)" data-toggle="modal" v-bind:data-target="Settings.listProps[type].target" ></i>
-          <i v-if="Settings.listProps[type].buttons.delete" class ="btn-private red fa fa-minus-square" @click="deleteDef(index,type)"></i>
+          <i v-if="Settings.listProps[type].buttons.edit" class="my-background btn-private yellow fa fa-pencil-square" @click="setDef(index,type)" data-toggle="modal" v-bind:data-target="Settings.listProps[type].target" ></i>
+          <i v-if="Settings.listProps[type].buttons.delete" class ="my-background btn-private red fa fa-minus-square" @click="deleteDef(index,type)"></i>
         </div>
       </div>
     </div>
@@ -214,3 +214,8 @@ export default {
   }
 };
 </script>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
