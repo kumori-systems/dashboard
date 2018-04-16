@@ -13,28 +13,28 @@
         <menures v-if="getManifest.type=='resource'" slot="menu"></menures>
         <menurun v-if="getManifest.type=='runtime'" slot="menu"></menurun>
       </appmenu>
-      <div v-if="currentManifest==''" class="panel panel-default alertModal">
-        <div class="panel-heading">{{$t('panel.selector.title')}}</div>
+      <div v-if="currentManifest==''" id="manifesteditor" class="panel panel-default alertModal">
+        <div class="panel-heading white--text">{{$t('panel.selector.title')}}</div>
         <div class="panel-body">
           <div class="form-group">
-            <label class="checkbox-inline black--text">
+            <label class="checkbox-inline">
               <input type="checkbox" value="service" v-model="filterManifests">
               {{ $t('panel.selector.options.services') }}
             </label>
-            <label class="checkbox-inline black--text">
+            <label class="checkbox-inline">
               <input type="checkbox"  value="component"  v-model="filterManifests">{{$t('panel.selector.options.components')}}
             </label>
-            <label class="checkbox-inline black--text">
+            <label class="checkbox-inline">
               <input type="checkbox"  value="deployment"  v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
             </label>
-            <label class="checkbox-inline black--text">
+            <label class="checkbox-inline">
               <input type="checkbox"  value="resource"  v-model="filterManifests">{{$t('panel.selector.options.resources')}}
             </label>
-            <label class="checkbox-inline black--text">
+            <label class="checkbox-inline">
               <input type="checkbox"  value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
             </label>
           </div>
-          <v-select :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
+          <v-select id="maininput" :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
         </div>
         <div class="panel-footer">
           <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
@@ -50,6 +50,15 @@
   </div>
 </template>
 <script>
+/** MetisMenu */
+require("/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.js");
+/** Bootstrap */
+require("/home/osmuogar/workspace/dashboard/static/css/bootstrap/js/bootstrap.min.js");
+/** D3 */
+require("/home/osmuogar/workspace/dashboard/static/js/d3.v3.js");
+/** FileSaver */
+require("/home/osmuogar/workspace/dashboard/static/js/FileSaver.min.js");
+
 import {
   Graph,
   Menu,
@@ -172,3 +181,36 @@ export default {
   }
 };
 </script>
+<!-- Bootstrap -->
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+
+<!-- MetisMenu CSS -->
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+
+<!-- Custom CSS -->
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+
+<!-- Custom Fonts -->
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/font-awesome/css/font-awesome.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
+<style scoped>
+.panel,
+.panel-default,
+.panel-footer,
+.panel-heading {
+  background-color: #303030 !important;
+  border-color: #303030 !important;
+}
+#manifesteditor{
+  position:inherit !important;
+}
+#maininput{
+  background-color:#fdfdfd;
+}
+</style>
+<style>
+.clear{
+  bottom: 0px !important;
+  top: 7px;
+}
+</style>

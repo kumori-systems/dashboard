@@ -54,8 +54,7 @@
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
-
-
+          
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" max-width="800px">
@@ -216,7 +215,6 @@ export default class VolumesView extends Vue {
     }
 
     /* Volatile volumes */
-
     let volatileVolumes: { [urn: string]: VolatileVolume } = ((<SSGetters>this
       .$store.getters).volatileVolumes as any) as {
       [urn: string]: VolatileVolume;
