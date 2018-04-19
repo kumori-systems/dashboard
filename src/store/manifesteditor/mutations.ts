@@ -10,6 +10,25 @@ import { Manifest } from '../stampstate/classes';
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
 
+
+  clearTemporalManifest = (state: State): void => {
+    state.temporalManifest = null;
+  }
+
+  updateTemporalManifest = (state: State, payload: {
+    [param: string]: any
+  }): void => {
+    if (!state.temporalManifest) {
+      state.temporalManifest = payload.manifests[state.currentManifest];
+    }
+
+    for (let key in payload) {
+      if (key !== 'manifests') {
+        state.temporalManifest[key] = payload[key];
+      }
+    }
+  }
+
   /**
    * Clear the local state.
    */

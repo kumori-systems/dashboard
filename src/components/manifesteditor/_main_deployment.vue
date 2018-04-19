@@ -67,7 +67,6 @@ export default {
   components: {
     DonutChart,
     BarChart
-    // LineChart, AreaChart
   },
   data() {
     return {};
@@ -75,23 +74,6 @@ export default {
   computed: {
     charts() {
       return this.$store.state.manifesteditor.deploymentState.charts;
-    }
-  },
-  methods: {
-    updateRoleName() {
-      this.$store.dispatch("updateRoleName", payload);
-    },
-    updateRoleComp() {
-      this.$store.dispatch("updateRoleComp", payload);
-    },
-    changeBypass() {
-      this.$store.dispatch("changeBypass", payload);
-    },
-    addRole() {
-      this.$store.dispatch("addRole", payload);
-    },
-    updateRoleState() {
-      this.$store.dispatch("updateRoleState", payload);
     }
   }
 };

@@ -12,7 +12,7 @@
         </div>
         <div class="col-md-6" >
           <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
-            <input type="text" :disabled="blockEditName" class="form-control" @input="updateArrangement(key)" :ref="key" :value="param">
+            <input type="text" class="form-control" @input="updateArrangement(key)" :ref="key" :value="param">
             <span v-if="validation[key].err" class="glyphicon glyphicon-remove form-control-feedback"></span>
             <span v-if="validation[key].err" class="help-block">{{$t('validation.'+validation[key].msg)}}</span>
           </div>

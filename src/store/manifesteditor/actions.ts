@@ -2,6 +2,8 @@ import Vuex from 'vuex';
 import State from './state';
 import { tools } from './utils';
 
+import FileSaver from 'file-saver';
+
 const maniAPI = {
   callback: (injectee, todo) => {
     for (let mutation of todo) {
@@ -23,9 +25,15 @@ const maniAPI = {
     });
   },
   POST: (url, data, injectee, actions) => {
-    console.debug('POST has been called');
+    console.debug('POST has been called with', url, data);
 
-    maniAPI.callback(injectee, actions.success);
+    injectee.dispatch('updateTemporalManifest', { [data.jsonPath]: data.data })
+      .then(() => {
+        maniAPI.callback(injectee, actions.success);
+      });
+
+
+
 
   },
   GET: (url, injectee, callback) => {
@@ -110,6 +118,41 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     payload: any): void => {
     maniAPI.getManifests(injectee);
     maniAPI.setSocket('/', injectee);
+  }
+
+  downloadTemporalManifest = (injectee: Vuex.ActionContext<State, any>,
+    payload: { [param: string]: any }): void => {
+
+    /*
+      In the case the temporal manifest havent been modified, the requested
+      manifest should be downloaded.
+    */
+    if (!injectee.state.temporalManifest) {
+      injectee.commit('updateTemporalManifest', {
+        manifests: injectee.getters.manifests
+      });
+    }
+
+    let temporalManifest = injectee.state.temporalManifest;
+    // Stores the temporal manifest in a local file
+    FileSaver.saveAs(
+      new Blob([
+        JSON.stringify(temporalManifest, null, 2) + '\n'
+      ], { type: 'application/json;charset=utf-8' }),
+      'TemporalManifest.json'
+    );
+
+
+  }
+
+  updateTemporalManifest = (injectee: Vuex.ActionContext<State, any>,
+    payload: { [param: string]: any }): void => {
+
+    injectee.commit('updateTemporalManifest', {
+      manifests: injectee.getters.manifests,
+      ...payload
+    });
+
   }
 
   deleteAlert = (injectee: Vuex.ActionContext<State, any>,
@@ -863,6 +906,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   setManifest = (injectee: Vuex.ActionContext<State, any>,
     manifestURN: string): void => {
+    injectee.commit('clearTemporalManifest');
 
     injectee.commit('setManifest', manifestURN);
     let service = injectee.getters.manifests[manifestURN];

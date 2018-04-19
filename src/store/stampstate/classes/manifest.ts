@@ -12,59 +12,58 @@ export class Manifest extends ECloudElement {
   readonly label: string;
 
   /** This holds the real type */
-  _type: string = null;
+  _type: string = undefined;
 
   /** Type used for the manifest editor. */
-  type: string = null;
+  type: string = undefined;
 
   /** The name of the service implemented by this deployment. */
-  servicename: string = null;
+  servicename: string = undefined;
 
   /** Deployment which uses this element. */
-  deployment: string = null;
+  deployment: string = undefined;
 
   /** Subitems of this element. */
-  items: any = null;
+  items: any = undefined;
 
   /** Name of this element. */
-  name: string = null;
+  name: string = undefined;
 
   /** Owner of this element. */
-  owner: string = null;
+  owner: string = undefined;
 
   /** Parameters of this element. */
-  parameters: string = null;
-
+  parameters: string = undefined;
 
   /** Channels of a service or a component. */
-  channels: any = null;
+  channels: any = undefined;
 
   /** Connectors of a service. */
-  connectors: any = null;
+  connectors: any = undefined;
 
   /** Component or runtime code. */
-  code: string = null;
+  code: string = undefined;
 
   /** Component or runtime code. */
-  codelocator: string = null;
+  codelocator: string = undefined;
 
   /** Configuration parameters of this element. */
-  configuration: any = {};
+  configuration: any = undefined;
 
   /** This element's metadata. */
-  metadata: any = {};
+  metadata: any = undefined;
 
   /** This element's profile. */
-  profile: any = {};
+  profile: any = undefined;
 
   /** Service roles. */
-  roles: any = null;
+  roles: any = undefined;
 
   /** Component's runtime */
-  runtime: string = null;
+  runtime: string = undefined;
 
   /** Specification of the element. */
-  spec: string = null;
+  spec: string = undefined;
 
   /**
    * Document which defines an element in the ECloud environment.
@@ -89,8 +88,6 @@ export class Manifest extends ECloudElement {
     if (manifest.runtime) { this.runtime = manifest.runtime; }
     if (manifest.spec) { this.spec = manifest.spec; }
     if (manifest.service) { this.servicename = manifest.service; }
-
-    console.debug('The manifest contains', manifest);
 
     /* For manifest editor - INIT */
     this.label = this._urn;

@@ -1050,7 +1050,7 @@ export class ProxyConnection extends EventEmitter {
       // Stores the manifest in a local file
       FileSaver.saveAs(
         new Blob([
-          JSON.stringify(manifest) + '\n'
+          JSON.stringify(manifest, null, 2) + '\n'
         ], { type: 'application/json;charset=utf-8' }),
         'Manifest.' + elementId + '.json'
       );

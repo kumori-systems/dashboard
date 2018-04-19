@@ -41,9 +41,7 @@
       </div>
     </div>
   
-    <!--
-      <maindep v-if=" currentManifest!='' && getManifest.type=='deployments'">{{ setDeployCharts() }}</maindep>
-    -->
+    <maindep v-if=" currentManifest!='' && getManifest.type=='deployments'">{{ setDeployCharts() }}</maindep>  
 
     <footer v-if="currentManifest!=''" id="footer">
       <div>

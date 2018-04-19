@@ -45,14 +45,17 @@
             <li v-if="option.id == 'arrangements'">
               <rowlist v-bind:list="getArrangements" v-bind:type="getSettings.listTypes.arrangement"> </rowlist>
             </li>
-            <li v-for="(secondOpt,j) in option.enum" v-bind:key="j">
-              <template v-if="secondOpt.type=='link'">
-                <a id="show-channels" class="white--text" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
-              </template>
-              <template v-if="secondOpt.type=='other'">
+            <template v-for="(secondOpt, index) in option.enum">
+              <li v-bind:key="index" v-if="secondOpt.type=='link'">
+                <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
+              </li>
+              <li v-bind:key="index" v-if="secondOpt.type=='other'">
                 <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
-              </template> 
-            </li>
+              </li>
+              <li v-bind:key="index">
+                <a class="white--text" v-on:click="downloadTemporalManifest">Download Temporal Manifest</a>
+              </li>
+            </template>
           </ul>
         </li>
       </ul>
@@ -122,6 +125,9 @@ export default {
     }
   },
   methods: {
+    downloadTemporalManifest() {
+      this.$store.dispatch("downloadTemporalManifest");
+    },
 
     cleanCurrent(payload) {
       this.$store.dispatch("cleanCurrent", payload);

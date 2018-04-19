@@ -46,21 +46,20 @@
                     <rowlist v-bind:list="getChannels.provides"  v-bind:type="getSettings.listTypes.channel.provides"> </rowlist>
                     <rowlist v-bind:list="getChannels.requires"  v-bind:type="getSettings.listTypes.channel.requires"> </rowlist>
                 </li>
-
-                
-                <li  v-for="(secondOpt, index) in option.enum" v-bind:key="index">
-                    <template v-if="secondOpt.type=='link'">
-                    <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
-                    </template>
-
-                    <template v-if="secondOpt.type=='other'">
-                    <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
-                    </template> 
-                </li>
+                <template v-for="(secondOpt, index) in option.enum">
+                    <li v-bind:key="index" v-if="secondOpt.type=='link'">
+                      <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
+                    </li>
+                    <li v-bind:key="index" v-if="secondOpt.type=='other'">
+                      <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
+                    </li>
+                    <li v-bind:key="index">
+                      <a class="white--text" v-on:click="downloadTemporalManifest">Download Temporal Manifest</a>
+                    </li>
+                </template>
                 </ul>
             </li>
         </ul>
-
 
         <modal :modalProp="getSettings.modalProps.channels" modalSize="xs">
             <modalChannels  slot="body"></modalChannels>
@@ -135,6 +134,9 @@ export default {
     }
   },
   methods: {
+    downloadTemporalManifest() {
+      this.$store.dispatch("downloadTemporalManifest");
+    },
     cleanCurrent(payload) {
       this.$store.dispatch("cleanCurrent", payload);
     },

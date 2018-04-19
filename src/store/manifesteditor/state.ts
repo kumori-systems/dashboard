@@ -4,6 +4,7 @@ import webSettings from './settings';
  * Representation of the stamp state.
  */
 export default class State {
+  temporalManifest: any;
   mDependencies: any;
   confirm: { accept: any, deny: any };
   alerts: any[];
@@ -143,6 +144,7 @@ export default class State {
 
   /** Constructor of the state. */
   constructor() {
+    this.temporalManifest = null;
     this.mDependencies = {};
     this.confirm = {
       accept: null,
