@@ -211,10 +211,10 @@ let menuOptions = {
       secondLevel: false,
     },
   ],
-  deployment: [
+  deployments: [
     {
       id: 'deployment',
-      name: 'menu.deployment.label',
+      name: 'menu.deployments.label',
       icon: 'fa fa-cloud-upload',
       secondLevel: true
     },
@@ -438,18 +438,23 @@ let manifestStructure = {
     service: { name: 'service' },
     component: { name: 'component' },
     runtime: {
-      name: 'runtime', enum: [
+      name: 'runtime',
+      enum: [
         { eslap: 'eslap://eslap.cloud/runtime/java/1_0_1' },
         { eslap: 'eslap://eslap.cloud/runtime/java/1_1_1' },
         { eslap: 'eslap://eslap.cloud/runtime/native/1_0_1' },
         { eslap: 'eslap://eslap.cloud/runtime/native/1_1_1' },
+        { eslap: 'eslap://eslap.cloud/runtime/native/2_0_0' },
+        { eslap: 'eslap://eslap.cloud/runtime/native/dev/privileged/2_0_0' },
         { eslap: 'eslap://c2netproject.eu/runtime/nodejs/1_0_0' },
         { eslap: 'eslap://c2netproject.eu/runtime/nodejs/1_0_2' },
         { eslap: 'eslap://c2netproject.eu/runtime/mariadb/1_0_2' },
         { eslap: 'eslap://linagora.c2netproject.eu/runtime/ucp/1_0_0' },
         { eslap: 'eslap://linagora.c2netproject.eu/runtime/ucp/1_0_4' },
         { eslap: 'eslap://c2netproject.eu/runtime/java/1_0_0' },
-        { eslap: 'eslap://c2netproject.eu/runtime/java/1_0_2' }
+        { eslap: 'eslap://c2netproject.eu/runtime/java/1_0_2' },
+        { eslap: 'eslap://slapdomain/runtimes/managed/nodejs/0_0_1' }
+
       ]
     },
     arrangements: {

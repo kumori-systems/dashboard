@@ -5,11 +5,13 @@ import { tools } from './utils';
 const maniAPI = {
   callback: (injectee, todo) => {
     for (let mutation of todo) {
-      if (mutation.params) {
-        injectee.commit(mutation.name, mutation.params);
-      } else {
-        injectee.commit(mutation.name);
+
+      if (mutation.manifests) { // add manifests to parameters
+        mutation.params['manifests'] = mutation.manifests;
       }
+
+      injectee.commit(mutation.name, mutation.params);
+
     }
   },
   socket: null,
@@ -21,25 +23,13 @@ const maniAPI = {
     });
   },
   POST: (url, data, injectee, actions) => {
-    /*
-    Vue.http.post(url, JSON.stringify(data)).then(
-      response => {
-        // console.log(response)
-        if (response.status === 200) {
-          maniAPI.callback(injectee, actions.success);
-        }
-        else {
-          maniAPI.callback(injectee, actions.failure);
-          injectee.dispatch('addAlert', { text: 'cantupd' });
-        }
-      },
-      response => {
-        injectee.dispatch('addAlert', { text: 'cantupd' });
-      }
-    );
-    */
+    console.debug('POST has been called');
+
+    maniAPI.callback(injectee, actions.success);
+
   },
   GET: (url, injectee, callback) => {
+    console.debug('THE GET METHOD HAS BEEN CALLED');
     switch (url) {
       case '/getmanifests':
 
@@ -69,18 +59,25 @@ const maniAPI = {
     */
   },
   updateManifest: (data, path, injectee, actions) => {
-    let manifest = injectee.state.manifests[injectee.state.currentManifest];
+    let currentManifest = injectee.state.currentManifest;
+    console.debug('El manifiesto actual es', currentManifest);
+    let manifest = injectee.getters.manifests[currentManifest];
+
     maniAPI.POST(
       '/updatemanifest',
       maniAPI.makeParams(data, path, manifest), injectee, actions
     );
+
+    console.debug('ACTUALIZAMOS EL MANIFIESTO', manifest);
   },
   getManifests: (injectee) => {
     maniAPI.GET('/getmanifests', injectee, maniAPI.manageRes);
+    console.debug('GET MANIFETS HAS BEEN CALLED!!');
   },
   getGraph: (data, injectee) => {
     let url = '/getgraph?service=' + data;
     maniAPI.GET(url, injectee, maniAPI.manageRes);
+    console.debug('GET GRAPH HAS BEEN CALLED!!');
   },
   makeParams: (data, path, file) => {
     return { data: data, path: file.filePath, jsonPath: path };
@@ -146,8 +143,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   // DEPLOYMENT 
   setDeploymentState = (injectee: Vuex.ActionContext<State, any>): void => {
-    /*
-    let deploy = injectee.state.manifests[injectee.state.currentManifest];
+
+    let deploy = injectee.getters.manifests[injectee.state.currentManifest];
 
     if (deploy.name) {
       injectee.commit('updateDeployState', { key: 'name', value: deploy.name });
@@ -155,10 +152,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.commit('updateDeployState', { key: 'name', value: null });
     }
 
+    let splitted = deploy.servicename.split('/');
     let serviceName = {
-      name: deploy.servicename.split('/')[4],
-      domain: deploy.servicename.split('/')[2],
-      version: deploy.servicename.split('/')[5]
+      name: splitted[4],
+      domain: splitted[2],
+      version: splitted[5]
     }
     injectee.commit('updateDeployState', {
       key: 'service', value: serviceName
@@ -187,30 +185,27 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     //  DEPLOY - RESOURCES
     injectee.commit('deleteValidation',
       injectee.state.deploymentState.resValidation);
-    Object.keys(deploy.configuration.resources).map(function (key, index) {
+    for (let key in deploy.configuration.resources) {
       injectee.commit('updateDeployResState', {
-        key: key,
-        value: deploy.configuration.resources[key]
+        key: key, value: deploy.configuration.resources[key]
       });
       injectee.commit('setValidation', {
         validation: injectee.state.deploymentState.resValidation,
-        prop: key,
-        msg: ''
-      })
-    });
+        prop: key, msg: ''
+      });
+    }
     injectee.dispatch('validateDeployRes');
-    injectee.commit('setDeploymentParams');
-    */
+    injectee.commit('setDeploymentParams', { manifests: injectee.getters.manifests });
   }
 
   validateDeployRes = (injectee: Vuex.ActionContext<State, any>): void => {
-    /*
-      let deploy = injectee.state.manifests[injectee.state.currentManifest];
-      let service = injectee.state.manifests[deploy.servicename];
+    if (injectee.state.currentManifest) {
+      let deploy = injectee.getters.manifests[injectee.state.currentManifest];
+      let service = injectee.getters.manifests[deploy.servicename];
       let userState = injectee.state.deploymentState.resources;
-      Object.keys(userState).map((x) => {
+      for (let x in userState) {
         if (userState[x].length > 0) {
-          let res = injectee.state.manifests[userState[x]];
+          let res = injectee.getters.manifests[userState[x]];
           if (res === undefined)
             injectee.commit('setErrValidation', {
               validation: injectee.state.deploymentState.resValidation,
@@ -238,8 +233,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             msg: 'empty'
           });
         }
-      })
-      */
+      }
+    }
   }
 
   updateDeployState = (injectee: Vuex.ActionContext<State, any>,
@@ -333,7 +328,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   setArrangement = (injectee: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    injectee.commit('setArrangement', payload);
+    injectee.commit('setArrangement', {
+      'payload': payload,
+      manifests: injectee.getters.manifests
+    });
     injectee.dispatch('validateArrangements');
   }
 
@@ -352,113 +350,123 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateArrangementState = (injectee: Vuex.ActionContext<State, any>,
     payload: any): void => {
 
-    /*
-  let validation = injectee.state.deploymentState.arrValidation;
+    let validation = injectee.state.deploymentState.arrValidation;
 
-  injectee.commit('updateArrangementState', payload);
-  injectee.commit('resetValidation', {
-    key: payload.key,
-    validation: validation
-  });
-  injectee.commit('updateValidation', {
-    type: 'arrangements',
-    prop: payload.key,
-    value: payload.value.toString(),
-    validation: validation
-  });
-  if (!validation[payload.key].err) {
-    payload.value = tools.parseType(payload.value,
-      injectee.state.Settings.manifestStructure.elementtype
-        .arrangements.types[payload.key].type);
+    injectee.commit('updateArrangementState', payload);
+    injectee.commit('resetValidation', {
+      key: payload.key,
+      validation: validation
+    });
+    injectee.commit('updateValidation', {
+      type: 'arrangements',
+      prop: payload.key,
+      value: payload.value.toString(),
+      validation: validation
+    });
+    if (!validation[payload.key].err) {
+      payload.value = tools.parseType(payload.value,
+        injectee.state.Settings.manifestStructure.elementtype
+          .arrangements.types[payload.key].type);
+      let path = 'roles.' + injectee.state.currentArrangement + '.resources';
+      let resources = Object.assign({}, injectee.getters
+        .manifests[injectee.state.currentManifest]
+        .roles[injectee.state.currentArrangement].resources);
+      resources[payload.key] = payload.value;
+
+      maniAPI.updateManifest(
+        resources,
+        path,
+        injectee,
+        {
+          success:
+            [{
+              name:
+                'updateArrangement',
+              params: resources
+            }],
+          failure: []
+        });
+    }
+
+  }
+
+  delteArrangement = (injectee: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     let path = 'roles.' + injectee.state.currentArrangement + '.resources';
-    let resources = Object.assign({}, injectee.state
-      .manifests[injectee.state.currentManifest]
-      .roles[injectee.state.currentArrangement].resources);
-    resources[payload.key] = payload.value;
+    let resources = Object.assign({},
+      injectee.getters.manifests[injectee.state.currentManifest]
+        .roles[injectee.state.currentArrangement].resources);
+    delete resources[payload];
 
     maniAPI.updateManifest(
       resources,
       path,
       injectee,
       {
-        success:
-          [{
-            name:
-              'updateArrangement',
-            params: resources
-          }],
+        success: [
+          { name: 'updateArrangement', params: resources },
+          { name: 'deleteArrangementState', params: payload }
+        ],
         failure: []
       });
-  }
-  */
-  }
-
-  delteArrangement = (injectee: Vuex.ActionContext<State, any>,
-    payload: any): void => {
-    /*
-  let path = 'roles.' + injectee.state.currentArrangement + '.resources';
-  let resources = Object.assign({},
-    injectee.state.manifests[injectee.state.currentManifest]
-      .roles[injectee.state.currentArrangement].resources);
-  delete resources[payload];
-
-  maniAPI.updateManifest(
-    resources,
-    path,
-    injectee,
-    {
-      success: [
-        { name: 'updateArrangement', params: resources },
-        { name: 'deleteArrangementState', params: payload }
-      ],
-      failure: []
-    });
-    */
   }
 
   addArrangement = (injectee: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    /*
-  let validation = injectee.state.deploymentState.arrValidation;
-  let path = 'roles.' + injectee.state.currentArrangement + '.resources';
-  let resources = Object.assign({},
-    injectee.state.manifests[injectee.state.currentManifest]
-      .roles[injectee.state.currentArrangement].resources);
+    let validation = injectee.state.deploymentState.arrValidation;
+    let path = 'roles.' + injectee.state.currentArrangement + '.resources';
+    let resources = Object.assign({},
+      injectee.getters.manifests[injectee.state.currentManifest]
+        .roles[injectee.state.currentArrangement].resources);
 
-  //console.log(resources)
-  resources[payload] = injectee.state.Settings.manifestStructure.elementtype
-    .arrangements.types[payload].default;
-  let success = [
-    {
-      name: 'updateArrangementState',
-      params: {
-        key: payload,
-        value: resources[payload]
+    //console.log(resources)
+    resources[payload] = injectee.state.Settings.manifestStructure.elementtype
+      .arrangements.types[payload].default;
+    let success = [
+      {
+        name: 'updateArrangementState',
+        params: {
+          key: payload,
+          value: resources[payload]
+        }
+      },
+      {
+        name: 'updateValidation',
+        params: {
+          type: 'arrangements',
+          prop: payload,
+          value: resources[payload].toString(),
+          validation: validation
+        }
       }
-    },
-    {
-      name: 'updateValidation',
-      params: {
-        type: 'arrangements',
-        prop: payload,
-        value: resources[payload].toString(),
-        validation: validation
-      }
-    }
-  ]
-  maniAPI.updateManifest(
-    resources,
-    path,
-    injectee,
-    {
-      success: success,
-      failure: []
-    });
-    */
+    ]
+    maniAPI.updateManifest(
+      resources,
+      path,
+      injectee,
+      {
+        success: success,
+        failure: []
+      });
   }
 
   setDeployCharts = (injectee: Vuex.ActionContext<State, any>): void => {
     let colorsData = injectee.state.deploymentState.colorsData;
+
+    let setColor = (colors, key) => {
+      let color;
+      if (colorsData[key]) {
+        color = colorsData[key];
+      } else {
+        color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        while (colors.indexOf(color) > -1 || color.length < 7) {
+          color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        }
+        colorsData[key] = color;
+      }
+      colors.push(color);
+    };
+
     let charts = {
       instances: {
         id: 'instances',
@@ -488,51 +496,50 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         grid: 'true'
       },
     };
-    let setColor = (colors, key) => {
-      let color;
-      if (colorsData[key]) {
-        color = colorsData[key];
-      } else {
-        color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-        while (colors.indexOf(color) > -1 || color.length < 7) {
-          color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-        }
-        colorsData[key] = color;
-      }
-      colors.push(color);
-    };
 
-    let roles = injectee.getters.manifests[injectee.state.currentManifest]
-      .roles;
     let totales = {
       instances: 0,
       cpu: 0,
       memory: 0
     };
 
-    Object.keys(roles).map(key => {
-      charts.instances.data
-        .push({ label: key, value: roles[key].resources.__instances });
-      setColor(charts.instances.colors, key);
-      charts.cpu.data
-        .push({ label: key, value: roles[key].resources.__cpu });
-      setColor(charts.cpu.colors, key);
-      charts.memory.data
-        .push({ label: key, value: roles[key].resources.__memory });
-      setColor(charts.memory.colors, key);
+    let currentManifest = injectee.state.currentManifest;
+    if (currentManifest) {
+      let roles = injectee.getters.manifests[currentManifest].roles;
 
-      totales.instances += roles[key].resources.__instances;
-      totales.cpu += roles[key].resources.__cpu;
-      totales.memory += roles[key].resources.__memory;
+      for (let key in roles) {
 
-    });
+        charts.instances.data.push({
+          label: key,
+          value: roles[key].arrangement.instances
+        });
 
-    Object.keys(totales).map(key => {
-      charts.resume.data.push({ prop: key, val: totales[key] });
+        setColor(charts.instances.colors, key);
 
-    });
+        charts.cpu.data.push({
+          label: key,
+          value: roles[key].arrangement.cpu
+        });
+        setColor(charts.cpu.colors, key);
+        charts.memory.data.push({
+          label: key,
+          value: roles[key].arrangement.memory
+        });
+        setColor(charts.memory.colors, key);
 
-    injectee.commit('setDeployCharts', charts);
+        totales.instances += roles[key].arrangement.instances;
+        totales.cpu += roles[key].arrangement.cpu;
+        totales.memory += roles[key].arrangement.memory;
+
+      }
+
+      Object.keys(totales).map(key => {
+        charts.resume.data.push({ prop: key, val: totales[key] });
+
+      });
+
+      injectee.commit('setDeployCharts', charts);
+    }
   }
 
   // COMPONENTS 
@@ -551,7 +558,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       value: component.configuration.parameters
     });
 
+
     let validation = injectee.state.componentState.validation;
+    console.debug('La validacion del componente vale', validation);
     injectee.commit('updateAllValidation', {
       type: 'component',
       data: component,
@@ -560,7 +569,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     if (injectee.state.Settings.manifestStructure.elementtype
       .runtime.enum.filter((x) => {
         return x.eslap === component.runtime;
-      }).length === 0)
+      }).length === 0) {
       injectee.commit(
         'setErrValidation',
         {
@@ -569,10 +578,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           msg: 'wrongruntime'
         }
       );
+    }
+
   }
 
   updateComponentState = (injectee: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
+    console.debug('UpdateComponentState with:', payload);
+
     injectee.commit('updateCompState', payload);
     let component = injectee.getters.manifests[injectee.state.currentManifest];
 
@@ -580,7 +594,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let success = [];
     if (payload.key = 'runtime') {
       path = payload.key;
-      success.push({ name: 'setComponentRuntime', params: payload.value });
+      success.push({
+        name: 'setComponentRuntime',
+        params: {
+          value: payload.value,
+          manifests: injectee.getters.manifests
+        }
+      });
     }
 
     injectee.commit('updateAllValidation', {
@@ -663,7 +683,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'setComponentResources',
-              params: resources
+              params: resources,
+              manifests: injectee.getters.manifests
             },
             {
               name: 'updateConfigState',
@@ -713,7 +734,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'setComponentParameters',
-              params: parameters
+              params: parameters,
+              manifests: injectee.getters.manifests
             },
             {
               name: 'updateConfigState',
@@ -745,7 +767,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'setComponentResources',
-          params: resources
+          params: resources,
+          manifests: injectee.getters.manifests
         },
         {
           name: 'updateConfigState',
@@ -768,7 +791,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'setComponentParameters',
-          params: parameters
+          params: parameters,
+          manifests: injectee.getters.manifests
         },
         {
           name: 'updateConfigState',
@@ -848,7 +872,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         state = injectee.state.componentState;
         injectee.dispatch('setComponentState');
         break;
-      case 'deployment':
+      case 'deployments':
         injectee.dispatch('setDeploymentState');
         break;
       case 'resource':
@@ -898,11 +922,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       {
         success: [{
           name: 'setServiceName',
-          params: splitname.join('/')
+          params: splitname.join('/'),
+          manifests: injectee.getters.manifests
         }],
         failure: [{
           name: 'setServiceName',
-          params: currName
+          params: currName,
+          manifests: injectee.getters.manifests
         }]
       });
   }
@@ -969,7 +995,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateRoleName = (injectee: Vuex.ActionContext<State, any>,
     payload: any): void => {
     let validation = injectee.state.roleState.validation;
-    injectee.dispatch('updateRoleState', { key: 'name', value: name });
+    injectee.dispatch('updateRoleState', {
+      key: 'name', value: name, manifests: injectee.getters.manifests
+    });
     let roles = injectee.getters.manifests[injectee.state.currentManifest]
       .roles.filter((rol, index) => {
         return rol.name === name && index !== injectee.state.currentRole;
@@ -1001,7 +1029,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [{
             name:
               'updateRoleName',
-            params: name
+            params: name,
+            manifest: injectee.getters.manifests
           }],
           failure: []
         }
@@ -1027,7 +1056,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       {
         success: [{
           name: 'setServParams',
-          params: parameters
+          params: parameters,
+          manifests: injectee.getters.manfiests
         }],
         failure: []
       });
@@ -1058,7 +1088,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       {
         success: [{
           name: 'updateConnectors',
-          params: connectors
+          params: connectors,
+          manifests: injectee.getters.manifests
         }],
         failure: []
       });
@@ -1102,7 +1133,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'updateRoles',
-              params: payload
+              params: payload,
+              manifests: injectee.getters.manifests
             }, {
               name: 'setRole',
               params: roles.length - 1
@@ -1117,7 +1149,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     payload: any): void => {
     injectee.commit('displayAlertPan', true);
     injectee.state.confirm.accept = () => {
-      injectee.commit('updateRoleState', { key: 'component', value: payload });
+      injectee.commit('updateRoleState', {
+        key: 'component', value: payload
+      });
 
       injectee.dispatch('deleteRoleFromConnectors', injectee.state.currentRole);
       injectee.dispatch('deleteRoleFromResouces', injectee.state.currentRole);
@@ -1133,15 +1167,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         {
           success: [{
             name: 'updateRoleComp',
-            params: payload
+            params: {
+              component: payload,
+              manifests: injectee.getters.manifests
+            },
           }],
           failure: []
         });
     };
     injectee.state.confirm.deny = () => {
-      injectee.commit('updateRoleComp',
-        injectee.getters.manifests[injectee.state.currentManifest]
-          .roles[injectee.state.currentRole].component);
+      injectee.commit('updateRoleComp', {
+        component: injectee.getters.manifests[injectee.state.currentManifest]
+          .roles[injectee.state.currentRole].component,
+        manifests: injectee.getters.manifests
+      }
+      );
       injectee.commit('updateRoleState', {
         key: 'component', value: injectee.getters
           .manifests[injectee.state.currentManifest]
@@ -1178,7 +1218,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let path = 'roles';
       maniAPI.updateManifest(roles, path, injectee, {
         success: [{
-          name: 'deleteRole', params: payload
+          name: 'deleteRole', params: payload,
+          manifests: injectee.getters.manifests
         }], failure: []
       });
     };
@@ -1205,7 +1246,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     path = 'connectors';
     maniAPI.updateManifest(connectors, path, injectee, {
       success: [{
-        name: 'updateConnectors', params: connectors
+        name: 'updateConnectors', params: connectors,
+        manifests: injectee.getters.manifests
       }], failure: []
     });
   }
@@ -1235,7 +1277,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     path = 'configuration.resources';
     maniAPI.updateManifest(resources, path, injectee, {
       success: [{
-        name: 'setServRes', params: { res: resources }
+        name: 'setServRes', params: { res: resources },
+        manifests: injectee.getters.manifests
       }], failure: []
     });
   }
@@ -1254,7 +1297,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let path = 'roles.' + payload;
     maniAPI.updateManifest(role, path, injectee, {
       success: [{
-        name: 'updateRoleRes', params: {}
+        name: 'updateRoleRes',
+        params: {},
+        manifests: injectee.getters.manifests
       }], failure: []
     });
   }
@@ -1273,7 +1318,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     path = 'configuration.parameters';
     maniAPI.updateManifest(parameters, path, injectee, {
       success: [{
-        name: 'setServParams', params: parameters
+        name: 'setServParams', params: parameters,
+        manifests: injectee.getters.manifests
       }], failure: []
     });
   }
@@ -1313,7 +1359,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                 success: [{
                   name: 'updateServRes', params: {
                     index: sResIndex, name: payload.tag
-                  }
+                  },
+                  manifests: injectee.getters.manifests
                 }], failure: []
               });
 
@@ -1326,7 +1373,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                 success: [{
                   name: 'updateRolRes', params: {
                     name: payload.name, tag: payload.tag
-                  }
+                  },
+                  manifests: injectee.getters.manifests
                 }], failure: []
               });
             }
@@ -1335,7 +1383,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               path = 'configuration.resources';
               sResources.splice(sResIndex, 1);
               maniAPI.updateManifest(sResources, path, injectee, {
-                success: [{ name: 'setServRes', params: { res: sResources } }],
+                success: [{
+                  name: 'setServRes', params: { res: sResources },
+                  manifests: injectee.getters.manifests
+                }],
                 failure: []
               });
 
@@ -1348,7 +1399,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               roles[injectee.state.currentRole].resources = rResources;
 
               maniAPI.updateManifest(roles, path, injectee, {
-                success: [{ name: 'setRolRes', params: { res: rResources } }],
+                success: [{
+                  name: 'setRolRes', params: { res: rResources },
+                  manifests: injectee.getters.manifests
+                }],
                 failure: []
               });
             }
@@ -1365,7 +1419,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             path = 'configuration.resources';
             maniAPI.updateManifest(sResources, path, injectee, {
               success: [{
-                name: 'setServRes', params: { res: sResources }
+                name: 'setServRes', params: { res: sResources },
+                manifests: injectee.getters.manifests
               }],
               failure: []
             });
@@ -1381,7 +1436,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             path = 'roles.' + injectee.state.currentRole + '.resources';
             maniAPI.updateManifest(rResources, path, injectee, {
               success: [{
-                name: 'setRolRes', params: { res: rResources }
+                name: 'setRolRes', params: { res: rResources },
+                manifests: injectee.getters.manifests
               }], failure: []
             });
           }
@@ -1595,7 +1651,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let path = 'configuration.parameters';
       maniAPI.updateManifest(params, path, injectee, {
         success: [{
-          name: 'setServParams', params: params
+          name: 'setServParams', params: params,
+          manifests: injectee.getters.manifests
         }], failure: []
       });
     }
@@ -1632,7 +1689,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [{
           name: 'updateChannels', params: {
             channels: channels, direction: payload.inout
-          }
+          },
+          manifests: injectee.getters.manifests
         }], failure: []
       });
       injectee.dispatch('deleteChannelInConnectors', payload);
@@ -1656,7 +1714,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let path = 'connectors';
       maniAPI.updateManifest(connectors, path, injectee, {
         success: [{
-          name: 'updateConnectors', params: connectors
+          name: 'updateConnectors', params: connectors,
+          manifests: injectee.getters.manifests
         }], failure: []
       });
     }
@@ -1688,7 +1747,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [{
             name: 'updateChannels', params: {
               channels: channels, direction: payload.inout
-            }
+            },
+            manifests: injectee.getters.manifests
           }], failure: []
         });
       };
@@ -1744,7 +1804,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [{
             name: 'updateChannels', params: {
               channels: channels, direction: payload.inout
-            }
+            },
+            manifests: injectee.getters.manifests
           }], failure: []
         });
       }
@@ -1769,7 +1830,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let path = 'connectors';
       maniAPI.updateManifest(connectors, path, injectee, {
         success: [{
-          name: 'updateConnectors', params: connectors
+          name: 'updateConnectors', params: connectors,
+          manifests: injectee.getters.manifests
         }], failure: []
       });
     }
@@ -1798,7 +1860,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [{
           name: 'updateChannels', params: {
             channels: channels, direction: payload.inout
-          }
+          },
+          manifests: injectee.getters.manifests
         }, {
           name: 'setChannel', params: {
             index: channels.length - 1, inout: payload.inout, data: payload.data
@@ -1838,7 +1901,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let path = 'connectors';
     maniAPI.updateManifest(connectors, path, injectee, {
-      success: [{ name: 'updateConnectors', params: connectors }],
+      success: [{
+        name: 'updateConnectors', params: connectors,
+        manifests: injectee.getters.manifests
+      }],
       failure: []
     });
   }
@@ -1850,7 +1916,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     connectors.push(payload);
     let path = 'connectors';
     maniAPI.updateManifest(connectors, path, injectee, {
-      success: [{ name: 'updateConnectors', params: connectors }],
+      success: [{
+        name: 'updateConnectors', params: connectors,
+        manifests: injectee.getters.manifests
+      }],
       failure: []
     });
     injectee.commit('setConnector', connectors.length - 1);
@@ -1864,7 +1933,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       .push(payload.element);
     let path = 'connectors';
     maniAPI.updateManifest(connectors, path, injectee, {
-      success: [{ name: 'updateConnectors', params: connectors }], failure: []
+      success: [{
+        name: 'updateConnectors', params: connectors,
+        manifests: injectee.getters.manifests
+      }], failure: []
     });
   }
 
@@ -1880,7 +1952,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let path = 'connectors.' + injectee.state.currentConnector + '.'
         + direction;
       maniAPI.updateManifest(connChannels, path, injectee, {
-        success: [{ name: 'deleteConnList', params: payload }], failure: []
+        success: [{
+          name: 'deleteConnList', params: payload,
+          manifests: injectee.getters.manifests
+        }], failure: []
       });
     }
   }

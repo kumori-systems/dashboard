@@ -2,14 +2,14 @@
   <div class="navbar-default sidebar" role="navigation" :updater="updater">
     <div class="sidebar-nav navbar-collapse"  role="navigation">
       <ul class="nav in" id="side-menu">
-        <li :ref="option.name" v-for="(option,i) in menuOptions" v-bind:key="i" v-if="['ui', 'runtime'].indexOf(option.id)>-1 || state[option.id]"  :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
-          <a href="#" @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator">
+        <li class="my-background" :ref="option.name" v-for="(option,i) in menuOptions" v-bind:key="i" v-if="['ui', 'runtime'].indexOf(option.id)>-1 || state[option.id]"  :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
+          <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator my-background white--text">
             <i  v-bind:class="option.icon+' activator'"></i> {{ $t(option.name) }}
             <span  v-if="option.secondLevel  || option.id == 'deployment'" class="fa arrow activator"></span>
             <i  v-if="option.add && active==option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator"  @click="openAdd(option.add.target, $event)"></i>
           </a>
           <span  v-if="option.add"  :ref="'simulate-'+option.add.target"  data-toggle="modal" v-bind:data-target="option.add.target"></span>
-          <ul  v-if="option.secondLevel" :id="option.name" class="nav nav-second-level collapse" aria-expanded="false" style="height: 0px;">         
+          <ul  v-if="option.secondLevel" :id="option.name" class="nav nav-second-level collapse my-background" aria-expanded="false" style="height: 0px;">         
             <li v-if="option.id == 'runtime' ">
               <div class="row" >
                 <div class="col-sm-3"><label class="control-label">{{$t('menu.resource.form.domain')}}</label></div>
@@ -44,10 +44,10 @@
             </li>        
             <li  v-for="(secondOpt, ind) in option.enum" v-bind:key="ind">
               <template v-if="secondOpt.type=='link'">
-                <a id="show-channels" href="#" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
+                <a class="my-background white--text" id="show-channels" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
               </template>
               <template v-if="secondOpt.type=='other'">
-                <a id="show-channels" href="#" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
+                <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
               </template> 
             </li>
           </ul>
@@ -71,12 +71,14 @@
 import ModalDerived from "./_modal_runtime_derived.vue";
 import ModalMetadata from "./_modal_runtime_metadata.vue";
 import ModalSettings from "./_modal_runtime_settings.vue";
+import Modal from "./helper_modal.vue";
 
 export default {
   components: {
     modalDerived: ModalDerived,
     modalMetadata: ModalMetadata,
-    modalSettings: ModalSettings
+    modalSettings: ModalSettings,
+    modal: Modal
   },
   data() {
     return {
@@ -116,19 +118,19 @@ export default {
     },
 
     nameMani() {
-      return this.$store.state.runtimeState.name;
+      return this.$store.state.manifesteditor.runtimeState.name;
     },
 
     validation() {
-      return this.$store.state.runtimeState.validation;
+      return this.$store.state.manifesteditor.runtimeState.validation;
     },
 
     updater() {
-      return this.$store.state.runtimeState.updater;
+      return this.$store.state.manifesteditor.runtimeState.updater;
     },
 
     state() {
-      return this.$store.state.runtimeState;
+      return this.$store.state.manifesteditor.runtimeState;
     }
   },
   methods: {
@@ -144,8 +146,8 @@ export default {
       return this.$store.dispatch("updateDeployState", payload);
     },
 
-    resetService(payload) {
-      return this.$store.dispatch("resetService", payload);
+    resetService() {
+      return this.$store.dispatch("resetService");
     },
 
     optLink(action) {

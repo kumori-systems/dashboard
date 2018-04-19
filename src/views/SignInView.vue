@@ -18,13 +18,11 @@
               <v-card-media class="mt-4 mb-4" src="/static/logo_text.png"
                 height="100px" contain></v-card-media>
 
-              <p class="subheading grey--text pt-4">
+              <p class="subheading text-xs-center">Simple, transparent and competitive</p>
+
+              <p class="subheading grey--text pt-4 text-xs-center">
                 Kumori's PAAS provides the best experience for your
                 applications and services.
-              </p>
-
-              <p class="subheading grey--text">
-                Join now and enjoy our welcome offers.
               </p>
 
             </v-flex>

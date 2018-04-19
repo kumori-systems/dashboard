@@ -135,10 +135,6 @@ export default {
       this.$store.dispatch("updateServState", payload);
     },
 
-    resetService(payload) {
-      this.$store.dispatch("resetService", payload);
-    },
-
     optLink(action) {
       this[action]();
     },
@@ -174,6 +170,10 @@ export default {
           this.clicks = 0;
         }, 400);
       }
+    },
+    
+    resetService() {
+      this.$store.dispatch("resetService");
     },
 
     activeList(name, event) {

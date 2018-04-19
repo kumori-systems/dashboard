@@ -1,9 +1,6 @@
 import Vuex from 'vuex';
 import State from './state';
 
-import {
-  getElementDomain, getElementName, getElementVersion
-} from '../../api/utils';
 import { Manifest } from '../stampstate/classes';
 
 import { tools } from './utils';
@@ -88,11 +85,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let res = [];
     if (state.currentManifest) {
       let deploy = getters.manifests[state.currentManifest];
-      console.debug('Deploy contains', deploy);
-      Object.keys(deploy.roles).map((key, index) => {
-        res.push({ name: key });
-        return true;
-      });
+      for (let role in deploy.roles) {
+        res.push({ name: role });
+      }
     }
     return res;
 
@@ -121,17 +116,19 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   // SERVICE
   getServiceName = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let res = null;
+    let res = {
+      name: '',
+      domain: '',
+      version: ''
+    };
     if (state.currentManifest) {
-      let name: string = getters.manifests[state.currentManifest].name;
-
-      res = {
-        'name': getElementName(name),
-        'domain': getElementDomain(name),
-        'version': getElementVersion(name)
-      };
-
+      let splitted: string = getters.manifests[state.currentManifest]._urn.split('/');
+      res.name = splitted[4];
+      res.domain = splitted[2];
+      res.version = splitted[5];
     }
+
+    console.debug('The result of splitting the urn is', res);
     return res;
   }
 

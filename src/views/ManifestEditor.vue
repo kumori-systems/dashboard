@@ -9,7 +9,7 @@
       <appmenu v-if="currentManifest!=''">
         <menuservice v-if="getManifest.type=='service'" slot="menu"></menuservice>
         <menucomp v-if="getManifest.type=='component'" slot="menu"></menucomp>
-        <menudep v-if="getManifest.type=='deployment'" slot="menu"></menudep>
+        <menudep v-if="getManifest.type=='deployments'" slot="menu"></menudep>
         <menures v-if="getManifest.type=='resource'" slot="menu"></menures>
         <menurun v-if="getManifest.type=='runtime'" slot="menu"></menurun>
       </appmenu>
@@ -18,20 +18,19 @@
         <div class="panel-body">
           <div class="form-group">
             <label class="checkbox-inline">
-              <input type="checkbox" value="service" v-model="filterManifests">
-              {{ $t('panel.selector.options.services') }}
+              <input type="checkbox" value="service" v-model="filterManifests">{{ $t('panel.selector.options.services') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox"  value="component"  v-model="filterManifests">{{$t('panel.selector.options.components')}}
+              <input type="checkbox" value="component" v-model="filterManifests">{{ $t('panel.selector.options.components') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox"  value="deployment"  v-model="filterManifests">{{$t('panel.selector.options.deployments')}}
+              <input type="checkbox" value="deployments" v-model="filterManifests">{{ $t('panel.selector.options.deployments') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox"  value="resource"  v-model="filterManifests">{{$t('panel.selector.options.resources')}}
+              <input type="checkbox" value="resource" v-model="filterManifests">{{ $t('panel.selector.options.resources') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox"  value="runtime"  v-model="filterManifests">{{$t('panel.selector.options.runtimes')}}
+              <input type="checkbox" value="runtime" v-model="filterManifests">{{ $t('panel.selector.options.runtimes') }}
             </label>
           </div>
           <v-select class="searchinput" :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
@@ -41,10 +40,14 @@
         </div>
       </div>
     </div>
-    <maindep v-if=" currentManifest!='' && getManifest.type=='deployment'">{{setDeployCharts()}}</maindep>
+  
+    <!--
+      <maindep v-if=" currentManifest!='' && getManifest.type=='deployments'">{{ setDeployCharts() }}</maindep>
+    -->
+
     <footer v-if="currentManifest!=''" id="footer">
       <div>
-        <p class="footext">Manifest: {{manifests[currentManifest].name}}</p>
+        <p class="footext">Manifest: {{ manifests[currentManifest].name }}</p>
       </div>
     </footer>
   </div>
@@ -101,7 +104,7 @@ export default {
       filterManifests: [
         "service",
         "component",
-        "deployment",
+        "deployments",
         "resource",
         "runtime"
       ],

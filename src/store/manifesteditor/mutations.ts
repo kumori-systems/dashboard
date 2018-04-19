@@ -250,10 +250,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   setArrangement = (state: State, payload: any): void => {
-    let deploy = (<any>state).manifests[state.currentManifest];
+    let deploy = payload.manifests[state.currentManifest];
     state.deploymentState.arrangements = Object.assign({},
-      deploy.roles[payload].resources);
-    state.currentArrangement = payload;
+      deploy.roles[payload.payload].resources);
+    state.currentArrangement = payload.payload;
   }
 
   updateArrangementState = (state: State, payload: any): void => {
@@ -274,12 +274,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   setDeploymentParams = (state: State, payload: any): void => {
 
-    let deploy = (<any>state).manifests[state.currentManifest];
+    let deploy = payload.manifests[state.currentManifest];
     let paramsList = [];
-    let service = (<any>state).manifests[deploy.servicename];
+    let service = payload.manifests[deploy.servicename];
     let serviceParams = service.configuration.parameters;
     state.deploymentState.paramValidation = {};
-    Object.keys(deploy.configuration.parameters).map(function (key, index) {
+    for (let key in deploy.configuration.parameters) {
       let parameter = {
         name: '',
         type: '',
@@ -302,7 +302,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
             if (roles.length > 0) {
               parameter.type = 'role';
               parameter.data = [];
-              let component = (<any>state).manifests[roles[0].component];
+              let component = payload.manifests[roles[0].component];
               let paramsHash = {};
               for (let p of component.configuration.parameters) {
 
@@ -348,7 +348,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       }
 
-    });
+    }
 
     state.deploymentState.paramsList = paramsList;
   }
@@ -374,22 +374,22 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   setComponentRuntime = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].runtime = payload;
+    payload.manifests[state.currentManifest].runtime = payload.value;
   }
 
   setComponentResources = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].configuration
+    payload.manifests[state.currentManifest].configuration
       .resources = payload;
   }
 
   setComponentParameters = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].configuration
+    payload.manifests[state.currentManifest].configuration
       .parameters = payload;
   }
 
   // SERVICE 
   setServiceName = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].name = payload;
+    payload.manifests[state.currentManifest].name = payload;
   }
 
   updateServState = (state: State, payload: any): void => {
@@ -415,7 +415,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
     role: number
   }
   ): void => {
-    console.debug('Llamamos a set role con el payload', payload);
     if (payload.role < payload.manifests[state.currentManifest].roles.length) {
       state.currentRole = payload.role;
 
@@ -436,21 +435,23 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateRoles = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles.push(payload);
+    payload.manifests[state.currentManifest].roles.push(payload);
   }
 
   updateRoleName = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles[state.currentRole]
+    payload.manifests[state.currentManifest].roles[state.currentRole]
       .name = payload;
   }
 
-  updateRoleComp = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles[state.currentRole]
-      .component = payload;
+  updateRoleComp = (state: State, payload: {
+    component: string, manifests: any
+  }): void => {
+    payload.manifests[state.currentManifest].roles[state.currentRole]
+      .component = payload.component;
   }
 
   updateRoleRes = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles[state.currentRole]
+    payload.manifests[state.currentManifest].roles[state.currentRole]
       .resources = payload;
   }
 
@@ -460,7 +461,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   deleteRole = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles.splice(payload, 1);
+    payload.manifests[state.currentManifest].roles.splice(payload, 1);
   }
 
   resetRole = (state: State, payload: any): void => {
@@ -489,7 +490,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateChannels = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].channels[payload.direction] =
+    payload.manifests[state.currentManifest].channels[payload.direction] =
       payload.channels;
   }
 
@@ -504,7 +505,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateConnectors = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].connectors = payload;
+    payload.manifests[state.currentManifest].connectors = payload;
   }
 
   deleteConnList = (state: State, payload: any): void => {
@@ -512,7 +513,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       let direction =
         payload.type === state.Settings.listTypes.connectorList.provided ?
           'provided' : 'depended';
-      (<any>state).manifests[state.currentManifest]
+      payload.manifests[state.currentManifest]
         .connectors[state.currentConnector][direction].splice(payload.index, 1);
     }
   }
@@ -533,22 +534,22 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   // RESOURCES
   updateServRes = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].configuration
+    payload.manifests[state.currentManifest].configuration
       .resources[payload.index].name = payload.name;
   }
 
   updateRolRes = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles[state.currentRole]
+    payload.manifests[state.currentManifest].roles[state.currentRole]
       .resources[payload.name] = payload.tag;
   }
 
   setServRes = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].configuration.resources =
+    payload.manifests[state.currentManifest].configuration.resources =
       payload.res;
   }
 
   setRolRes = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].roles[state.currentRole]
+    payload.manifests[state.currentManifest].roles[state.currentRole]
       .resources = payload.res;
   }
 
@@ -570,7 +571,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   // PARAMETERS
   setServParams = (state: State, payload: any): void => {
-    (<any>state).manifests[state.currentManifest].configuration.parameters
+    payload.manifests[state.currentManifest].configuration.parameters
       = payload;
   }
 

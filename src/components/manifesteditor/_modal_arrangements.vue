@@ -1,13 +1,12 @@
 <template>
   <div :class="'modal-content content'+'xs'" heith="100" :updater="updater">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-header my-background">
+      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-    <div class="modal-body">
+    <div class="modal-body my-background">
       <div class="row" v-for="(param, key) in getArragementRes" v-bind:key="key">
-        <div class="col-md-1">
-        </div>
+        <div class="col-md-1"></div>
         <div class="col-md-3">
           <label> {{humanizeLabel(key)}} </label>
         </div>
@@ -19,25 +18,25 @@
           </div>
         </div>
         <div class="col-md-2" v-if="getMainArrangements.indexOf(key)==-1">
-          <div class="action-btn" @click="delteArrangement(key)"><i class="btn-private red fa fa-minus-square"></i></div>
+          <div class="action-btn" @click="delteArrangement(key)"><i class="btn-private red fa fa-minus-square my-background"></i></div>
         </div>
       </div>
       <div class="row" v-if="availablesArrs().length>0">
         <hr/>
         <div class="col-md-1">
         </div>
-        <div class="col-md-9" v-if="getMainArrangements.indexOf(key)==-1">
+        <div class="col-md-9">
           <select class="form-control" ref="newArr">
             <option v-for="(arr,i) in availablesArrs()" :value="arr" v-bind:key="i">{{ humanizeLabel(arr) }}</option>
           </select>
         </div>
-        <div class="col-md-2" v-if="getMainArrangements.indexOf(key)==-1">
-          <div class="action-btn" @click="addNewArr()"><i class="btn-private blue fa fa-plus-square"></i></div>
+        <div class="col-md-2">
+          <div class="action-btn" @click="addNewArr()"><i class="btn-private blue fa fa-plus-square my-background"></i></div>
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+    <div class="modal-footer my-background">
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
@@ -64,11 +63,11 @@ export default {
     },
 
     validation() {
-      return this.$store.state.deploymentState.arrValidation;
+      return this.$store.state.manifesteditor.deploymentState.arrValidation;
     },
 
     updater() {
-      return this.$store.state.deploymentState.updater;
+      return this.$store.state.manifesteditor.deploymentState.updater;
     },
 
     modalProp() {
@@ -76,16 +75,16 @@ export default {
     }
   },
   methods: {
-    updateArrangementState() {
-      return this.$store.getters.updateArrangementState;
+    updateArrangementState(payload) {
+      return this.$store.dispatch("updateArrangementState", payload);
     },
 
-    deleteArrangement() {
-      return this.$store.getters.deleteArrangement;
+    deleteArrangement(payload) {
+      return this.$store.dispatch("deleteArrangement", payload);
     },
 
-    modalProp() {
-      return this.$store.getters.addArrangement;
+    addArrangement(payload) {
+      return this.$store.dispatch("addArrangement", payload);
     },
 
     availablesArrs() {

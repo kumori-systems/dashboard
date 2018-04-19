@@ -2,8 +2,8 @@
   <div class="navbar-default sidebar" role="navigation" :updater="updater">
     <div class="sidebar-nav navbar-collapse"  role="navigation">
       <ul class="nav in" id="side-menu">
-        <li :ref="option.name" v-for="(option, i) in menuOptions" v-bind:key="i" :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
-          <a href="#" @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator">
+        <li class="my-background" :ref="option.name" v-for="(option, i) in menuOptions" v-bind:key="i" :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
+          <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator white--text">
             <i v-bind:class="option.icon+' activator'"></i> {{ $t(option.name) }}
             <span v-if="option.secondLevel  || option.id == 'deployment'" class="fa arrow activator"></span>
             <i v-if="option.add && active==option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator"  @click="openAdd(option.add.target, $event)"></i>
@@ -47,10 +47,10 @@
             </li>
             <li v-for="(secondOpt,j) in option.enum" v-bind:key="j">
               <template v-if="secondOpt.type=='link'">
-                <a id="show-channels" href="#" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
+                <a id="show-channels" class="white--text" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
               </template>
               <template v-if="secondOpt.type=='other'">
-                <a id="show-channels" href="#" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
+                <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
               </template> 
             </li>
           </ul>
@@ -65,7 +65,7 @@
 <script>
 import HelperModal from "./helper_modal.vue";
 
-import ModalDeployParameters from "./_modal_deploy_parameters.vue";
+import ModalDeployParameters from "./_modal_resource_parameters.vue";
 
 export default {
   components: {
@@ -135,8 +135,8 @@ export default {
       this.$store.dispatch("updateDeployState", payload);
     },
 
-    resetService(payload) {
-      this.$store.dispatch("resetService", payload);
+    resetService() {
+      this.$store.dispatch("resetService");
     },
 
     optLink(action) {

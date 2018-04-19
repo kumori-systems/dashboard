@@ -3,9 +3,10 @@
     <div class="row">
       <div class="col-xs-3">
         <div class="panel panel-default">
-          <div class="panel-heading text-center">Instances by Role</div>
-          <div class="panel-body">
-            <donut-chart :id="charts.instances.id"
+          <div class="panel-heading headline text-center my-background white--text">Instances by Role</div>
+          <div class="panel-body my-background">
+            <donut-chart style="background:white;"
+              :id="charts.instances.id"
               :data="charts.instances.data"
               :colors="JSON.stringify(charts.instances.colors)"
               :resize="charts.instances.resize">
@@ -15,9 +16,11 @@
       </div>
       <div class="col-xs-3">
         <div class="panel panel-default">
-          <div class="panel-heading text-center">CPU by Role</div>
-          <div class="panel-body">
-            <donut-chart :id="charts.cpu.id" :data="charts.cpu.data"
+          <div class="panel-heading headline text-center my-background white--text">CPU by Role</div>
+          <div class="panel-body my-background">
+            <donut-chart style="background:white;"
+              :id="charts.cpu.id"
+              :data="charts.cpu.data"
               :colors="JSON.stringify(charts.cpu.colors)"
               :resize="charts.cpu.resize">
             </donut-chart>
@@ -26,9 +29,11 @@
       </div>
       <div class="col-xs-3" >
         <div class="panel panel-default">
-          <div class="panel-heading text-center">Memory by Role</div>
-          <div class="panel-body">
-            <donut-chart :id="charts.memory.id" :data="charts.memory.data"
+          <div class="panel-heading headline text-center my-background white--text">Memory by Role</div>
+          <div class="panel-body my-background">
+            <donut-chart style="background:white;"
+              :id="charts.memory.id"
+              :data="charts.memory.data"
               :colors="JSON.stringify(charts.memory.colors)"
               :resize="charts.memory.resize">
             </donut-chart>
@@ -37,9 +42,10 @@
       </div>
       <div class="col-xs-3" >
         <div class="panel panel-default">
-          <div class="panel-heading text-center">Resume</div>
-          <div class="panel-body">
-            <bar-chart  :id="charts.resume.id"
+          <div class="panel-heading headline text-center my-background white--text">Resume</div>
+          <div class="panel-body my-background">
+            <bar-chart style="background:white;"
+              :id="charts.resume.id"
               :data="charts.resume.data"
               :resize="charts.resume.resize"
               :xkey="charts.resume.xkey"
@@ -52,8 +58,6 @@
     </div>
   </div>
 </template>
-
-
 <script>
 import Raphael from "raphael/raphael";
 global.Raphael = Raphael;
@@ -65,14 +69,12 @@ export default {
     BarChart
     // LineChart, AreaChart
   },
-
   data() {
     return {};
   },
-
   computed: {
     charts() {
-      return this.$store.state.deploymentState.charts;
+      return this.$store.state.manifesteditor.deploymentState.charts;
     }
   },
   methods: {

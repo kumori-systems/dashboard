@@ -4,10 +4,10 @@
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-    <div class="modal-body">
-      <div  v-for="(key, i) in Object.keys(derived)" v-bind:key="i" class="row">
+    <div class="modal-body" v-if="derived">
+      <div v-for="(key, i) in Object.keys(derived)" v-bind:key="i" class="row">
         <div class="col-sm-12">
-          <label> {{key[0].toUpperCase() + key.substring(1)}} </label>
+          <label> {{ key[0].toUpperCase() + key.substring(1) }} </label>
           <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
             <div class="form-group input-group">
               <input class="form-control" type="text" :ref="key" :value="derived[key]"  @input="updatedField(key)">
@@ -38,15 +38,15 @@ export default {
     },
 
     derived() {
-      return this.$store.state.runtimeState.derived;
+      return this.$store.state.manifesteditor.runtimeState.derived;
     },
 
     validation() {
-      return this.$store.state.runtimeState.validation;
+      return this.$store.state.manifesteditor.runtimeState.validation;
     },
 
     updater() {
-      return this.$store.state.runtimeState.updater;
+      return this.$store.state.manifesteditor.runtimeState.updater;
     },
 
     modalProp() {

@@ -17,7 +17,7 @@
         "version": "Version"
       }
     },
-    "deployment": {
+    "deployments": {
       "label": "Deployment",
       "form": {
         "domain": "Service Domain",

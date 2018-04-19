@@ -1,16 +1,16 @@
 <template>
   <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
-    <div class="modal-header">
+    <div class="modal-header my-background">
       <button type="button" class="close" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-  <div class="modal-body">
+  <div class="modal-body my-background">
   <div class="panel panel-default">
-    <div class="panel-heading">
+    <div class="panel-heading my-background white--text">
       <i class="fa fa-cubes fa-fw"></i> {{$t('modals.components.labels.res')}}
     </div> 
-    <div class="panel-body">
-      <div class="row">   
+    <div class="panel-body my-background">
+      <div class="row my-background">
         <div class="col-md-3" >
           <label style="text-decoration: underline;">{{$t('modals.components.labels.name')}}</label>
         </div>
@@ -20,7 +20,7 @@
       </div>
       <rowlist v-if="resources.length>0"  v-bind:list="resources"  :type="getSettings.listTypes.component.resources"> </rowlist>
       <hr  v-if="resources.length>0"/>
-        <div class="row">   
+        <div class="row my-background">
           <div class="col-md-3" >
             <div :class="{'form-group':true, 'has-error':validation.rname.err, 'has-feedback':validation.rname.err}">
               <input class="form-control" ref="res_name" :value="rname" @input="updateStateRes" :placeholder="$t('modals.components.labels.name')"  @keyup.enter="addRes">
@@ -35,17 +35,17 @@
           </div>
           <div class="col-md-1" >
             <div class="action-btn">
-              <i  class="btn-private fa fa-plus-square blue" @click="addRes()"></i>
+              <i  class="btn-private fa fa-plus-square my-background blue" @click="addRes()"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div class="panel panel-default">
-      <div class="panel-heading">
+      <div class="panel-heading my-background white--text">
         <i class="fa fa-sliders fa-fw"></i> {{$t('modals.components.labels.param')}}
       </div>
-      <div class="panel-body">
+      <div class="panel-body my-background">
         <div class="row">   
           <div class="col-md-3" >
             <label style="text-decoration: underline;">{{$t('modals.components.labels.name')}}</label>
@@ -71,20 +71,24 @@
             </div>
             <div class="col-md-1" >
               <div class="action-btn">
-                <i  class="btn-private fa fa-plus-square blue" @click="addParam()"></i>
+                <i class="btn-private fa fa-plus-square blue my-background" @click="addParam()"></i>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+    <div class="modal-footer my-background">
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
 <script>
+import RowList from "./helper_list.vue";
 export default {
+  components: {
+    rowlist: RowList
+  },
   data() {
     return {};
   },
@@ -93,22 +97,22 @@ export default {
       return this.$store.getters.getSettings;
     },
     pname() {
-      return this.$store.state.configurationState.pname;
+      return this.$store.state.manifesteditor.configurationState.pname;
     },
     rname() {
-      return this.$store.state.configurationState.rname;
+      return this.$store.state.manifesteditor.configurationState.rname;
     },
     resources() {
-      return this.$store.state.configurationState.resources;
+      return this.$store.state.manifesteditor.configurationState.resources;
     },
     parameters() {
-      return this.$store.state.configurationState.parameters;
+      return this.$store.state.manifesteditor.configurationState.parameters;
     },
     validation() {
-      return this.$store.state.configurationState.validation;
+      return this.$store.state.manifesteditor.configurationState.validation;
     },
     updater() {
-      return this.$store.state.configurationState.updater;
+      return this.$store.state.manifesteditor.configurationState.updater;
     },
     modalProp() {
       return this.getSettings.modalProps.configuration;

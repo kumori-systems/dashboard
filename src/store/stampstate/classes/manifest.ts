@@ -17,6 +17,9 @@ export class Manifest extends ECloudElement {
   /** Type used for the manifest editor. */
   type: string = null;
 
+  /** The name of the service implemented by this deployment. */
+  servicename: string = null;
+
   /** Deployment which uses this element. */
   deployment: string = null;
 
@@ -85,6 +88,9 @@ export class Manifest extends ECloudElement {
     if (manifest.roles) { this.roles = manifest.roles; }
     if (manifest.runtime) { this.runtime = manifest.runtime; }
     if (manifest.spec) { this.spec = manifest.spec; }
+    if (manifest.service) { this.servicename = manifest.service; }
+
+    console.debug('The manifest contains', manifest);
 
     /* For manifest editor - INIT */
     this.label = this._urn;

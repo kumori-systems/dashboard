@@ -2,7 +2,7 @@
     <div class="sidebar-nav navbar-collapse">
         <ul class="nav in" id="side-menu">
             <li :ref="option.name" v-for="(option, ind) in menuOptions" v-bind:key="ind" :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
-                <a href="#" @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator">
+                <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator white--text">
                 <i  v-bind:class="option.icon+' activator'"></i> {{ $t(option.name) }}
                 <span  v-if="option.secondLevel  || option.id == 'component'" class="fa arrow activator"></span>
                     <i  v-if="option.add && active==option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator"  @click="openAdd(option.add.target, $event)"></i>
@@ -50,11 +50,11 @@
                 
                 <li  v-for="(secondOpt, index) in option.enum" v-bind:key="index">
                     <template v-if="secondOpt.type=='link'">
-                    <a id="show-channels" href="#" @click="optLink(secondOpt.action)" >{{ $t(secondOpt.id) }}</a>
+                    <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
                     </template>
 
                     <template v-if="secondOpt.type=='other'">
-                    <a id="show-channels" href="#" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
+                    <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
                     </template> 
                 </li>
                 </ul>
@@ -82,12 +82,16 @@
 import ModalChannels from "./_modal_channels.vue";
 import ModalRuntimes from "./_modal_runtimes.vue";
 import ModalConfiguration from "./_modal_configuration.vue";
+import RowList from "./helper_list.vue";
+import Modal from "./helper_modal.vue";
 
 export default {
   components: {
     modalChannels: ModalChannels,
     modalRuntimes: ModalRuntimes,
-    modalConfiguration: ModalConfiguration
+    modalConfiguration: ModalConfiguration,
+    rowlist: RowList,
+    modal: Modal
   },
   data() {
     return {
@@ -119,33 +123,32 @@ export default {
     },
 
     validation() {
-      return this.$store.state.serviceState.validation;
+      return this.$store.state.manifesteditor.serviceState.validation;
     },
 
     nameMani() {
-      return this.$store.state.componentState.name;
+      return this.$store.state.manifesteditor.componentState.name;
     },
 
     updater() {
-      return this.$store.state.serviceState.updater;
+      return this.$store.state.manifesteditor.serviceState.updater;
     }
   },
   methods: {
-
-    cleanCurrent() {
+    cleanCurrent(payload) {
       this.$store.dispatch("cleanCurrent", payload);
     },
 
-    updateServiceName() {
+    updateServiceName(payload) {
       this.$store.dispatch("updateServiceName", payload);
     },
 
-    updateServState() {
+    updateServState(payload) {
       this.$store.dispatch("updateServState", payload);
     },
 
     resetService() {
-      this.$store.dispatch("resetService", payload);
+      this.$store.dispatch("resetService");
     },
 
     optLink(action) {

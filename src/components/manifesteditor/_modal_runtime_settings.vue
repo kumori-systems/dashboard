@@ -1,7 +1,7 @@
 <template>
-  <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
+  <div :class="'my-background modal-content content'+'xl'" heith="100" :updater="updater">
     <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
     <div class="modal-body">
@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
@@ -29,32 +29,32 @@ export default {
     return {};
   },
   computed: {
-    getSettings(){
+    getSettings() {
       return this.$store.getters.getSettings;
     },
-    getDeployParams(){
+    getDeployParams() {
       return this.$store.getters.getDeployParams;
     },
-    
-    runtimeSttings(){
-      return this.$store.state.runtimeState.runsettings;
+
+    runtimeSttings() {
+      return this.$store.state.manifesteditor.runtimeState.runsettings;
     },
-    
-    validation(){
-      return this.$store.state.runtimeState.validation;
+
+    validation() {
+      return this.$store.state.manifesteditor.runtimeState.validation;
     },
-    
-    updater(){
-      return this.state.runtimeState.updater;
+
+    updater() {
+      return this.$store.state.manifesteditor.runtimeState.updater;
     },
-    
+
     modalProp() {
       return this.getSettings.modalProps.runtimeSettings;
     }
   },
   methods: {
-    updateRuntimeState(payload){
-      return this.$store.dispatch('updateRuntimeState', payload);
+    updateRuntimeState(payload) {
+      return this.$store.dispatch("updateRuntimeState", payload);
     },
     updatedField(key) {
       this.updateRuntimeState({

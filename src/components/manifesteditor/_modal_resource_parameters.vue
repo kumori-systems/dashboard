@@ -1,10 +1,10 @@
 <template>
   <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-header my-background">
+      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-    <div class="modal-body">
+    <div class="modal-body my-background">
       <div  v-for="(key, index) in Object.keys(parameters)" v-bind:key="index" class="row">
         <div class="col-sm-12">
           <label> {{key}} </label>
@@ -14,7 +14,7 @@
                 <span class="input-group-addon">{{$t('modals.deployParams.labels.'+types[key].type)}}</span>                   
             </div>
             <div v-if="['number', 'integer', 'string'].indexOf(types[key].type) > -1" class="form-group input-group">
-              <input class="form-control" type="integer" :ref="key" :value="parameters[key]"  @input="updatedField(key)">
+              <input class="form-control black--text" type="integer" :ref="key" :value="parameters[key]"  @input="updatedField(key)">
               <span class="input-group-addon">{{$t('modals.deployParams.labels.'+types[key].type)}}</span>
             </div>
             <div v-if="['boolean'].indexOf(types[key].type) > -1" >
@@ -28,8 +28,8 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+    <div class="modal-footer my-background">
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
@@ -49,19 +49,19 @@ export default {
     },
 
     parameters() {
-      return this.$store.state.resourceState.parameters;
+      return this.$store.state.manifesteditor.resourceState.parameters;
     },
 
     validation() {
-      return this.$store.state.resourceState.validation;
+      return this.$store.state.manifesteditor.resourceState.validation;
     },
 
     updater() {
-      return this.$store.state.deploymentState.updater;
+      return this.$store.state.manifesteditor.deploymentState.updater;
     },
 
     types() {
-      return this.$store.state.Settings.resourceFields;
+      return this.$store.state.manifesteditor.Settings.resourceFields;
     },
 
     modalProp() {

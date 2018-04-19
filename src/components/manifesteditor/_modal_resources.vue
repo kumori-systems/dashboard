@@ -1,10 +1,10 @@
 <template>
   <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-header my-background">
+      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
       <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
     </div>
-    <div class="modal-body">
+    <div class="modal-body my-background">
       <div class="row">   
         <div class="col-xs-3" >
           <label style="text-decoration: underline;">{{$t('modals.components.labels.name')}}</label>
@@ -26,8 +26,8 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+    <div class="modal-footer my-background">
+      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
     </div>
   </div>
 </template>
@@ -44,19 +44,19 @@ export default {
       return this.$store.getters.getResources;
     },
     currentManifest() {
-      return this.$store.state.currentManifest;
+      return this.$store.state.manifesteditor.currentManifest;
     },
     manifests() {
-      return this.$sotre.state.manifests;
+      return this.$store.getters.manifests;
     },
     resources() {
-      return this.$store.state.deploymentState.resources;
+      return this.$store.state.manifesteditor.deploymentState.resources;
     },
     validation() {
-      return this.$store.state.deploymentState.resValidation;
+      return this.$store.state.manifesteditor.deploymentState.resValidation;
     },
     updater() {
-      return this.$store.state.deploymentState.updater;
+      return this.$store.state.manifesteditor.deploymentState.updater;
     },
     modalProp() {
       return this.getSettings.modalProps.resources;

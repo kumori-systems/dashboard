@@ -56,13 +56,13 @@ export default {
   },
   computed: {
     depParams() {
-      return this.$store.state.deploymentState.parameters;
+      return this.$store.state.manifesteditor.deploymentState.parameters;
     },
     validation() {
-      return this.$store.state.deploymentState.paramValidation;
+      return this.$store.state.manifesteditor.deploymentState.paramValidation;
     },
     updater() {
-      return this.$store.state.deploymentState.updater;
+      return this.$store.state.manifesteditor.deploymentState.updater;
     }
   },
   methods: {

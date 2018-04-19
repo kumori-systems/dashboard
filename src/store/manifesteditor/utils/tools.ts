@@ -71,30 +71,30 @@ function getAllChannels(state, getters, type) {
     let service = getters.manifests[state.currentManifest];
 
     // Create exclusions
-    for (let conn of service.connectors) {
-      for (let entry of conn[connType]) {
+    for (let conn in service.connectors) {
+      for (let entry of service.connectors[conn][connType]) {
         if (entry.role) {
           excludeRolChann[entry.role + ':' + entry.endpoint] = true;
         }
       }
       if (type === 'requires')
-        for (let entry of conn[connType]) {
-          if (entry.role === undefined) {
-            excludeSrvChann[':' + entry.endpoint] = true;
+        for (let entry in service.connectors[conn][connType]) {
+          if (service.connectors[conn][connType][entry].role === undefined) {
+            excludeSrvChann[':' + service.connectors[conn][connType][entry].endpoint] = true;
           }
         }
     }
 
-    for (let role of service.roles) {
-      if (getters.getComponents[role.component]) {
-        let comChannels = getters.getComponents[role.component].channels[type];
+    for (let role in service.roles) {
+      if (getters.getComponents[service.roles[role].component]) {
+        let comChannels = getters.getComponents[service.roles[role].component].channels[type];
         if (comChannels && comChannels.length > 0) {
-          list = list.concat(paseSugestionChannels(comChannels, role.name));
+          list = list.concat(paseSugestionChannels(comChannels, service.roles[role].name));
         }
       }
     }
 
-    if (type === 'requires' && service.channels['provides']) {
+    if (type === 'requires' && service.channels && service.channels['provides']) {
       list = list.concat(
         paseSugestionChannels(service.channels['provides'], '')
       );
