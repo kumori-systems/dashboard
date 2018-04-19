@@ -153,33 +153,41 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
 
     let splitted = deploy.servicename.split('/');
+
     let serviceName = {
       name: splitted[4],
       domain: splitted[2],
       version: splitted[5]
-    }
+    };
+
     injectee.commit('updateDeployState', {
       key: 'service', value: serviceName
     });
+
     injectee.commit('updateDeployState', {
       key: 'resources',
       value: deploy.configuration.resources
     });
+
     injectee.commit('updateDeployState', {
       key: 'parameters',
       value: deploy.configuration.parameters
     });
 
     if (deploy.interconnection) {
+
       injectee.commit('updateDeployState', {
         key: 'interconnection',
         value: deploy.interconnection
       });
+
     } else {
+
       injectee.commit('updateDeployState', {
         key: 'interconnection',
         value: null
       });
+
     }
 
     //  DEPLOY - RESOURCES
@@ -195,7 +203,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
     }
     injectee.dispatch('validateDeployRes');
-    injectee.commit('setDeploymentParams', { manifests: injectee.getters.manifests });
+    injectee.commit('setDeploymentParams', {
+      manifests: injectee.getters.manifests
+    });
   }
 
   validateDeployRes = (injectee: Vuex.ActionContext<State, any>): void => {
@@ -214,10 +224,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             });
           else {
             let sres = (service.configuration.resources.filter((elem) => {
-              return elem.name === x
+              return elem.name === x;
             }));
             if (sres.length > 0) {
-              if (res.spec != sres[0].type)
+              if (res.spec !== sres[0].type)
                 injectee.commit('setErrValidation', {
                   validation: injectee.state.deploymentState.resValidation,
                   prop: x,
@@ -419,32 +429,27 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.getters.manifests[injectee.state.currentManifest]
         .roles[injectee.state.currentArrangement].resources);
 
-    //console.log(resources)
     resources[payload] = injectee.state.Settings.manifestStructure.elementtype
       .arrangements.types[payload].default;
-    let success = [
-      {
-        name: 'updateArrangementState',
-        params: {
-          key: payload,
-          value: resources[payload]
-        }
-      },
-      {
-        name: 'updateValidation',
-        params: {
-          type: 'arrangements',
-          prop: payload,
-          value: resources[payload].toString(),
-          validation: validation
-        }
+    let success = [{
+      name: 'updateArrangementState',
+      params: {
+        key: payload,
+        value: resources[payload]
       }
-    ]
+    }, {
+      name: 'updateValidation',
+      params: {
+        type: 'arrangements',
+        prop: payload,
+        value: resources[payload].toString(),
+        validation: validation
+      }
+    }];
     maniAPI.updateManifest(
       resources,
       path,
-      injectee,
-      {
+      injectee, {
         success: success,
         failure: []
       });

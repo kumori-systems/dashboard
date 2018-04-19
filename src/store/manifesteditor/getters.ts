@@ -122,7 +122,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       version: ''
     };
     if (state.currentManifest) {
-      let splitted: string = getters.manifests[state.currentManifest]._urn.split('/');
+      let splitted: string = getters.manifests[state.currentManifest]
+        ._urn.split('/');
       res.name = splitted[4];
       res.domain = splitted[2];
       res.version = splitted[5];

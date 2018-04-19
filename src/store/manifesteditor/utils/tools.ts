@@ -79,22 +79,31 @@ function getAllChannels(state, getters, type) {
       }
       if (type === 'requires')
         for (let entry in service.connectors[conn][connType]) {
-          if (service.connectors[conn][connType][entry].role === undefined) {
-            excludeSrvChann[':' + service.connectors[conn][connType][entry].endpoint] = true;
+          if (!service.connectors[conn][connType][entry].role) {
+            excludeSrvChann[
+              ':' + service.connectors[conn][connType][entry].endpoint
+            ] = true;
           }
         }
     }
 
     for (let role in service.roles) {
       if (getters.getComponents[service.roles[role].component]) {
-        let comChannels = getters.getComponents[service.roles[role].component].channels[type];
+        let comChannels = getters.getComponents[service.roles[role].component]
+          .channels[type];
         if (comChannels && comChannels.length > 0) {
-          list = list.concat(paseSugestionChannels(comChannels, service.roles[role].name));
+          list = list.concat(paseSugestionChannels(
+            comChannels, service.roles[role].name
+          ));
         }
       }
     }
 
-    if (type === 'requires' && service.channels && service.channels['provides']) {
+    if (
+      type === 'requires'
+      && service.channels
+      && service.channels['provides']
+    ) {
       list = list.concat(
         paseSugestionChannels(service.channels['provides'], '')
       );
