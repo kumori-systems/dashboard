@@ -1,60 +1,117 @@
 <template>
   <div>
     <div class="notifier alertNoty">
-      <notifier></notifier>
+      <notifier/>
     </div>
     <div id="container">
-      <alertpan  v-show="alertPan"></alertpan>
-      <graph v-if="false" @d3-event="listener"></graph>
+      <alertpan v-show="alertPan"/>
+      <graph
+        v-if="false" 
+        @d3-event="listener"/>
       <appmenu v-if="currentManifest!=''">
-        <menuservice v-if="getManifest.type=='service'" slot="menu"></menuservice>
-        <menucomp v-if="getManifest.type=='component'" slot="menu"></menucomp>
-        <menudep v-if="getManifest.type=='deployments'" slot="menu"></menudep>
-        <menures v-if="getManifest.type=='resource'" slot="menu"></menures>
-        <menurun v-if="getManifest.type=='runtime'" slot="menu"></menurun>
+        <menuservice 
+          v-if="getManifest.type=='service'" 
+          slot="menu"/>
+        <menucomp
+          v-if="getManifest.type=='component'"
+          slot="menu"/>
+        <menudep
+          v-if="getManifest.type=='deployments'"
+          slot="menu"/>
+        <menures
+          v-if="getManifest.type=='resource'"
+          slot="menu"/>
+        <menurun
+          v-if="getManifest.type=='runtime'"
+          slot="menu"/>
       </appmenu>
-      <div v-if="currentManifest==''" id="manifesteditor" class="panel panel-default alertModal">
-        <div class="panel-heading white--text">{{$t('panel.selector.title')}}</div>
+      <div
+        v-if="currentManifest==''"
+        id="manifesteditor"
+        class="panel panel-default alertModal">
+        <div class="panel-heading white--text">
+          {{ $t('panel.selector.title') }}
+        </div>
         <div class="panel-body">
           <div class="form-group">
             <label class="checkbox-inline">
-              <input type="checkbox" value="service" v-model="filterManifests">{{ $t('panel.selector.options.services') }}
+              <input
+                v-model="filterManifests"
+                type="checkbox"
+                value="service">
+              {{ $t('panel.selector.options.services') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox" value="component" v-model="filterManifests">{{ $t('panel.selector.options.components') }}
+              <input 
+                v-model="filterManifests"
+                type="checkbox" 
+                value="component">
+              {{ $t('panel.selector.options.components') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox" value="deployments" v-model="filterManifests">{{ $t('panel.selector.options.deployments') }}
+              <input
+                v-model="filterManifests"
+                type="checkbox"
+                value="deployments">
+              {{ $t('panel.selector.options.deployments') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox" value="resource" v-model="filterManifests">{{ $t('panel.selector.options.resources') }}
+              <input
+                v-model="filterManifests"
+                type="checkbox"
+                value="resource">
+              {{ $t('panel.selector.options.resources') }}
             </label>
             <label class="checkbox-inline">
-              <input type="checkbox" value="runtime" v-model="filterManifests">{{ $t('panel.selector.options.runtimes') }}
+              <input
+                v-model="filterManifests"
+                type="checkbox"
+                value="runtime">
+              {{ $t('panel.selector.options.runtimes') }}
             </label>
           </div>
-          <v-select class="searchinput" :value="selected" :on-change="setSelect" :options="options" ref="select"></v-select>
+          <v-select
+            ref="select"
+            :options="options"
+            :value="selected"
+            :on-change="setSelect"
+            class="searchinput"/>
         </div>
         <div class="panel-footer">
-          <button  type="button" @click="selectModal" ref="btnaccept" :class="{btn:true, 'btn-success':true, disabled:manifestList.length==0 || selectedManifest==null}">  <i class="fa fa-check"></i> {{$t('panel.warning.buttons.accept')}}</button>
+          <button
+            ref="btnaccept"
+            :class="{
+              btn:true,
+              'btn-success':true,
+              disabled:manifestList.length==0 || selectedManifest==null
+            }"
+            type="button"
+            @click="selectModal">
+            <i class="fa fa-check"/>
+            {{ $t('panel.warning.buttons.accept') }}
+          </button>
         </div>
       </div>
     </div>
   
-    <maindep v-if=" currentManifest!='' && getManifest.type=='deployments'">{{ setDeployCharts() }}</maindep>  
+    <maindep v-if="currentManifest!='' && getManifest.type=='deployments'"/>
 
-    <footer v-if="currentManifest!=''" id="footer">
+    <footer
+      v-if="currentManifest!=''" 
+      id="footer">
       <div>
-        <p class="footext">Manifest: {{ manifests[currentManifest].name }}</p>
+        <p class="footext">Manifest: {{ manifests[currentManifest]._urn }}</p>
       </div>
     </footer>
   </div>
 </template>
 <script>
 /** MetisMenu */
-require("/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.js");
+require("/home/osmuogar/workspace/dashboard/static/css/metisMenu/" +
+  "metisMenu.min.js");
 /** Bootstrap */
-require("/home/osmuogar/workspace/dashboard/static/css/bootstrap/js/bootstrap.min.js");
+require("/home/osmuogar/workspace/dashboard/static/css/bootstrap/js/" +
+  "bootstrap.min.js");
 /** D3 */
 require("/home/osmuogar/workspace/dashboard/static/js/d3.v3.js");
 /** FileSaver */
@@ -79,10 +136,6 @@ import i18n from "../store/manifesteditor/i18n";
 import vSelect from "vue-select";
 
 export default {
-  mounted() {
-    console.debug("Manifest Editor has been mounted");
-    this.clear();
-  },
   i18n: i18n,
   components: {
     alertpan: HelperAlertPanel,
@@ -146,6 +199,10 @@ export default {
       });
     }
   },
+  mounted() {
+    console.debug("Manifest Editor has been mounted");
+    this.clear();
+  },
   methods: {
     clear() {
       if (this.clearAllModals) {
@@ -159,10 +216,6 @@ export default {
 
     setManifest(manifest) {
       this.$store.dispatch("setManifest", manifest);
-    },
-
-    setDeployCharts() {
-      this.$store.dispatch("setDeployCharts");
     },
 
     clearModals(modals) {
@@ -185,16 +238,13 @@ export default {
   }
 };
 </script>
-<!-- Bootstrap -->
+<!--
+  There is a bug in which relative css paths are not correctly solved:
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
-
-<!-- MetisMenu CSS -->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
-
-<!-- Custom CSS -->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
-
-<!-- Custom Fonts -->
 <style src="/home/osmuogar/workspace/dashboard/static/css/font-awesome/css/font-awesome.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
 <style scoped>

@@ -306,11 +306,15 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
 
     let components = {};
-    for (let mani in rootState.stampstate.manifests) {
-      if (rootState.stampstate.manifests[mani].type === 'component') {
-        components[mani] = rootState.stampstate.manifests[mani];
+    let manifests = rootState.stampstate.manifests;
+    for (let man in manifests) {
+      if (manifests[man].type === 'component') {
+        console.debug('FOUND A COMPONENT');
+        components[man] = manifests[man];
       }
     }
+
+    console.debug('The list of components contains', components);
     return components;
 
   }

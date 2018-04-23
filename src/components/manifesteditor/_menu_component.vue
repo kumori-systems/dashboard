@@ -1,82 +1,193 @@
 <template>
-    <div class="sidebar-nav navbar-collapse">
-        <ul class="nav in" id="side-menu">
-            <li :ref="option.name" v-for="(option, ind) in menuOptions" v-bind:key="ind" :class="{active: option.name == active}" @click="updateActive(option.name, $event)" >
-                <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator white--text">
-                <i  v-bind:class="option.icon+' activator'"></i> {{ $t(option.name) }}
-                <span  v-if="option.secondLevel  || option.id == 'component'" class="fa arrow activator"></span>
-                    <i  v-if="option.add && active==option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator"  @click="openAdd(option.add.target, $event)"></i>
-                </a>
-                <span  v-if="option.add"  :ref="'simulate-'+option.add.target"  data-toggle="modal" v-bind:data-target="option.add.target"></span>
-                <ul  v-if="option.secondLevel || option.id == 'component' " :id="option.name" class="nav nav-second-level collapse" aria-expanded="false" style="height: 0px;">              
-                <li v-if="option.id == 'component' ">
-                    <div class="row" >
-                        <div class="col-sm-3"><label class="control-label">{{$t('menu.component.form.domain')}}</label></div>
-                        <div class="col-sm-9">
-                        <div :class="{'form-group':true, 'has-error':validation.domain.err, 'has-feedback':validation.domain.err}">
-                            <input :disabled="blockEditName" class="form-control" @input="updateName('domain')" ref="domain" :value="nameMani.domain">
-                            <span v-if="validation.domain.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                            <span v-if="validation.domain.err" class="help-block">{{$t('validation.'+validation.domain.msg)}}</span>
-                        </div>
-                    </div>               
-                    </div>
-                    <div class="row">
-                    <div class="col-sm-3"><label class="control-label">{{$t('menu.component.form.name')}}</label></div>
-                    <div class="col-sm-9">
-                        <div :class="{'form-group':true, 'has-error':validation.name.err, 'has-feedback':validation.name.err}">
-                            <input :disabled="blockEditName" class="form-control" @input="updateName('name')" ref="name" :value="nameMani.name">
-                            <span v-if="validation.name.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                            <span v-if="validation.name.err" class="help-block">{{$t('validation.'+validation.name.msg)}}</span>
-                        </div>
-                    </div>
-                    </div> 
-                    <div class="row">
-                    <div class="col-sm-3"><label class="control-label">{{$t('menu.component.form.version')}}</label></div>
-                    <div class="col-sm-9">
-                        <div :class="{'form-group':true, 'has-error':validation.version.err, 'has-feedback':validation.version.err}">
-                            <input :disabled="blockEditName" class="form-control" @input="updateName('version')" ref="version" :value="nameMani.version">
-                            <span v-if="validation.version.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                            <span v-if="validation.version.err" class="help-block">{{$t('validation.'+validation.version.msg)}}</span>
-                        </div>
-                    </div>
-                    </div>
-                </li>
-
-                <li v-if="option.id == 'channels'">
-                    <rowlist v-bind:list="getChannels.provides"  v-bind:type="getSettings.listTypes.channel.provides"> </rowlist>
-                    <rowlist v-bind:list="getChannels.requires"  v-bind:type="getSettings.listTypes.channel.requires"> </rowlist>
-                </li>
-                <template v-for="(secondOpt, index) in option.enum">
-                    <li v-bind:key="index" v-if="secondOpt.type=='link'">
-                      <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
-                    </li>
-                    <li v-bind:key="index" v-if="secondOpt.type=='other'">
-                      <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
-                    </li>
-                    <li v-bind:key="index">
-                      <a class="white--text" v-on:click="downloadTemporalManifest">Download Temporal Manifest</a>
-                    </li>
-                </template>
-                </ul>
+  <div class="sidebar-nav navbar-collapse">
+    <ul
+      id="side-menu"
+      class="nav in">
+      <li
+        v-for="(option, ind) in menuOptions"
+        :ref="option.name"
+        :key="ind"
+        :class="{active: option.name == active}"
+        @click="updateActive(option.name, $event)">
+        <a
+          :data-toggle="option.target ? 'modal':''"
+          :data-target="option.target ? option.target : ''"
+          class="menu-title activator white--text"
+          @click="option.clear? cleanCurrent(option.target): null">
+          <i :class="option.icon + ' activator'"/>
+          {{ $t(option.name) }}
+          <span
+            v-if="option.secondLevel || option.id == 'component'"
+            class="fa arrow activator"/>
+          <i 
+            v-if="option.add && active==option.name"
+            :id="option.add.id"
+            class="menuAddr fa fa-plus-square pull-right activator"
+            @click="openAdd(option.add.target, $event)"/>
+        </a>
+        <span
+          v-if="option.add"
+          :ref="'simulate-'+option.add.target"
+          :data-target="option.add.target"
+          data-toggle="modal"/>
+        <ul
+          v-if="option.secondLevel || option.id == 'component'"
+          :id="option.name"
+          class="nav nav-second-level collapse"
+          aria-expanded="false"
+          style="height: 0px;">              
+          <li v-if="option.id == 'component' ">
+            <div class="row" >
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.component.form.domain') }}
+                </label>
+              </div>
+              <div class="col-sm-9">
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.domain.err,
+                    'has-feedback':validation.domain.err
+                  }"
+                >
+                  <input
+                    ref="domain"
+                    :disabled="blockEditName"
+                    :value="nameMani.domain"
+                    class="form-control"
+                    @input="updateName('domain')">
+                  <span
+                    v-if="validation.domain.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.domain.err"
+                    class="help-block">
+                    {{ $t('validation.'+validation.domain.msg) }}
+                  </span>
+                </div>
+              </div>               
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.component.form.name') }}
+                </label>
+              </div>
+              <div class="col-sm-9">
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.name.err,
+                    'has-feedback':validation.name.err
+                  }"
+                >
+                  <input
+                    ref="name"
+                    :disabled="blockEditName"
+                    :value="nameMani.name"
+                    class="form-control"
+                    @input="updateName('name')">
+                  <span
+                    v-if="validation.name.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.name.err"
+                    class="help-block">
+                    {{ $t('validation.'+validation.name.msg) }}
+                  </span>
+                </div>
+              </div>
+            </div> 
+            <div class="row">
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.component.form.version') }}
+                </label>
+              </div>
+              <div class="col-sm-9">
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.version.err,
+                    'has-feedback':validation.version.err
+                  }"
+                >
+                  <input
+                    ref="version"
+                    :disabled="blockEditName"
+                    :value="nameMani.version"
+                    class="form-control"
+                    @input="updateName('version')">
+                  <span
+                    v-if="validation.version.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.version.err"
+                    class="help-block">
+                    {{ $t('validation.'+validation.version.msg) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li v-if="option.id == 'channels'">
+            <rowlist
+              :list="getChannels.provides"
+              :type="getSettings.listTypes.channel.provides"/>
+            <rowlist
+              :list="getChannels.requires"
+              :type="getSettings.listTypes.channel.requires"/>
+          </li>
+          <template v-for="(secondOpt, index) in option.enum">
+            <li
+              v-if="secondOpt.type=='link'"
+              :key="index">
+              <a
+                id="show-channels"
+                class="white--text"
+                @click="optLink(secondOpt.action)"
+              >
+                {{ $t(secondOpt.id) }}
+              </a>
             </li>
+            <li
+              v-if="secondOpt.type=='other'"
+              :key="index">
+              <a
+                id="show-channels"
+                title="show channels"
+                alt="show channels">
+                {{ $t('menu.uielements.form.show_hide') }}
+              </a>
+            </li>
+            <li :key="index">
+              <a
+                class="white--text" 
+                @click="downloadTemporalManifest">
+                Download Temporal Manifest
+              </a>
+            </li>
+          </template>
         </ul>
+      </li>
+    </ul>
+    <modal
+      :modal-prop="getSettings.modalProps.channels"
+      modal-size="xs">
+      <modalChannels slot="body"/>
+    </modal>
 
-        <modal :modalProp="getSettings.modalProps.channels" modalSize="xs">
-            <modalChannels  slot="body"></modalChannels>
-        </modal>
+    <modal
+      :modal-prop="getSettings.modalProps.runtimes"
+      modal-size="xs">
+      <modalRuntimes slot="body"/>
+    </modal>
 
-        <modal :modalProp="getSettings.modalProps.runtimes" modalSize="xs">
-            <modalRuntimes  slot="body"></modalRuntimes>
-        </modal>
-
-        <modal :modalProp="getSettings.modalProps.configuration" modalSize="xl">
-            <modalConfiguration slot="body"></modalConfiguration>
-        </modal>
-
-    </div>
+    <modal
+      :modal-prop="getSettings.modalProps.configuration"
+      modal-size="xl">
+      <modalConfiguration slot="body"/>
+    </modal>
+  </div>
 </template>
-
-
 <script>
 import ModalChannels from "./_modal_channels.vue";
 import ModalRuntimes from "./_modal_runtimes.vue";
@@ -205,6 +316,10 @@ export default {
   }
 };
 </script>
+<!--
+  There is a bug in which relative css paths are not correctly solved
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>

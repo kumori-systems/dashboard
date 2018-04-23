@@ -178,6 +178,10 @@ export default {
   }
 };
 </script>
+<!--
+  There is a bug in which relative css paths are not correctly solved
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>

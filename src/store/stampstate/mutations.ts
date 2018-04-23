@@ -122,7 +122,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   addManifest = (state: State, payload: Manifest): void => {
-    state.manifests[payload._urn] = payload;
+    state.manifests = { ...state.manifests, [payload._urn]: payload };
   }
 
   addInstance = (state: State,

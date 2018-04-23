@@ -2,7 +2,7 @@
   <div  style="position:relative" v-bind:class="{'open':openSuggestion, disabled:disabled}">
     {{init()}}
     <input  :disabled="disabled ? '' : null" :value="defaultVal"
-      class="form-control" type="text" v-model="selection"
+      class="form-control black--text" type="text" v-model="selection"
       @keydown.enter = 'enter' @keydown.down = 'down' @keydown.up = 'up'
       @focusout = 'close($event)' @focus = 'setFocus'/>
 
@@ -108,6 +108,10 @@ export default {
   }
 };
 </script>
+<!--
+  There is a bug in which relative css paths are not correctly solved
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>

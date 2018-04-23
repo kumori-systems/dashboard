@@ -7,7 +7,7 @@
     <div class="modal-body">
       <div class="panel panel-default">
         <div class="panel-heading my-background white--text">
-          <i class="fa fa-gears fa-fw"></i> {{getCurrentRoleIndex>-1 ? $t('modals.heads.settings') : $t('modals.heads.new')+' '+$t('modals.roles.name') }}
+          <i class="fa fa-gears fa-fw"></i> {{ getCurrentRoleIndex>-1 ? $t('modals.heads.settings') : $t('modals.heads.new')+' '+$t('modals.roles.name') }}
         </div>
         <div class="panel-body my-background">
           <div class="row">
@@ -174,6 +174,10 @@ export default {
   }
 };
 </script>
+<!--
+  There is a bug in which relative css paths are not correctly solved
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>

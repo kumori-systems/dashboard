@@ -11,7 +11,8 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "unit-debug": "karma start test/unit/karma.conf.js --browsers=Chrome --auto-watch --no-colors",
-    "lint": "tslint src/**/*.ts"
+    "tslint": "tslint src/**/*.ts",
+    "lint": "eslint src/**/*.{js,vue}"
   },
   "devDependencies": {
     "@types/chai": "^3.4.35",
@@ -44,13 +45,13 @@
     "cross-spawn": "^5.0.1",
     "css-loader": "^0.26.1",
     "d3": "^5.0.0",
-    "eslint": "^3.18.0",
+    "eslint": "^3.19.0",
     "eslint-config-standard": "^6.2.1",
     "eslint-friendly-formatter": "^2.0.7",
     "eslint-loader": "^1.6.1",
-    "eslint-plugin-html": "^2.0.0",
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
+    "eslint-plugin-vue": "^4.5.0",
     "eventsource-polyfill": "^0.9.6",
     "express": "^4.16.3",
     "extract-text-webpack-plugin": "^2.0.0",
