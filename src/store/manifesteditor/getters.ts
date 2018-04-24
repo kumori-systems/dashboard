@@ -116,7 +116,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   // SERVICE
   getServiceName = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let res = {
+    
+      let res = {
       name: '',
       domain: '',
       version: ''
@@ -128,9 +129,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       res.domain = splitted[2];
       res.version = splitted[5];
     }
-
-    console.debug('The result of splitting the urn is', res);
     return res;
+
   }
 
   // ROLES
@@ -171,15 +171,10 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let service = getters.manifests[state.currentManifest];
     if (state.currentRole >= 0) {
 
-      console.debug('getCurrentRoleResource currentRole', state.currentRole);
       let role = service.roles[state.currentRole];
-      console.debug('getCurrentRoleResource role', role);
       let components = getters.getComponents;
-      console.debug('Components contiene', components);
       let component = components[role.component];
-      console.debug('getCurrentRoleResource component', component);
       let resources = component.configuration.resources;
-      console.debug('getCurrentRoleResource resources', resources);
 
       let rows = [];
       if (resources.length > 0) {
@@ -310,12 +305,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let manifests = rootState.stampstate.manifests;
     for (let man in manifests) {
       if (manifests[man].type === 'component') {
-        console.debug('FOUND A COMPONENT');
         components[man] = manifests[man];
       }
     }
-
-    console.debug('The list of components contains', components);
     return components;
 
   }

@@ -27,7 +27,6 @@ const maniAPI = {
     });
   },
   POST: (url, data, injectee, actions) => {
-    console.debug('POST has been called with', url, data);
 
     injectee
       .dispatch('updateTemporalManifest', {
@@ -38,7 +37,7 @@ const maniAPI = {
       });
   },
   GET: (url, injectee, callback) => {
-    console.debug('THE GET METHOD HAS BEEN CALLED');
+
     switch (url) {
       case '/getmanifests':
         callback(injectee, injectee.getters.registries);
@@ -66,10 +65,9 @@ const maniAPI = {
     */
   },
   updateManifest: (data, path, injectee, actions) => {
-    let currentManifest = injectee.state.currentManifest;
-    console.debug('El manifiesto actual es', currentManifest);
-    let manifest = injectee.getters.manifests[currentManifest];
 
+    let currentManifest = injectee.state.currentManifest;
+    let manifest = injectee.getters.manifests[currentManifest];
     maniAPI.POST(
       '/updatemanifest',
       maniAPI.makeParams(data, path, manifest),
@@ -77,21 +75,25 @@ const maniAPI = {
       actions
     );
 
-    console.debug('ACTUALIZAMOS EL MANIFIESTO', manifest);
   },
   getManifests: injectee => {
+
     maniAPI.GET('/getmanifests', injectee, maniAPI.manageRes);
-    console.debug('GET MANIFETS HAS BEEN CALLED!!');
+
   },
   getGraph: (data, injectee) => {
+
     let url = '/getgraph?service=' + data;
     maniAPI.GET(url, injectee, maniAPI.manageRes);
-    console.debug('GET GRAPH HAS BEEN CALLED!!');
+
   },
   makeParams: (data, path, file) => {
+
     return { data: data, path: file.filePath, jsonPath: path };
+
   },
   manageRes: (injectee, response) => {
+
     let res = JSON.parse(response.bodyText);
     if (res.status === 200) injectee.dispatch('setState', res.data);
     if (res.status === 201) injectee.dispatch('setServs', res.data);
@@ -100,7 +102,9 @@ const maniAPI = {
       res.path = res.path !== undefined ? res.path : '';
       injectee.dispatch('addAlert', { text: res.error, extra: res.path });
     }
+
   }
+
 };
 
 /**
@@ -200,7 +204,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       version: getElementVersion(deploy.servicename)
     };
 
-    console.debug('The manifest contains', deploy);
     let resources = deploy.configuration ? deploy.configuration.resources : {};
     let parameters = deploy.configuration
       ? deploy.configuration.parameters
@@ -623,7 +626,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     });
 
     let validation = injectee.state.componentState.validation;
-    console.debug('La validacion del componente vale', validation);
     injectee.commit('updateAllValidation', {
       type: 'component',
       data: component,
@@ -648,7 +650,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     injectee: Vuex.ActionContext<State, any>,
     payload: any
   ): void => {
-    console.debug('UpdateComponentState with:', payload);
 
     injectee.commit('updateCompState', payload);
     let component = injectee.getters.manifests[injectee.state.currentManifest];
@@ -1034,11 +1035,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let currentManifest =
       injectee.getters.manifests[injectee.state.currentManifest];
-    console.debug('The current manifest is', currentManifest);
     let role = currentManifest.roles[injectee.state.currentRole];
-    console.debug('The current role is', role);
     let component = injectee.getters.manifests[role.component];
-    console.debug('The component is', component);
 
     if (component.configuration.resources) {
       component.configuration.resources.map(elem => {
@@ -1611,7 +1609,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       injectee.state.resourceState.validation
     );
     let resource = injectee.getters.manifests[injectee.state.currentManifest];
-    console.debug('The manifest contains', resource);
     // resourceState
     let resourceName = {
       name: getElementName(resource._urn),
@@ -1693,8 +1690,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   setRuntimeState = (injectee: Vuex.ActionContext<State, any>): void => {
 
     let runtime = injectee.getters.manifests[injectee.state.currentManifest];
-
-    console.debug('When the runtime is gonna be setted, it', runtime);
 
     injectee.commit('updateRuntimeState', {
       key: 'name',

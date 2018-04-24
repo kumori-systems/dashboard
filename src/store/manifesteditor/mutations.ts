@@ -32,8 +32,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
         while (key.indexOf('.') !== -1) {
           let partTwo = key.substr(key.indexOf('.') + 1);
           let partOne = key.substr(0, key.length - partTwo.length - 1);
-          console.debug('PartOne is', partOne);
-          console.debug('PartTwo is', partTwo);
           object = object[partOne];
           key = partTwo;
         }
@@ -188,7 +186,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   // APP
   setState = (state: State, payload: any): void => {
-    console.debug('Calling to set STATE');
     // (<any>state).manifests = payload;
   }
 
@@ -320,7 +317,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateArrangement = (state: State, payload: any): void => {
-    console.debug('TRYING TO UPDATE A MANIFEST ARRANGEMENT');
     /*
     (<any>state).manifests[state.currentManifest]
       .roles[state.currentArrangement].resources = payload;

@@ -302,8 +302,6 @@ export default {
     },
 
     activeList(name, event) {
-      console.debug("Se llama a active list con ", name, event);
-      console.debug("this.active contiene", this.active);
 
       let nameFilter = name.replace(/(:|\.|\[|\])/g, "\\$1");
       let activeFilter = this.active.replace(/(:|\.|\[|\])/g, "\\$1");
@@ -320,15 +318,12 @@ export default {
           $("#" + activeFilter).collapse("hide");
         }
         this.active = name;
-
-        console.debug("Active contains", this.active);
         let filter = "#" + nameFilter;
-        console.debug("Filter contains", filter);
         let item = $(filter);
         // let item=$("#menu\\.service\\.label");
-        console.debug("item contains", item);
         item.collapse("show");
       }
+
     }
   }
 };

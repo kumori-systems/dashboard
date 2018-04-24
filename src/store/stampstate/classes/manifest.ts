@@ -106,8 +106,6 @@ export class Manifest extends ECloudElement {
     if (manifest.entrypoint) { this.entrypoint = manifest.entrypoint; }
     if (manifest.agent) { this.agent = manifest.agent; }
 
-
-    console.debug('A MANIFEST CONTAINS', urn, manifest);
     /* For manifest editor - INIT */
     this.label = this._urn;
     try {

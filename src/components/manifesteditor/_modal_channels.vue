@@ -204,7 +204,7 @@ export default {
     }
   },
   methods: {
-    setChannelDirect() {
+    setChannelDirect(payload) {
       this.$store.dispatch("setChannelDirect", payload);
     },
     updateCurrentChannel(payload) {

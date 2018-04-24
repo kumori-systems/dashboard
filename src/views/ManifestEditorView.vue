@@ -200,13 +200,11 @@ export default {
     }
   },
   mounted() {
-    console.debug("Manifest Editor has been mounted");
     this.clear();
   },
   methods: {
     clear() {
       if (this.clearAllModals) {
-        console.debug("Clear method is called");
         $(".modal").modal("hide");
       }
       this.clearModals(false);

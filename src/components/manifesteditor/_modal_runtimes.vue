@@ -34,9 +34,7 @@ export default {
     },
 
     runtime() {
-      let res = this.$store.state.manifesteditor.componentState.runtime;
-      console.debug('El runtime que devuelve es', res);
-      return res;
+      return this.$store.state.manifesteditor.componentState.runtime;
     },
 
     validation() {

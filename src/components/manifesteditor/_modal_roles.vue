@@ -158,113 +158,89 @@ export default {
 
   computed: {
     getComponents() {
-      console.debug("getComponent");
       return this.$store.getters.getComponents;
     },
 
     getSettings() {
-      console.debug("getSettings");
       return this.$store.getters.getSettings;
     },
 
     getCurrentRoleResource() {
-      console.debug("getCurrentRoleResource");
       return this.$store.getters.getCurrentRoleResource;
     },
 
     getCurrentRoleParams() {
-      console.debug("getCurrentRoleParams");
       return this.$store.getters.getCurrentRoleParams;
     },
 
     getBypassParams() {
-      console.debug("getBypassParams");
       return this.$store.getters.getBypassParams;
     },
 
     getCurrentRoleIndex() {
-      console.debug("getCurrentRoleIndex");
       return this.$store.getters.getCurrentRoleIndex;
     },
 
     role: {
       get() {
-        console.debug("The getter is beeing executed");
-        let res = this.$store.state.manifesteditor.roleState.role;
-        console.debug("The getter has finished");
-        return res;
+        return this.$store.state.manifesteditor.roleState.role;
       },
 
       set() {
-        console.debug("role set");
         this.$store.dispatch("updateRoleName", role);
       }
     },
 
     validation() {
-      console.debug("validation");
       return this.$store.state.manifesteditor.roleState.validation;
     },
 
     resourceValidation() {
-      console.debug("resourceValidation");
       return this.$store.state.manifesteditor.roleState.resourceValidation;
     },
 
     updater() {
-      console.debug("updater");
       return this.$store.state.manifesteditor.roleState.updater;
     },
 
     roleName() {
-      console.debug("roleName");
       return this.$store.state.manifesteditor.currentRole.name;
     },
 
     modalProp() {
-      console.debug("modalProp");
       return this.getSettings.modalProps.roles;
     }
   },
   methods: {
     updateRoleName(payload) {
-      console.debug("updateRoleName");
       this.$store.dispatch("updateRoleName", payload);
     },
 
     updateRoleComp(payload) {
-      console.debug("updateRoleComp");
       this.$store.dispatch("updateRoleComp", payload);
     },
 
     changeBypass(payload) {
-      console.debug("changeBypass");
       this.$store.dispatch("changeBypass", payload);
     },
 
     addRole(payload) {
-      console.debug("addRole");
       this.$store.dispatch("addRole", payload);
     },
 
     updateRoleState(payload) {
-      console.debug("updateRoleState");
       this.$store.dispatch("updateRoleState", payload);
     },
 
-    /*
     updateName() {
-      console.debug("updateName");
       if (this.getCurrentRoleIndex != -1) {
         this.updateRoleName(this.$refs.rolename.value);
       } else {
         this.updateRoleState({ key: "name", value: this.$refs.rolename.value });
       }
     },
-    */
 
     updateComponent() {
-      console.debug("updateComponent");
       if (this.getCurrentRoleIndex != -1) {
         this.updateRoleComp(this.$refs.rolecomp.value);
       } else {
@@ -276,12 +252,10 @@ export default {
     },
 
     changeParams() {
-      console.debug("changeParams");
       this.changeBypass();
     },
 
     addValidRole() {
-      console.debug("addValidRole");
       this.addRole({
         name: this.$refs.rolename.value,
         component: this.$refs.rolecomp.value
