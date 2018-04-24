@@ -1,25 +1,61 @@
 <template>
-  <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
+  <div
+    :updater="updater"
+    class="modal-content content xl"
+    heith="100">
     <div class="modal-header my-background">
-      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
-      <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="close white--text">
+        &times;
+      </button>
+      <h4 class="modal-title">
+        <i :class="modalProp.icon"/> {{ modalProp.title }}
+      </h4>
     </div>
     <div class="modal-body my-background">
       <div class="row">
         <div class="col-sm-12">
-          <label> {{key[0].toUpperCase() + key.substring(1)}} </label>
-          <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
+          <label>
+            {{ key[0].toUpperCase() + key.substring(1) }}
+          </label>
+          <div
+            :class="{
+              'form-group': true, 
+              'has-error': validation[key] ? validation[key].err: false,
+              'has-feedback': validation[key] ? validation[key].err: false
+            }"
+          >
             <div  class="form-group input-group">
-              <textarea class="form-control" rows="3" :ref="key" style=" min-height: 35px; height: 300px; resize: vertical;" @input="updatedField(key)" v-model="metadata"></textarea>
-              <span class="input-group-addon">{{$t('modals.deployParams.labels.json')}}</span>                   
+              <textarea
+                v-model="metadata"
+                :ref="key"
+                rows="3"
+                style="min-height: 35px; height: 300px; resize: vertical;"
+                class="form-control"
+                @input="updatedField(key)">
+              </textarea>
+              <span class="input-group-addon">
+                {{ $t('modals.deployParams.labels.json') }}
+              </span>
             </div>
-            <span v-if="validation[key].err" class="help-block">{{$t('validation.'+validation[key].msg)}}</span>
+            <span
+              v-if="validation[key] && validation[key].err"
+              class="help-block">
+              {{ $t('validation.' + validation[key].msg) }}
+            </span>
           </div>
         </div>
       </div>
     </div>
     <div class="modal-footer my-background">
-      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="btn btn-default white--text">
+        <i class="fa fa-times"/> {{$t('panel.buttons.close')}}
+      </button>
     </div>
   </div>
 </template>

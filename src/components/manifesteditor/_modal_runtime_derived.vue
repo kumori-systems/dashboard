@@ -1,25 +1,61 @@
 <template>
-  <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
+  <div
+    :updater="updater"
+    class="modal-content content xl my-background"
+    heith="100">
     <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
-      <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="close white--text">
+        &times;
+      </button>
+      <h4 class="modal-title">
+        <i :class="modalProp.icon"/> {{ modalProp.title }}
+      </h4>
     </div>
-    <div class="modal-body" v-if="derived">
-      <div v-for="(key, i) in Object.keys(derived)" v-bind:key="i" class="row">
+    <div
+      v-if="derived"
+      class="modal-body">
+      <div
+        v-for="(key, i) in Object.keys(derived)"
+        :key="i"
+        class="row">
         <div class="col-sm-12">
-          <label> {{ key[0].toUpperCase() + key.substring(1) }} </label>
-          <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
+          <label>{{ key[0].toUpperCase() + key.substring(1) }}</label>
+          <div
+            :class="{
+              'form-group':true, 'has-error':validation[key].err,
+              'has-feedback':validation[key].err
+            }"
+          >
             <div class="form-group input-group">
-              <input class="form-control" type="text" :ref="key" :value="derived[key]"  @input="updatedField(key)">
-              <span class="input-group-addon">{{$t('modals.deployParams.labels.string')}}</span>
+              <input
+                type="text"
+                :ref="key"
+                :value="derived[key]"
+                class="form-control black--text"
+                @input="updatedField(key)">
+              <span class="input-group-addon">
+                {{ $t('modals.deployParams.labels.string') }}
+              </span>
             </div>
-            <span v-if="validation[key].err" class="help-block">{{$t('validation.'+validation[key].msg)}}</span>
+            <span
+              v-if="validation[key].err"
+              class="help-block">
+              {{ $t('validation.' + validation[key].msg) }}
+            </span>
           </div>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button
+        type="button"
+        class="btn btn-default white--text"
+        data-dismiss="modal">
+        <i class="fa fa-times"/> {{ $t('panel.buttons.close') }}
+      </button>
     </div>
   </div>
 </template>

@@ -1,8 +1,18 @@
 <template>
   <div>
-    <div v-for="(alert, index) in getAlerts" v-bind:key="index"
-     v-bind:class="'alert '+ alert.type +' alert-dismissable'">
-      <button :id="index" type="button" class="close" @click="deleteAlert(index)" aria-hidden="true">×</button>
+    <div
+      v-for="(alert, index) in getAlerts"
+      :key="index"
+      :class="alert.type"
+      class="alert alert-dismissable">
+      <button
+        :id="index"
+        type="button"
+        aria-hidden="true"
+        class="close"
+        @click="deleteAlert(index)">
+        ×
+      </button>
       {{ $t('notify.' + alert.text) + " " + alert.extra }}
     </div>
   </div>

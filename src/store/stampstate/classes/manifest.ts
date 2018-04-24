@@ -23,6 +23,9 @@ export class Manifest extends ECloudElement {
   /** Deployment which uses this element. */
   deployment: string = undefined;
 
+  /** When a runtime is derived from another one. */
+  derived: string = undefined;
+
   /** Subitems of this element. */
   items: any = undefined;
 
@@ -65,6 +68,15 @@ export class Manifest extends ECloudElement {
   /** Specification of the element. */
   spec: string = undefined;
 
+  /** Runtime sourcedir. */
+  sourcedir: string = undefined;
+
+  /** Runtime entrypoint. */
+  entrypoint: string = undefined;
+
+  /** Runtime agent. */
+  agent: string = undefined;
+
   /**
    * Document which defines an element in the ECloud environment.
    */
@@ -88,7 +100,14 @@ export class Manifest extends ECloudElement {
     if (manifest.runtime) { this.runtime = manifest.runtime; }
     if (manifest.spec) { this.spec = manifest.spec; }
     if (manifest.service) { this.servicename = manifest.service; }
+    if (manifest.derived) { this.derived = manifest.derived; }
 
+    if (manifest.sourcedir) { this.sourcedir = manifest.sourcedir; }
+    if (manifest.entrypoint) { this.entrypoint = manifest.entrypoint; }
+    if (manifest.agent) { this.agent = manifest.agent; }
+
+
+    console.debug('A MANIFEST CONTAINS', urn, manifest);
     /* For manifest editor - INIT */
     this.label = this._urn;
     try {

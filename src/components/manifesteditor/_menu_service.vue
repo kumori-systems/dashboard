@@ -1,75 +1,193 @@
 <template>
   <div class="sidebar-nav navbar-collapse">
-    <ul class="nav in" id="side-menu">
-      <li v-for="(option, index) in menuOptions"  v-bind:key="index" :class="{active: option.name == active}" :ref="option.name" @click="updateActive(option.name, $event)" >
-        <a @click="option.clear? cleanCurrent(option.target): null" :data-toggle="option.target ? 'modal':''" :data-target="option.target ? option.target : ''" class="menu-title activator subheading white--text">
-          <v-icon class="activator">{{option.icon}}</v-icon> {{ $t(option.name) }}
-          <span v-if="option.secondLevel || option.id == 'service'" class="fa arrow activator"></span>
-          <i v-if="option.add && active == option.name" v-bind:id="option.add.id" class="menuAddr fa fa-plus-square pull-right activator" @click="openAdd(option.add.target, $event)"></i>
+    <ul
+      id="side-menu"
+      class="nav in">
+      <li
+        v-for="(option, index) in menuOptions"
+        :key="index"
+        :class="{active: option.name == active}"
+        :ref="option.name"
+        @click="updateActive(option.name, $event)" >
+        <a
+          :data-toggle="option.target ? 'modal':''"
+          :data-target="option.target ? option.target : ''"
+          class="menu-title activator subheading white--text"
+          @click="option.clear? cleanCurrent(option.target): null">
+          <v-icon class="activator">{{ option.icon }}</v-icon>
+          {{ $t(option.name) }}
+          <span
+            v-if="option.secondLevel || option.id == 'service'"
+            class="fa arrow activator"/>
+          <i
+            v-if="option.add && active == option.name"
+            :id="option.add.id"
+            class="menuAddr fa fa-plus-square pull-right activator"
+            @click="openAdd(option.add.target, $event)"/>
         </a>
-        <span v-if="option.add" :ref="'simulate-' + option.add.target" data-toggle="modal" v-bind:data-target="option.add.target"></span>
-        <ul v-if="option.secondLevel || option.id == 'service' " :id="option.name" class="nav nav-second-level collapse" aria-expanded="false" style="height: 0px;">
-          <li v-if="option.id == 'service'">
+        <span
+          v-if="option.add"
+          :ref="'simulate-' + option.add.target"
+          :data-target="option.add.target"
+          data-toggle="modal"/>
+        <ul
+          v-if="option.secondLevel || option.id == 'service'"
+          :id="option.name"
+          class="nav nav-second-level collapse"
+          aria-expanded="false"
+          style="height: 0px;">
+          <li v-if="option.id === 'service'">
             <div class="row">
-              <div class="col-sm-3"><label class="control-label">{{$t('menu.service.form.domain')}}</label></div>
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.service.form.domain') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.domain.err, 'has-feedback':validation.domain.err}">
-                  <input :disabled="blockEditName" class="form-control" @input="updateName('domain')" ref="domain" :value="servName.domain">
-                  <span v-if="validation.domain.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.domain.err" class="help-block">{{$t('validation.'+validation.domain.msg)}}</span>
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.domain.err,
+                    'has-feedback':validation.domain.err
+                  }"
+                >
+                  <input
+                    ref="domain"
+                    :disabled="blockEditName"
+                    :value="servName.domain"
+                    class="form-control"
+                    @input="updateName('domain')"
+                  >
+                  <span
+                    v-if="validation.domain.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.domain.err"
+                    class="help-block">
+                    {{ $t('validation.' + validation.domain.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3"><label class="control-label">{{$t('menu.service.form.name')}}</label></div>
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.service.form.name') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.name.err, 'has-feedback':validation.name.err}">
-                  <input :disabled="blockEditName" class="form-control" @input="updateName('name')" ref="name" :value="servName.name">
-                  <span v-if="validation.name.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.name.err" class="help-block">{{$t('validation.'+validation.name.msg)}}</span>
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.name.err,
+                    'has-feedback':validation.name.err
+                  }"
+                >
+                  <input
+                    ref="name"
+                    :value="servName.name"
+                    :disabled="blockEditName"
+                    class="form-control"
+                    @input="updateName('name')">
+                  <span
+                    v-if="validation.name.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.name.err"
+                    class="help-block">
+                    {{ $t('validation.'+validation.name.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3"><label class="control-label">{{$t('menu.service.form.version')}}</label></div>
+              <div class="col-sm-3">
+                <label class="control-label">
+                  {{ $t('menu.service.form.version') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.version.err, 'has-feedback':validation.version.err}">
-                  <input :disabled="blockEditName" class="form-control" @input="updateName('version')" ref="version" :value="servName.version">
-                  <span v-if="validation.version.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.version.err" class="help-block">{{$t('validation.'+validation.version.msg)}}</span>
+                <div
+                  :class="{
+                    'form-group':true, 'has-error':validation.version.err,
+                    'has-feedback':validation.version.err
+                  }"
+                >
+                  <input
+                    ref="version"
+                    :value="servName.version"
+                    :disabled="blockEditName"
+                    class="form-control"
+                    @input="updateName('version')">
+                  <span
+                    v-if="validation.version.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.version.err"
+                    class="help-block">
+                    {{ $t('validation.'+validation.version.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
           </li>
           <li v-if="option.id == 'roles'">
-            <rowlist v-bind:list="getManifest.roles" v-bind:type="getSettings.listTypes.role"> </rowlist>
+            <rowlist
+              :list="getManifest.roles"
+              :type="getSettings.listTypes.role"/>
           </li>
           <li v-if="option.id == 'channels'">
-            <rowlist v-bind:list="getChannels.provides" v-bind:type="getSettings.listTypes.channel.provides"></rowlist>
-            <rowlist v-bind:list="getChannels.requires" v-bind:type="getSettings.listTypes.channel.requires"></rowlist>
+            <rowlist
+              :list="getChannels.provides"
+              :type="getSettings.listTypes.channel.provides"/>
+            <rowlist
+              :list="getChannels.requires"
+              :type="getSettings.listTypes.channel.requires"/>
           </li>
-            <template v-for="(secondOpt, index) in option.enum">
-              <li v-bind:key="index" v-if="secondOpt.type=='link'">
-                <a class="white--text" id="show-channels" @click="optLink(secondOpt.action)">{{ $t(secondOpt.id) }}</a>
-              </li>
-              <li v-bind:key="index" v-if="secondOpt.type=='other'">
-                <a id="show-channels" title="show channels" alt="show channels">{{ $t('menu.uielements.form.show_hide')}}</a>
-              </li>
-              <li v-bind:key="index">
-                <a class="white--text" v-on:click="downloadTemporalManifest">Download Temporal Manifest</a>
-              </li>
-            </template>
+          <template v-for="(secondOpt, index) in option.enum">
+            <li
+              v-if="secondOpt.type=='link'"
+              :key="index">
+              <a
+                id="show-channels"
+                class="white--text"
+                @click="optLink(secondOpt.action)">
+                {{ $t(secondOpt.id) }}
+              </a>
+            </li>
+            <li
+              v-if="secondOpt.type=='other'"
+              :key="index">
+              <a
+                id="show-channels"
+                title="show channels"
+                alt="show channels">
+                {{ $t('menu.uielements.form.show_hide') }}
+              </a>
+            </li>
+            <li :key="index">
+              <a
+                class="white--text"
+                @click="downloadTemporalManifest">
+                Download Temporal Manifest
+              </a>
+            </li>
+          </template>
         </ul>
       </li>
     </ul>
-    <modal :modalProp="getSettings.modalProps.roles" modalSize="xs">
-      <modalRoles slot="body"></modalRoles>
+    <modal
+      :modal-prop="getSettings.modalProps.roles"
+      modal-size="xs">
+      <modalRoles slot="body"/>
     </modal>
-    <modal :modalProp="getSettings.modalProps.channels" modalSize="xs">
-      <modalChannels slot="body"></modalChannels>
+    <modal
+      :modal-prop="getSettings.modalProps.channels"
+      modal-size="xs">
+      <modalChannels slot="body"/>
     </modal>
-    <modal :modalProp="getSettings.modalProps.connectors" modalSize="xl">
-      <modalConnectors slot="body"></modalConnectors>
+    <modal
+      :modal-prop="getSettings.modalProps.connectors"
+      modal-size="xl">
+      <modalConnectors slot="body"/>
     </modal>
   </div>
 </template>

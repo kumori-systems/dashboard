@@ -1,58 +1,157 @@
 <template>
-  <div :class="'my-background modal-content content'+'xs'" heith="100" :updater="updater">
+  <div
+    :updater="updater"
+    class="my-background modal-content content xs"
+    heith="100">
     <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">&times;</button>
-      <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="close">
+        &times;
+      </button>
+      <h4 class="modal-title">
+        <i :class="modalProp.icon"/> {{ modalProp.title }}
+      </h4>
     </div>
     <div class="modal-body">
       <div>
+
         <!-- Nav tabs -->
         <ul class="nav nav-tabs">
-          <li v-if="channel.index==-1 || (channel.index>=0 && channel.inout=='provides')" 
-            v-bind:class="{active: channel.inout=='provides' }"
-            v-on:click="changeDir('provides')">
-            <a v-bind:class="{active: 'black--text'}" data-toggle="tab" aria-expanded="true">{{$t('modals.channels.labels.prov')}} </a>
+          <li
+            v-if="channel.index === -1 ||
+              (channel.index >= 0 && channel.inout === 'provides')" 
+            :class="{ active: channel.inout === 'provides' }"
+            @click="changeDir('provides')">
+            <a
+              :class="{active: 'black--text'}"
+              data-toggle="tab"
+              aria-expanded="true">
+              {{$t('modals.channels.labels.prov')}}
+            </a>
           </li>
-          <li v-if="channel.index==-1 || (channel.index>=0 && channel.inout=='requires')"
-            v-bind:class="{active: channel.inout=='requires'}" v-on:click="changeDir('requires')">
-            <a data-toggle="tab" aria-expanded="false">{{$t('modals.channels.labels.req')}}</a>
+          <li
+            v-if="channel.index === -1 ||
+              (channel.index >= 0 && channel.inout === 'requires')"
+            :class="{active: channel.inout=='requires'}"
+            @click="changeDir('requires')">
+            <a
+              data-toggle="tab"
+              aria-expanded="false">
+              {{ $t('modals.channels.labels.req') }}
+            </a>
           </li>
         </ul>
+
         <!-- Tab panes -->
         <br/>
         <div class="tab-content">
-          <div class="tab-pane fade active in" id="tab">
+          <div
+            id="tab" 
+            class="tab-pane fade active in">
             <div class="row">
-              <div class="col-sm-3"><label>{{$t('modals.channels.labels.name')}}</label></div>
+              <div class="col-sm-3">
+                <label>
+                  {{ $t('modals.channels.labels.name') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.name.err, 'has-feedback':validation.name.err}">
-                  <input class="form-control" ref="name" @input="updateName()" :value="channel.data.name">
-                  <span v-if="validation.name.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.name.err" class="help-block">{{$t('validation.'+validation.name.msg)}}</span>
+                <div
+                  :class="{
+                    'form-group': true, 'has-error': validation.name.err,
+                    'has-feedback': validation.name.err
+                  }"
+                >
+                  <input
+                    ref="name"
+                    :value="channel.data.name"
+                    class="form-control"
+                    @input="updateName()">
+                  <span
+                    v-if="validation.name.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.name.err"
+                    class="help-block">
+                    {{ $t('validation.' + validation.name.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3"><label>{{$t('modals.channels.labels.type')}}</label></div>
+              <div class="col-sm-3">
+                <label>
+                  {{ $t('modals.channels.labels.type') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.type.err, 'has-feedback':validation.type.err}">
-                  <select id="componentsList" class="form-control" ref="type" @change="updateType()" :value="getType(channel.data.type)">
-                    <option v-for="(chType, i) in getChannelTypes(channel.inout)" v-bind:key="i" :value="chType.eslap" :selected="chType.eslap == getType(channel.data.type)" >{{chType.name}}</option>
+                <div
+                  :class="{
+                    'form-group': true, 'has-error': validation.type.err,
+                    'has-feedback': validation.type.err
+                  }"
+                >
+                  <select
+                    id="componentsList"
+                    ref="type"
+                    :value="getType(channel.data.type)"
+                    class="form-control"
+                    @change="updateType()">
+                    <option
+                      v-for="(chType, i) in getChannelTypes(channel.inout)"
+                      :key="i"
+                      :value="chType.eslap"
+                      :selected="chType.eslap === getType(channel.data.type)">
+                      {{ chType.name }}
+                    </option>
                   </select>
-                  <span v-if="validation.type.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.type.err" class="help-block">{{$t('validation.'+validation.type.msg)}}</span>
+                  <span
+                    v-if="validation.type.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.type.err"
+                    class="help-block">
+                    {{ $t('validation.' + validation.type.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3"><label>{{$t('modals.channels.labels.proto')}}</label></div>
+              <div class="col-sm-3">
+                <label>
+                  {{ $t('modals.channels.labels.proto') }}
+                </label>
+              </div>
               <div class="col-sm-9">
-                <div :class="{'form-group':true, 'has-error':validation.protocol.err, 'has-feedback':validation.protocol.err}">
-                  <select id="componentsList" class="form-control" ref="protocol" @change="updateProtocol()" :value="getProtocol(channel.data.protocol)">
-                    <option v-for="(chProt, i) in getSettings.manifestStructure.elementtype.protocol.enum" v-bind:key="i" :value="chProt.eslap">{{chProt.name}}</option>
+                <div
+                  :class="{'form-group':true,
+                    'has-error':validation.protocol.err,
+                    'has-feedback':validation.protocol.err
+                  }"
+                >
+                  <select
+                    id="componentsList"
+                    ref="protocol"
+                    :value="getProtocol(channel.data.protocol)"
+                    class="form-control"
+                    @change="updateProtocol()">
+                    <option
+                      v-for="(chProt, i) in getSettings.manifestStructure
+                        .elementtype.protocol.enum"
+                      :key="i"
+                      :value="chProt.eslap">
+                      {{ chProt.name }}
+                    </option>
                   </select>
-                  <span v-if="validation.protocol.err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-                  <span v-if="validation.protocol.err" class="help-block">{{$t('validation.'+validation.protocol.msg)}}</span>
+                  <span
+                    v-if="validation.protocol.err"
+                    class="glyphicon glyphicon-remove form-control-feedback"/>
+                  <span
+                    v-if="validation.protocol.err"
+                    class="help-block">
+                    {{ $t('validation.' + validation.protocol.msg) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -61,8 +160,20 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button v-if="channel.index==-1" @click="createChannel()" type="button" class="btn btn-primary" slot="add">  <i class="fa fa-plus"></i> {{$t('panel.buttons.add')}}</button>
-      <button type="button" class="white--text btn btn-default" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button
+        v-if="channel.index === -1"
+        @click="createChannel()"
+        type="button"
+        class="btn btn-primary"
+        slot="add">
+        <i class="fa fa-plus"/> {{ $t('panel.buttons.add') }}
+      </button>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="white--text btn btn-default">
+        <i class="fa fa-times"/> {{$t('panel.buttons.close')}}
+      </button>
     </div>
   </div>
 </template>
@@ -96,13 +207,13 @@ export default {
     setChannelDirect() {
       this.$store.dispatch("setChannelDirect", payload);
     },
-    updateCurrentChannel() {
+    updateCurrentChannel(payload) {
       this.$store.dispatch("updateCurrentChannel", payload);
     },
     addChannel() {
       this.$store.dispatch("addChannel", payload);
     },
-    updateChannState() {
+    updateChannState(payload) {
       this.$store.dispatch("updateChannState", payload);
     },
     getType(eslap) {
@@ -188,7 +299,7 @@ export default {
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
 <style scoped>
-a{
+a {
   color: white;
 }
 </style>

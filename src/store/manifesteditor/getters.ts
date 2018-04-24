@@ -156,6 +156,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       res = { name: '', component: '', resources: [] };
 
     }
+    
     return res;
 
   }

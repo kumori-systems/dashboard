@@ -1,18 +1,18 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import State from "./state";
+import Vue from 'vue';
+import Vuex from 'vuex';
+import State from './state';
 
-import webSettings from "./settings";
-import { validProp, validType } from "./utils/validator";
+import webSettings from './settings';
+import { validProp, validType } from './utils/validator';
 
-import { Manifest } from "../stampstate/classes";
+import { Manifest } from '../stampstate/classes';
 
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
 
   clearTemporalManifest = (state: State): void => {
     state.temporalManifest = null;
-  };
+  }
 
   updateTemporalManifest = (
     state: State,
@@ -25,15 +25,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
 
     for (let key in payload) {
-      if (key !== "manifests") {
+      if (key !== 'manifests') {
         let value = payload[key];
         let object = state.temporalManifest;
 
-        while (key.indexOf(".") !== -1) {
-          let partTwo = key.substr(key.indexOf(".") + 1);
+        while (key.indexOf('.') !== -1) {
+          let partTwo = key.substr(key.indexOf('.') + 1);
           let partOne = key.substr(0, key.length - partTwo.length - 1);
-          console.debug("PartOne is", partOne);
-          console.debug("PartTwo is", partTwo);
+          console.debug('PartOne is', partOne);
+          console.debug('PartTwo is', partTwo);
           object = object[partOne];
           key = partTwo;
         }
@@ -41,7 +41,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
         object[key] = value;
       }
     }
-  };
+  }
 
   /**
    * Clear the local state.
@@ -59,13 +59,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.Settings = webSettings;
     state.socket = null;
     state.manifestList = [];
-    state.currentManifest = "";
+    state.currentManifest = '';
     state.clearModals = false;
 
     // DEPLOYMENT
     state.deploymentState = {
-      name: "",
-      service: "",
+      name: '',
+      service: '',
       arrangements: {},
       resources: {},
       parameters: {},
@@ -73,7 +73,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       charts: {},
       colorsData: {},
       validation: {
-        name: { err: false, msg: "" }
+        name: { err: false, msg: '' }
       },
       resValidation: {},
       paramValidation: {},
@@ -81,16 +81,16 @@ export default class Mutations implements Vuex.MutationTree<State> {
       updater: false
     };
 
-    state.currentArrangement = "";
+    state.currentArrangement = '';
 
     // SERVICE
     state.currentRole = -1;
     state.currentConnector = -1;
     state.roleState = {
-      role: { name: "", component: "", resources: [] },
+      role: { name: '', component: '', resources: [] },
       validation: {
-        name: { err: false, msg: "" },
-        component: { err: false, msg: "" }
+        name: { err: false, msg: '' },
+        component: { err: false, msg: '' }
       },
       resourceValidation: {},
       updater: false,
@@ -100,13 +100,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.channelState = {
       channel: {
         index: -1,
-        inout: "provides",
-        data: { name: "", type: "", protocol: "" }
+        inout: 'provides',
+        data: { name: '', type: '', protocol: '' }
       },
       validation: {
-        name: { err: false, msg: "" },
-        type: { err: false, msg: "" },
-        protocol: { err: false, msg: "" }
+        name: { err: false, msg: '' },
+        type: { err: false, msg: '' },
+        protocol: { err: false, msg: '' }
       },
       updater: false,
       valid: true
@@ -114,14 +114,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     state.serviceState = {
       name: {
-        domain: "",
-        name: "",
-        version: ""
+        domain: '',
+        name: '',
+        version: ''
       },
       validation: {
-        domain: { err: false, msg: "" },
-        name: { err: false, msg: "" },
-        version: { err: false, msg: "" }
+        domain: { err: false, msg: '' },
+        name: { err: false, msg: '' },
+        version: { err: false, msg: '' }
       },
       updater: false
     };
@@ -129,25 +129,25 @@ export default class Mutations implements Vuex.MutationTree<State> {
     // COMPONENT
     state.componentState = {
       name: {
-        domain: "",
-        name: "",
-        version: ""
+        domain: '',
+        name: '',
+        version: ''
       },
-      runtime: "",
+      runtime: '',
       validation: {
-        runtime: { err: false, msg: "" }
+        runtime: { err: false, msg: '' }
       },
       updater: false
     };
 
     state.configurationState = {
-      pname: "",
-      rname: "",
+      pname: '',
+      rname: '',
       resources: [],
       parameters: [],
       validation: {
-        pname: { err: false, msg: "" },
-        rname: { err: false, msg: "" }
+        pname: { err: false, msg: '' },
+        rname: { err: false, msg: '' }
       },
       updater: false
     };
@@ -155,17 +155,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
     // RESOURCE
     state.resourceState = {
       name: {
-        domain: "",
-        name: "",
-        type: "",
-        version: ""
+        domain: '',
+        name: '',
+        type: '',
+        version: ''
       },
       parameters: {},
       validation: {
-        domain: { err: false, msg: "" },
-        name: { err: false, msg: "" },
-        type: { err: false, msg: "" },
-        version: { err: false, msg: "" }
+        domain: { err: false, msg: '' },
+        name: { err: false, msg: '' },
+        type: { err: false, msg: '' },
+        version: { err: false, msg: '' }
       },
       updater: false
     };
@@ -173,54 +173,54 @@ export default class Mutations implements Vuex.MutationTree<State> {
     // RUNTIME
     state.runtimeState = {
       name: {
-        domain: "",
-        name: "",
-        version: ""
+        domain: '',
+        name: '',
+        version: ''
       },
       validation: {
-        domain: { err: false, msg: "" },
-        name: { err: false, msg: "" },
-        version: { err: false, msg: "" }
+        domain: { err: false, msg: '' },
+        name: { err: false, msg: '' },
+        version: { err: false, msg: '' }
       },
       updater: false
     };
-  };
+  }
 
   // APP
   setState = (state: State, payload: any): void => {
-    console.debug("Calling to set STATE");
+    console.debug('Calling to set STATE');
     // (<any>state).manifests = payload;
-  };
+  }
 
   addAlert = (state: State, payload: any): void => {
     state.alerts.push(payload);
-  };
+  }
 
   deleteAlert = (state: State, payload: any): void => {
     state.alerts.splice(payload, 1);
-  };
+  }
 
   resetAlerts = (state: State, payload: any): void => {
     state.alerts = [];
-  };
+  }
 
   displayAlertPan = (state: State, payload: any): void => {
     state.showAlertPan = payload;
-  };
+  }
 
   deleteValidation = (state: State, payload: any): void => {
     payload = {};
-  };
+  }
 
   resetValidation = (state: State, payload: any): void => {
     payload.validation[payload.key] = false;
-  };
+  }
 
   resetAllValidation = (state: State, payload: any): void => {
     for (let prop in payload) {
       payload[prop].err = false;
     }
-  };
+  }
 
   updateAllValidation = (state: State, payload: any): void => {
     payload.currState.valid = false;
@@ -235,7 +235,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
         payload.currState.valid = true;
       }
     }
-  };
+  }
 
   updateValidation = (state: State, payload: any): void => {
     let dinamicProp = payload.dinamic ? payload.dinamic : payload.prop;
@@ -244,27 +244,27 @@ export default class Mutations implements Vuex.MutationTree<State> {
       dinamicProp,
       payload.value
     );
-  };
+  }
 
   updateValidationType = (state: State, payload: any): void => {
     payload.validation[payload.prop] = validType(payload.type, payload.value);
-  };
+  }
 
   setErrValidation = (state: State, payload: any): void => {
     payload.validation[payload.prop] = { err: true, msg: payload.msg };
-  };
+  }
 
   setValidation = (state: State, payload: any): void => {
     payload.validation[payload.prop] = { err: false, msg: payload.msg };
-  };
+  }
 
   setManifest = (state: State, payload: any): void => {
     state.currentManifest = payload;
-  };
+  }
 
   clearModals = (state: State, payload: any): void => {
     state.clearModals = payload;
-  };
+  }
 
   // DEPLOYMENT
   updateDeployState = (state: State, payload: any): void => {
@@ -273,7 +273,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       [payload.key]: payload.value
     };
     state.deploymentState.updater = !state.deploymentState.updater;
-  };
+  }
 
   updateDeployResState = (state: State, payload: any): void => {
     state.deploymentState = {
@@ -284,7 +284,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       },
       updater: !state.deploymentState.updater
     };
-  };
+  }
 
   updateDeployParamState = (state: State, payload: any): void => {
     state.deploymentState = {
@@ -295,7 +295,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       },
       updater: !state.deploymentState.updater
     };
-  };
+  }
 
   setArrangement = (state: State, payload: any): void => {
     let deploy = payload.manifests[state.currentManifest];
@@ -307,7 +307,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
     };
     state.currentArrangement = payload.payload;
-  };
+  }
 
   updateArrangementState = (state: State, payload: any): void => {
     state.deploymentState = {
@@ -317,15 +317,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
       },
       updater: !state.deploymentState.updater
     };
-  };
+  }
 
   updateArrangement = (state: State, payload: any): void => {
-    console.debug("TRYING TO UPDATE A MANIFEST ARRANGEMENT");
+    console.debug('TRYING TO UPDATE A MANIFEST ARRANGEMENT');
     /*
     (<any>state).manifests[state.currentManifest]
       .roles[state.currentArrangement].resources = payload;
     */
-  };
+  }
 
   deleteArrangementState = (state: State, payload: any): void => {
     delete state.deploymentState.arrangements[payload];
@@ -334,25 +334,28 @@ export default class Mutations implements Vuex.MutationTree<State> {
       ...state.deploymentState,
       updater: !state.deploymentState.updater
     };
-  };
+  }
 
   setDeploymentParams = (state: State, payload: any): void => {
+
     let deploy = payload.manifests[state.currentManifest];
     let service = payload.manifests[deploy.servicename];
     let serviceParams = service.configuration.parameters;
     let paramsList = [];
+
     state.deploymentState = {
       ...state.deploymentState,
       paramValidation: {}
     };
+
     if (deploy.configuration && deploy.configuration.parameters) {
       for (let key in deploy.configuration.parameters) {
         let parameter = {
-          name: "",
-          type: "",
+          name: '',
+          type: '',
           data: null,
-          role: "",
-          default: ""
+          role: '',
+          default: ''
         };
         parameter.name = key;
         let param = serviceParams.filter(x => {
@@ -360,24 +363,24 @@ export default class Mutations implements Vuex.MutationTree<State> {
         });
 
         if (param.length > 0) {
-          let type = param[0].type.split("/")[4];
+          let type = param[0].type.split('/')[4];
           parameter.type = type;
           parameter.data = deploy.configuration.parameters[key];
 
-          if (type === "json") {
+          if (type === 'json') {
             let roles = service.roles.filter(x => {
               return x.name === key;
             });
 
             if (roles.length > 0) {
-              parameter.type = "role";
+              parameter.type = 'role';
               parameter.data = [];
               let component = payload.manifests[roles[0].component];
               let paramsHash = {};
               for (let p of component.configuration.parameters) {
                 paramsHash[p.name] = {
                   type: p.type,
-                  default: p.default ? p.default : ""
+                  default: p.default ? p.default : ''
                 };
               }
 
@@ -386,11 +389,11 @@ export default class Mutations implements Vuex.MutationTree<State> {
                 state.deploymentState.parameters[key + pKey] = data[pKey];
                 state.deploymentState.paramValidation[key + pKey] = {
                   err: false,
-                  msg: ""
+                  msg: ''
                 };
                 parameter.data.push({
                   name: pKey,
-                  type: paramsHash[pKey].type.split("/")[4],
+                  type: paramsHash[pKey].type.split('/')[4],
                   role: key,
                   default: paramsHash[pKey].default
                 });
@@ -400,20 +403,20 @@ export default class Mutations implements Vuex.MutationTree<State> {
                 deploy.configuration.parameters[key];
               state.deploymentState.paramValidation[key] = {
                 err: false,
-                msg: ""
+                msg: ''
               };
             }
           } else {
             state.deploymentState.paramValidation[key] = {
               err: false,
-              msg: ""
+              msg: ''
             };
           }
 
           paramsList.push(parameter);
         } else {
           state.alerts.push({
-            text: "rolenotfound",
+            text: 'rolenotfound',
             type: state.Settings.alerts.danger,
             extra: key
           });
@@ -421,193 +424,314 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
     }
 
-    state.deploymentState.paramsList = paramsList;
-  };
+    state.deploymentState = {
+      ...state.deploymentState,
+      'paramsList': paramsList
+    };
+  }
 
   setDeployCharts = (state: State, payload: any): void => {
-    state.deploymentState.charts = payload;
-  };
+    state.deploymentState = {
+      ...state.deploymentState,
+      'charts': payload
+    };
+  }
 
   // COMPONENT
   updateCompState = (state: State, payload: any): void => {
-    state.componentState[payload.key] = payload.value;
-    state.componentState.updater = !state.componentState.updater;
-  };
+    state.componentState = {
+      ...state.componentState,
+      [payload.key]: payload.value,
+      'updater': !state.componentState.updater
+    };
+  }
 
   updateConfigState = (state: State, payload: any): void => {
-    state.configurationState[payload.key] = payload.value;
-    state.configurationState.updater = !state.configurationState.updater;
-  };
+    state.configurationState = {
+      ...state.configurationState,
+      [payload.key]: payload.value,
+      'updater': !state.configurationState.updater
+    };
+  }
 
   updateConfState = (state: State, payload: any): void => {
-    state.configurationState[payload.key] = payload.value;
-    state.configurationState.updater = !state.configurationState.updater;
-  };
+    state.configurationState = {
+      ...state.configurationState,
+      [payload.key]: payload.value,
+      'updater': !state.configurationState.updater
+    };
+  }
 
   setComponentRuntime = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].runtime = payload.value;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'runtime': payload.value
+    };
+  }
 
   setComponentResources = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].configuration.resources = payload;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'configuration': {
+        ...state.temporalManifest.configuration,
+        'resources': payload
+      }
+    };
+  }
 
   setComponentParameters = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].configuration.parameters = payload;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'configuration': {
+        ...state.temporalManifest.configuration,
+        'parameters': payload
+      }
+    };
+  }
 
   // SERVICE
   setServiceName = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].name = payload;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'name': payload
+    };
+  }
 
   updateServState = (state: State, payload: any): void => {
-    state.serviceState.name[payload.key] = payload.value;
-    state.serviceState.updater = !state.serviceState.updater;
-  };
+    state.serviceState = {
+      ...state.serviceState,
+      'name': {
+        ...state.serviceState.name,
+        [payload.key]: payload.value
+      },
+      'updater': !state.serviceState.updater
+    };
+  }
 
   setServs = (state: State, payload: any): void => {
     state.manifestList = payload;
-  };
+  }
 
   setDependencies = (state: State, payload: any): void => {
     state.mDependencies = payload;
-  };
+  }
 
   setStateName = (state: State, payload: any): void => {
     payload.state.name = payload.param;
-  };
+  }
 
   // ROLES
   setRole = (
-    state: State,
-    payload: {
-      manifests: any;
-      role: number;
-    }
+    state: State, payload: { manifests: any; role: number; }
   ): void => {
+
     if (payload.role < payload.manifests[state.currentManifest].roles.length) {
       state.currentRole = payload.role;
 
       if (state.currentRole >= 0) {
-        let role =
-          payload.manifests[state.currentManifest].roles[state.currentRole];
-        state.roleState.role = {
-          name: role.name,
-          component: role.component,
-          resources:
-            role.resources !== undefined
-              ? Object.keys(role.resources).map(function(key) {
-                  return { name: role.resources[key], key: key };
-                })
+
+        let role = payload.manifests[state.currentManifest]
+          .roles[state.currentRole];
+
+        state.roleState = {
+          ...state.roleState,
+          'role': {
+            name: role.name,
+            component: role.component,
+            resources: role.resources !== undefined ?
+              Object.keys(role.resources).map((key) => {
+                return { name: role.resources[key], key: key };
+              })
               : []
+          }
         };
+
       }
+
     }
-  };
+
+  }
 
   updateRoles = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles.push(payload);
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      roles: state.temporalManifest.roles.push(payload)
+    };
+
+  }
 
   updateRoleName = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles[
-      state.currentRole
-    ].name = payload;
-  };
 
-  updateRoleComp = (
-    state: State,
-    payload: {
-      component: string;
-      manifests: any;
-    }
-  ): void => {
-    payload.manifests[state.currentManifest].roles[
-      state.currentRole
-    ].component =
-      payload.component;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': {
+        ...state.temporalManifest.roles,
+        [state.currentRole]: {
+          ...state.temporalManifest.roles[state.currentRole],
+          'name': payload
+        }
+      }
+    };
+
+  }
+
+  updateRoleComp = (state: State, payload: {
+    component: string; manifests: any;
+  }): void => {
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': {
+        ...state.temporalManifest.roles,
+        [state.currentRole]: {
+          ...state.temporalManifest.roles[state.currentRole],
+          'component': payload.component
+        }
+      }
+    };
+
+  }
 
   updateRoleRes = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles[
-      state.currentRole
-    ].resources = payload;
-  };
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': {
+        ...state.temporalManifest.roles[state.currentRole],
+        'resources': payload
+      }
+    };
+  }
 
   updateRoleState = (state: State, payload: any): void => {
-    state.roleState.role[payload.key] = payload.value;
-    state.roleState.updater = !state.roleState.updater;
-  };
+
+    state.roleState = {
+      ...state.roleState,
+      'role': {
+        ...state.roleState.role,
+        [payload.key]: payload.value
+      },
+      'updater': !state.roleState.updater
+    };
+
+  }
 
   deleteRole = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles.splice(payload, 1);
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': state.temporalManifest.roles.splice(payload, 1)
+    };
+
+  }
 
   resetRole = (state: State, payload: any): void => {
     state.currentRole = -1;
-    state.roleState.role = { name: "", component: "", resources: [] };
-  };
+    state.roleState = {
+      ...state.roleState,
+      'role': { name: '', component: '', resources: [] }
+    };
+  }
 
   // CHANNELS
   resetChannel = (state: State, payload: any): void => {
-    state.channelState.channel = {
-      index: -1,
-      inout: "provides",
-      data: {
-        name: "",
-        type: "",
-        protocol: ""
+
+    state.channelState = {
+      ...state.channelState,
+      'channel': {
+        index: -1,
+        inout: 'provides',
+        data: { name: '', type: '', protocol: '' }
       }
     };
-  };
+
+  }
 
   setChannel = (state: State, payload: any): void => {
-    // console.log(channel)
-    state.channelState.channel = payload;
-  };
+    state.channelState = {
+      ...state.channelState,
+      'channel': payload
+    };
+  }
 
   setChannelDirect = (state: State, payload: any): void => {
-    state.channelState.channel.inout = payload;
-  };
+
+    state.channelState = {
+      ...state.channelState,
+      'channel': {
+        ...state.channelState.channel,
+        'inout': payload
+      }
+    };
+
+  }
 
   updateChannels = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].channels[payload.direction] =
-      payload.channels;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'channels': {
+        ...state.temporalManifest,
+        [payload.direction]: payload.channels
+      }
+    };
+
+  }
 
   updateChannState = (state: State, payload: any): void => {
-    state.channelState.channel.data[payload.key] = payload.value;
-    state.channelState.updater = !state.channelState.updater;
-  };
+
+    state.channelState = {
+      ...state.channelState,
+      'channel': {
+        ...state.channelState.channel,
+        'data': {
+          ...state.channelState.channel.data,
+          [payload.key]: payload.value
+        }
+      },
+      'updater': !state.channelState.updater
+    };
+
+  }
 
   // CONNECTORS
   setConnector = (state: State, payload: any): void => {
     state.currentConnector = payload;
-  };
+  }
 
   updateConnectors = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].connectors = payload;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'connectors': payload
+    };
+
+  }
 
   deleteConnList = (state: State, payload: any): void => {
-    if (state.currentConnector >= 0) {
-      let direction =
-        payload.type === state.Settings.listTypes.connectorList.provided
-          ? "provided"
-          : "depended";
-      payload.manifests[state.currentManifest].connectors[
-        state.currentConnector
-      ][direction].splice(payload.index, 1);
-    }
-  };
 
-  resetConnector = (
-    state: State,
-    manifests: {
-      [urn: string]: Manifest;
+    if (state.currentConnector >= 0) {
+
+      let direction = payload.type === state.Settings.listTypes
+        .connectorList.provided ? 'provided' : 'depended';
+
+      state.temporalManifest = {
+        ...state.temporalManifest,
+        'connectors': {
+          ...state.temporalManifest.connectors,
+          [state.currentConnector]: {
+            ...state.temporalManifest.connectors[state.currentConnector],
+            'direction': state.temporalManifest.connectors
+            [state.currentConnector][direction].splice(payload.index, 1)
+
+          }
+        }
+      };
     }
-  ): void => {
+  }
+
+  resetConnector = (state: State,
+    manifests: { [urn: string]: Manifest; }): void => {
     let service = manifests[state.currentManifest];
 
     if (service.connectors.length > 0) {
@@ -615,53 +739,117 @@ export default class Mutations implements Vuex.MutationTree<State> {
     } else {
       state.currentConnector = 1;
     }
-  };
+  }
 
   // RESOURCES
   updateServRes = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].configuration.resources[
-      payload.index
-    ].name =
-      payload.name;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'configuration': {
+        ...state.temporalManifest.configuration,
+        'resources': {
+          ...state.temporalManifest.configuration.resources,
+          [payload.index]: {
+            ...state.temporalManifest.configuration.resources[payload.index],
+            'name': payload.name
+          }
+        }
+
+      }
+    };
+
+  }
 
   updateRolRes = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles[state.currentRole].resources[
-      payload.name
-    ] =
-      payload.tag;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': {
+        ...state.temporalManifest.roles,
+        [state.currentRole]: {
+          ...state.temporalManifest.roles[state.currentRole],
+          'resources': {
+            ...state.temporalManifest.roles[state.currentRole].resources,
+            [payload.name]: payload.tag
+          }
+        }
+      }
+    };
+
+  }
 
   setServRes = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].configuration.resources =
-      payload.res;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'configuration': {
+        ...state.temporalManifest.configuration,
+        'resources': payload.res
+      }
+    };
+
+  }
 
   setRolRes = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].roles[
-      state.currentRole
-    ].resources =
-      payload.res;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'roles': {
+        ...state.temporalManifest.roles,
+        [state.currentRole]: {
+          ...state.temporalManifest.roles[state.currentRole],
+          'resources': payload.res
+        }
+      }
+    };
+
+  }
 
   updateResourceState = (state: State, payload: any): void => {
-    state.resourceState[payload.key] = payload.value;
-    state.resourceState.updater = !state.resourceState.updater;
-  };
+
+    state.resourceState = {
+      ...state.resourceState,
+      [payload.key]: payload.value,
+      'updater': !state.resourceState.updater
+    };
+
+  }
 
   // RUNTIMES
   updateRuntimeState = (state: State, payload: any): void => {
-    state.runtimeState[payload.key] = payload.value;
-    state.runtimeState.updater = !state.runtimeState.updater;
-  };
+
+    state.runtimeState = {
+      ...state.runtimeState,
+      [payload.key]: payload.value,
+      'updater': !state.runtimeState.updater
+    };
+
+  }
 
   updateRuntimeStateParent = (state: State, payload: any): void => {
-    state.runtimeState[payload.parent][payload.key] = payload.value;
-    state.runtimeState.updater = !state.runtimeState.updater;
-  };
+
+    state.runtimeState = {
+      ...state.runtimeState,
+      [payload.parent]: {
+        ...state.runtimeState[payload.parent],
+        [payload.key]: payload.value
+      },
+      'updater': state.runtimeState.updater
+    };
+
+  }
 
   // PARAMETERS
   setServParams = (state: State, payload: any): void => {
-    payload.manifests[state.currentManifest].configuration.parameters = payload;
-  };
+
+    state.temporalManifest = {
+      ...state.temporalManifest,
+      'configuration': {
+        ...state.temporalManifest.configuration,
+        'parameters': payload
+      }
+    };
+
+  }
 }
