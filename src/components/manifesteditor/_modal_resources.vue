@@ -1,33 +1,79 @@
 <template>
-  <div :class="'modal-content content'+'xl'" heith="100" :updater="updater">
+  <div
+  :updater="updater"
+  class="modal-content content xl"
+  heith="100">
     <div class="modal-header my-background">
-      <button type="button" class="close white--text" data-dismiss="modal">&times;</button>
-      <h4 class="modal-title"> <i :class="modalProp.icon"></i> {{ modalProp.title }} </h4>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="close white--text">
+        &times;
+      </button>
+      <h4 class="modal-title">
+        <i :class="modalProp.icon"/> {{ modalProp.title }}
+      </h4>
     </div>
     <div class="modal-body my-background">
       <div class="row">   
         <div class="col-xs-3" >
-          <label style="text-decoration: underline;">{{$t('modals.components.labels.name')}}</label>
+          <label style="text-decoration: underline;">
+            {{ $t('modals.components.labels.name') }}
+          </label>
         </div>
         <div class="col-md-8" >
-          <label style="text-decoration: underline;">{{$t('modals.resources.labels.resource')}}</label>
+          <label style="text-decoration: underline;">
+            {{ $t('modals.resources.labels.resource') }}
+          </label>
         </div>
       </div>
-      <div class="row" v-for="(resource, key) in resources" v-bind:key="key">   
-        <div class="col-xs-3" >{{key}}</div>
+
+      <div
+        v-for="(resource, key) in resources" v-bind:key="key"
+        class="row">
+        <div class="col-xs-3">
+          {{ key }}
+        </div>
         <div class="col-xs-9" >
-          <div :class="{'form-group':true, 'has-error':validation[key].err, 'has-feedback':validation[key].err}">
-            <select class="form-control" v-bind:ref="'res_type' + key" :value="resource" @change="updateStateRes(key)">
-              <option v-for="(res,i) in filteredResources(key)" v-bind:key="i"  :value="res.name">{{res.name}}</option>
+          <div
+            :class="{
+              'form-group':true, 'has-error':validation[key].err,
+              'has-feedback':validation[key].err
+            }"
+          >
+            <select
+              :ref="'res_type' + key"
+              :value="resource"
+              :text="resource.name"
+              class="form-control"
+              @change="updateStateRes(key)">
+              <option
+                v-for="(res,i) in filteredResources(key)"
+                :key="i"
+                :value="res"
+                :text="res._urn">
+                {{ res._urn }}
+              </option>
             </select>
-            <span v-if="validation[key].err" class="glyphicon glyphicon-remove form-control-feedback"></span>
-            <span v-if="validation[key].err" class="help-block">{{$t('validation.'+validation[key].msg)}}</span>
+            <span
+              v-if="validation[key].err"
+              class="glyphicon glyphicon-remove form-control-feedback"/>
+            <span
+              v-if="validation[key].err"
+              class="help-block">
+              {{ $t('validation.' + validation[key].msg) }}
+            </span>
           </div>
         </div>
       </div>
     </div>
     <div class="modal-footer my-background">
-      <button type="button" class="btn btn-default white--text" data-dismiss="modal">  <i class="fa fa-times"></i> {{$t('panel.buttons.close')}}</button>
+      <button
+        type="button"
+        data-dismiss="modal"
+        class="btn btn-default white--text">
+        <i class="fa fa-times"/> {{ $t('panel.buttons.close') }}
+      </button>
     </div>
   </div>
 </template>
@@ -68,20 +114,29 @@ export default {
     },
 
     filteredResources(key) {
+      // Contains all resources
       let allRes = this.getResources;
+
+      // Contains the current deployment
       let deploy = this.manifests[this.currentManifest];
-      let service = this.manifests[deploy.servicename];
-      if (service) {
-        let resources = service.configuration.resources.filter(x => {
-          return x.name == key;
+
+      console.debug("key contains", key);
+
+      let res = [];
+
+      if (deploy && deploy.resources) {
+
+        console.debug('deploy');
+        console.debug('deploy.resources', deploy.resources);
+        console.debug('all resources', allRes);
+        res = allRes.filter(resource => {
+          return resource._type === deploy.resources[key].type;
         });
-        if (resources.length == 1) {
-          return allRes.filter(x => {
-            return x.spec == resources[0].type;
-          });
-        }
+
+        console.debug('res contains', res);
       }
-      return [];
+
+      return res;
     },
 
     updateStateRes(res_name) {

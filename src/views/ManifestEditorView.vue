@@ -200,6 +200,7 @@ export default {
     }
   },
   mounted() {
+    this.$store.dispatch('loadManifests');
     this.clear();
   },
   methods: {

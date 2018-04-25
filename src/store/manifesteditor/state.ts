@@ -1,9 +1,11 @@
+import { Manifest } from '../stampstate/classes';
 import webSettings from './settings';
 
 /**
  * Representation of the stamp state.
  */
 export default class State {
+  manifests: { [uri: string]: Manifest };
   temporalManifest: any;
   mDependencies: any;
   confirm: { accept: any, deny: any };
@@ -144,6 +146,7 @@ export default class State {
 
   /** Constructor of the state. */
   constructor() {
+    this.manifests = {};
     this.temporalManifest = null;
     this.mDependencies = {};
     this.confirm = {

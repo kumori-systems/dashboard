@@ -10,81 +10,28 @@ import {
 import State from './state';
 import { tools } from './utils';
 
+import { Manifest, ECloudElement, Resource } from '../stampstate/classes';
+
 import FileSaver from 'file-saver';
 
 const maniAPI = {
-  callback: (injectee, todo) => {
+  callback: (actionContext: Vuex.ActionContext<State, any>, todo: any) => {
     for (let mutation of todo) {
-      injectee.commit(mutation.name, mutation.params);
+      actionContext.commit(mutation.name, mutation.params);
     }
   },
-  socket: null,
-  setSocket: (url, injectee) => {
-    maniAPI.socket = io.connect(url, { forceNew: true });
-    maniAPI.socket.on('status', function (data) {
-      injectee.commit('resetAlerts');
-      maniAPI.getManifests(injectee);
-    });
-  },
-  POST: (url, data, injectee, actions) => {
+  updateManifest: (data: any, path: string,
+    actionContext: Vuex.ActionContext<State, any>, actions: any) => {
 
-    injectee
-      .dispatch('updateTemporalManifest', {
-        [data.jsonPath]: data.data
-      })
-      .then(() => {
-        maniAPI.callback(injectee, actions.success);
-      });
-  },
-  GET: (url, injectee, callback) => {
-
-    switch (url) {
-      case '/getmanifests':
-        callback(injectee, injectee.getters.registries);
-
-        break;
-      default:
-        console.error('Not expected url in manifest editor', url);
-    }
-    /*
-    Vue.http.get(url).then(
-      response => {
-        if (response.status === 200) {
-          callback(injectee, response);
-        }
-        else {
-          injectee.dispatch('addAlert', { text: 'cantread' });
-          injectee.dispatch('resetService');
-        }
-      },
-      response => {
-        injectee.dispatch('addAlert', { text: 'cantread' });
-        injectee.dispatch('resetService');
-      }
-    );
-    */
-  },
-  updateManifest: (data, path, injectee, actions) => {
-
-    let currentManifest = injectee.state.currentManifest;
-    let manifest = injectee.getters.manifests[currentManifest];
-    maniAPI.POST(
-      '/updatemanifest',
-      maniAPI.makeParams(data, path, manifest),
-      injectee,
-      actions
-    );
+    actionContext.commit('updateManifest', { data, path });
+    maniAPI.callback(actionContext, actions.success);
 
   },
-  getManifests: injectee => {
+  getGraph: (data, actionContext) => {
 
-    maniAPI.GET('/getmanifests', injectee, maniAPI.manageRes);
-
-  },
-  getGraph: (data, injectee) => {
-
+    console.error('GETGRAPH is under development');
     let url = '/getgraph?service=' + data;
-    maniAPI.GET(url, injectee, maniAPI.manageRes);
+    // maniAPI.GET(url, actionContext, maniAPI.manageRes);
 
   },
   makeParams: (data, path, file) => {
@@ -92,15 +39,15 @@ const maniAPI = {
     return { data: data, path: file.filePath, jsonPath: path };
 
   },
-  manageRes: (injectee, response) => {
+  manageRes: (actionContext, response) => {
 
     let res = JSON.parse(response.bodyText);
-    if (res.status === 200) injectee.dispatch('setState', res.data);
-    if (res.status === 201) injectee.dispatch('setServs', res.data);
+    if (res.status === 200) actionContext.dispatch('setState', res.data);
+    if (res.status === 201) actionContext.dispatch('setServs', res.data);
     if (res.status === 500) {
-      injectee.dispatch('resetService');
+      actionContext.dispatch('resetService');
       res.path = res.path !== undefined ? res.path : '';
-      injectee.dispatch('addAlert', { text: res.error, extra: res.path });
+      actionContext.dispatch('addAlert', { text: res.error, extra: res.path });
     }
 
   }
@@ -113,225 +60,249 @@ const maniAPI = {
 export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
-  setState = (injectee: Vuex.ActionContext<State, any>, payload: any): void => {
-    injectee.commit('setState', payload);
+  /**
+   * This action is the responsible for copying all manifests from the
+   * stampstate module of the store to the manifesteditor module of the store.
+   */
+  loadManifests = (actionContext: Vuex.ActionContext<State, any>): void => {
+
+    actionContext.commit(
+      'loadManifests',
+      actionContext.rootState.stampstate.manifests
+    );
+
   }
-
-  startConnection = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
+  downloadTemporalManifest = (actionContext: Vuex.ActionContext<State, any>
   ): void => {
-    maniAPI.getManifests(injectee);
-    maniAPI.setSocket('/', injectee);
-  }
 
-  downloadTemporalManifest = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: { [param: string]: any }
-  ): void => {
-    /*
-      In the case the temporal manifest havent been modified, the requested
-      manifest should be downloaded.
-    */
-    if (!injectee.state.temporalManifest) {
-      injectee.commit('updateTemporalManifest', {
-        manifests: injectee.getters.manifests
-      });
-    }
+    let temporalManifest = actionContext.state
+      .manifests[actionContext.state.currentManifest];
 
-    let temporalManifest = injectee.state.temporalManifest;
     // Stores the temporal manifest in a local file
     FileSaver.saveAs(
       new Blob([JSON.stringify(temporalManifest, null, 2) + '\n'], {
         type: 'application/json;charset=utf-8'
       }),
-      'TemporalManifest.json'
+      'TemporalManifest.' + temporalManifest._urn + '.json'
     );
+    
   }
 
-  updateTemporalManifest = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: { [param: string]: any }
-  ): void => {
-    injectee.commit('updateTemporalManifest', {
-      manifests: injectee.getters.manifests,
-      ...payload
-    });
+  // TODO - dont know what this is used for
+  setState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('setState', payload);
   }
 
-  deleteAlert = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('deleteAlert', payload);
+  // TODO - alerts should be handled by the page
+  deleteAlert = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('deleteAlert', payload);
   }
 
-  alertResult = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('displayAlertPan', false);
+  // TODO - alerts should be handled by the page
+  alertResult = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('displayAlertPan', false);
     if (payload) {
-      injectee.state.confirm.accept();
+      actionContext.state.confirm.accept();
     } else {
-      injectee.state.confirm.deny();
+      actionContext.state.confirm.deny();
     }
   }
 
-  addAlert = (injectee: Vuex.ActionContext<State, any>, payload: any): void => {
+  // TODO - alerts should be handled by the page
+  addAlert = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     payload.extra = payload.extra !== undefined ? payload.extra : '';
-    injectee.commit('addAlert', {
+    actionContext.commit('addAlert', {
       text: payload.text,
-      type: injectee.state.Settings.alerts.danger,
+      type: actionContext.state.Settings.alerts.danger,
       extra: payload.extra
     });
   }
 
-  clearModals = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('clearModals', payload);
+  // TODO - don't know the payload type
+  clearModals = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('clearModals', payload);
   }
 
-  // DEPLOYMENT
-  setDeploymentState = (injectee: Vuex.ActionContext<State, any>): void => {
-    let deploy = injectee.getters.manifests[injectee.state.currentManifest];
+  /**
+   * Sets the deployment state.
+   */
+  setDeploymentState = (actionContext: Vuex.ActionContext<State, any>
+  ): void => {
+    let deploy: Manifest = actionContext.state
+      .manifests[actionContext.state.currentManifest];
 
+    // Obtains the name of the service
     let serviceName = {
       name: getElementName(deploy.servicename),
       domain: getElementDomain(deploy.servicename),
       version: getElementVersion(deploy.servicename)
     };
 
-    let resources = deploy.configuration ? deploy.configuration.resources : {};
-    let parameters = deploy.configuration
-      ? deploy.configuration.parameters
-      : {};
+    // Obtains deployment parameters
+    let parameters = deploy.configuration ?
+      deploy.configuration.parameters : {};
 
-    injectee.commit('updateDeployState', { key: 'name', value: deploy.name });
-
-    injectee.commit('updateDeployState', {
-      key: 'service',
-      value: serviceName
-    });
-
-    injectee.commit('updateDeployState', {
-      key: 'resources',
-      value: resources
-    });
-
-    injectee.commit('updateDeployState', {
-      key: 'parameters',
-      value: parameters
-    });
-
-    if (deploy.interconnection) {
-      injectee.commit('updateDeployState', {
-        key: 'interconnection',
-        value: deploy.interconnection
-      });
-    } else {
-      injectee.commit('updateDeployState', {
-        key: 'interconnection',
-        value: null
-      });
-    }
-
-    //  DEPLOY - RESOURCES
-    injectee.commit(
-      'deleteValidation',
-      injectee.state.deploymentState.resValidation
+    // Updates deployment's name
+    actionContext.commit(
+      'updateDeployState', { key: 'name', value: deploy.name }
     );
 
-    for (let key in resources) {
-      injectee.commit('updateDeployResState', {
-        key: key,
-        value: resources[key]
-      });
-      injectee.commit('setValidation', {
-        validation: injectee.state.deploymentState.resValidation,
-        prop: key,
-        msg: ''
-      });
+    // Updates deployment's service
+    actionContext.commit(
+      'updateDeployState', { key: 'service', value: serviceName }
+    );
+
+    // Updates deployment's resources
+    actionContext.commit(
+      'updateDeployState', { key: 'resources', value: deploy.resources }
+    );
+
+    // Updates deployment's parameters
+    actionContext.commit(
+      'updateDeployState', { key: 'parameters', value: parameters }
+    );
+
+    // Updates deployment's interconnection
+    actionContext.commit(
+      'updateDeployState',
+      {
+        key: 'interconnection',
+        value: deploy.interconnection ? deploy.interconnection : null
+      }
+    );
+
+    // Removes the resource validation
+    actionContext.commit('deleteDeploymentStateValidation');
+
+    for (let key in deploy.resources) {
+
+      // It seems it's a bug in here, so it changes 'updater' depending of
+      // if there is an even or odd number of resources
+      actionContext.commit(
+        'updateDeployResState', { key: key, value: deploy.resources[key] }
+      );
+
+      // This will change state.deploymentState.resValidation[key] to ''
+      actionContext.commit(
+        'setValidation',
+        {
+          validation: actionContext.state.deploymentState.resValidation,
+          prop: key,
+          msg: ''
+        }
+      );
     }
 
-    injectee.dispatch('validateDeployRes');
-    injectee.commit('setDeploymentParams', {
-      manifests: injectee.getters.manifests
-    });
+    actionContext.dispatch('validateDeployRes');
+    actionContext.commit('setDeploymentParams');
   }
 
-  validateDeployRes = (injectee: Vuex.ActionContext<State, any>): void => {
-    if (injectee.state.currentManifest) {
-      let deploy = injectee.getters.manifests[injectee.state.currentManifest];
-      let service = injectee.getters.manifests[deploy.servicename];
-      let userState = injectee.state.deploymentState.resources;
-      for (let x in userState) {
-        if (userState[x].length > 0) {
-          let res = injectee.getters.manifests[userState[x]];
-          if (res === undefined)
-            injectee.commit('setErrValidation', {
-              validation: injectee.state.deploymentState.resValidation,
-              prop: x,
-              msg: 'manifest404'
-            });
-          else {
-            let sres = service.configuration.resources.filter(elem => {
-              return elem.name === x;
-            });
-            if (sres.length > 0) {
-              if (res.spec !== sres[0].type)
-                injectee.commit('setErrValidation', {
-                  validation: injectee.state.deploymentState.resValidation,
+  validateDeployRes = (actionContext: Vuex.ActionContext<State, any>): void => {
+
+    if (actionContext.state.currentManifest) {
+      // Current manifest - which must be a deployment
+      let deploy: Manifest = actionContext.getters
+        .manifests[actionContext.state.currentManifest];
+
+      // Service of the deployment referenced by current manifest
+      let service: Manifest = actionContext.getters
+        .manifests[deploy.servicename];
+
+      // Resources of the deploymentState
+      let userState = actionContext.state.deploymentState.resources;
+
+      for (let x in userState) { // For each resource at deploymentState
+
+        // If the resource is a volatile volume, no change should be allowed
+        if (
+          getResourceType(userState[x].type)
+          !== Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+        ) {
+
+          // If a resource is selected
+          if (userState[x].resource.name.length > 0) {
+
+            let res = actionContext.state.manifests[userState[x].resource.name];
+            if (res) {
+              // If the resource's type is not the required type
+              if (res._type !== deploy.resources[x].type) {
+
+                // Set error invalid type
+                actionContext.commit('setErrValidation', {
+                  validation: actionContext.state.deploymentState.resValidation,
                   prop: x,
                   msg: 'invalidType'
                 });
+
+              }
+            } else { // If the resource doesn't exists in the state
+
+              // Set error manifest not found
+              actionContext.commit(
+                'setErrValidation',
+                {
+                  validation: actionContext.state.deploymentState.resValidation,
+                  prop: x,
+                  msg: 'manifest404'
+                }
+              );
+
             }
+
+          } else { // No resource is selected
+
+            // Set error not allowed empty parameter
+            actionContext.commit('setErrValidation', {
+              validation: actionContext.state.deploymentState.resValidation,
+              prop: x,
+              msg: 'empty'
+            });
+
           }
-        } else {
-          injectee.commit('setErrValidation', {
-            validation: injectee.state.deploymentState.resValidation,
-            prop: x,
-            msg: 'empty'
-          });
         }
       }
     }
   }
 
-  updateDeployState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.deploymentState.validation;
-    injectee.commit('updateDeployState', payload);
-    injectee.commit('updateValidation', {
+  updateDeployState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    let validation = actionContext.state.deploymentState.validation;
+    actionContext.commit('updateDeployState', payload);
+    actionContext.commit('updateValidation', {
       validation: validation,
       prop: payload.key,
       type: 'deployment',
       value: payload.value
     });
-    if (!injectee.state.deploymentState.validation.name.err) {
-      maniAPI.updateManifest(payload.value, 'name', injectee, {
+    if (!actionContext.state.deploymentState.validation.name.err) {
+      maniAPI.updateManifest(payload.value, 'name', actionContext, {
         success: [],
         failure: []
       });
     }
+
   }
 
-  updateDeployParamState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.deploymentState.paramValidation;
+  updateDeployParamState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    let validation = actionContext.state.deploymentState.paramValidation;
     let key = payload.role + payload.name;
-    injectee.commit('updateDeployParamState', {
+    actionContext.commit('updateDeployParamState', {
       key: key,
       value: payload.value
     });
-    injectee.commit('resetValidation', { validation: validation, key: key });
-    injectee.commit('updateValidationType', {
+    actionContext.commit(
+      'resetValidation',
+      { validation: validation, key: key }
+    );
+    actionContext.commit('updateValidationType', {
       validation: validation,
       prop: key,
       type: payload.type,
@@ -357,66 +328,66 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         default:
           break;
       }
-      maniAPI.updateManifest(payload.value, path, injectee, {
+      maniAPI.updateManifest(payload.value, path, actionContext, {
         success: [],
         failure: []
       });
     }
+
   }
 
-  updateDeployResState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('updateDeployResState', payload);
-    injectee.commit(
+  updateDeployResState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    actionContext.commit('updateDeployResState', payload);
+    actionContext.commit(
       'resetAllValidation',
-      injectee.state.deploymentState.resValidation
+      actionContext.state.deploymentState.resValidation
     );
-    injectee.dispatch('validateDeployRes');
+    actionContext.dispatch('validateDeployRes');
 
     let path = 'configuration.resources.' + payload.key;
-    maniAPI.updateManifest(payload.value, path, injectee, {
+    maniAPI.updateManifest(payload.value, path, actionContext, {
       success: [],
       failure: []
     });
+
   }
 
-  setArrangement = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
+  setArrangement = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    actionContext.commit('setArrangement', payload);
+    actionContext.dispatch('validateArrangements');
+
+  }
+
+  validateArrangements = (actionContext: Vuex.ActionContext<State, any>
   ): void => {
-    injectee.commit('setArrangement', {
-      payload: payload,
-      manifests: injectee.getters.manifests
-    });
-    injectee.dispatch('validateArrangements');
-  }
 
-  validateArrangements = (injectee: Vuex.ActionContext<State, any>): void => {
-    let arrangements = injectee.state.deploymentState.arrangements;
+    let arrangements = actionContext.state.deploymentState.arrangements;
     Object.keys(arrangements).filter(x => {
-      injectee.commit('updateValidation', {
+      actionContext.commit('updateValidation', {
         type: 'arrangements',
         prop: x,
         value: arrangements[x].toString(),
-        validation: injectee.state.deploymentState.arrValidation
+        validation: actionContext.state.deploymentState.arrValidation
       });
     });
+
   }
 
-  updateArrangementState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.deploymentState.arrValidation;
+  updateArrangementState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
 
-    injectee.commit('updateArrangementState', payload);
-    injectee.commit('resetValidation', {
+    let validation = actionContext.state.deploymentState.arrValidation;
+
+    actionContext.commit('updateArrangementState', payload);
+    actionContext.commit('resetValidation', {
       key: payload.key,
       validation: validation
     });
-    injectee.commit('updateValidation', {
+    actionContext.commit('updateValidation', {
       type: 'arrangements',
       prop: payload.key,
       value: payload.value.toString(),
@@ -425,19 +396,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     if (!validation[payload.key].err) {
       payload.value = tools.parseType(
         payload.value,
-        injectee.state.Settings.manifestStructure.elementtype.arrangements
+        actionContext.state.Settings.manifestStructure.elementtype.arrangements
           .types[payload.key].type
       );
-      let path = 'roles.' + injectee.state.currentArrangement + '.resources';
+      let path = 'roles.' + actionContext.state.currentArrangement
+        + '.resources';
       let resources = Object.assign(
         {},
-        injectee.getters.manifests[injectee.state.currentManifest].roles[
-          injectee.state.currentArrangement
-        ].resources
+        actionContext.getters.manifests[actionContext.state.currentManifest]
+          .roles[actionContext.state.currentArrangement].resources
       );
       resources[payload.key] = payload.value;
 
-      maniAPI.updateManifest(resources, path, injectee, {
+      maniAPI.updateManifest(resources, path, actionContext, {
         success: [
           {
             name: 'updateArrangement',
@@ -447,47 +418,44 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         failure: []
       });
     }
+
   }
 
-  delteArrangement = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let path = 'roles.' + injectee.state.currentArrangement + '.resources';
+  delteArrangement = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    let path = 'roles.' + actionContext.state.currentArrangement + '.resources';
     let resources = Object.assign(
       {},
-      injectee.getters.manifests[injectee.state.currentManifest].roles[
-        injectee.state.currentArrangement
-      ].resources
+      actionContext.getters.manifests[actionContext.state.currentManifest]
+        .roles[actionContext.state.currentArrangement].resources
     );
     delete resources[payload];
 
-    maniAPI.updateManifest(resources, path, injectee, {
+    maniAPI.updateManifest(resources, path, actionContext, {
       success: [
         { name: 'updateArrangement', params: resources },
         { name: 'deleteArrangementState', params: payload }
       ],
       failure: []
     });
+
   }
 
-  addArrangement = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.deploymentState.arrValidation;
-    let path = 'roles.' + injectee.state.currentArrangement + '.resources';
+  addArrangement = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+
+    let validation = actionContext.state.deploymentState.arrValidation;
+    let path = 'roles.' + actionContext.state.currentArrangement + '.resources';
     let resources = Object.assign(
       {},
-      injectee.getters.manifests[injectee.state.currentManifest].roles[
-        injectee.state.currentArrangement
-      ].resources
+      actionContext.getters.manifests[actionContext.state.currentManifest]
+        .roles[actionContext.state.currentArrangement].resources
     );
 
     resources[payload] =
-      injectee.state.Settings.manifestStructure.elementtype.arrangements.types[
-        payload
-      ].default;
+      actionContext.state.Settings.manifestStructure.elementtype.arrangements
+        .types[payload].default;
     let success = [
       {
         name: 'updateArrangementState',
@@ -506,14 +474,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
       }
     ];
-    maniAPI.updateManifest(resources, path, injectee, {
+    maniAPI.updateManifest(resources, path, actionContext, {
       success: success,
       failure: []
     });
+
   }
 
-  setDeployCharts = (injectee: Vuex.ActionContext<State, any>): void => {
-    let colorsData = injectee.state.deploymentState.colorsData;
+  setDeployCharts = (actionContext: Vuex.ActionContext<State, any>): void => {
+
+    let colorsData = actionContext.state.deploymentState.colorsData;
 
     let setColor = (colors, key) => {
       let color;
@@ -565,9 +535,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       memory: 0
     };
 
-    let currentManifest = injectee.state.currentManifest;
+    let currentManifest = actionContext.state.currentManifest;
     if (currentManifest) {
-      let roles = injectee.getters.manifests[currentManifest].roles;
+      let roles = actionContext.getters.manifests[currentManifest].roles;
 
       for (let key in roles) {
         charts.instances.data.push({
@@ -597,14 +567,17 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         charts.resume.data.push({ prop: key, val: totales[key] });
       });
 
-      injectee.commit('setDeployCharts', charts);
+      actionContext.commit('setDeployCharts', charts);
     }
+
   }
 
   // COMPONENTS
-  setComponentState = (injectee: Vuex.ActionContext<State, any>): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    injectee.commit('updateCompState', {
+  setComponentState = (actionContext: Vuex.ActionContext<State, any>): void => {
+
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    actionContext.commit('updateCompState', {
       key: 'name',
       value: {
         'domain': getElementDomain(component._urn),
@@ -612,47 +585,44 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'version': getElementVersion(component._urn)
       }
     });
-    injectee.commit('updateCompState', {
+    actionContext.commit('updateCompState', {
       key: 'runtime',
       value: component.runtime
     });
-    injectee.commit('updateConfState', {
+    actionContext.commit('updateConfState', {
       key: 'resources',
       value: component.configuration.resources
     });
-    injectee.commit('updateConfState', {
+    actionContext.commit('updateConfState', {
       key: 'parameters',
       value: component.configuration.parameters
     });
 
-    let validation = injectee.state.componentState.validation;
-    injectee.commit('updateAllValidation', {
+    let validation = actionContext.state.componentState.validation;
+    actionContext.commit('updateAllValidation', {
       type: 'component',
       data: component,
-      currState: injectee.state.componentState
+      currState: actionContext.state.componentState
     });
     if (
-      injectee.state.Settings.manifestStructure.elementtype.runtime.enum.filter(
-        x => {
-          return x.eslap === component.runtime;
-        }
-      ).length === 0
+      actionContext.state.Settings.manifestStructure.elementtype.runtime.enum
+        .filter(x => { return x.eslap === component.runtime; }).length === 0
     ) {
-      injectee.commit('setErrValidation', {
+      actionContext.commit('setErrValidation', {
         validation: validation,
         prop: 'runtime',
         msg: 'wrongruntime'
       });
     }
+
   }
 
-  updateComponentState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  updateComponentState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
 
-    injectee.commit('updateCompState', payload);
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
+    actionContext.commit('updateCompState', payload);
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
 
     let path = '';
     let success = [];
@@ -662,32 +632,33 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         name: 'setComponentRuntime',
         params: {
           value: payload.value,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       });
     }
 
-    injectee.commit('updateAllValidation', {
+    actionContext.commit('updateAllValidation', {
       type: 'component',
       data: component,
-      currState: injectee.state.componentState
+      currState: actionContext.state.componentState
     });
 
-    maniAPI.updateManifest(payload.value, path, injectee, {
+    maniAPI.updateManifest(payload.value, path, actionContext, {
       success: success,
       failure: []
     });
   }
 
   updateConfigState = (
-    injectee: Vuex.ActionContext<State, any>,
+    actionContext: Vuex.ActionContext<State, any>,
     payload: any
   ): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    injectee.commit('updateConfigState', payload);
-    injectee.commit('resetValidation', {
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    actionContext.commit('updateConfigState', payload);
+    actionContext.commit('resetValidation', {
       key: payload.key,
-      validation: injectee.state.configurationState.validation
+      validation: actionContext.state.configurationState.validation
     });
     if (
       payload.key === 'rname' &&
@@ -695,8 +666,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         return x.name === payload.value;
       }).length > 0
     )
-      injectee.commit('setErrValidation', {
-        validation: injectee.state.configurationState.validation,
+      actionContext.commit('setErrValidation', {
+        validation: actionContext.state.configurationState.validation,
         prop: 'rname',
         msg: 'dupname'
       });
@@ -706,24 +677,23 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         return x.name === payload.value;
       }).length > 0
     ) {
-      injectee.commit('setErrValidation', {
-        validation: injectee.state.configurationState.validation,
+      actionContext.commit('setErrValidation', {
+        validation: actionContext.state.configurationState.validation,
         prop: 'pname',
         msg: 'dupname'
       });
     }
   }
 
-  addComponentResource = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    injectee.commit('updateValidation', {
+  addComponentResource = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    actionContext.commit('updateValidation', {
       type: 'configuration',
       prop: 'rname',
       value: payload.name,
-      validation: injectee.state.configurationState.validation
+      validation: actionContext.state.configurationState.validation
     });
 
     if (
@@ -731,23 +701,120 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         return x.name === payload.name;
       }).length > 0
     ) {
-      injectee.commit('setErrValidation', {
-        validation: injectee.state.configurationState.validation,
+      actionContext.commit('setErrValidation', {
+        validation: actionContext.state.configurationState.validation,
         prop: 'rname',
         msg: 'dupname'
       });
     }
 
-    if (!injectee.state.configurationState.validation.rname.err) {
+    if (!actionContext.state.configurationState.validation.rname.err) {
       let resources = component.configuration.resources.slice();
       resources.push(payload);
 
-      maniAPI.updateManifest(resources, 'configuration.resources', injectee, {
+      maniAPI.updateManifest(
+        resources,
+        'configuration.resources',
+        actionContext,
+        {
+          success: [
+            {
+              name: 'setComponentResources',
+              params: resources,
+              manifests: actionContext.getters.manifests
+            },
+            {
+              name: 'updateConfigState',
+              params: {
+                key: 'resources',
+                value: resources
+              }
+            },
+            {
+              name: 'updateConfigState',
+              params: {
+                key: 'rname',
+                value: ''
+              }
+            }
+          ],
+          failure: []
+        });
+    }
+  }
+
+  addComponentParameter = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    actionContext.commit('updateValidation', {
+      type: 'configuration',
+      prop: 'pname',
+      value: payload.name,
+      validation: actionContext.state.configurationState.validation
+    });
+    if (
+      component.configuration.parameters.filter(x => {
+        return x.name === payload.name;
+      }).length > 0
+    )
+      actionContext.commit('setErrValidation', {
+        validation: actionContext.state.configurationState.validation,
+        prop: 'pname',
+        msg: 'dupname'
+      });
+
+    if (!actionContext.state.configurationState.validation.pname.err) {
+      let parameters = component.configuration.parameters.slice();
+      parameters.push(payload);
+
+      maniAPI.updateManifest(
+        parameters,
+        'configuration.parameters',
+        actionContext,
+        {
+          success: [
+            {
+              name: 'setComponentParameters',
+              params: parameters,
+              manifests: actionContext.getters.manifests
+            },
+            {
+              name: 'updateConfigState',
+              params: {
+                key: 'parameters',
+                value: parameters
+              }
+            },
+            {
+              name: 'updateConfigState',
+              params: {
+                key: 'pname',
+                value: ''
+              }
+            }
+          ],
+          failure: []
+        });
+    }
+  }
+
+  deleteComponentResource = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    let resources = component.configuration.resources.slice();
+    resources.splice(payload.index, 1);
+    maniAPI.updateManifest(
+      resources,
+      'configuration.resources',
+      actionContext,
+      {
         success: [
           {
             name: 'setComponentResources',
             params: resources,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           },
           {
             name: 'updateConfigState',
@@ -755,52 +822,28 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               key: 'resources',
               value: resources
             }
-          },
-          {
-            name: 'updateConfigState',
-            params: {
-              key: 'rname',
-              value: ''
-            }
           }
         ],
         failure: []
       });
-    }
   }
 
-  addComponentParameter = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    injectee.commit('updateValidation', {
-      type: 'configuration',
-      prop: 'pname',
-      value: payload.name,
-      validation: injectee.state.configurationState.validation
-    });
-    if (
-      component.configuration.parameters.filter(x => {
-        return x.name === payload.name;
-      }).length > 0
-    )
-      injectee.commit('setErrValidation', {
-        validation: injectee.state.configurationState.validation,
-        prop: 'pname',
-        msg: 'dupname'
-      });
-
-    if (!injectee.state.configurationState.validation.pname.err) {
-      let parameters = component.configuration.parameters.slice();
-      parameters.push(payload);
-
-      maniAPI.updateManifest(parameters, 'configuration.parameters', injectee, {
+  deleteComponentParameter = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let component = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    let parameters = component.configuration.parameters.slice();
+    parameters.splice(payload.index, 1);
+    maniAPI.updateManifest(
+      parameters,
+      'configuration.parameters',
+      actionContext,
+      {
         success: [
           {
             name: 'setComponentParameters',
             params: parameters,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           },
           {
             name: 'updateConfigState',
@@ -808,81 +851,22 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               key: 'parameters',
               value: parameters
             }
-          },
-          {
-            name: 'updateConfigState',
-            params: {
-              key: 'pname',
-              value: ''
-            }
           }
         ],
         failure: []
       });
-    }
-  }
-
-  deleteComponentResource = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    let resources = component.configuration.resources.slice();
-    resources.splice(payload.index, 1);
-    maniAPI.updateManifest(resources, 'configuration.resources', injectee, {
-      success: [
-        {
-          name: 'setComponentResources',
-          params: resources,
-          manifests: injectee.getters.manifests
-        },
-        {
-          name: 'updateConfigState',
-          params: {
-            key: 'resources',
-            value: resources
-          }
-        }
-      ],
-      failure: []
-    });
-  }
-
-  deleteComponentParameter = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let component = injectee.getters.manifests[injectee.state.currentManifest];
-    let parameters = component.configuration.parameters.slice();
-    parameters.splice(payload.index, 1);
-    maniAPI.updateManifest(parameters, 'configuration.parameters', injectee, {
-      success: [
-        {
-          name: 'setComponentParameters',
-          params: parameters,
-          manifests: injectee.getters.manifests
-        },
-        {
-          name: 'updateConfigState',
-          params: {
-            key: 'parameters',
-            value: parameters
-          }
-        }
-      ],
-      failure: []
-    });
   }
 
   // SERVICE
-  resetService = (injectee: Vuex.ActionContext<State, any>): void => {
-    injectee.commit('clearModals', true);
-    injectee.commit('setManifest', '');
+  resetService = (actionContext: Vuex.ActionContext<State, any>): void => {
+    actionContext.commit('clearModals', true);
+    actionContext.commit('setManifest', '');
   }
 
-  setServs = (injectee: Vuex.ActionContext<State, any>, payload: any): void => {
+  setServs = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     if (payload && Object.keys(payload).length) {
-      injectee.commit(
+      actionContext.commit(
         'setServs',
         Object.keys(payload).map(function (key, index) {
           return {
@@ -909,81 +893,88 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         if (role.component) mDependencies[role.component] = serv.name;
     }
 
-    injectee.commit('setDependencies', mDependencies);
-    injectee.dispatch('setState', payload);
+    actionContext.commit('setDependencies', mDependencies);
+    actionContext.dispatch('setState', payload);
 
-    if (injectee.state.currentManifest.length > 0) {
-      if (payload[injectee.state.currentManifest] !== undefined) {
-        injectee.dispatch('setManifest', injectee.state.currentManifest);
+    if (actionContext.state.currentManifest.length > 0) {
+      if (payload[actionContext.state.currentManifest] !== undefined) {
+        actionContext.dispatch(
+          'setManifest',
+          actionContext.state.currentManifest
+        );
       } else {
-        injectee.commit('setManifest', '');
+        actionContext.commit('setManifest', '');
       }
     } else {
-      injectee.commit('setManifest', '');
+      actionContext.commit('setManifest', '');
     }
   }
 
-  setManifest = (
-    injectee: Vuex.ActionContext<State, any>,
-    manifestURN: string
-  ): void => {
-    injectee.commit('clearTemporalManifest');
+  /**
+   * When a menu is chosen the mani
+   */
+  setManifest = (actionContext: Vuex.ActionContext<State, any>,
+    manifestURN: string): void => {
 
-    injectee.commit('setManifest', manifestURN);
-    let service = injectee.getters.manifests[manifestURN];
-    let state = null;
+    // Changes state.currentManifest
+    actionContext.commit('setManifest', manifestURN);
 
-    switch (service.type) {
+    // Obtains the actual element
+    let element: Manifest = actionContext.state
+      .manifests[actionContext.state.currentManifest];
+
+    let state: any = null;
+    switch (element.type) {
       case 'service':
-        state = injectee.state.serviceState;
-        injectee.commit('resetConnector', injectee.getters.manifests);
+        state = actionContext.state.serviceState;
+        actionContext.commit('resetConnector', actionContext.getters.manifests);
         break;
 
       case 'component':
-        state = injectee.state.componentState;
-        injectee.dispatch('setComponentState');
+        state = actionContext.state.componentState;
+        actionContext.dispatch('setComponentState');
         break;
 
       case 'deployments':
-        injectee.dispatch('setDeploymentState');
+        actionContext.dispatch('setDeploymentState');
         break;
 
       case 'resource':
-        injectee.dispatch('setResourceState');
+        actionContext.dispatch('setResourceState');
         break;
 
       case 'runtime':
-        state = injectee.state.runtimeState;
-        injectee.dispatch('setRuntimeState');
+        state = actionContext.state.runtimeState;
+        actionContext.dispatch('setRuntimeState');
         break;
 
       default:
+        console.error('Unidentified element type at manifest editor', element);
     }
 
-    if (state != null) {
-      injectee.commit('setStateName', {
+    if (state) {
+      actionContext.commit('setStateName', {
         state: state,
         param: {
-          name: getElementName(service.name),
-          domain: getElementDomain(service.name),
-          version: getElementVersion(service.name)
+          name: getElementName(element.name),
+          domain: getElementDomain(element.name),
+          version: getElementVersion(element.name)
         }
       });
 
-      injectee.commit('updateAllValidation', {
+      actionContext.commit('updateAllValidation', {
         type: 'service',
-        data: injectee.getters.getServiceName,
-        currState: injectee.state.serviceState
+        data: actionContext.getters.getServiceName,
+        currState: actionContext.state.serviceState
       });
     }
   }
 
-  updateServiceName = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let manifest = injectee.getters.manifests[injectee.state.currentManifest];
-    maniAPI.updateManifest('', 'name', injectee, {
+  updateServiceName = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let manifest = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
+    maniAPI.updateManifest('', 'name', actionContext, {
       success: [
         {
           name: 'setServiceName',
@@ -1003,18 +994,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     });
   }
 
-  updateServState = (injectee: Vuex.ActionContext<State, any>,
+  updateServState = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
 
-    injectee.commit('updateValidation', {
+    actionContext.commit('updateValidation', {
       type: 'service',
       prop: payload.key,
       value: payload.value,
-      validation: injectee.state.serviceState.validation
+      validation: actionContext.state.serviceState.validation
     });
-    injectee.commit('updateServState', payload);
+    actionContext.commit('updateServState', payload);
     let path = 'name';
-    maniAPI.updateManifest(payload.value, path, injectee, {
+    maniAPI.updateManifest(payload.value, path, actionContext, {
       success: [],
       failure: []
     });
@@ -1022,60 +1013,57 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   // ROLES
-  setRole = (injectee: Vuex.ActionContext<State, any>, payload: any): void => {
-    injectee.commit('resetRole');
-    injectee.commit(
+  setRole = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('resetRole');
+    actionContext.commit(
       'deleteValidation',
-      injectee.state.roleState.resourceValidation
+      actionContext.state.roleState.resourceValidation
     );
-    injectee.commit('setRole', {
-      manifests: injectee.getters.manifests,
+    actionContext.commit('setRole', {
+      manifests: actionContext.getters.manifests,
       role: payload
     });
 
     let currentManifest =
-      injectee.getters.manifests[injectee.state.currentManifest];
-    let role = currentManifest.roles[injectee.state.currentRole];
-    let component = injectee.getters.manifests[role.component];
+      actionContext.getters.manifests[actionContext.state.currentManifest];
+    let role = currentManifest.roles[actionContext.state.currentRole];
+    let component = actionContext.getters.manifests[role.component];
 
     if (component.configuration.resources) {
       component.configuration.resources.map(elem => {
-        injectee.commit('setValidation', {
-          validation: injectee.state.roleState.resourceValidation,
+        actionContext.commit('setValidation', {
+          validation: actionContext.state.roleState.resourceValidation,
           prop: elem.name,
           msg: ''
         });
       });
     }
 
-    injectee.commit('updateAllValidation', {
+    actionContext.commit('updateAllValidation', {
       type: 'role',
-      data:
-        injectee.getters.manifests[injectee.state.currentManifest].roles[
-        payload
-        ],
-      currState: injectee.state.roleState
+      data: actionContext.getters.manifests[actionContext.state.currentManifest]
+        .roles[payload],
+      currState: actionContext.state.roleState
     });
   }
 
-  updateRoleName = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.roleState.validation;
+  updateRoleName = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let validation = actionContext.state.roleState.validation;
     if (validation) {
-      injectee.dispatch('updateRoleState', {
+      actionContext.dispatch('updateRoleState', {
         key: 'name',
         value: name,
-        manifests: injectee.getters.manifests
+        manifests: actionContext.getters.manifests
       });
-      let roles = injectee.getters.manifests[
-        injectee.state.currentManifest
+      let roles = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].roles.filter((rol, index) => {
-        return rol.name === name && index !== injectee.state.currentRole;
+        return rol.name === name && index !== actionContext.state.currentRole;
       });
       if (roles.length > 0)
-        injectee.commit('setErrValidation', {
+        actionContext.commit('setErrValidation', {
           validation: validation,
           prop: 'name',
           msg: 'dupname'
@@ -1083,29 +1071,27 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       // console.log(validation.name.err)
       if (!validation.name.err) {
-        injectee.dispatch('updateRoleNameInConnectors', {
-          oldName:
-            injectee.getters.manifests[injectee.state.currentManifest].roles[
-              injectee.state.currentRole
-            ].name,
+        actionContext.dispatch('updateRoleNameInConnectors', {
+          oldName: actionContext.getters
+            .manifests[actionContext.state.currentManifest]
+            .roles[actionContext.state.currentRole].name,
           newName: name
         });
-        injectee.dispatch('updateRoleNameInParams', {
-          oldName:
-            injectee.getters.manifests[injectee.state.currentManifest].roles[
-              injectee.state.currentRole
-            ].name,
+        actionContext.dispatch('updateRoleNameInParams', {
+          oldName: actionContext.getters
+            .manifests[actionContext.state.currentManifest]
+            .roles[actionContext.state.currentRole].name,
           newName: name
         });
 
-        let path = 'roles.' + injectee.state.currentRole + '.name';
+        let path = 'roles.' + actionContext.state.currentRole + '.name';
 
-        maniAPI.updateManifest(name, path, injectee, {
+        maniAPI.updateManifest(name, path, actionContext, {
           success: [
             {
               name: 'updateRoleName',
               params: name,
-              manifest: injectee.getters.manifests
+              manifest: actionContext.getters.manifests
             }
           ],
           failure: []
@@ -1114,12 +1100,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  updateRoleNameInParams = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let parameters = injectee.getters.manifests[
-      injectee.state.currentManifest
+  updateRoleNameInParams = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let parameters = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].configuration.parameters.slice();
     for (let j = 0; j < parameters.length; j++) {
       if (payload.oldName === parameters[j].name)
@@ -1127,24 +1111,22 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
 
     let path = 'configuration.parameters';
-    maniAPI.updateManifest(parameters, path, injectee, {
+    maniAPI.updateManifest(parameters, path, actionContext, {
       success: [
         {
           name: 'setServParams',
           params: parameters,
-          manifests: injectee.getters.manfiests
+          manifests: actionContext.getters.manfiests
         }
       ],
       failure: []
     });
   }
 
-  updateRoleNameInConnectors = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let connectors = injectee.getters.manifests[
-      injectee.state.currentManifest
+  updateRoleNameInConnectors = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let connectors = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].connectors.slice();
     let UpdateConnList = (data, list) => {
       for (let j = 0; j < list.length; j++)
@@ -1159,40 +1141,42 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let path = 'connectors';
 
-    maniAPI.updateManifest(connectors, path, injectee, {
+    maniAPI.updateManifest(connectors, path, actionContext, {
       success: [
         {
           name: 'updateConnectors',
           params: connectors,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  addRole = (injectee: Vuex.ActionContext<State, any>, payload: any): void => {
-    injectee.commit('updateAllValidation', {
+  addRole = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('updateAllValidation', {
       type: 'role',
       data: payload,
-      currState: injectee.state.roleState
+      currState: actionContext.state.roleState
     });
-    if (injectee.state.roleState.valid) {
+    if (actionContext.state.roleState.valid) {
       let path = 'roles';
-      let roles = injectee.getters.manifests[
-        injectee.state.currentManifest
+      let roles = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].roles.slice();
 
       roles.push(payload);
 
       try {
-        let conf = injectee.getters.manifests[payload.component].configuration;
+        let conf = actionContext.getters.manifests[payload.component]
+          .configuration;
         if (conf.resources.length === 0 && conf.parameters.length === 0)
-          injectee.commit('clearModals', true);
+          actionContext.commit('clearModals', true);
         else if (conf.resources) {
           conf.resources.map(elem => {
-            injectee.commit('setValidation', {
-              validation: injectee.state.roleState.resourceValidation,
+            actionContext.commit('setValidation', {
+              validation: actionContext.state.roleState.resourceValidation,
               prop: elem.name,
               msg: ''
             });
@@ -1200,14 +1184,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
       } catch (e) {
         console.log(e);
-        injectee.commit('clearModals', true);
+        actionContext.commit('clearModals', true);
       }
-      maniAPI.updateManifest(roles, path, injectee, {
+      maniAPI.updateManifest(roles, path, actionContext, {
         success: [
           {
             name: 'updateRoles',
             params: payload,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           },
           {
             name: 'setRole',
@@ -1219,107 +1203,109 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  updateRoleComp = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('displayAlertPan', true);
-    injectee.state.confirm.accept = () => {
-      injectee.commit('updateRoleState', {
-        key: 'component',
-        value: payload
+  /**
+   * Updates the role component.
+   */
+  updateRoleComp = (actionContext: Vuex.ActionContext<State, any>,
+    newComponent: string): void => {
+
+    actionContext.commit('displayAlertPan', true);
+
+    actionContext.commit('updateConfirmationAccept', () => {
+
+      actionContext.commit('updateRoleState', {
+        key: 'component', value: newComponent
       });
 
-      injectee.dispatch('deleteRoleFromConnectors', injectee.state.currentRole);
-      injectee.dispatch('deleteRoleFromResouces', injectee.state.currentRole);
-      injectee.dispatch('deleteRolesResouces', injectee.state.currentRole);
-      injectee.dispatch('deleteRoleFromParameters', injectee.state.currentRole);
+      actionContext.dispatch(
+        'deleteRoleFromConnectors', actionContext.state.currentRole
+      );
 
-      let path = 'roles.' + injectee.state.currentRole + '.component';
+      actionContext.dispatch(
+        'deleteRoleFromResouces', actionContext.state.currentRole
+      );
 
-      maniAPI.updateManifest(payload, path, injectee, {
-        success: [
-          {
+      actionContext.dispatch(
+        'deleteRolesResouces', actionContext.state.currentRole
+      );
+
+      actionContext.dispatch(
+        'deleteRoleFromParameters', actionContext.state.currentRole
+      );
+
+      maniAPI.updateManifest(
+        newComponent,
+        'roles.' + actionContext.state.currentRole + '.component',
+        actionContext,
+        {
+          success: [{
             name: 'updateRoleComp',
-            params: {
-              component: payload,
-              manifests: injectee.getters.manifests
-            }
-          }
-        ],
-        failure: []
-      });
-    };
-    injectee.state.confirm.deny = () => {
-      injectee.commit('updateRoleComp', {
-        component:
-          injectee.getters.manifests[injectee.state.currentManifest].roles[
-            injectee.state.currentRole
-          ].component,
-        manifests: injectee.getters.manifests
-      });
-      injectee.commit('updateRoleState', {
-        key: 'component',
-        value:
-          injectee.getters.manifests[injectee.state.currentManifest].roles[
-            injectee.state.currentRole
-          ].component
-      });
-    };
-  }
+            newComponent
+          }],
+          failure: []
+        });
+    });
 
-  updateRoleState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('updateRoleState', payload);
-    injectee.commit('updateValidation', {
-      type: 'role',
-      prop: payload.key,
-      value: payload.value,
-      validation: injectee.state.roleState.validation
+    actionContext.commit('updateConfirmationDeny', () => {
+      actionContext.commit('updateRoleComp', actionContext.state
+        .manifests[actionContext.state.currentManifest]
+        .roles[actionContext.state.currentRole].component
+      );
+      actionContext.commit('updateRoleState', {
+        key: 'component',
+        value: actionContext.state
+          .manifests[actionContext.state.currentManifest]
+          .roles[actionContext.state.currentRole].component
+      });
     });
   }
 
-  deleteRole = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('displayAlertPan', true);
-    injectee.state.confirm.accept = () => {
-      injectee.commit('resetRole');
-      let roles = injectee.getters.manifests[
-        injectee.state.currentManifest
+  updateRoleState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('updateRoleState', payload);
+    actionContext.commit('updateValidation', {
+      type: 'role',
+      prop: payload.key,
+      value: payload.value,
+      validation: actionContext.state.roleState.validation
+    });
+  }
+
+  deleteRole = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('displayAlertPan', true);
+    actionContext.state.confirm.accept = () => {
+      actionContext.commit('resetRole');
+      let roles = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].roles.slice();
 
-      injectee.dispatch('deleteRoleFromConnectors', payload);
-      injectee.dispatch('deleteRoleFromResouces', payload);
-      injectee.dispatch('deleteRoleFromParameters', payload);
+      actionContext.dispatch('deleteRoleFromConnectors', payload);
+      actionContext.dispatch('deleteRoleFromResouces', payload);
+      actionContext.dispatch('deleteRoleFromParameters', payload);
 
       // UPDATE ROLES
       roles.splice(payload, 1);
       let path = 'roles';
-      maniAPI.updateManifest(roles, path, injectee, {
+      maniAPI.updateManifest(roles, path, actionContext, {
         success: [
           {
             name: 'deleteRole',
             params: payload,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
       });
     };
-    injectee.state.confirm.deny = () => { };
+    actionContext.state.confirm.deny = () => { };
   }
 
-  deleteRoleFromConnectors = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  deleteRoleFromConnectors = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     let path = '';
-    let roles = injectee.getters.manifests[
-      injectee.state.currentManifest
+    let roles = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].roles.slice();
     let role = roles[payload];
 
@@ -1327,40 +1313,38 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let filterConn = function (elem) {
       return elem.role !== undefined && elem.role !== role.name;
     };
-    let connectors = injectee.getters.manifests[
-      injectee.state.currentManifest
+    let connectors = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].connectors.slice();
     for (let i = 0; i < connectors.length; i++) {
       connectors[i].provided = connectors[i].provided.filter(filterConn);
       connectors[i].depended = connectors[i].depended.filter(filterConn);
     }
     path = 'connectors';
-    maniAPI.updateManifest(connectors, path, injectee, {
+    maniAPI.updateManifest(connectors, path, actionContext, {
       success: [
         {
           name: 'updateConnectors',
           params: connectors,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  deleteRoleFromResouces = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  deleteRoleFromResouces = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     let path = '';
-    let roles = injectee.getters.manifests[
-      injectee.state.currentManifest
+    let roles = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].roles.slice();
     let role = roles[payload];
 
     // UPDATE SERVICE RESOURCES
-    let resources =
-      injectee.getters.manifests[injectee.state.currentManifest].configuration
-        .resources;
+    let resources = actionContext.getters
+      .manifests[actionContext.state.currentManifest].configuration
+      .resources;
     let roleRes = {};
     let filterRes = function (elem) {
       return roleRes[elem.name] === undefined;
@@ -1373,52 +1357,48 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     resources = resources.filter(filterRes);
 
     path = 'configuration.resources';
-    maniAPI.updateManifest(resources, path, injectee, {
+    maniAPI.updateManifest(resources, path, actionContext, {
       success: [
         {
           name: 'setServRes',
           params: { res: resources },
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  deleteRolesResouces = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let roles = injectee.getters.manifests[
-      injectee.state.currentManifest
+  deleteRolesResouces = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let roles = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].roles.slice();
     let role = roles[payload];
 
     // UPDATE SERVICE RESOURCES
     role.resources = {};
 
-    injectee.commit('updateRoleState', { key: 'resources', value: {} });
+    actionContext.commit('updateRoleState', { key: 'resources', value: {} });
 
     let path = 'roles.' + payload;
-    maniAPI.updateManifest(role, path, injectee, {
+    maniAPI.updateManifest(role, path, actionContext, {
       success: [
         {
           name: 'updateRoleRes',
           params: {},
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  deleteRoleFromParameters = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  deleteRoleFromParameters = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     let path = '';
-    let roles = injectee.getters.manifests[
-      injectee.state.currentManifest
+    let roles = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].roles.slice();
     let role = roles[payload];
 
@@ -1426,16 +1406,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let filterParam = function (elem) {
       return elem.name !== role.name;
     };
-    let parameters = injectee.getters.manifests[
-      injectee.state.currentManifest
+    let parameters = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].configuration.parameters.filter(filterParam);
     path = 'configuration.parameters';
-    maniAPI.updateManifest(parameters, path, injectee, {
+    maniAPI.updateManifest(parameters, path, actionContext, {
       success: [
         {
           name: 'setServParams',
           params: parameters,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
@@ -1443,23 +1423,20 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   // RESOURCES
-  setResource = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let role =
-      injectee.getters.manifests[injectee.state.currentManifest].roles[
-      injectee.state.currentRole
-      ];
-    let sResources = injectee.getters.manifests[
-      injectee.state.currentManifest
-    ].configuration.resources.slice();
+  setResource = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let role = actionContext.getters
+      .manifests[actionContext.state.currentManifest]
+      .roles[actionContext.state.currentRole];
+    let sResources = actionContext.getters
+      .manifests[actionContext.state.currentManifest]
+      .configuration.resources.slice();
     let sResIndex = sResources.findIndex(x => x['name'] === payload.oldTag);
     let path = '';
 
-    let validation = injectee.state.roleState.resourceValidation;
+    let validation = actionContext.state.roleState.resourceValidation;
 
-    injectee.commit('updateValidation', {
+    actionContext.commit('updateValidation', {
       type: 'role',
       prop: payload.name,
       dinamic: 'resource',
@@ -1472,7 +1449,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         return x.name === payload.tag;
       });
       if (duplicateRes.length === 0) {
-        if (injectee.state.currentRole > -1) {
+        if (actionContext.state.currentRole > -1) {
           if (
             role.resources &&
             role.resources[payload.name] &&
@@ -1482,71 +1459,83 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               // actualizar
               path = 'configuration.resources.' + sResIndex;
               sResources[sResIndex].name = payload.tag;
-              maniAPI.updateManifest(sResources[sResIndex], path, injectee, {
-                success: [
-                  {
-                    name: 'updateServRes',
-                    params: {
-                      index: sResIndex,
-                      name: payload.tag
-                    },
-                    manifests: injectee.getters.manifests
-                  }
-                ],
-                failure: []
-              });
+              maniAPI.updateManifest(
+                sResources[sResIndex],
+                path,
+                actionContext,
+                {
+                  success: [
+                    {
+                      name: 'updateServRes',
+                      params: {
+                        index: sResIndex,
+                        name: payload.tag
+                      },
+                      manifests: actionContext.getters.manifests
+                    }
+                  ],
+                  failure: []
+                });
 
               path =
                 'roles.' +
-                injectee.state.currentRole +
+                actionContext.state.currentRole +
                 '.resources.' +
                 payload.name;
               let rResources = {};
               Object.assign(rResources, role.resources);
               rResources[payload.name] = payload.tag;
-              maniAPI.updateManifest(rResources[payload.name], path, injectee, {
-                success: [
-                  {
-                    name: 'updateRolRes',
-                    params: {
-                      name: payload.name,
-                      tag: payload.tag
-                    },
-                    manifests: injectee.getters.manifests
-                  }
-                ],
-                failure: []
-              });
+              maniAPI.updateManifest(
+                rResources[payload.name],
+                path,
+                actionContext,
+                {
+                  success: [
+                    {
+                      name: 'updateRolRes',
+                      params: {
+                        name: payload.name,
+                        tag: payload.tag
+                      },
+                      manifests: actionContext.getters.manifests
+                    }
+                  ],
+                  failure: []
+                });
             } else {
               // borrar
               path = 'configuration.resources';
               sResources.splice(sResIndex, 1);
-              maniAPI.updateManifest(sResources, path, injectee, {
-                success: [
-                  {
-                    name: 'setServRes',
-                    params: { res: sResources },
-                    manifests: injectee.getters.manifests
-                  }
-                ],
-                failure: []
-              });
+              maniAPI.updateManifest(
+                sResources,
+                path,
+                actionContext,
+                {
+                  success: [
+                    {
+                      name: 'setServRes',
+                      params: { res: sResources },
+                      manifests: actionContext.getters.manifests
+                    }
+                  ],
+                  failure: []
+                });
 
               path = 'roles';
               let rResources = {};
               Object.assign(rResources, role.resources);
               delete rResources[payload.name];
-              let roles = injectee.getters.manifests[
-                injectee.state.currentManifest
+              let roles = actionContext.getters.manifests[
+                actionContext.state.currentManifest
               ].roles.slice();
-              roles[injectee.state.currentRole].resources = rResources;
+              roles[actionContext.state.currentRole].resources = rResources;
 
-              maniAPI.updateManifest(roles, path, injectee, {
+              maniAPI.updateManifest(roles, path, actionContext, {
                 success: [
                   {
                     name: 'setRolRes',
                     params: { res: rResources },
-                    manifests: injectee.getters.manifests
+                    manifests: actionContext.getters.manifests
                   }
                 ],
                 failure: []
@@ -1561,12 +1550,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               sResources[sResIndex] = { name: payload.tag, type: payload.type };
             }
             path = 'configuration.resources';
-            maniAPI.updateManifest(sResources, path, injectee, {
+            maniAPI.updateManifest(sResources, path, actionContext, {
               success: [
                 {
                   name: 'setServRes',
                   params: { res: sResources },
-                  manifests: injectee.getters.manifests
+                  manifests: actionContext.getters.manifests
                 }
               ],
               failure: []
@@ -1579,13 +1568,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             } else {
               rResources[payload.name] = payload.tag;
             }
-            path = 'roles.' + injectee.state.currentRole + '.resources';
-            maniAPI.updateManifest(rResources, path, injectee, {
+            path = 'roles.' + actionContext.state.currentRole + '.resources';
+            maniAPI.updateManifest(rResources, path, actionContext, {
               success: [
                 {
                   name: 'setRolRes',
                   params: { res: rResources },
-                  manifests: injectee.getters.manifests
+                  manifests: actionContext.getters.manifests
                 }
               ],
               failure: []
@@ -1594,8 +1583,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
       } else {
         if (duplicateRes.length === 1 && payload.tag !== payload.oldTag)
-          injectee.commit('setErrValidation', {
-            validation: injectee.state.roleState.resourceValidation,
+          actionContext.commit('setErrValidation', {
+            validation: actionContext.state.roleState.resourceValidation,
             prop: payload.name,
             msg: 'dupname'
           });
@@ -1603,12 +1592,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  setResourceState = (injectee: Vuex.ActionContext<State, any>): void => {
-    injectee.commit(
+  setResourceState = (actionContext: Vuex.ActionContext<State, any>): void => {
+    actionContext.commit(
       'deleteValidation',
-      injectee.state.resourceState.validation
+      actionContext.state.resourceState.validation
     );
-    let resource = injectee.getters.manifests[injectee.state.currentManifest];
+    let resource = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
     // resourceState
     let resourceName = {
       name: getElementName(resource._urn),
@@ -1616,14 +1606,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       domain: getElementDomain(resource._urn),
       type: getResourceType(resource._type)
     };
-    injectee.commit('updateResourceState', {
+    actionContext.commit('updateResourceState', {
       key: 'name',
       value: resourceName
     });
 
     Object.keys(resourceName).map(x => {
-      injectee.commit('setValidation', {
-        validation: injectee.state.resourceState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.resourceState.validation,
         prop: x,
         msg: ''
       });
@@ -1632,32 +1622,32 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let parameters = {};
     Object.keys(resource.parameters).map(key => {
       parameters[key] = resource.parameters[key];
-      injectee.commit('setValidation', {
-        validation: injectee.state.resourceState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.resourceState.validation,
         prop: key,
         msg: ''
       });
     });
-    injectee.commit('updateResourceState', {
+    actionContext.commit('updateResourceState', {
       key: 'parameters',
       value: parameters
     });
   }
 
-  updateResourceState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let validation = injectee.state.resourceState.validation;
-    let params = Object.assign({}, injectee.state.resourceState.parameters);
-    injectee.commit('updateValidationType', {
+  updateResourceState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let validation = actionContext.state.resourceState.validation;
+    let params = Object.assign(
+      {}, actionContext.state.resourceState.parameters
+    );
+    actionContext.commit('updateValidationType', {
       validation: validation,
       prop: payload.key,
       type: payload.type,
       value: payload.value
     });
     params[payload.key] = payload.value;
-    injectee.commit('updateResourceState', {
+    actionContext.commit('updateResourceState', {
       key: 'parameters',
       value: params
     });
@@ -1679,7 +1669,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         default:
           break;
       }
-      maniAPI.updateManifest(payload.value, path, injectee, {
+      maniAPI.updateManifest(payload.value, path, actionContext, {
         success: [],
         failure: []
       });
@@ -1687,11 +1677,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   // RUNTIMES
-  setRuntimeState = (injectee: Vuex.ActionContext<State, any>): void => {
+  setRuntimeState = (actionContext: Vuex.ActionContext<State, any>): void => {
 
-    let runtime = injectee.getters.manifests[injectee.state.currentManifest];
+    let runtime = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
 
-    injectee.commit('updateRuntimeState', {
+    actionContext.commit('updateRuntimeState', {
       key: 'name',
       value: {
         domain: getElementDomain(runtime._urn),
@@ -1701,14 +1692,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     });
 
     if (runtime.derived) {
-      injectee.commit('updateRuntimeState', {
+      actionContext.commit('updateRuntimeState', {
         key: 'derived',
         value: runtime.derived
       });
 
       Object.keys(runtime.derived).map(key => {
-        injectee.commit('setValidation', {
-          validation: injectee.state.runtimeState.validation,
+        actionContext.commit('setValidation', {
+          validation: actionContext.state.runtimeState.validation,
           prop: key,
           msg: ''
         });
@@ -1718,56 +1709,54 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let runsettings = {};
     if (runtime.sourcedir) {
       runsettings['sourcedir'] = runtime.sourcedir;
-      injectee.commit('setValidation', {
-        validation: injectee.state.runtimeState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.runtimeState.validation,
         prop: 'sourcedir',
         msg: ''
       });
     }
     if (runtime.entrypoint) {
       runsettings['entrypoint'] = runtime.entrypoint;
-      injectee.commit('setValidation', {
-        validation: injectee.state.runtimeState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.runtimeState.validation,
         prop: 'entrypoint',
         msg: ''
       });
     }
     if (runtime.agent) {
       runsettings['agent'] = runtime.agent;
-      injectee.commit('setValidation', {
-        validation: injectee.state.runtimeState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.runtimeState.validation,
         prop: 'agent',
         msg: ''
       });
     }
 
-    injectee.commit('updateRuntimeState', {
+    actionContext.commit('updateRuntimeState', {
       key: 'runsettings',
       value: runsettings
     });
 
     if (runtime.metadata) {
-      injectee.commit('updateRuntimeState', {
+      actionContext.commit('updateRuntimeState', {
         key: 'metadata',
         value: runtime.metadata
       });
-      injectee.commit('setValidation', {
-        validation: injectee.state.runtimeState.validation,
+      actionContext.commit('setValidation', {
+        validation: actionContext.state.runtimeState.validation,
         prop: 'metadata',
         msg: ''
       });
     }
   }
 
-  updateRuntimeState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  updateRuntimeState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
 
-    let validation = injectee.state.runtimeState.validation;
+    let validation = actionContext.state.runtimeState.validation;
     let path = '';
 
-    injectee.commit('updateValidationType', {
+    actionContext.commit('updateValidationType', {
       validation: validation,
       prop: payload.key,
       type: payload.type,
@@ -1776,7 +1765,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     if (payload.parent) {
 
-      injectee.commit('updateRuntimeStateParent', {
+      actionContext.commit('updateRuntimeStateParent', {
         key: payload.key,
         value: payload.value,
         parent: payload.parent
@@ -1784,7 +1773,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       if (payload.parent === 'derived') path = 'derived.';
 
     } else {
-      injectee.commit('updateRuntimeState', {
+      actionContext.commit('updateRuntimeState', {
         key: payload.parent ? payload.parent : payload.key,
         value: payload.value
       });
@@ -1807,7 +1796,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         default:
           break;
       }
-      maniAPI.updateManifest(payload.value, path, injectee, {
+      maniAPI.updateManifest(payload.value, path, actionContext, {
         success: [],
         failure: []
       });
@@ -1815,14 +1804,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   // PARAMETERS
-  changeBypass = (injectee: Vuex.ActionContext<State, any>): void => {
-    if (injectee.state.currentRole >= 0) {
+  changeBypass = (actionContext: Vuex.ActionContext<State, any>): void => {
+    if (actionContext.state.currentRole >= 0) {
       let role =
-        injectee.getters.manifests[injectee.state.currentManifest].roles[
-        injectee.state.currentRole
-        ];
-      let params = injectee.getters.manifests[
-        injectee.state.currentManifest
+        actionContext.getters
+          .manifests[actionContext.state.currentManifest]
+          .roles[actionContext.state.currentRole];
+      let params = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].configuration.parameters.slice();
       let pIndex = params.findIndex(x => x.name === role.name);
       //     console.log(pIndex)
@@ -1831,18 +1820,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       } else {
         params.push({
           name: role.name,
-          type: injectee.state.Settings.manifestStructure.elementtype.parameter
-            .enum.find(x => x.name === 'json').eslap
+          type: actionContext.state.Settings.manifestStructure.elementtype
+            .parameter.enum.find(x => x.name === 'json').eslap
         });
       }
       //  console.log(JSON.stringify(params))
       let path = 'configuration.parameters';
-      maniAPI.updateManifest(params, path, injectee, {
+      maniAPI.updateManifest(params, path, actionContext, {
         success: [
           {
             name: 'setServParams',
             params: params,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
@@ -1851,46 +1840,39 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   // CHANNELS
-  setChannel = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  setChannel = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     payload.data = Object.assign(
       {},
-      injectee.getters.manifests[injectee.state.currentManifest].channels[
-      payload.inout
-      ][payload.index]
+      actionContext.getters.manifests[actionContext.state.currentManifest]
+        .channels[payload.inout][payload.index]
     );
-    injectee.commit('setChannel', payload);
-    injectee.commit('updateAllValidation', {
+    actionContext.commit('setChannel', payload);
+    actionContext.commit('updateAllValidation', {
       type: 'channel',
       data:
-        injectee.getters.manifests[injectee.state.currentManifest].channels[
-        payload.inout
-        ][payload.index],
-      currState: injectee.state.channelState
+        actionContext.getters.manifests[actionContext.state.currentManifest]
+          .channels[payload.inout][payload.index],
+      currState: actionContext.state.channelState
     });
   }
 
-  deleteChannel = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
+  deleteChannel = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     payload.data = Object.assign(
       {},
-      injectee.getters.manifests[injectee.state.currentManifest].channels[
-      payload.inout
-      ][payload.index]
+      actionContext.getters.manifests[actionContext.state.currentManifest]
+        .channels[payload.inout][payload.index]
     );
-    injectee.commit('displayAlertPan', true);
+    actionContext.commit('displayAlertPan', true);
 
-    injectee.state.confirm.accept = () => {
-      let channels = injectee.getters.manifests[
-        injectee.state.currentManifest
+    actionContext.state.confirm.accept = () => {
+      let channels = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].channels[payload.inout].slice();
       channels.splice(payload.index, 1);
       let path = 'channels.' + payload.inout;
-      maniAPI.updateManifest(channels, path, injectee, {
+      maniAPI.updateManifest(channels, path, actionContext, {
         success: [
           {
             name: 'updateChannels',
@@ -1898,21 +1880,20 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               channels: channels,
               direction: payload.inout
             },
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
       });
-      injectee.dispatch('deleteChannelInConnectors', payload);
+      actionContext.dispatch('deleteChannelInConnectors', payload);
     };
-    injectee.state.confirm.deny = () => { };
+    actionContext.state.confirm.deny = () => { };
   }
 
-  deleteChannelInConnectors = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let service = injectee.getters.manifests[injectee.state.currentManifest];
+  deleteChannelInConnectors = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let service = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
     // UPDATE SERVICE CONNECTORS
     if (service.type === 'service') {
       let filterConn = function (elem) {
@@ -1924,12 +1905,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         connectors[i].depended = connectors[i].depended.filter(filterConn);
       }
       let path = 'connectors';
-      maniAPI.updateManifest(connectors, path, injectee, {
+      maniAPI.updateManifest(connectors, path, actionContext, {
         success: [
           {
             name: 'updateConnectors',
             params: connectors,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
@@ -1937,11 +1918,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  updateCurrentChannel = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let service = injectee.getters.manifests[injectee.state.currentManifest];
+  updateCurrentChannel = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let service = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
     let channels = service.channels[payload.inout].slice();
 
     if (
@@ -1949,16 +1929,16 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       (channels[payload.index].protocol !== payload.data.protocol &&
         payload.data.protocol !== '')
     ) {
-      injectee.commit('displayAlertPan', true);
-      injectee.state.confirm.accept = () => {
-        injectee.dispatch('deleteChannelInConnectors', payload);
+      actionContext.commit('displayAlertPan', true);
+      actionContext.state.confirm.accept = () => {
+        actionContext.dispatch('deleteChannelInConnectors', payload);
         channels[payload.index].name = payload.data.name;
         channels[payload.index].type = payload.data.type;
         if (payload.data.protocol !== '')
           channels[payload.index].protocol = payload.data.protocol;
 
         let path = 'channels.' + payload.inout;
-        maniAPI.updateManifest(channels, path, injectee, {
+        maniAPI.updateManifest(channels, path, actionContext, {
           success: [
             {
               name: 'updateChannels',
@@ -1966,32 +1946,32 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                 channels: channels,
                 direction: payload.inout
               },
-              manifests: injectee.getters.manifests
+              manifests: actionContext.getters.manifests
             }
           ],
           failure: []
         });
       };
-      injectee.state.confirm.deny = () => {
-        injectee.dispatch('updateChannState', {
+      actionContext.state.confirm.deny = () => {
+        actionContext.dispatch('updateChannState', {
           key: 'type',
           value: channels[payload.index].type
         });
-        injectee.dispatch('updateChannState', {
+        actionContext.dispatch('updateChannState', {
           key: 'protocol',
           value: channels[payload.index].protocol
         });
       };
     } else {
-      let validation = injectee.state.channelState.validation;
+      let validation = actionContext.state.channelState.validation;
       let filteredChan;
-      injectee.dispatch('updateChannState', {
+      actionContext.dispatch('updateChannState', {
         key: 'name',
         value: payload.data.name
       });
       let direct = 'provides';
-      filteredChan = injectee.getters.manifests[
-        injectee.state.currentManifest
+      filteredChan = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].channels[direct].filter((chann, index) => {
         return (
           chann.name === payload.data.name &&
@@ -1999,15 +1979,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         );
       });
       if (filteredChan.length > 0)
-        injectee.commit('setErrValidation', {
+        actionContext.commit('setErrValidation', {
           validation: validation,
           prop: 'name',
           msg: 'dupname'
         });
 
       direct = 'requires';
-      filteredChan = injectee.getters.manifests[
-        injectee.state.currentManifest
+      filteredChan = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].channels[direct].filter((chann, index) => {
         return (
           chann.name === payload.data.name &&
@@ -2016,14 +1996,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
 
       if (filteredChan.length > 0)
-        injectee.commit('setErrValidation', {
+        actionContext.commit('setErrValidation', {
           validation: validation,
           prop: 'name',
           msg: 'dupname'
         });
 
       if (!validation.name.err) {
-        injectee.dispatch('updateChannelInConnectors', {
+        actionContext.dispatch('updateChannelInConnectors', {
           oldName: channels[payload.index].name,
           newName: payload.data.name
         });
@@ -2032,7 +2012,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         if (payload.data.protocol !== '')
           channels[payload.index].protocol = payload.data.protocol;
         let path = 'channels.' + payload.inout;
-        maniAPI.updateManifest(channels, path, injectee, {
+        maniAPI.updateManifest(channels, path, actionContext, {
           success: [
             {
               name: 'updateChannels',
@@ -2040,7 +2020,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                 channels: channels,
                 direction: payload.inout
               },
-              manifests: injectee.getters.manifests
+              manifests: actionContext.getters.manifests
             }
           ],
           failure: []
@@ -2049,11 +2029,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  updateChannelInConnectors = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let service = injectee.getters.manifests[injectee.state.currentManifest];
+  updateChannelInConnectors = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let service = actionContext.getters
+      .manifests[actionContext.state.currentManifest];
     if (service.type === 'service') {
       let connectors = service.connectors.slice();
       let UpdateConnList = (data, list) => {
@@ -2067,12 +2046,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         UpdateConnList(payload, connectors[i].depended);
       }
       let path = 'connectors';
-      maniAPI.updateManifest(connectors, path, injectee, {
+      maniAPI.updateManifest(connectors, path, actionContext, {
         success: [
           {
             name: 'updateConnectors',
             params: connectors,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
@@ -2080,34 +2059,30 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  setChannelDirect = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('resetChannel');
-    injectee.commit(
+  setChannelDirect = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('resetChannel');
+    actionContext.commit(
       'resetAllValidation',
-      injectee.state.channelState.validation
+      actionContext.state.channelState.validation
     );
-    injectee.commit('setChannelDirect', payload);
+    actionContext.commit('setChannelDirect', payload);
   }
 
-  addChannel = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('updateAllValidation', {
+  addChannel = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('updateAllValidation', {
       type: 'channel',
       data: payload.data,
-      currState: injectee.state.channelState
+      currState: actionContext.state.channelState
     });
-    if (injectee.state.channelState.valid) {
-      let channels = injectee.getters.manifests[
-        injectee.state.currentManifest
+    if (actionContext.state.channelState.valid) {
+      let channels = actionContext.getters.manifests[
+        actionContext.state.currentManifest
       ].channels[payload.inout].slice();
       channels.push(payload.data);
       let path = 'channels.' + payload.inout;
-      maniAPI.updateManifest(channels, path, injectee, {
+      maniAPI.updateManifest(channels, path, actionContext, {
         success: [
           {
             name: 'updateChannels',
@@ -2115,7 +2090,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               channels: channels,
               direction: payload.inout
             },
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           },
           {
             name: 'setChannel',
@@ -2131,120 +2106,108 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  updateChannState = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('updateChannState', payload);
-    injectee.commit('updateValidation', {
+  updateChannState = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('updateChannState', payload);
+    actionContext.commit('updateValidation', {
       type: 'channel',
       prop: payload.key,
       value: payload.value,
-      validation: injectee.state.channelState.validation
+      validation: actionContext.state.channelState.validation
     });
   }
 
   // CONNECTORS
-  setConnector = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    injectee.commit('setConnector', payload);
+  setConnector = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    actionContext.commit('setConnector', payload);
   }
 
-  deleteConnector = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let connectors = injectee.getters.manifests[
-      injectee.state.currentManifest
+  deleteConnector = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let connectors = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].connectors.slice();
     connectors.splice(payload, 1);
     if (connectors.length > 0)
-      if (payload > 0) injectee.commit('setConnector', payload - 1);
-      else injectee.commit('setConnector', 0);
-    else injectee.commit('setConnector', -1);
+      if (payload > 0) actionContext.commit('setConnector', payload - 1);
+      else actionContext.commit('setConnector', 0);
+    else actionContext.commit('setConnector', -1);
 
     let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, injectee, {
+    maniAPI.updateManifest(connectors, path, actionContext, {
       success: [
         {
           name: 'updateConnectors',
           params: connectors,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  addConnector = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let connectors = injectee.getters.manifests[
-      injectee.state.currentManifest
+  addConnector = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let connectors = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].connectors.slice();
     connectors.push(payload);
     let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, injectee, {
+    maniAPI.updateManifest(connectors, path, actionContext, {
       success: [
         {
           name: 'updateConnectors',
           params: connectors,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
-    injectee.commit('setConnector', connectors.length - 1);
+    actionContext.commit('setConnector', connectors.length - 1);
   }
 
-  addConnection = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    let connectors = injectee.getters.manifests[
-      injectee.state.currentManifest
+  addConnection = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    let connectors = actionContext.getters.manifests[
+      actionContext.state.currentManifest
     ].connectors.slice();
-    connectors[injectee.state.currentConnector][payload.direction].push(
+    connectors[actionContext.state.currentConnector][payload.direction].push(
       payload.element
     );
     let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, injectee, {
+    maniAPI.updateManifest(connectors, path, actionContext, {
       success: [
         {
           name: 'updateConnectors',
           params: connectors,
-          manifests: injectee.getters.manifests
+          manifests: actionContext.getters.manifests
         }
       ],
       failure: []
     });
   }
 
-  deleteConnList = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
-  ): void => {
-    if (injectee.state.currentConnector >= 0) {
+  deleteConnList = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
+    if (actionContext.state.currentConnector >= 0) {
       let direction =
         payload.type ===
-          injectee.state.Settings.listTypes.connectorList.provided
+          actionContext.state.Settings.listTypes.connectorList.provided
           ? 'provided'
           : 'depended';
-      let connChannels = injectee.getters.manifests[
-        injectee.state.currentManifest
-      ].connectors[injectee.state.currentConnector][direction].slice();
+      let connChannels = actionContext.getters.manifests[
+        actionContext.state.currentManifest
+      ].connectors[actionContext.state.currentConnector][direction].slice();
       connChannels.splice(payload.index, 1);
       let path =
-        'connectors.' + injectee.state.currentConnector + '.' + direction;
-      maniAPI.updateManifest(connChannels, path, injectee, {
+        'connectors.' + actionContext.state.currentConnector + '.' + direction;
+      maniAPI.updateManifest(connChannels, path, actionContext, {
         success: [
           {
             name: 'deleteConnList',
             params: payload,
-            manifests: injectee.getters.manifests
+            manifests: actionContext.getters.manifests
           }
         ],
         failure: []
@@ -2252,29 +2215,32 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }
   }
 
-  // ROUTING ACTIONS
-  cleanCurrent = (
-    injectee: Vuex.ActionContext<State, any>,
-    payload: any
+  setRoleName = (actionContext: Vuex.ActionContext<State, any>, newName: string
   ): void => {
+    actionContext.commit('setRoleName', newName);
+  }
+
+  // ROUTING ACTIONS
+  cleanCurrent = (actionContext: Vuex.ActionContext<State, any>,
+    payload: any): void => {
     payload = payload.split('#')[1];
     switch (payload) {
-      case injectee.state.Settings.modalProps.roles.id:
-        injectee.commit('resetRole');
-        injectee.commit(
+      case actionContext.state.Settings.modalProps.roles.id:
+        actionContext.commit('resetRole');
+        actionContext.commit(
           'resetAllValidation',
-          injectee.state.roleState.validation
+          actionContext.state.roleState.validation
         );
         break;
-      case injectee.state.Settings.modalProps.channels.id:
-        injectee.commit('resetChannel');
-        injectee.commit(
+      case actionContext.state.Settings.modalProps.channels.id:
+        actionContext.commit('resetChannel');
+        actionContext.commit(
           'resetAllValidation',
-          injectee.state.channelState.validation
+          actionContext.state.channelState.validation
         );
         break;
-      case injectee.state.Settings.modalProps.connectors.id:
-        injectee.commit('resetConnector', injectee.getters.manifests);
+      case actionContext.state.Settings.modalProps.connectors.id:
+        actionContext.commit('resetConnector', actionContext.getters.manifests);
         break;
       default:
         break;

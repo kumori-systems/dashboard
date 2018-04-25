@@ -65,6 +65,10 @@ export class Manifest extends ECloudElement {
   /** Component's runtime */
   runtime: string = undefined;
 
+  resources: any = undefined;
+
+  interconnection: any = undefined;
+
   /** Specification of the element. */
   spec: string = undefined;
 
@@ -101,7 +105,12 @@ export class Manifest extends ECloudElement {
     if (manifest.spec) { this.spec = manifest.spec; }
     if (manifest.service) { this.servicename = manifest.service; }
     if (manifest.derived) { this.derived = manifest.derived; }
-
+    if (manifest.interconnection) {
+      this.interconnection = manifest.interconnection;
+    }
+    if (manifest.resources) {
+      this.resources = manifest.resources;
+    }
     if (manifest.sourcedir) { this.sourcedir = manifest.sourcedir; }
     if (manifest.entrypoint) { this.entrypoint = manifest.entrypoint; }
     if (manifest.agent) { this.agent = manifest.agent; }

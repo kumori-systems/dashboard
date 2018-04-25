@@ -6,7 +6,7 @@
     <div class="modal-header">
       <button
         type="button"
-        class="close"
+        class="close white--text"
         data-dismiss="modal">
         &times;
       </button>
@@ -38,7 +38,7 @@
               >
                 <input
                   ref="rolename"
-                  v-model="role.name"
+                  v-model="roleName"
                   class="form-control">
                 <span
                   v-if="validation.name.err"
@@ -203,8 +203,13 @@ export default {
       return this.$store.state.manifesteditor.roleState.updater;
     },
 
-    roleName() {
-      return this.$store.state.manifesteditor.currentRole.name;
+    roleName: {
+      get() {
+        return this.$store.state.manifesteditor.currentRole.name;
+      },
+      set(newName) {
+        this.$store.dispatch("setRoleName", newName);
+      }
     },
 
     modalProp() {
@@ -216,8 +221,8 @@ export default {
       this.$store.dispatch("updateRoleName", payload);
     },
 
-    updateRoleComp(payload) {
-      this.$store.dispatch("updateRoleComp", payload);
+    updateRoleComp(newComponent) {
+      this.$store.dispatch("updateRoleComp", newComponent);
     },
 
     changeBypass(payload) {

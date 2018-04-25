@@ -10,35 +10,49 @@ import { Manifest } from '../stampstate/classes';
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
 
-  clearTemporalManifest = (state: State): void => {
-    state.temporalManifest = null;
+  /**
+   * Loads manifests to the manifesteditor module state.
+   */
+  loadManifests = (state: State, payload: { [uri: string]: Manifest }
+  ): void => {
+    state.manifests = payload;
   }
 
-  updateTemporalManifest = (
-    state: State,
-    payload: {
-      [param: string]: any;
-    }
+  updateManifest = (state: State, payload: { data: any, path: string }
   ): void => {
-    if (!state.temporalManifest) {
-      state.temporalManifest = payload.manifests[state.currentManifest];
+
+    let modifiedManifest = state.manifests[state.currentManifest];
+
+    let object = modifiedManifest;
+    let key = payload.path;
+    let data = payload.data;
+
+    while (key.indexOf('.') !== -1) {
+      let partOne = key.substr(0, key.indexOf('.'));
+      let partTwo = key.substr(key.indexOf('.') + 1, key.length);
+      object = object[partOne];
+      key = partTwo;
+      console.debug('part ONE', partOne);
+      console.debug('part TWO', partTwo);
     }
+    object[key] = data;
 
-    for (let key in payload) {
-      if (key !== 'manifests') {
-        let value = payload[key];
-        let object = state.temporalManifest;
+    console.debug('Path contains', payload.path);
+    console.debug('Data contains', payload.data);
 
-        while (key.indexOf('.') !== -1) {
-          let partTwo = key.substr(key.indexOf('.') + 1);
-          let partOne = key.substr(0, key.length - partTwo.length - 1);
-          object = object[partOne];
-          key = partTwo;
-        }
+    // The change will be something like
+    // state.manifests[path] = data
 
-        object[key] = value;
-      }
-    }
+
+
+
+
+    state.manifests = {
+      ...state.manifests,
+      [modifiedManifest._urn]: modifiedManifest
+
+    };
+
   }
 
   /**
@@ -183,11 +197,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       updater: false
     };
   }
-
   // APP
-  setState = (state: State, payload: any): void => {
-    // (<any>state).manifests = payload;
-  }
 
   addAlert = (state: State, payload: any): void => {
     state.alerts.push(payload);
@@ -207,6 +217,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   deleteValidation = (state: State, payload: any): void => {
     payload = {};
+  }
+
+  /**
+   * Removes the validation of the resources at the deployment state
+   */
+  deleteDeploymentStateValidation = (state: State, payload: any): void => {
+    state.deploymentState.resValidation = {};
   }
 
   resetValidation = (state: State, payload: any): void => {
@@ -251,12 +268,22 @@ export default class Mutations implements Vuex.MutationTree<State> {
     payload.validation[payload.prop] = { err: true, msg: payload.msg };
   }
 
-  setValidation = (state: State, payload: any): void => {
+  /**
+   * This method changes any value of the state referenced by payload.validation
+   * which has a parameter as the same name as payload.prop to payload.msg.
+   */
+  setValidation = (state: State,
+    payload: { validation: any, prop: string, msg: string }): void => {
+    console.debug('changing param \'%s\' to \'%s\' at', payload.prop,
+      payload.msg, payload.validation);
     payload.validation[payload.prop] = { err: false, msg: payload.msg };
   }
 
-  setManifest = (state: State, payload: any): void => {
-    state.currentManifest = payload;
+  /**
+   * Switches the uri of the current manifest.
+   */
+  setManifest = (state: State, uri: string): void => {
+    state.currentManifest = uri;
   }
 
   clearModals = (state: State, payload: any): void => {
@@ -272,7 +299,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.deploymentState.updater = !state.deploymentState.updater;
   }
 
-  updateDeployResState = (state: State, payload: any): void => {
+  // TODO - 'updater' here should be wrong.. it changes depending if the number
+  // of calls to this method is even or odd
+  updateDeployResState = (state: State, payload: { key: string, value: any }
+  ): void => {
     state.deploymentState = {
       ...state.deploymentState,
       resources: {
@@ -295,15 +325,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   setArrangement = (state: State, payload: any): void => {
-    let deploy = payload.manifests[state.currentManifest];
+    let deploy = state.manifests[state.currentManifest];
     state.deploymentState = {
       ...state.deploymentState,
       arrangements: {
         ...state.deploymentState.arrangements,
-        ...deploy.roles[payload.payload].resources
+        ...deploy.roles[payload].resources
       }
     };
-    state.currentArrangement = payload.payload;
+    state.currentArrangement = payload;
   }
 
   updateArrangementState = (state: State, payload: any): void => {
@@ -316,11 +346,13 @@ export default class Mutations implements Vuex.MutationTree<State> {
     };
   }
 
+  setRoleName = (state: State, newName: string): void => {
+    // TODO
+  }
+
   updateArrangement = (state: State, payload: any): void => {
-    /*
-    (<any>state).manifests[state.currentManifest]
-      .roles[state.currentArrangement].resources = payload;
-    */
+    state.manifests[state.currentManifest].roles[state.currentArrangement]
+      .resources = payload;
   }
 
   deleteArrangementState = (state: State, payload: any): void => {
@@ -332,10 +364,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
     };
   }
 
-  setDeploymentParams = (state: State, payload: any): void => {
+  setDeploymentParams = (state: State): void => {
 
-    let deploy = payload.manifests[state.currentManifest];
-    let service = payload.manifests[deploy.servicename];
+    let deploy = state.manifests[state.currentManifest];
+    let service = state.manifests[deploy.servicename];
     let serviceParams = service.configuration.parameters;
     let paramsList = [];
 
@@ -371,7 +403,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
             if (roles.length > 0) {
               parameter.type = 'role';
               parameter.data = [];
-              let component = payload.manifests[roles[0].component];
+              let component = state.manifests[roles[0].component];
               let paramsHash = {};
               for (let p of component.configuration.parameters) {
                 paramsHash[p.name] = {
@@ -517,16 +549,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   // ROLES
-  setRole = (
-    state: State, payload: { manifests: any; role: number; }
-  ): void => {
+  setRole = (state: State, role: number): void => {
 
-    if (payload.role < payload.manifests[state.currentManifest].roles.length) {
-      state.currentRole = payload.role;
+    if (role < state.manifests[state.currentManifest].roles.length) {
+      state.currentRole = role;
 
       if (state.currentRole >= 0) {
 
-        let role = payload.manifests[state.currentManifest]
+        let role = state.manifests[state.currentManifest]
           .roles[state.currentRole];
 
         state.roleState = {
@@ -572,9 +602,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
-  updateRoleComp = (state: State, payload: {
-    component: string; manifests: any;
-  }): void => {
+  updateConfirmationAccept(state: State, payload: any) {
+    state.confirm.accept = payload;
+  }
+
+  updateConfirmationDeny(state: State, payload: any) {
+    state.confirm.deny = payload;
+  }
+
+  updateRoleComp = (state: State, component: string): void => {
 
     state.temporalManifest = {
       ...state.temporalManifest,
@@ -582,7 +618,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
         ...state.temporalManifest.roles,
         [state.currentRole]: {
           ...state.temporalManifest.roles[state.currentRole],
-          'component': payload.component
+          'component': component
         }
       }
     };

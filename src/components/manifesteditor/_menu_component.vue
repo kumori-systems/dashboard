@@ -27,7 +27,7 @@
         </a>
         <span
           v-if="option.add"
-          :ref="'simulate-'+option.add.target"
+          :ref="'simulate-' + option.add.target"
           :data-target="option.add.target"
           data-toggle="modal"/>
         <ul
@@ -36,7 +36,7 @@
           class="nav nav-second-level collapse"
           aria-expanded="false"
           style="height: 0px;">              
-          <li v-if="option.id == 'component' ">
+          <li v-if="option.id === 'component' ">
             <div class="row" >
               <div class="col-sm-3">
                 <label class="control-label">
@@ -62,7 +62,7 @@
                   <span
                     v-if="validation.domain.err"
                     class="help-block">
-                    {{ $t('validation.'+validation.domain.msg) }}
+                    {{ $t('validation.' + validation.domain.msg) }}
                   </span>
                 </div>
               </div>               

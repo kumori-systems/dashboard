@@ -43,7 +43,7 @@
             class="nav nav-second-level collapse"
             aria-expanded="false"
             style="height: 0px;">         
-            <li v-if="option.id == 'deployment' ">
+            <li v-if="option.id === 'deployment' ">
               <div class="row">
                 <div class="col-sm-6">
                   <label class="control-label">
@@ -92,13 +92,13 @@
                     <span
                       v-if="validation.name.err"
                       class="help-block">
-                      {{ $t('validation.'+validation.name.msg) }}
+                      {{ $t('validation.' + validation.name.msg) }}
                     </span>
                   </div>
                 </div>
               </div> 
               <div
-                v-if="state.interconnection!=null"
+                v-if="state.interconnection!==null"
                 class="row"> 
                 <div class="col-sm-9">
                   <label class="control-label">

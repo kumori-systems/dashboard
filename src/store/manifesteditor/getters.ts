@@ -1,9 +1,11 @@
 import Vuex from 'vuex';
 import State from './state';
 
-import { Manifest } from '../stampstate/classes';
-
 import { tools } from './utils';
+
+import { ECloudElement, Manifest } from '../stampstate/classes';
+
+import { getElementType } from '../../api/utils';
 
 /**
  * Getters to handle the representation of the stamp state easier.
@@ -116,8 +118,8 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   // SERVICE
   getServiceName = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    
-      let res = {
+
+    let res = {
       name: '',
       domain: '',
       version: ''
@@ -156,7 +158,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       res = { name: '', component: '', resources: [] };
 
     }
-    
+
     return res;
 
   }
@@ -313,16 +315,17 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   }
 
   // RESOURCES
+  /**
+   * Obtains from all manifests all thoose which are resources
+   */
   getResources = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     let res = [];
-    Object.keys(getters.manifests).map(function (key, index) {
-      if (getters.manifests[key].type === 'resource') {
-        res.push(getters.manifests[key]);
+    for (let uri in state.manifests) {
+      if (getElementType(uri) === ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE) {
+        res.push(state.manifests[uri]);
       }
-      return true;
-    });
-
+    }
     return res;
   }
 

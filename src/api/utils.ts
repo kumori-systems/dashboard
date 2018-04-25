@@ -47,6 +47,10 @@ export function getElementType(urn: string): ECloudElement.ECLOUDELEMENT_TYPE {
     case 'resources':
       res = ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE;
       break;
+    case 'deployment':
+    case 'deployments':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT;
+      break;
     default:
       console.error('Unknown element type ' + splitted[i] + ' of ' + urn);
   }

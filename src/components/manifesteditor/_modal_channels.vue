@@ -28,7 +28,7 @@
               :class="{active: 'black--text'}"
               data-toggle="tab"
               aria-expanded="true">
-              {{$t('modals.channels.labels.prov')}}
+              {{ $t('modals.channels.labels.prov') }}
             </a>
           </li>
           <li
@@ -134,11 +134,10 @@
                     id="componentsList"
                     ref="protocol"
                     :value="getProtocol(channel.data.protocol)"
-                    class="form-control"
+                    class="form-control black--text"
                     @change="updateProtocol()">
                     <option
-                      v-for="(chProt, i) in getSettings.manifestStructure
-                        .elementtype.protocol.enum"
+                      v-for="(chProt, i) in getSettings.manifestStructure.elementtype.protocol.enum"
                       :key="i"
                       :value="chProt.eslap">
                       {{ chProt.name }}
@@ -172,7 +171,7 @@
         type="button"
         data-dismiss="modal"
         class="white--text btn btn-default">
-        <i class="fa fa-times"/> {{$t('panel.buttons.close')}}
+        <i class="fa fa-times"/> {{ $t('panel.buttons.close') }}
       </button>
     </div>
   </div>
@@ -207,43 +206,51 @@ export default {
     setChannelDirect(payload) {
       this.$store.dispatch("setChannelDirect", payload);
     },
+
     updateCurrentChannel(payload) {
       this.$store.dispatch("updateCurrentChannel", payload);
     },
-    addChannel() {
+
+    addChannel(payload) {
       this.$store.dispatch("addChannel", payload);
     },
+
     updateChannState(payload) {
       this.$store.dispatch("updateChannState", payload);
     },
+
     getType(eslap) {
       let hasChannel = this.getSettings.manifestStructure.elementtype.channel.enum.filter(
         elem => {
-          return elem.eslap == eslap;
+          return elem.eslap === eslap;
         }
       );
       return hasChannel.length > 0 ? hasChannel[0].eslap : "";
     },
+
     getProtocol(eslap) {
       let hasProtocol = this.getSettings.manifestStructure.elementtype.protocol.enum.filter(
         elem => {
-          return elem.eslap == eslap;
+          return elem.eslap === eslap;
         }
       );
       return hasProtocol.length > 0 ? hasProtocol[0].eslap : "";
     },
+
     getChannelTypes(inout) {
-      let negateDir = inout == "provides" ? "requires" : "provides";
+      let negateDir = inout === "provides" ? "requires" : "provides";
       return this.getSettings.manifestStructure.elementtype.channel.enum.filter(
         elem => {
           return elem.type != negateDir;
         }
       );
     },
+
     updateName() {
       this.updateChannState({ key: "name", value: this.$refs.name.value });
       if (this.channel.index > -1) this.updateChannel();
     },
+
     updateType() {
       this.updateChannState({ key: "type", value: this.$refs.type.value });
       if (!this.updateTypeOpts) {
@@ -253,6 +260,7 @@ export default {
       }
       this.updateTypeOpts = false;
     },
+
     updateProtocol() {
       this.updateChannState({
         key: "protocol",
@@ -262,6 +270,7 @@ export default {
         this.updateChannel();
       }
     },
+
     updateChannel() {
       this.updateCurrentChannel({
         inout: this.channel.inout,
@@ -273,6 +282,7 @@ export default {
         }
       });
     },
+
     createChannel() {
       this.addChannel({
         inout: this.channel.inout,
@@ -283,6 +293,7 @@ export default {
         }
       });
     },
+
     changeDir(dir) {
       this.setChannelDirect(dir);
     }
