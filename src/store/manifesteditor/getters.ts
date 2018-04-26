@@ -51,7 +51,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
     let res = [];
     if (state.currentManifest) {
-      let manifest = getters.manifests[state.currentManifest];
+      let manifest = state.manifests[state.currentManifest];
       res = res.concat(state.Settings.menuOptions[manifest.type])
         .concat(state.Settings.menuOptions['shared']);
     }
@@ -72,7 +72,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   getManifest = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     if (state.currentManifest !== '')
-      return getters.manifests[state.currentManifest];
+      return state.manifests[state.currentManifest];
   }
 
   blockEditName = (state?: State, getters?: Getters, rootState?: any,
@@ -86,7 +86,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
     let res = [];
     if (state.currentManifest) {
-      let deploy = getters.manifests[state.currentManifest];
+      let deploy = state.manifests[state.currentManifest];
       for (let role in deploy.roles) {
         res.push({ name: role });
       }
@@ -125,7 +125,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       version: ''
     };
     if (state.currentManifest) {
-      let splitted: string = getters.manifests[state.currentManifest]
+      let splitted: string[] = state.manifests[state.currentManifest]
         ._urn.split('/');
       res.name = splitted[4];
       res.domain = splitted[2];
@@ -142,7 +142,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let res: { name: string, component: string, resources: any[] };
     if (state.currentRole >= 0) {
 
-      let service = getters.manifests[state.currentManifest];
+      let service = state.manifests[state.currentManifest];
       let role = service.roles[state.currentRole];
       res = {
         name: role.name,
@@ -170,7 +170,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   getCurrentRoleResource = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let service = getters.manifests[state.currentManifest];
+    let service = state.manifests[state.currentManifest];
     if (state.currentRole >= 0) {
 
       let role = service.roles[state.currentRole];
@@ -215,7 +215,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   getCurrentRoleParams = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let service = getters.manifests[state.currentManifest];
+    let service = state.manifests[state.currentManifest];
     if (state.currentRole >= 0) {
       let role = service.roles[state.currentRole];
       let component = getters.getComponents[role.component];
@@ -229,7 +229,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     rootGetters?: any) => {
     let res = [];
     if (state.currentManifest) {
-      res = getters.manifests[state.currentManifest].channels;
+      res = state.manifests[state.currentManifest].channels;
     }
     return res;
   }
@@ -281,7 +281,7 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     let currentManifest = state.currentManifest;
     if (currentManifest) {
 
-      let connectors = getters.manifests[currentManifest].connectors;
+      let connectors = state.manifests[currentManifest].connectors;
       let genId = -1;
       for (let conn in connectors) {
 
@@ -333,9 +333,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   getBypassParams = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
     if (state.currentRole >= 0) {
-      let role = getters.manifests[state.currentManifest]
+      let role = state.manifests[state.currentManifest]
         .roles[state.currentRole];
-      return getters.manifests[state.currentManifest].configuration.parameters
+      return state.manifests[state.currentManifest].configuration.parameters
         .findIndex(x => x.name === role.name) !== -1;
     }
     return null;

@@ -197,8 +197,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
       updater: false
     };
   }
-  // APP
 
+  // APP
   addAlert = (state: State, payload: any): void => {
     state.alerts.push(payload);
   }
@@ -211,7 +211,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.alerts = [];
   }
 
-  displayAlertPan = (state: State, payload: any): void => {
+  /**
+   * Marks if the warning modal should be shown or not
+   */
+  displayAlertPan = (state: State, payload: boolean): void => {
     state.showAlertPan = payload;
   }
 
@@ -726,10 +729,59 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
+  /**
+   * Updates any property of a channel.
+   */
+  updateChannelProperty = (state: State, payload: {
+    key: string, value: string, channIndex: string,
+    inout: 'requires' | 'provides'
+  }): void => {
+
+    let channels = state.manifests[state.currentManifest].channels;
+    console.debug('Payload contains', payload);
+
+    console.debug('The group of channels contain', channels[payload.inout]);
+    console.debug(
+      'The selected channel contain',
+      channels[payload.inout][payload.channIndex]
+    );
+    
+    channels[payload.inout][payload.channIndex][payload.key] = payload.value;
+    state.manifests = {
+      ...state.manifests,
+      [state.currentManifest]: {
+        ...state.manifests[state.currentManifest],
+        'channels': channels
+      }
+    };
+
+  }
+
   // CONNECTORS
   setConnector = (state: State, payload: any): void => {
     state.currentConnector = payload;
   }
+
+  /**
+   * Sets the callback for the accept button on the warning modal
+   */
+  setConfirmAccept = (state: State, payload: any): void => {
+    state.confirm = {
+      ...state.confirm,
+      'accept': payload
+    };
+  }
+
+  /**
+   * Sets the callback for the deny button on the warning modal
+   */
+  setConfirmDeny = (state: State, payload: any): void => {
+    state.confirm = {
+      ...state.confirm,
+      'deny': payload
+    };
+  }
+
 
   updateConnectors = (state: State, payload: any): void => {
 

@@ -93,7 +93,7 @@ export default {
       return this.$store.state.manifesteditor.currentManifest;
     },
     manifests() {
-      return this.$store.getters.manifests;
+      return this.$store.state.manifests;
     },
     resources() {
       return this.$store.state.manifesteditor.deploymentState.resources;

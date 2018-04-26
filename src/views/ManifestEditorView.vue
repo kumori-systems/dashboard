@@ -173,7 +173,7 @@ export default {
     },
 
     manifests() {
-      return this.$store.getters.manifests;
+      return this.$store.state.manifesteditor.manifests;
     },
 
     currentManifest() {
@@ -182,9 +182,9 @@ export default {
 
     manifestList() {
       let res = [];
-      let manifests = this.manifests;
-      for (let i in manifests) {
-        res.push(manifests[i]);
+      console.debug('the list of manifests is', this.manifests);
+      for (let i in this.manifests) {
+        res.push(this.manifests[i]);
       }
       return res;
     },
@@ -194,9 +194,13 @@ export default {
     },
 
     options() {
-      return this.manifestList.filter(x => {
+      let res =  this.manifestList.filter(x => {
         return this.filterManifests.indexOf(x.type) > -1;
       });
+
+      console.debug('The list of manifests contains', this.manifestList);
+      console.debug('Options contains', res);
+      return res;
     }
   },
   mounted() {

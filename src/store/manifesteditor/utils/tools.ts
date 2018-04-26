@@ -68,7 +68,7 @@ function getAllChannels(state, getters, type) {
     let excludeSrvChann = {};
 
     let connType = type === 'requires' ? 'depended' : 'provided';
-    let service = getters.manifests[state.currentManifest];
+    let service = state.manifests[state.currentManifest];
 
     // Create exclusions
     for (let conn in service.connectors) {

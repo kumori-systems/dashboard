@@ -4,7 +4,7 @@
       v-for="(alert, index) in getAlerts"
       :key="index"
       :class="alert.type"
-      class="alert alert-dismissable">
+      class="alert alert-dismissable black--text">
       <button
         :id="index"
         type="button"

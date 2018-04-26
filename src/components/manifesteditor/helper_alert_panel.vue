@@ -5,12 +5,24 @@
       <div class="panel-heading">
         {{$t('panel.warning.title')}}
       </div>
-      <div class="panel-body">
-        <p>{{$t('panel.warning.text')}}</p>
+      <div class="panel-body black--text">
+        <p>
+          {{$t('panel.warning.text')}}
+        </p>
       </div>
       <div class="panel-footer">
-        <button  type="button" class="btn btn-success" @click="emit(true)">  <i class="fa fa-check"></i> {{ $t('panel.warning.buttons.accept') }}</button>
-        <button type="button" class="btn btn-default pull-right"  @click="emit(false)">  <i class="fa fa-times"></i>  {{ $t('panel.warning.buttons.deny') }} </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          @click="emit(true)"> 
+          <i class="fa fa-check"/> {{ $t('panel.warning.buttons.accept') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-default pull-right white--text"
+          @click="emit(false)">
+          <i class="fa fa-times"/> {{ $t('panel.warning.buttons.deny') }}
+        </button>
       </div>
     </div>
   </div>
