@@ -6,7 +6,6 @@ import webSettings from './settings';
  */
 export default class State {
   manifests: { [uri: string]: Manifest };
-  temporalManifest: any;
   mDependencies: any;
   confirm: { accept: any, deny: any };
   alerts: any[];
@@ -147,7 +146,6 @@ export default class State {
   /** Constructor of the state. */
   constructor() {
     this.manifests = {};
-    this.temporalManifest = null;
     this.mDependencies = {};
     this.confirm = {
       accept: null,
