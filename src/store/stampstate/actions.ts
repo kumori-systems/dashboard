@@ -17,6 +17,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   getElementInfo = (injectee: Vuex.ActionContext<State, any>,
     elementURN: string): void => {
+
     // Obtain the element in the state
     let res: any = undefined;
     switch (utils.getElementType(elementURN)) {
@@ -67,7 +68,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     // If the element isn't stored in the state, info is requested to the
     // platform
-    if (!res && res !== null) {
+    if (!res) {
 
       ProxyConnection.instance.getElementInfo(elementURN).catch((err) => {
         if (err.message !== 'Duplicated request') {
