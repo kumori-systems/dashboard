@@ -10,7 +10,7 @@ import {
 import State from './state';
 import { tools } from './utils';
 
-import { Manifest, ECloudElement, Resource } from '../stampstate/classes';
+import { ECloudElement, Manifest, Resource } from '../stampstate/classes';
 
 import FileSaver from 'file-saver';
 
@@ -85,7 +85,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       }),
       'TemporalManifest.' + temporalManifest._urn + '.json'
     );
-    
+
   }
 
   // TODO - dont know what this is used for
@@ -577,6 +577,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let component = actionContext.getters
       .manifests[actionContext.state.currentManifest];
+      
     actionContext.commit('updateCompState', {
       key: 'name',
       value: {
@@ -585,34 +586,41 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'version': getElementVersion(component._urn)
       }
     });
+
     actionContext.commit('updateCompState', {
       key: 'runtime',
       value: component.runtime
     });
+
     actionContext.commit('updateConfState', {
       key: 'resources',
       value: component.configuration.resources
     });
+
     actionContext.commit('updateConfState', {
       key: 'parameters',
       value: component.configuration.parameters
     });
 
     let validation = actionContext.state.componentState.validation;
+
     actionContext.commit('updateAllValidation', {
       type: 'component',
       data: component,
       currState: actionContext.state.componentState
     });
+
     if (
       actionContext.state.Settings.manifestStructure.elementtype.runtime.enum
         .filter(x => { return x.eslap === component.runtime; }).length === 0
     ) {
+
       actionContext.commit('setErrValidation', {
         validation: validation,
         prop: 'runtime',
         msg: 'wrongruntime'
       });
+      
     }
 
   }

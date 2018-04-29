@@ -13,9 +13,9 @@ export default class Mutations implements Vuex.MutationTree<State> {
   /**
    * Loads manifests to the manifesteditor module state.
    */
-  loadManifests = (state: State, payload: { [uri: string]: Manifest }
+  loadManifests = (state: State, manifests: { [uri: string]: Manifest }
   ): void => {
-    state.manifests = payload;
+    state.manifests = manifests;
   }
 
   updateManifest = (state: State, payload: { data: any, path: string }
@@ -203,7 +203,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   deleteValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats.
     payload = {};
   }
 
@@ -211,24 +212,28 @@ export default class Mutations implements Vuex.MutationTree<State> {
    * Removes the validation of the resources at the deployment state
    */
   deleteDeploymentStateValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     state.deploymentState.resValidation = {};
   }
 
   resetValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     payload.validation[payload.key] = false;
   }
 
   resetAllValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     for (let prop in payload) {
       payload[prop].err = false;
     }
   }
 
   updateAllValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     payload.currState.valid = false;
     for (let prop in payload.currState.validation) {
       payload.currState.validation[prop] = validProp(
@@ -244,7 +249,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     let dinamicProp = payload.dinamic ? payload.dinamic : payload.prop;
     payload.validation[payload.prop] = validProp(
       payload.type,
@@ -254,12 +260,14 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateValidationType = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     payload.validation[payload.prop] = validType(payload.type, payload.value);
   }
 
   setErrValidation = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     payload.validation[payload.prop] = { err: true, msg: payload.msg };
   }
 
@@ -269,7 +277,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
    */
   setValidation = (state: State,
     payload: { validation: any, prop: string, msg: string }): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     console.debug('changing param \'%s\' to \'%s\' at', payload.prop,
       payload.msg, payload.validation);
     payload.validation[payload.prop] = { err: false, msg: payload.msg };
@@ -287,18 +296,24 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   // DEPLOYMENT
+  /**
+   * TODO - Possible bug. 'updater' changes depending if the number of calls to
+   * this method is even or odd
+   */
   updateDeployState = (state: State, payload: any): void => {
 
     state.deploymentState = {
       ...state.deploymentState,
-      [payload.key]: payload.value
+      [payload.key]: payload.value,
+      updater: !state.deploymentState.updater
     };
-    state.deploymentState.updater = !state.deploymentState.updater;
 
   }
 
-  // TODO - 'updater' here should be wrong.. it changes depending if the number
-  // of calls to this method is even or odd
+  /**
+   * TODO - Possible bug. 'updater' changes depending if the number of calls to
+   * this method is even or odd
+   */
   updateDeployResState = (state: State, payload: { key: string, value: any }
   ): void => {
 
@@ -313,6 +328,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
+  /**
+   * TODO - Possible bug. 'updater' changes depending if the number of calls to
+   * this method is even or odd
+   */
   updateDeployParamState = (state: State, payload: any): void => {
     state.deploymentState = {
       ...state.deploymentState,
@@ -336,6 +355,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.currentArrangement = payload;
   }
 
+  /**
+   * TODO - Possible bug. 'updater' changes depending if the number of calls to
+   * this method is even or odd
+   */
   updateArrangementState = (state: State, payload: any): void => {
     state.deploymentState = {
       ...state.deploymentState,
@@ -351,15 +374,17 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   updateArrangement = (state: State, payload: any): void => {
-    // TODO - This doesn't triggers a change
+    // TODO - Possible bug. This doesn't triggers a change.
+    // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
     state.manifests[state.currentManifest].roles[state.currentArrangement]
       .resources = payload;
   }
 
   deleteArrangementState = (state: State, payload: any): void => {
-    // TODO - ¿Does delete triggers a change? ¿Why not vue.delete()?
-    delete state.deploymentState.arrangements[payload];
-    delete state.deploymentState.arrValidation[payload];
+
+    Vue.delete(state.deploymentState.arrangements, payload);
+    Vue.delete(state.deploymentState.arrValidation, payload);
+
     state.deploymentState = {
       ...state.deploymentState,
       updater: !state.deploymentState.updater
@@ -367,7 +392,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   /**
-   * It seems this function has several bugs
+   * Function with possible bugs
    */
   setDeploymentParams = (state: State): void => {
 
@@ -413,7 +438,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
           if (type === 'json') {
 
-            // ????? Don't know the reason of this filter
+            /*
+              ????? Don't know the reason of this filter
+              Example values:
+              key : 0
+              x.name : 'myRoleName'
+            */
             let roles = service.roles.filter(x => {
               return x.name === key;
             });
@@ -445,13 +475,21 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
               // For each parameter at the json parameter
               // TODO - maps can be dangerous if 'data' cant be converted to an
-              //  object
+              //  object.
               Object.keys(data).map((pKey, index) => {
 
-                // TODO - This won't trigger a change
+                /*
+                  TODO - Possible bug. This doesn't triggers a change.
+                  https://vuejs.org/v2/guide/reactivity.html#Change
+                    -Detection-Caveats
+                */
                 state.deploymentState.parameters[key + pKey] = data[pKey];
 
-                // TODO - This won't trigger a change
+                /*
+                  TODO - Possible bug. This doesn't triggers a change.
+                  https://vuejs.org/v2/guide/reactivity.html#Change
+                    -Detection-Caveats
+                */
                 state.deploymentState.paramValidation[key + pKey] = {
                   err: false,
                   msg: ''
@@ -468,11 +506,19 @@ export default class Mutations implements Vuex.MutationTree<State> {
               });
             } else { // There aren't roles
 
-              // TODO - This won't trigger a change
+              /*
+                TODO - Possible bug. This doesn't triggers a change.
+                https://vuejs.org/v2/guide/reactivity.html#Change
+                  -Detection-Caveats
+              */
               state.deploymentState.parameters[key] = deploy.configuration
                 .parameters[key];
 
-              // TODO - This won't trigger a change
+              /*
+                TODO - Possible bug. This doesn't triggers a change.
+                https://vuejs.org/v2/guide/reactivity.html#Change
+                  -Detection-Caveats
+              */
               state.deploymentState.paramValidation[key] = {
                 err: false,
                 msg: ''
@@ -482,7 +528,11 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
           } else {
 
-            // TODO - This won't trigger a change
+            /*
+              TODO - Possible bug. This doesn't triggers a change.
+              https://vuejs.org/v2/guide/reactivity.html#Change
+                -Detection-Caveats
+            */
             state.deploymentState.paramValidation[key] = {
               err: false,
               msg: ''
@@ -531,7 +581,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       ...state.componentState,
       [payload.key]: payload.value,
 
-      // TODO - What if odd number of calls to this function?
+      // TODO - What if odd | even number of calls to this function?
       'updater': !state.componentState.updater
     };
 
@@ -545,6 +595,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.configurationState = {
       ...state.configurationState,
       [payload.key]: payload.value,
+
       // TODO - What if odd number of calls to this function?
       'updater': !state.configurationState.updater
     };
@@ -556,6 +607,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
     state.configurationState = {
       ...state.configurationState,
       [payload.key]: payload.value,
+
       // TODO - What if odd number of calls to this function?
       'updater': !state.configurationState.updater
     };
