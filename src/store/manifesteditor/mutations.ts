@@ -369,10 +369,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
     };
   }
 
-  setRoleName = (state: State, newName: string): void => {
-    // TODO
-  }
-
   updateArrangement = (state: State, payload: any): void => {
     // TODO - Possible bug. This doesn't triggers a change.
     // https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats
@@ -703,6 +699,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
   // ROLES
   setRole = (state: State, role: number): void => {
 
+    console.debug('Cuando entramos en setRole tenemos como rol ' + role);
+
     if (role < state.manifests[state.currentManifest].roles.length) {
       state.currentRole = role;
 
@@ -742,12 +740,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
-  updateRoleName = (state: State, payload: any): void => {
+  updateRoleName = (state: State, newRoleName: string): void => {
 
     let roles = state.manifests[state.currentManifest].roles;
     roles[state.currentRole] = {
       ...state.manifests[state.currentManifest].roles[state.currentRole],
-      'name': payload
+      'name': newRoleName
     };
 
     state.manifests = {

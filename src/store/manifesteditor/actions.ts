@@ -577,7 +577,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let component = actionContext.getters
       .manifests[actionContext.state.currentManifest];
-      
+
     actionContext.commit('updateCompState', {
       key: 'name',
       value: {
@@ -620,7 +620,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         prop: 'runtime',
         msg: 'wrongruntime'
       });
-      
+
     }
 
   }
@@ -639,8 +639,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success.push({
         name: 'setComponentRuntime',
         params: {
-          value: payload.value,
-          manifests: actionContext.getters.manifests
+          value: payload.value
         }
       });
     }
@@ -728,8 +727,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'setComponentResources',
-              params: resources,
-              manifests: actionContext.getters.manifests
+              params: resources
             },
             {
               name: 'updateConfigState',
@@ -784,8 +782,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'setComponentParameters',
-              params: parameters,
-              manifests: actionContext.getters.manifests
+              params: parameters
             },
             {
               name: 'updateConfigState',
@@ -821,8 +818,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'setComponentResources',
-            params: resources,
-            manifests: actionContext.getters.manifests
+            params: resources
           },
           {
             name: 'updateConfigState',
@@ -850,8 +846,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'setComponentParameters',
-            params: parameters,
-            manifests: actionContext.getters.manifests
+            params: parameters
           },
           {
             name: 'updateConfigState',
@@ -1022,21 +1017,44 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   // ROLES
   setRole = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
+    actualRoleNumber: number): void => {
+
+    console.debug(
+      'Cuando entramos a setRole (action) tenemos como rol'
+      + JSON.stringify(actualRoleNumber)
+    );
+
+    // Resets the state.currentRole
     actionContext.commit('resetRole');
+
+    // actionContext.state.roleState.resourceValidation = {}
     actionContext.commit(
       'deleteValidation',
       actionContext.state.roleState.resourceValidation
     );
-    actionContext.commit('setRole', {
-      manifests: actionContext.getters.manifests,
-      role: payload
-    });
 
+    // TODO - Analizando
+    actionContext.commit('setRole', actualRoleNumber);
+
+    console.debug(
+      'The current manifest URI is ' + actionContext.state.currentManifest
+    );
     let currentManifest =
       actionContext.getters.manifests[actionContext.state.currentManifest];
+    console.debug(
+      'The current manifest is' + JSON.stringify(currentManifest, null, 2)
+    );
+
+    console.debug('The current role URI is' + actionContext.state.currentRole);
     let role = currentManifest.roles[actionContext.state.currentRole];
+    console.debug(
+      'The current role is' + JSON.stringify(role, null, 2)
+    );
+
     let component = actionContext.getters.manifests[role.component];
+    console.debug(
+      'The current component is' + JSON.stringify(component, null, 2)
+    );
 
     if (component.configuration.resources) {
       component.configuration.resources.map(elem => {
@@ -1051,19 +1069,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     actionContext.commit('updateAllValidation', {
       type: 'role',
       data: actionContext.getters.manifests[actionContext.state.currentManifest]
-        .roles[payload],
+        .roles[actualRoleNumber],
       currState: actionContext.state.roleState
     });
   }
 
   updateRoleName = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let validation = actionContext.state.roleState.validation;
     if (validation) {
       actionContext.dispatch('updateRoleState', {
         key: 'name',
-        value: name,
-        manifests: actionContext.getters.manifests
+        value: name
       });
       let roles = actionContext.getters.manifests[
         actionContext.state.currentManifest
@@ -1098,14 +1116,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           success: [
             {
               name: 'updateRoleName',
-              params: name,
-              manifest: actionContext.getters.manifests
+              params: name
             }
           ],
           failure: []
         });
       }
     }
+    
   }
 
   updateRoleNameInParams = (actionContext: Vuex.ActionContext<State, any>,
@@ -1123,8 +1141,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'setServParams',
-          params: parameters,
-          manifests: actionContext.getters.manfiests
+          params: parameters
         }
       ],
       failure: []
@@ -1153,8 +1170,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
-          manifests: actionContext.getters.manifests
+          params: connectors
         }
       ],
       failure: []
@@ -1198,8 +1214,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'updateRoles',
-            params: payload,
-            manifests: actionContext.getters.manifests
+            params: payload
           },
           {
             name: 'setRole',
@@ -1299,8 +1314,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'deleteRole',
-            params: payload,
-            manifests: actionContext.getters.manifests
+            params: payload
           }
         ],
         failure: []
@@ -1333,8 +1347,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
-          manifests: actionContext.getters.manifests
+          params: connectors
         }
       ],
       failure: []
@@ -1369,8 +1382,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'setServRes',
-          params: { res: resources },
-          manifests: actionContext.getters.manifests
+          params: { res: resources }
         }
       ],
       failure: []
@@ -1394,8 +1406,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateRoleRes',
-          params: {},
-          manifests: actionContext.getters.manifests
+          params: {}
         }
       ],
       failure: []
@@ -1422,8 +1433,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'setServParams',
-          params: parameters,
-          manifests: actionContext.getters.manifests
+          params: parameters
         }
       ],
       failure: []
@@ -1478,8 +1488,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                       params: {
                         index: sResIndex,
                         name: payload.tag
-                      },
-                      manifests: actionContext.getters.manifests
+                      }
                     }
                   ],
                   failure: []
@@ -1504,8 +1513,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                       params: {
                         name: payload.name,
                         tag: payload.tag
-                      },
-                      manifests: actionContext.getters.manifests
+                      }
                     }
                   ],
                   failure: []
@@ -1522,8 +1530,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                   success: [
                     {
                       name: 'setServRes',
-                      params: { res: sResources },
-                      manifests: actionContext.getters.manifests
+                      params: { res: sResources }
                     }
                   ],
                   failure: []
@@ -1542,8 +1549,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                 success: [
                   {
                     name: 'setRolRes',
-                    params: { res: rResources },
-                    manifests: actionContext.getters.manifests
+                    params: { res: rResources }
                   }
                 ],
                 failure: []
@@ -1562,8 +1568,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               success: [
                 {
                   name: 'setServRes',
-                  params: { res: sResources },
-                  manifests: actionContext.getters.manifests
+                  params: { res: sResources }
                 }
               ],
               failure: []
@@ -1581,8 +1586,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               success: [
                 {
                   name: 'setRolRes',
-                  params: { res: rResources },
-                  manifests: actionContext.getters.manifests
+                  params: { res: rResources }
                 }
               ],
               failure: []
@@ -1838,8 +1842,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'setServParams',
-            params: params,
-            manifests: actionContext.getters.manifests
+            params: params
           }
         ],
         failure: []
@@ -1887,8 +1890,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             params: {
               channels: channels,
               direction: payload.inout
-            },
-            manifests: actionContext.getters.manifests
+            }
           }
         ],
         failure: []
@@ -1917,8 +1919,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'updateConnectors',
-            params: connectors,
-            manifests: actionContext.getters.manifests
+            params: connectors
           }
         ],
         failure: []
@@ -1953,8 +1954,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               params: {
                 channels: channels,
                 direction: payload.inout
-              },
-              manifests: actionContext.getters.manifests
+              }
             }
           ],
           failure: []
@@ -2027,8 +2027,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               params: {
                 channels: channels,
                 direction: payload.inout
-              },
-              manifests: actionContext.getters.manifests
+              }
             }
           ],
           failure: []
@@ -2058,8 +2057,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'updateConnectors',
-            params: connectors,
-            manifests: actionContext.getters.manifests
+            params: connectors
           }
         ],
         failure: []
@@ -2097,8 +2095,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             params: {
               channels: channels,
               direction: payload.inout
-            },
-            manifests: actionContext.getters.manifests
+            }
           },
           {
             name: 'setChannel',
@@ -2147,8 +2144,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
-          manifests: actionContext.getters.manifests
+          params: connectors
         }
       ],
       failure: []
@@ -2166,8 +2162,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
-          manifests: actionContext.getters.manifests
+          params: connectors
         }
       ],
       failure: []
@@ -2188,8 +2183,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
-          manifests: actionContext.getters.manifests
+          params: connectors
         }
       ],
       failure: []
@@ -2214,8 +2208,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         success: [
           {
             name: 'deleteConnList',
-            params: payload,
-            manifests: actionContext.getters.manifests
+            params: payload
           }
         ],
         failure: []
