@@ -40,14 +40,17 @@
                   ref="rolename"
                   v-model="roleName"
                   class="form-control">
+                
                 <span
                   v-if="validation.name.err"
                   class="glyphicon glyphicon-remove form-control-feedback"/>
+
                 <span
                   v-if="validation.name.err"
                   class="help-block">
                   {{ $t('validation.' + validation.name.msg) }}
                 </span>
+
               </div>
             </div>
           </div>
@@ -71,12 +74,14 @@
                   class="form-control"
                   @change="updateComponent">
                   <optgroup :label="$t('modals.roles.labels.chcomp')">
+
                     <option
                       v-for="comp in getComponents"
                       :value="comp.name"
                       :key="comp.name">
                       {{ comp.name }}
                     </option>
+
                   </optgroup>
                 </select>
                 <span
@@ -207,12 +212,17 @@ export default {
 
     roleName: {
       get() {
-        return this.$store.state.manifesteditor.manifests[
-          this.$store.state.manifesteditor.currentManifest
-        ].roles[this.$store.state.manifesteditor.currentRole].name;
+        let res = "";
+
+        if (this.$store.state.manifesteditor.currentRole >= 0) {
+          res = this.$store.state.manifesteditor.manifests[
+            this.$store.state.manifesteditor.currentManifest
+          ].roles[this.$store.state.manifesteditor.currentRole].name;
+        }
+
+        return res;
       },
       set(newName) {
-        console.debug("Updating role name " + newName);
         this.$store.dispatch("updateRoleName", newName);
       }
     },
@@ -243,10 +253,13 @@ export default {
     },
 
     updateName() {
-      if (this.getCurrentRoleIndex != -1) {
+      if (this.getCurrentRoleIndex !== -1) {
         this.updateRoleName(this.$refs.rolename.value);
       } else {
-        this.updateRoleState({ key: "name", value: this.$refs.rolename.value });
+        this.updateRoleState({
+          key: "name",
+          value: this.$refs.rolename.value
+        });
       }
     },
 

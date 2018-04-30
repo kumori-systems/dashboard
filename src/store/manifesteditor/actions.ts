@@ -1077,104 +1077,147 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateRoleName = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
 
+    console.debug('Entramos en updateRoleName con', payload);
+
     let validation = actionContext.state.roleState.validation;
     if (validation) {
+
       actionContext.dispatch('updateRoleState', {
         key: 'name',
-        value: name
+        value: payload
       });
+
       let roles = actionContext.state.manifests[
         actionContext.state.currentManifest
       ].roles.filter((rol, index) => {
-        return rol.name === name && index !== actionContext.state.currentRole;
+        return rol.name === payload
+          && index !== actionContext.state.currentRole;
       });
-      if (roles.length > 0)
+
+      if (roles.length > 0) {
+
         actionContext.commit('setErrValidation', {
           validation: validation,
           prop: 'name',
           msg: 'dupname'
         });
 
-      // console.log(validation.name.err)
+      }
+
       if (!validation.name.err) {
+
         actionContext.dispatch('updateRoleNameInConnectors', {
           oldName: actionContext.state
             .manifests[actionContext.state.currentManifest]
             .roles[actionContext.state.currentRole].name,
-          newName: name
+          newName: payload
         });
+
         actionContext.dispatch('updateRoleNameInParams', {
           oldName: actionContext.state
             .manifests[actionContext.state.currentManifest]
             .roles[actionContext.state.currentRole].name,
-          newName: name
+          newName: payload
         });
 
-        let path = 'roles.' + actionContext.state.currentRole + '.name';
 
-        maniAPI.updateManifest(name, path, actionContext, {
-          success: [
-            {
-              name: 'updateRoleName',
-              params: name
-            }
-          ],
-          failure: []
-        });
+        maniAPI.updateManifest(
+          payload,
+          'roles.' + actionContext.state.currentRole + '.name',
+          actionContext,
+          {
+            success: [
+              {
+                name: 'updateRoleName',
+                params: payload
+              }
+            ],
+            failure: []
+          }
+        );
+
       }
+
     }
 
   }
 
   updateRoleNameInParams = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
+    // Obtains the current manifest parameters
     let parameters = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].configuration.parameters.slice();
+    ].configuration.parameters;
+
     for (let j = 0; j < parameters.length; j++) {
-      if (payload.oldName === parameters[j].name)
-        parameters[j].name = payload.newName;
+      if (payload.oldName === parameters[j].name) {
+        actionContext.commit(
+          'udpateRoleNameInParameters',
+          {
+            key: parameters[j].name,
+            value: payload.newName
+          }
+        );
+      }
     }
 
-    let path = 'configuration.parameters';
-    maniAPI.updateManifest(parameters, path, actionContext, {
-      success: [
-        {
-          name: 'setServParams',
-          params: parameters
-        }
-      ],
-      failure: []
-    });
+    maniAPI.updateManifest(
+      parameters,
+      'configuration.parameters',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'setServParams',
+            params: parameters
+          }
+        ],
+        failure: []
+      }
+    );
   }
 
   updateRoleNameInConnectors = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
+    payload: { oldName: string, newName: string }): void => {
+
+    console.debug('At updateRoleNameInConnectors the payload is', payload);
+
+    // Manifest connectors
     let connectors = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].connectors.slice();
-    let UpdateConnList = (data, list) => {
-      for (let j = 0; j < list.length; j++)
-        if (list[j].role && data.oldName === list[j].role)
-          list[j].role = data.newName;
-    };
+    ].connectors;
 
-    for (let i = 0; i < connectors.length; i++) {
+    // Updates the role name in a list
+    let UpdateConnList = (data, list) => {
+      for (let j: number = 0; j < list.length; j++) {
+        if (list[j].role && data.oldName === list[j].role) {
+          actionContext.commit('updateRoleNameInConnector', {
+            key: list[j].role,
+            value: data.newName
+          });
+        }
+      }
+    };
+    for (let i: number = 0; i < connectors.length; i++) {
       UpdateConnList(payload, connectors[i].provided);
       UpdateConnList(payload, connectors[i].depended);
     }
 
-    let path = 'connectors';
-
-    maniAPI.updateManifest(connectors, path, actionContext, {
-      success: [
-        {
-          name: 'updateConnectors',
-          params: connectors
-        }
-      ],
-      failure: []
-    });
+    maniAPI.updateManifest(
+      connectors,
+      'connectors',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateConnectors',
+            params: connectors
+          }
+        ],
+        failure: []
+      }
+    );
   }
 
   addRole = (actionContext: Vuex.ActionContext<State, any>,
@@ -1232,9 +1275,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateRoleComp = (actionContext: Vuex.ActionContext<State, any>,
     newComponent: string): void => {
 
-    actionContext.commit('displayAlertPan', true);
+    console.debug(
+      'Entramos en updateRole Component con el nombre %s', newComponent
+    );
 
+    // Sets confirm callback
     actionContext.commit('updateConfirmationAccept', () => {
+
+
+      console.debug(
+        'En updateRoleState newComponent vale: '
+        + JSON.stringify(newComponent, null, 2)
+      );
 
       actionContext.commit('updateRoleState', {
         key: 'component', value: newComponent
@@ -1245,7 +1297,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       );
 
       actionContext.dispatch(
-        'deleteRoleFromResouces', actionContext.state.currentRole
+        'deleteRoleFromResources', actionContext.state.currentRole
       );
 
       actionContext.dispatch(
@@ -1256,6 +1308,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'deleteRoleFromParameters', actionContext.state.currentRole
       );
 
+      console.debug(
+        'En updateRoleState2 newComponent vale: '
+        + JSON.stringify(newComponent, null, 2)
+      );
+
+
       maniAPI.updateManifest(
         newComponent,
         'roles.' + actionContext.state.currentRole + '.component',
@@ -1263,12 +1321,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         {
           success: [{
             name: 'updateRoleComp',
-            newComponent
+            params: newComponent
           }],
           failure: []
         });
     });
 
+    // Sets deny callback
     actionContext.commit('updateConfirmationDeny', () => {
       actionContext.commit('updateRoleComp', actionContext.state
         .manifests[actionContext.state.currentManifest]
@@ -1281,10 +1340,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           .roles[actionContext.state.currentRole].component
       });
     });
+
+    // Show warning modal
+    actionContext.commit('displayAlertPan', true);
   }
 
   updateRoleState = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
+    payload: { key: string, value: string }): void => {
     actionContext.commit('updateRoleState', payload);
     actionContext.commit('updateValidation', {
       type: 'role',
@@ -1296,148 +1358,199 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   deleteRole = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     actionContext.commit('displayAlertPan', true);
-    actionContext.state.confirm.accept = () => {
+
+
+    actionContext.commit('setConfirmAccept', () => {
+
       actionContext.commit('resetRole');
+      actionContext.dispatch('deleteRoleFromConnectors', payload);
+      actionContext.dispatch('deleteRoleFromResources', payload);
+      actionContext.dispatch('deleteRoleFromParameters', payload);
+      actionContext.commit('deleteRole', payload);
+
       let roles = actionContext.state.manifests[
         actionContext.state.currentManifest
-      ].roles.slice();
+      ].roles;
 
-      actionContext.dispatch('deleteRoleFromConnectors', payload);
-      actionContext.dispatch('deleteRoleFromResouces', payload);
-      actionContext.dispatch('deleteRoleFromParameters', payload);
+      maniAPI.updateManifest(
+        roles,
+        'roles',
+        actionContext,
+        {
+          success: [
+            {
+              name: 'deleteRole',
+              params: payload
+            }
+          ],
+          failure: []
+        }
+      );
+    }
+    );
 
-      // UPDATE ROLES
-      roles.splice(payload, 1);
-      let path = 'roles';
-      maniAPI.updateManifest(roles, path, actionContext, {
-        success: [
-          {
-            name: 'deleteRole',
-            params: payload
-          }
-        ],
-        failure: []
-      });
-    };
-    actionContext.state.confirm.deny = () => { };
+    actionContext.commit('setConfirmDeny', () => { });
+
   }
 
   deleteRoleFromConnectors = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
-    let path = '';
+    actualRoleNumber: number): void => {
+
+    // Current manifest roles
     let roles = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].roles.slice();
-    let role = roles[payload];
+    ].roles;
 
-    // UPDATE SERVICE CONNECTORS
-    let filterConn = function (elem) {
-      return elem.role !== undefined && elem.role !== role.name;
-    };
+    // Current role
+    let role = roles[actualRoleNumber];
+
+    // Current manifest connectors
     let connectors = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].connectors.slice();
+    ].connectors;
+
+    let filterConn = function (elem) {
+      return elem.role && elem.role !== role.name;
+    };
     for (let i = 0; i < connectors.length; i++) {
-      connectors[i].provided = connectors[i].provided.filter(filterConn);
-      connectors[i].depended = connectors[i].depended.filter(filterConn);
-    }
-    path = 'connectors';
-    maniAPI.updateManifest(connectors, path, actionContext, {
-      success: [
+
+      actionContext.commit('setProvidedConnectors',
         {
-          name: 'updateConnectors',
-          params: connectors
+          key: connectors[i].provided,
+          value: connectors[i].provided.filter(filterConn)
         }
-      ],
-      failure: []
-    });
+      );
+
+      actionContext.commit('setDependedConnectors',
+        {
+          key: connectors[i].depended,
+          value: connectors[i].depended.filter(filterConn)
+        }
+      );
+
+    }
+
+    maniAPI.updateManifest(
+      connectors,
+      'connectors',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateConnectors',
+            params: connectors
+          }
+        ],
+        failure: []
+      }
+    );
   }
 
-  deleteRoleFromResouces = (actionContext: Vuex.ActionContext<State, any>,
+  deleteRoleFromResources = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    let path = '';
-    let roles = actionContext.state.manifests[
+
+    // Obtains the current role
+    let role = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].roles.slice();
-    let role = roles[payload];
+    ].roles[payload];
 
     // UPDATE SERVICE RESOURCES
     let resources = actionContext.state
-      .manifests[actionContext.state.currentManifest].configuration
-      .resources;
-    let roleRes = {};
-    let filterRes = function (elem) {
-      return roleRes[elem.name] === undefined;
-    };
+      .manifests[actionContext.state.currentManifest].configuration.resources;
 
-    for (let prop in role.resources) {
-      roleRes[role.resources[prop]] = true;
+    if (resources) {
+
+      let roleRes = {};
+      for (let prop in role.resources) {
+        roleRes[role.resources[prop]] = true;
+      }
+
+      let filteredResources = resources.filter((elem) => {
+        return !roleRes[elem.name];
+      });
+
+      actionContext.commit('updateRoleRes', filteredResources);
+
+      maniAPI.updateManifest(
+        resources,
+        'configuration.resources',
+        actionContext,
+        {
+          success: [{
+            name: 'setServRes',
+            params: filteredResources
+          }],
+          failure: []
+        }
+      );
+
     }
 
-    resources = resources.filter(filterRes);
-
-    path = 'configuration.resources';
-    maniAPI.updateManifest(resources, path, actionContext, {
-      success: [
-        {
-          name: 'setServRes',
-          params: { res: resources }
-        }
-      ],
-      failure: []
-    });
   }
 
   deleteRolesResouces = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
+    actualRoleIndex: number): void => {
+
+    // Obtains the roles from the current manifest
     let roles = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].roles.slice();
-    let role = roles[payload];
+    ].roles;
 
-    // UPDATE SERVICE RESOURCES
-    role.resources = {};
+    // Obtains the current role
+    let role = roles[actualRoleIndex];
 
+    // Removes the resources from the role state
     actionContext.commit('updateRoleState', { key: 'resources', value: {} });
 
-    let path = 'roles.' + payload;
-    maniAPI.updateManifest(role, path, actionContext, {
-      success: [
-        {
-          name: 'updateRoleRes',
-          params: {}
-        }
-      ],
-      failure: []
-    });
+    maniAPI.updateManifest(
+      role,
+      'roles.' + actualRoleIndex,
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateRoleRes',
+            params: {}
+          }
+        ],
+        failure: []
+      }
+    );
+
   }
 
   deleteRoleFromParameters = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    let path = '';
+
+    // Obtains current manifest roles
     let roles = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].roles.slice();
+    ].roles;
+
+    // Obtains current role
     let role = roles[payload];
 
-    // UPDATE SERVICE PARAMETERS
-    let filterParam = function (elem) {
-      return elem.name !== role.name;
-    };
+    // Obtains current role parameters
     let parameters = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].configuration.parameters.filter(filterParam);
-    path = 'configuration.parameters';
-    maniAPI.updateManifest(parameters, path, actionContext, {
-      success: [
-        {
+    ].configuration.parameters.filter((elem) => {
+      return elem && elem.name && elem.name !== role.name;
+    });
+
+    maniAPI.updateManifest(
+      parameters,
+      'configuration.parameters',
+      actionContext,
+      {
+        success: [{
           name: 'setServParams',
           params: parameters
-        }
-      ],
-      failure: []
-    });
+        }],
+        failure: []
+      }
+    );
   }
 
   // RESOURCES
@@ -1530,7 +1643,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                   success: [
                     {
                       name: 'setServRes',
-                      params: { res: sResources }
+                      params: sResources
                     }
                   ],
                   failure: []
@@ -1548,8 +1661,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               maniAPI.updateManifest(roles, path, actionContext, {
                 success: [
                   {
-                    name: 'setRolRes',
-                    params: { res: rResources }
+                    name: 'updateRoleRes',
+                    params: rResources
                   }
                 ],
                 failure: []
@@ -1568,7 +1681,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
               success: [
                 {
                   name: 'setServRes',
-                  params: { res: sResources }
+                  params: sResources
                 }
               ],
               failure: []
@@ -1585,8 +1698,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             maniAPI.updateManifest(rResources, path, actionContext, {
               success: [
                 {
-                  name: 'setRolRes',
-                  params: { res: rResources }
+                  name: 'updateRoleRes',
+                  params: rResources
                 }
               ],
               failure: []

@@ -139,23 +139,30 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   getCurrentRole = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
 
-    let res: { name: string, component: string, resources: any[] };
-    if (state.currentRole >= 0) {
+    let res: { name: string, component: string, resources: any[] } = {
+      name: '', component: '', resources: []
+    };
 
+    if (state.currentManifest && state.currentRole >= 0) {
+
+      // Current service
       let service = state.manifests[state.currentManifest];
+
+      // Current role
       let role = service.roles[state.currentRole];
+
+      console.debug('The current Role Index is ' + state.currentRole);
+      console.debug('The service is ' + JSON.stringify(service, null, 2));
+      console.debug('The current Role is ' + JSON.stringify(role, null, 2));
+
       res = {
         name: role.name,
         component: role.component,
         resources: role.resources ?
-          Object.keys(role.resources).map(function (key) {
+          Object.keys(role.resources).map((key) => {
             return { name: role.resources[key], key: key };
           }) : []
       };
-
-    } else {
-
-      res = { name: '', component: '', resources: [] };
 
     }
 
@@ -170,58 +177,87 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   getCurrentRoleResource = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let service = state.manifests[state.currentManifest];
-    if (state.currentRole >= 0) {
 
+    let res: { headers: any, rows: any } = {
+      headers: state.Settings.inlineForms.headers.resource, rows: []
+    };
+    if (state.currentManifest && state.currentRole >= 0) {
+
+      // Current Service
+      let service = state.manifests[state.currentManifest];
+
+      console.debug(
+        'Current manifest URI ' + JSON.stringify(state.currentManifest, null, 2)
+      );
+
+      console.debug(
+        'Current service ' + JSON.stringify(service, null, 2)
+      );
+
+      // Current Role
       let role = service.roles[state.currentRole];
-      let components = getters.getComponents;
-      let component = components[role.component];
+
+      console.debug(
+        'Current role URI ' + JSON.stringify(state.currentRole, null, 2)
+      );
+
+      console.debug(
+        'Current role ' + JSON.stringify(role, null, 2)
+      );
+
+      // Current Role component
+      let component = getters.getComponents[role.component];
+
+      console.debug(
+        'Current component ' + JSON.stringify(component, null, 2)
+      );
+
+      // Current Role Resources
       let resources = component.configuration.resources;
 
-      let rows = [];
-      if (resources.length > 0) {
+      if (resources.length > 0) { // If this role has resources
+
         for (let i = 0; i < resources.length; i++) {
-          let depId = role.resources ? role.resources[resources[i].name] : '';
-          rows.push([
-            {
-              id: 'name',
-              ref: resources[i].name + i,
-              value: resources[i].name,
-              type: state.Settings.inlineForms.valueTypes.text
-            },
-            {
-              id: 'resType',
-              ref: resources[i].name + i,
-              value: resources[i].type.match(/resource\/(.+)\//)[1],
-              type: state.Settings.inlineForms.valueTypes.text,
-              fullType: resources[i].type
-            },
-            {
-              id: 'depid',
-              ref: resources[i].name + i,
-              value: depId,
-              type: state.Settings.inlineForms.valueTypes.input
-            }
-          ]);
+
+          res.rows.push([{
+            id: 'name',
+            ref: resources[i].name + i,
+            value: resources[i].name,
+            type: state.Settings.inlineForms.valueTypes.text
+          }, {
+            id: 'resType',
+            ref: resources[i].name + i,
+            value: resources[i].type.match(/resource\/(.+)\//)[1],
+            type: state.Settings.inlineForms.valueTypes.text,
+            fullType: resources[i].type
+          }, {
+            id: 'depid',
+            ref: resources[i].name + i,
+            value: role.resources ? role.resources[resources[i].name] : '',
+            type: state.Settings.inlineForms.valueTypes.input
+          }]);
+
         }
-        return {
-          headers: state.Settings.inlineForms.headers.resource,
-          rows: rows
-        };
+
       }
+
     }
-    return { headers: state.Settings.inlineForms.headers.resource, rows: [] };
+    return res;
+
   }
 
   getCurrentRoleParams = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    let service = state.manifests[state.currentManifest];
-    if (state.currentRole >= 0) {
-      let role = service.roles[state.currentRole];
+
+    let res = [];
+    if (state.currentManifest && state.currentRole >= 0) {
+      let role = state
+        .manifests[state.currentManifest]
+        .roles[state.currentRole];
       let component = getters.getComponents[role.component];
-      return component.configuration.parameters;
+      res = component.configuration.parameters;
     }
-    return [];
+    return res;
   }
 
   // CHANNELS 
@@ -332,13 +368,21 @@ export default class Getters implements Vuex.GetterTree<State, any> {
   // PARAMETERS
   getBypassParams = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
-    if (state.currentRole >= 0) {
-      let role = state.manifests[state.currentManifest]
+
+    let res = null;
+
+    if (state.currentManifest && state.currentRole >= 0) {
+
+      let role = state
+        .manifests[state.currentManifest]
         .roles[state.currentRole];
-      return state.manifests[state.currentManifest].configuration.parameters
+
+      res = state
+        .manifests[state.currentManifest]
+        .configuration.parameters
         .findIndex(x => x.name === role.name) !== -1;
     }
-    return null;
+    return res;
   }
 
   currentManifest = (state?: State, getters?: Getters, rootState?: any,
