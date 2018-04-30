@@ -577,6 +577,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let component = actionContext.state
       .manifests[actionContext.state.currentManifest];
+
     actionContext.commit('updateCompState', {
       key: 'name',
       value: {
@@ -585,34 +586,41 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         'version': getElementVersion(component._urn)
       }
     });
+
     actionContext.commit('updateCompState', {
       key: 'runtime',
       value: component.runtime
     });
+
     actionContext.commit('updateConfState', {
       key: 'resources',
       value: component.configuration.resources
     });
+
     actionContext.commit('updateConfState', {
       key: 'parameters',
       value: component.configuration.parameters
     });
 
     let validation = actionContext.state.componentState.validation;
+
     actionContext.commit('updateAllValidation', {
       type: 'component',
       data: component,
       currState: actionContext.state.componentState
     });
+
     if (
       actionContext.state.Settings.manifestStructure.elementtype.runtime.enum
         .filter(x => { return x.eslap === component.runtime; }).length === 0
     ) {
+
       actionContext.commit('setErrValidation', {
         validation: validation,
         prop: 'runtime',
         msg: 'wrongruntime'
       });
+
     }
 
   }
@@ -1009,21 +1017,44 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   // ROLES
   setRole = (actionContext: Vuex.ActionContext<State, any>,
-    payload: any): void => {
+    actualRoleNumber: number): void => {
+
+    console.debug(
+      'Cuando entramos a setRole (action) tenemos como rol'
+      + JSON.stringify(actualRoleNumber)
+    );
+
+    // Resets the state.currentRole
     actionContext.commit('resetRole');
+
+    // actionContext.state.roleState.resourceValidation = {}
     actionContext.commit(
       'deleteValidation',
       actionContext.state.roleState.resourceValidation
     );
-    actionContext.commit('setRole', {
-      manifests: actionContext.state.manifests,
-      role: payload
-    });
 
+    // TODO - Analizando
+    actionContext.commit('setRole', actualRoleNumber);
+
+    console.debug(
+      'The current manifest URI is ' + actionContext.state.currentManifest
+    );
     let currentManifest =
-      actionContext.state.manifests[actionContext.state.currentManifest];
+      actionContext.getters.manifests[actionContext.state.currentManifest];
+    console.debug(
+      'The current manifest is' + JSON.stringify(currentManifest, null, 2)
+    );
+
+    console.debug('The current role URI is' + actionContext.state.currentRole);
     let role = currentManifest.roles[actionContext.state.currentRole];
-    let component = actionContext.state.manifests[role.component];
+    console.debug(
+      'The current role is' + JSON.stringify(role, null, 2)
+    );
+
+    let component = actionContext.getters.manifests[role.component];
+    console.debug(
+      'The current component is' + JSON.stringify(component, null, 2)
+    );
 
     if (component.configuration.resources) {
       component.configuration.resources.map(elem => {
@@ -1037,14 +1068,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     actionContext.commit('updateAllValidation', {
       type: 'role',
-      data: actionContext.state.manifests[actionContext.state.currentManifest]
-        .roles[payload],
+      data: actionContext.getters.manifests[actionContext.state.currentManifest]
+        .roles[actualRoleNumber],
       currState: actionContext.state.roleState
     });
   }
 
   updateRoleName = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let validation = actionContext.state.roleState.validation;
     if (validation) {
       actionContext.dispatch('updateRoleState', {
@@ -1091,6 +1123,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         });
       }
     }
+
   }
 
   updateRoleNameInParams = (actionContext: Vuex.ActionContext<State, any>,
@@ -1929,10 +1962,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         // Deletes the channel in all connectors
         actionContext.dispatch('deleteChannelInConnectors', payload);
 
-        // Sets the channel name
-        actionContext.commit('updateChannelProperty', {
-          key: 'name', value: payload.data.name, channIndex: payload.index,
-          inout: payload.inout
+        let path = 'channels.' + payload.inout;
+        maniAPI.updateManifest(channels, path, actionContext, {
+          success: [
+            {
+              name: 'updateChannels',
+              params: {
+                channels: channels,
+                direction: payload.inout
+              }
+            }
+          ],
+          failure: []
         });
 
         // Sets the channel type
@@ -2156,7 +2197,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             params: {
               channels: channels,
               direction: payload.inout
-            },
+            }
           },
           {
             name: 'setChannel',
@@ -2223,7 +2264,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       success: [
         {
           name: 'updateConnectors',
-          params: connectors,
+          params: connectors
         }
       ],
       failure: []

@@ -155,7 +155,9 @@ export default {
   data() {
     return {};
   },
-
+  mounted: function() {
+    console.debug("Modal roles has been mounted");
+  },
   computed: {
     getComponents() {
       return this.$store.getters.getComponents;
@@ -186,7 +188,7 @@ export default {
         return this.$store.state.manifesteditor.roleState.role;
       },
 
-      set() {
+      set(role) {
         this.$store.dispatch("updateRoleName", role);
       }
     },
@@ -205,10 +207,13 @@ export default {
 
     roleName: {
       get() {
-        return this.$store.state.manifesteditor.currentRole.name;
+        return this.$store.state.manifesteditor.manifests[
+          this.$store.state.manifesteditor.currentManifest
+        ].roles[this.$store.state.manifesteditor.currentRole].name;
       },
       set(newName) {
-        this.$store.dispatch("setRoleName", newName);
+        console.debug("Updating role name " + newName);
+        this.$store.dispatch("updateRoleName", newName);
       }
     },
 
@@ -276,5 +281,5 @@ export default {
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/dist/css/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/sb-admin-2/sb-admin-2.css"></style>
 <style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
