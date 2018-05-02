@@ -2024,29 +2024,48 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   deleteChannelInConnectors = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let service = actionContext.state
       .manifests[actionContext.state.currentManifest];
-    // UPDATE SERVICE CONNECTORS
+
     if (service.type === 'service') {
+
       let filterConn = function (elem) {
         return elem.role !== undefined || elem.endpoint !== payload.data.name;
       };
-      let connectors = service.connectors.slice();
-      for (let i = 0; i < connectors.length; i++) {
-        connectors[i].provided = connectors[i].provided.filter(filterConn);
-        connectors[i].depended = connectors[i].depended.filter(filterConn);
+
+
+      for (let i = 0; i < service.connectors.length; i++) {
+
+        actionContext.commit('deleteChannelInConnectors', {
+          key: service.connectors[i].provided,
+          value: service.connectors[i].provided.filter(filterConn)
+        });
+
+        actionContext.commit('deleteChannelInConnectors', {
+          key: service.connectors[i].depended,
+          value: service.connectors[i].depended.filter(filterConn)
+        });
+
       }
-      let path = 'connectors';
-      maniAPI.updateManifest(connectors, path, actionContext, {
-        success: [
-          {
-            name: 'updateConnectors',
-            params: connectors
-          }
-        ],
-        failure: []
-      });
+
+      maniAPI.updateManifest(
+        service.connectors,
+        'connectors',
+        actionContext,
+        {
+          success: [
+            {
+              name: 'updateConnectors',
+              params: service.connectors
+            }
+          ],
+          failure: []
+        }
+      );
+
     }
+
   }
 
   updateCurrentChannel = (actionContext: Vuex.ActionContext<State, any>,
@@ -2257,31 +2276,46 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   updateChannelInConnectors = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let service = actionContext.state
       .manifests[actionContext.state.currentManifest];
-    if (service.type === 'service') {
-      let connectors = service.connectors.slice();
-      let UpdateConnList = (data, list) => {
-        for (let j = 0; j < list.length; j++)
-          if (list[j].role === undefined && data.oldName === list[j].endpoint)
-            list[j].endpoint = data.newName;
-      };
 
-      for (let i = 0; i < connectors.length; i++) {
-        UpdateConnList(payload, connectors[i].provided);
-        UpdateConnList(payload, connectors[i].depended);
-      }
-      let path = 'connectors';
-      maniAPI.updateManifest(connectors, path, actionContext, {
-        success: [
-          {
-            name: 'updateConnectors',
-            params: connectors
+    if (service.type === 'service') {
+
+      let UpdateConnList = (data, list) => {
+        for (let j = 0; j < list.length; j++) {
+          if (!list[j].role && data.oldName === list[j].endpoint) {
+
+            actionContext.commit('updateChannelNameInConnectors', {
+              key: list[j].endpoint,
+              value: data.newName
+            });
+
           }
-        ],
-        failure: []
-      });
+        }
+      };
+      for (let i = 0; i < service.connectors.length; i++) {
+        UpdateConnList(payload, service.connectors[i].provided);
+        UpdateConnList(payload, service.connectors[i].depended);
+      }
+
+      maniAPI.updateManifest(
+        service.connectors,
+        'connectors',
+        actionContext,
+        {
+          success: [
+            {
+              name: 'updateConnectors',
+              params: service.connectors
+            }
+          ],
+          failure: []
+        }
+      );
+
     }
+
   }
 
   setChannelDirect = (actionContext: Vuex.ActionContext<State, any>,
