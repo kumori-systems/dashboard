@@ -1,2 +1,2 @@
-export const ACS_URL = "";
-export const ADMISSION_URL = "";
+export const ACS_URI = "";
+export const ADMISSION_URI = "";
