@@ -886,6 +886,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
+  addConnector = (state: State, payload: { key: any, value: any }): any => {
+
+    payload.key.push(payload.value);
+
+  }
+
   updateConfirmationAccept = (state: State, payload: any): void => {
 
     console.debug('MUTATION - updateConfirmationAccept');

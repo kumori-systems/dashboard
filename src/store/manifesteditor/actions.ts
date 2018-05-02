@@ -2330,6 +2330,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   addChannel = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     actionContext.commit('updateAllValidation', {
       type: 'channel',
       data: payload.data,
@@ -2362,10 +2363,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         failure: []
       });
     }
+
   }
 
   updateChannState = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     actionContext.commit('updateChannState', payload);
     actionContext.commit('updateValidation', {
       type: 'channel',
@@ -2373,112 +2376,161 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       value: payload.value,
       validation: actionContext.state.channelState.validation
     });
+
   }
 
   // CONNECTORS
   setConnector = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     actionContext.commit('setConnector', payload);
+
   }
 
   deleteConnector = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let connectors = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].connectors.slice();
-    connectors.splice(payload, 1);
-    if (connectors.length > 0)
-      if (payload > 0) actionContext.commit('setConnector', payload - 1);
-      else actionContext.commit('setConnector', 0);
-    else actionContext.commit('setConnector', -1);
+    ].connectors;
 
-    let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, actionContext, {
-      success: [
-        {
-          name: 'updateConnectors',
-          params: connectors
-        }
-      ],
-      failure: []
-    });
+    connectors.splice(payload, 1);
+
+    if (connectors.length > 0) {
+      if (payload > 0) {
+        actionContext.commit('setConnector', payload - 1);
+      } else {
+        actionContext.commit('setConnector', 0);
+      }
+    } else {
+      actionContext.commit('setConnector', -1);
+    }
+
+    maniAPI.updateManifest(
+      connectors,
+      'connectors',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateConnectors',
+            params: connectors
+          }
+        ],
+        failure: []
+      }
+    );
+
   }
 
   addConnector = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    let connectors = actionContext.state.manifests[
-      actionContext.state.currentManifest
-    ].connectors.slice();
-    connectors.push(payload);
-    let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, actionContext, {
-      success: [
-        {
-          name: 'updateConnectors',
-          params: connectors
-        }
-      ],
-      failure: []
+
+    actionContext.commit('addConnector', {
+      key: actionContext.state.manifests[
+        actionContext.state.currentManifest
+      ].connectors,
+      value: payload
     });
-    actionContext.commit('setConnector', connectors.length - 1);
+
+    maniAPI.updateManifest(
+      actionContext.state.manifests[
+        actionContext.state.currentManifest
+      ].connectors,
+      'connectors',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateConnectors',
+            params: actionContext.state.manifests[
+              actionContext.state.currentManifest
+            ].connectors
+          }
+        ],
+        failure: []
+      }
+    );
+
+    actionContext.commit('setConnector', actionContext.state.manifests[
+      actionContext.state.currentManifest
+    ].connectors.length - 1);
+
   }
 
   addConnection = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     let connectors = actionContext.state.manifests[
       actionContext.state.currentManifest
-    ].connectors.slice();
+    ].connectors;
+
     connectors[actionContext.state.currentConnector][payload.direction].push(
       payload.element
     );
-    let path = 'connectors';
-    maniAPI.updateManifest(connectors, path, actionContext, {
-      success: [
-        {
-          name: 'updateConnectors',
-          params: connectors
-        }
-      ],
-      failure: []
-    });
+
+    maniAPI.updateManifest(
+      connectors,
+      'connectors',
+      actionContext,
+      {
+        success: [
+          {
+            name: 'updateConnectors',
+            params: connectors
+          }
+        ],
+        failure: []
+      }
+    );
+
   }
 
   deleteConnList = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     if (actionContext.state.currentConnector >= 0) {
-      let direction =
-        payload.type ===
-          actionContext.state.Settings.listTypes.connectorList.provided
-          ? 'provided'
-          : 'depended';
+
+      let direction = payload.type === actionContext.state.Settings.listTypes
+        .connectorList.provided ? 'provided' : 'depended';
+
       let connChannels = actionContext.state.manifests[
         actionContext.state.currentManifest
-      ].connectors[actionContext.state.currentConnector][direction].slice();
+      ].connectors[actionContext.state.currentConnector][direction];
+
       connChannels.splice(payload.index, 1);
-      let path =
-        'connectors.' + actionContext.state.currentConnector + '.' + direction;
-      maniAPI.updateManifest(connChannels, path, actionContext, {
-        success: [
-          {
-            name: 'deleteConnList',
-            params: payload
-          }
-        ],
-        failure: []
-      });
+
+      maniAPI.updateManifest(
+        connChannels,
+        'connectors.' + actionContext.state.currentConnector + '.' + direction,
+        actionContext,
+        {
+          success: [
+            {
+              name: 'deleteConnList',
+              params: payload
+            }
+          ],
+          failure: []
+        }
+      );
+
     }
+
   }
 
   setRoleName = (actionContext: Vuex.ActionContext<State, any>, newName: string
   ): void => {
+
     actionContext.commit('setRoleName', newName);
+
   }
 
   // ROUTING ACTIONS
   cleanCurrent = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
-    payload = payload.split('#')[1];
-    switch (payload) {
+
+    switch (payload.split('#')[1]) {
       case actionContext.state.Settings.modalProps.roles.id:
         actionContext.commit('resetRole');
         actionContext.commit(
@@ -2486,6 +2538,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           actionContext.state.roleState.validation
         );
         break;
+
       case actionContext.state.Settings.modalProps.channels.id:
         actionContext.commit('resetChannel');
         actionContext.commit(
@@ -2493,11 +2546,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           actionContext.state.channelState.validation
         );
         break;
+
       case actionContext.state.Settings.modalProps.connectors.id:
         actionContext.commit('resetConnector', actionContext.state.manifests);
         break;
+
       default:
-        break;
     }
+
   }
+
 }

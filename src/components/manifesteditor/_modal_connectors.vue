@@ -131,7 +131,7 @@ export default {
     }
   },
   methods: {
-    addConnector() {
+    addConnector(payload) {
       this.$store.dispatch("addConnector", payload);
     },
 
