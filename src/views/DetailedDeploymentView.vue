@@ -1,6 +1,6 @@
 <template>
 <v-form ref="form" lazy-validation>
-  <v-card>
+  <v-card v-if="deployment">
     <v-card-title>
       
       <!-- View title-->
@@ -321,20 +321,24 @@ export default class DetailedDeploymentView extends Vue {
     [channel: string]: { text: string; value: string }[];
   } = {};
 
-  unwatch: () => void;
+  unwatch = [];
 
   mounted() {
     this.cancelChanges();
-    this.unwatch = this.$watch("$route.path", val => {
-      this.cancelChanges();
-
-      this.clear = true;
-      this.haveChanges = false;
-    });
+    this.unwatch.push(
+      // Watches for route changes
+      this.$watch("$route.path", val => {
+        this.cancelChanges();
+        this.clear = true;
+        this.haveChanges = false;
+      })
+    );
   }
 
   beforeDestroy() {
-    this.unwatch();
+    for (let i in this.unwatch) {
+      this.unwatch[i]();
+    }
   }
 
   /** Obtains the deployment from the storage. */
@@ -343,6 +347,9 @@ export default class DetailedDeploymentView extends Vue {
     let res: Deployment = null;
     for (let key in deployments) {
       if (deployments[key]._path === this.$route.path) res = deployments[key];
+    }
+    if(!res){
+      this.$router.push('/overview');
     }
     return res;
   }

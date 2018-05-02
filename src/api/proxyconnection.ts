@@ -423,8 +423,8 @@ export class ProxyConnection extends EventEmitter {
                       'Service ' + event.data.endpoints[0].deployment
                       + ':' + event.data.endpoints[0].channel
                       + ' has been linked with '
-                      + event.data.endpoints[0].deployment
-                      + ':' + event.data.endpoints[0].channel,
+                      + event.data.endpoints[1].deployment
+                      + ':' + event.data.endpoints[1].channel,
                       JSON.stringify(event, null, 4)
                     )
                   );
@@ -657,8 +657,12 @@ export class ProxyConnection extends EventEmitter {
               registeredResIndex,
               new Certificate(
                 registeredResIndex, // urn
-                registeredResources[registeredResIndex].parameters.key, // key
-                registeredResources[registeredResIndex].parameters.cert, // cert
+                // key
+                registeredResources[registeredResIndex].parameters.content.key,
+                // cert
+                registeredResources[registeredResIndex].parameters.content.cert,
+                // ca
+                registeredResources[registeredResIndex].parameters.content.ca,
                 registeredResources[registeredResIndex].deployment // UsedBy
               )
             );
@@ -1375,18 +1379,19 @@ export class ProxyConnection extends EventEmitter {
           // Ther's actually a bug in which deployments with no certificates
           // return a resource with null parameters
           if (ecloudDeployment.resources[res].resource.parameters) {
-            resources[res] = ecloudDeployment.resources[res].resource.parameters
-              .name;
+            resources[res] = ecloudDeployment.resources[res].resource.name;
 
             this.emit(
               this.onAddCertificate,
               ecloudDeployment.resources[res].resource.name,
               new Certificate(
-                ecloudDeployment.resources[res].resource.parameters.name, // urn
+                ecloudDeployment.resources[res].resource.name, // urn
                 ecloudDeployment.resources[res].resource.parameters.content
                   .key, // key
                 ecloudDeployment.resources[res].resource.parameters.content
                   .cert, // certificate
+                ecloudDeployment.resources[res].resource.parameters.content
+                  .ca, // ca
                 ecloudDeployment.urn // usedBy
               )
             );
@@ -2009,6 +2014,7 @@ export class ProxyConnection extends EventEmitter {
           manifest.name, // urn
           manifest.parameters.content.key, // key
           manifest.parameters.content.cert, // certificate
+          manifest.parameters.content.ca, // certificate
           null // usedBy
         );
 

@@ -42,7 +42,7 @@
               clearable
               v-model="selectedCertificate"
               v-bind:items="certificates"
-              item-text="_version"
+              item-text="_urn"
               item-value="_urn"
               autocomplete
             ></v-select>
