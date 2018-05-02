@@ -23,7 +23,7 @@ import {
 } from '../store/stampstate/classes';
 
 
-import { ACS_URL, ADMISSION_URL } from './config.js';
+import { ACS_URI, ADMISSION_URI } from './config.js';
 import { utils } from './index';
 
 
@@ -230,7 +230,7 @@ export class ProxyConnection extends EventEmitter {
   ): Promise<any> {
 
     // ACS will be used in both cases to refresh the token
-    this.acs = new EcloudAcsClient(ACS_URL);
+    this.acs = new EcloudAcsClient(ACS_URI);
     let signIn: Promise<User>;
     if (!token) {
 
@@ -264,7 +264,7 @@ export class ProxyConnection extends EventEmitter {
       .then(() => signIn)
       .then((user: User) => {
 
-        this.admission = new EcloudAdmissionClient(ADMISSION_URL,
+        this.admission = new EcloudAdmissionClient(ADMISSION_URI,
           user.token.accessToken);
 
         this.admission.onConnected(() => {

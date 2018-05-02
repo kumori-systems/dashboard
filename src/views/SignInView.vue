@@ -118,7 +118,7 @@ export default class SignInView extends Vue {
   mounted() {
     // Set redirection path for google oauth
     this.googleOauthURN =
-      config.ACS_URL +
+      config.ACS_URI +
       "/auth/google?redirectOnSuccessUrl=" +
       urlencode(location.origin + "/#/overview") +
       "&redirectOnFailureUrl=" +
