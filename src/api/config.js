@@ -1,2 +1,2 @@
-export let ACS_URL = "";
-export let ADMISSION_URL = "";
+export let ACS_URI = "";
+export let ADMISSION_URI = "";

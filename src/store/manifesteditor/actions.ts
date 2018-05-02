@@ -2394,7 +2394,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       actionContext.state.currentManifest
     ].connectors;
 
-    connectors.splice(payload, 1);
+    actionContext.commit('deleteConnector', {
+      key: connectors,
+      value: payload
+    });
 
     if (connectors.length > 0) {
       if (payload > 0) {

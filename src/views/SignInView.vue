@@ -248,10 +248,10 @@ export default class SignInView extends Vue {
     this.admissionURL = localStorage.getItem("admissionURL");
 
     if (!this.acsURL) {
-      this.acsURL = config.ACS_URL;
+      this.acsURL = config.ACS_URI;
     }
     if (!this.admissionURL) {
-      this.admissionURL = config.ADMISSION_URL;
+      this.admissionURL = config.ADMISSION_URI;
     }
   }
 
@@ -277,8 +277,8 @@ export default class SignInView extends Vue {
   }
 
   clearConfig() {
-    this.acsURL = config.ACS_URL;
-    this.admissionURL = config.ADMISSION_URL;
+    this.acsURL = config.ACS_URI;
+    this.admissionURL = config.ADMISSION_URI;
   }
 }
 </script>

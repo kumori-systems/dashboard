@@ -62,22 +62,33 @@ function paseSugestionChannels(list, role) {
 }
 
 function getAllChannels(state, getters, type) {
+
   let list = [];
+
   if (state.currentManifest) {
     let excludeRolChann = {};
     let excludeSrvChann = {};
 
     let connType = type === 'requires' ? 'depended' : 'provided';
+    console.debug(
+      'The connection type is ' + JSON.stringify(connType, null, 2)
+    );
+
+    // Current service
     let service = state.manifests[state.currentManifest];
+    console.debug('The actual service is ' + JSON.stringify(service, null, 2));
 
     // Create exclusions
     for (let conn in service.connectors) {
       for (let entry of service.connectors[conn][connType]) {
+
+        // Add all provided or depended channels as excluded ones
         if (entry.role) {
           excludeRolChann[entry.role + ':' + entry.endpoint] = true;
         }
+
       }
-      if (type === 'requires')
+      if (type === 'requires') {
         for (let entry in service.connectors[conn][connType]) {
           if (!service.connectors[conn][connType][entry].role) {
             excludeSrvChann[
@@ -85,19 +96,28 @@ function getAllChannels(state, getters, type) {
             ] = true;
           }
         }
+      }
     }
 
+    console.debug(
+      'The excluded channel list contains ' + JSON.stringify(service, null, 2)
+    );
+
     for (let role in service.roles) {
-      if (getters.getComponents[service.roles[role].component]) {
-        let comChannels = getters.getComponents[service.roles[role].component]
-          .channels[type];
+      let component = getters.getComponents[service.roles[role].component];
+      if (component) {
+        let comChannels = component.channels[type];
         if (comChannels && comChannels.length > 0) {
-          list = list.concat(paseSugestionChannels(
-            comChannels, service.roles[role].name
-          ));
+          list = list.concat(
+            paseSugestionChannels(comChannels, service.roles[role].name)
+          );
         }
       }
     }
+
+    console.debug(
+      'In the middle of the method the list contains ' + JSON.stringify(list)
+    );
 
     if (
       type === 'requires'
@@ -114,6 +134,11 @@ function getAllChannels(state, getters, type) {
     });
 
   }
+
+
+  console.debug(
+    'La lista de opciones de canales contiene: ' + JSON.stringify(list)
+  );
 
   return list;
 }
