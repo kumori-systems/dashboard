@@ -214,10 +214,12 @@ export default {
       get() {
         let res = "";
 
-        if (this.$store.state.manifesteditor.currentRole >= 0) {
+        if (this.$store.state.manifesteditor.currentRole > -1) {
           res = this.$store.state.manifesteditor.manifests[
             this.$store.state.manifesteditor.currentManifest
           ].roles[this.$store.state.manifesteditor.currentRole].name;
+        }else{
+          res = this.$store.state.manifesteditor.roleState.role.name;
         }
 
         return res;

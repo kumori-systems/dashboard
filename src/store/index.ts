@@ -12,7 +12,8 @@ export default new Vuex.Store({
     The strict mode is an important feature which ensures one of the basis of
     the flux pattern implemented in vuex. https://vuex.vuejs.org/en/strict.html
   */
-  'strict': process.env.NODE_ENV !== 'production',
+  // 'strict': process.env.NODE_ENV !== 'production',
+  strict: true,
   'modules': {
     pagestate,
     stampstate,

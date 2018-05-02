@@ -1104,7 +1104,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       }
 
-      if (!validation.name.err) {
+      if (!validation.name.err && actionContext.state.currentRole > -1) {
 
         actionContext.dispatch('updateRoleNameInConnectors', {
           oldName: actionContext.state
@@ -1222,50 +1222,54 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   addRole = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
+
     actionContext.commit('updateAllValidation', {
       type: 'role',
       data: payload,
       currState: actionContext.state.roleState
     });
-    if (actionContext.state.roleState.valid) {
-      let path = 'roles';
-      let roles = actionContext.state.manifests[
-        actionContext.state.currentManifest
-      ].roles.slice();
 
-      roles.push(payload);
+    if (actionContext.state.roleState.valid) {
+
+      actionContext.commit('addRole', payload);
 
       try {
+
         let conf = actionContext.state.manifests[payload.component]
           .configuration;
-        if (conf.resources.length === 0 && conf.parameters.length === 0)
+
+        if (conf.resources.length === 0 && conf.parameters.length === 0) {
+
           actionContext.commit('clearModals', true);
-        else if (conf.resources) {
+
+        } else if (conf.resources) {
+
           conf.resources.map(elem => {
+
             actionContext.commit('setValidation', {
               validation: actionContext.state.roleState.resourceValidation,
               prop: elem.name,
               msg: ''
             });
+
           });
+
         }
+
       } catch (e) {
+
         console.log(e);
         actionContext.commit('clearModals', true);
+
       }
-      maniAPI.updateManifest(roles, path, actionContext, {
-        success: [
-          {
-            name: 'updateRoles',
-            params: payload
-          },
-          {
-            name: 'setRole',
-            params: roles.length - 1
-          }
-        ],
-        failure: []
-      });
+
+      actionContext.commit('updateRoles', payload);
+      actionContext.commit('setRole',
+        actionContext.state.manifests[
+          actionContext.state.currentManifest
+        ].roles.length - 1
+      );
+
     }
   }
 

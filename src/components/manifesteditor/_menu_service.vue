@@ -6,7 +6,7 @@
       <li
         v-for="(option, index) in menuOptions"
         :key="index"
-        :class="{active: option.name == active}"
+        :class="{active: option.name === active}"
         :ref="option.name"
         @click="updateActive(option.name, $event)" >
         <a
@@ -17,21 +17,25 @@
           <v-icon class="activator">{{ option.icon }}</v-icon>
           {{ $t(option.name) }}
           <span
-            v-if="option.secondLevel || option.id == 'service'"
+            v-if="option.secondLevel || option.id === 'service'"
             class="fa arrow activator"/>
+
           <i
-            v-if="option.add && active == option.name"
+            v-if="option.add && active === option.name"
             :id="option.add.id"
             class="menuAddr fa fa-plus-square pull-right activator"
             @click="openAdd(option.add.target, $event)"/>
+            
         </a>
+
         <span
           v-if="option.add"
           :ref="'simulate-' + option.add.target"
           :data-target="option.add.target"
           data-toggle="modal"/>
+
         <ul
-          v-if="option.secondLevel || option.id == 'service'"
+          v-if="option.secondLevel || option.id === 'service'"
           :id="option.name"
           class="nav nav-second-level collapse"
           aria-expanded="false"
@@ -93,7 +97,7 @@
                   <span
                     v-if="validation.name.err"
                     class="help-block">
-                    {{ $t('validation.'+validation.name.msg) }}
+                    {{ $t('validation.' + validation.name.msg) }}
                   </span>
                 </div>
               </div>
@@ -123,52 +127,63 @@
                   <span
                     v-if="validation.version.err"
                     class="help-block">
-                    {{ $t('validation.'+validation.version.msg) }}
+                    {{ $t('validation.' + validation.version.msg) }}
                   </span>
                 </div>
               </div>
             </div>
           </li>
-          <li v-if="option.id == 'roles'">
+          <li v-if="option.id === 'roles'">
+
             <rowlist
               :list="getManifest.roles"
               :type="getSettings.listTypes.role"/>
+
           </li>
-          <li v-if="option.id == 'channels'">
+          <li v-if="option.id === 'channels'">
+
             <rowlist
               :list="getChannels.provides"
               :type="getSettings.listTypes.channel.provides"/>
+
             <rowlist
               :list="getChannels.requires"
               :type="getSettings.listTypes.channel.requires"/>
+
           </li>
           <template v-for="(secondOpt, index) in option.enum">
             <li
-              v-if="secondOpt.type=='link'"
+              v-if="secondOpt.type === 'link'"
               :key="index">
+
               <a
                 id="show-channels"
                 class="white--text"
                 @click="optLink(secondOpt.action)">
                 {{ $t(secondOpt.id) }}
               </a>
+
             </li>
             <li
-              v-if="secondOpt.type=='other'"
+              v-if="secondOpt.type === 'other'"
               :key="index">
+
               <a
                 id="show-channels"
                 title="show channels"
                 alt="show channels">
                 {{ $t('menu.uielements.form.show_hide') }}
               </a>
+
             </li>
             <li :key="index">
+
               <a
                 class="white--text"
                 @click="downloadTemporalManifest">
                 Download Temporal Manifest
               </a>
+
             </li>
           </template>
         </ul>
@@ -302,7 +317,6 @@ export default {
     },
 
     activeList(name, event) {
-
       let nameFilter = name.replace(/(:|\.|\[|\])/g, "\\$1");
       let activeFilter = this.active.replace(/(:|\.|\[|\])/g, "\\$1");
 
@@ -323,7 +337,6 @@ export default {
         // let item=$("#menu\\.service\\.label");
         item.collapse("show");
       }
-
     }
   }
 };
