@@ -24,7 +24,7 @@ export default new Router({
       component: DetailedDeploymentView
     },
     {
-      path: '/availableelements',
+      path: '/elements',
       component: ElementsView
     },
     {

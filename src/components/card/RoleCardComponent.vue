@@ -88,16 +88,22 @@
       </v-layout>
       
       <!-- Role instances -->
-      <v-layout wrap v-if="service">
-        <v-flex ma-1 xs12 sm4 v-for="(instanceContent, instanceId) in role.instances" v-bind:key="instanceId">
-          <instance-card-component 
-            v-bind:key="instanceId" v-bind:instance="instanceContent"
-            v-bind:instanceMetrics="roleChartData.instances"
-            v-on:killInstanceChange="handleKillInstanceChange"
-            v-bind:clear="onClearHandler">
-          </instance-card-component>
+       <v-layout wrap v-if="service">
+        <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+          <v-expansion-panel expand>
+            <v-expansion-panel-content>
+              <div slot="header">Instances</div>
+                <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
+                  v-bind:key="instanceId" v-bind:instance="instanceContent"
+                  v-bind:instanceMetrics="roleChartData.instances"
+                  v-on:killInstanceChange="handleKillInstanceChange"
+                  v-bind:clear="onClearHandler">
+                </instance-card-component>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
         </v-flex>
       </v-layout>
+
 
     </v-container>
   </v-card>

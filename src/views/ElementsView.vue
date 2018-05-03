@@ -3,7 +3,7 @@
     <v-card-title>
 
       <!-- View title -->
-      <h3 class="headline mb-0">Available elements</h3>
+      <h3 class="headline mb-0">Elements</h3>
 
       <!-- Applies spaces between elements -->
       <v-spacer></v-spacer>
