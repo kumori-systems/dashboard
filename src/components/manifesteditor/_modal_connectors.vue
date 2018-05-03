@@ -76,8 +76,6 @@
                 <div class="col-sm-12">
                   <div class="form-group input-group">
 
-                    available connectors: {{getAllConnProvided}}
-
                     <search
                       :reset="reset.provided"
                       :disabled="getCurrentConnector==-1"
