@@ -96,6 +96,7 @@
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "urlencode": "^1.1.0",
+    "utils-merge": "^1.0.1",
     "vue": "^2.2.2",
     "vue-chartjs": "^2.6.5",
     "vue-class-component": "^6.1.0",

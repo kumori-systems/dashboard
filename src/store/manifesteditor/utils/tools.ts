@@ -41,7 +41,7 @@ function parseConnChannels(list) {
   });
 }
 
-function paseSugestionChannels(list, role) {
+function parseSugestionChannels(list, role) {
   return Object.keys(list).map(function (key) {
     if (role && list[key].name)
       return {
@@ -88,35 +88,62 @@ function getAllChannels(state, getters, type) {
         }
 
       }
-      if (type === 'requires') {
+      
+
         for (let entry in service.connectors[conn][connType]) {
+
           if (!service.connectors[conn][connType][entry].role) {
+
             excludeSrvChann[
               ':' + service.connectors[conn][connType][entry].endpoint
             ] = true;
           }
+
         }
-      }
+
+      
     }
 
-    console.debug(
-      'The excluded channel list contains ' + JSON.stringify(service, null, 2)
-    );
-
+    // Add component channels
     for (let role in service.roles) {
       let component = getters.getComponents[service.roles[role].component];
+
+      console.debug(
+        'The component contains' + JSON.stringify(component, null, 2)
+      );
+
       if (component) {
         let comChannels = component.channels[type];
+
+        console.debug('The type is ' + JSON.stringify(type));
+
+        console.debug(
+          'The component channels are ' + JSON.stringify(comChannels, null, 2)
+        );
+
         if (comChannels && comChannels.length > 0) {
           list = list.concat(
-            paseSugestionChannels(comChannels, service.roles[role].name)
+            parseSugestionChannels(comChannels, service.roles[role].name)
           );
         }
       }
     }
 
+
     console.debug(
-      'In the middle of the method the list contains ' + JSON.stringify(list)
+      'Before adding the service channels the list contains '
+      + JSON.stringify(list, null, 2)
+    );
+
+    // Add service channels
+    let searched = type === 'provides' ? 'requires' : 'provides';
+    list = list.concat(
+      parseSugestionChannels(service.channels[searched], '')
+    );
+
+    console.debug(
+      'In the middle of the method the list contains '
+      + JSON.stringify(list, null, 2)
     );
 
     if (
@@ -125,19 +152,25 @@ function getAllChannels(state, getters, type) {
       && service.channels['provides']
     ) {
       list = list.concat(
-        paseSugestionChannels(service.channels['provides'], '')
+        parseSugestionChannels(service.channels['provides'], '')
       );
     }
 
+    console.debug('La lista de exclusion de roles contiene '
+      + JSON.stringify(excludeRolChann, null, 2));
+    console.debug('La lista de exclusion de servicios contiene '
+      + JSON.stringify(excludeSrvChann, null, 2));
+
     list = list.filter((x) => {
-      return excludeRolChann[x.fullName] && excludeSrvChann[x.fullName];
+      return !excludeRolChann[x.fullName] && !excludeSrvChann[x.fullName];
     });
 
   }
 
 
   console.debug(
-    'La lista de opciones de canales contiene: ' + JSON.stringify(list)
+    'La lista de opciones de canales contiene: '
+    + JSON.stringify(list, null, 2)
   );
 
   return list;
@@ -145,5 +178,5 @@ function getAllChannels(state, getters, type) {
 
 export {
   isUndefinedOrEmpty, parseType, limitName, parseConnChannels,
-  paseSugestionChannels, getAllChannels
+  parseSugestionChannels, getAllChannels
 }

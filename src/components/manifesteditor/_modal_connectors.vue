@@ -23,6 +23,7 @@
             <div class="row addNewOnTop my-background">
               <div class="col-sm-12">
                 <div class="form-group input-group">
+
                   <select
                     id="componentsList"
                     ref="connector"
@@ -75,13 +76,15 @@
                 <div class="col-sm-12">
                   <div class="form-group input-group">
 
+                    available connectors: {{getAllConnProvided}}
+
                     <search
                       :reset="reset.provided"
                       :disabled="getCurrentConnector==-1"
                       :suggestions="getAllConnProvided"
                       @reset="(data)=>{manageReset('provided',data)}"
                       @update="(data)=>{setCurrent('provided',data)}"/>
-
+                    
                     <span class="input-group-btn">
 
                       <button
@@ -223,40 +226,55 @@ export default {
   },
   methods: {
     addConnector(payload) {
+
       this.$store.dispatch("addConnector", payload);
+      
     },
 
-    addConnection() {
+    addConnection(payload) {
+
       this.$store.dispatch("addConnection", payload);
+
     },
 
     setCurrent(direction, data) {
+      console.debug('Llamamos a setCurrent');
+
       this.current[direction] = data;
+
     },
 
     makeConnection(direction) {
-      if (this.current[direction] != "") {
+
+      if (this.current[direction] !== "") {
+        
         let element = {};
-        if (this.current[direction].role)
+
+        if (this.current[direction].role){
           element["role"] = this.current[direction].role;
+        }
+          
         element["endpoint"] = this.current[direction].endpoint;
         this.addConnection({ element: element, direction: direction });
         this.current[direction] = "";
         this.reset[direction] = true;
       }
+
     },
 
     manageReset(direction, value) {
+      console.debug('Llamamos a manageReset');
       this.reset[direction] = value;
     },
 
     addNewConnector() {
-      if (this.$refs.connector.value.length > 0)
+      if (this.$refs.connector.value.length > 0) {
         this.addConnector({
           type: this.$refs.connector.value,
           depended: [],
           provided: []
         });
+      }
     }
   }
 };

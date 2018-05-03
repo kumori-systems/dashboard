@@ -893,7 +893,28 @@ export default class Mutations implements Vuex.MutationTree<State> {
   }
 
   deleteConnector = (state: State, payload: { key: any, value: any }): any => {
+
+    console.debug(
+      'Removing connector ' + JSON.stringify(payload.value)
+      + 'from ' + JSON.stringify(payload.key)
+    );
+
     payload.key.splice(payload.value, 1);
+
+  }
+
+  deleteConnectionChannel = (state: State,
+    payload: { key: any, value: any }): any => {
+
+    console.debug('En deleteConnectionChannel nos llega'
+      + '\nkey: ' + JSON.stringify(payload.key)
+      + '\nvalue: ' + JSON.stringify(payload.value)
+    );
+
+    payload.key.splice(payload.value, 1);
+
+    console.debug('Y queda ' + JSON.stringify(payload.key));
+
   }
 
   updateConfirmationAccept = (state: State, payload: any): void => {
@@ -1222,7 +1243,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
             [state.currentConnector]: {
               ...state.manifests[state.currentManifest]
                 .connectors[state.currentConnector],
-              'direction': state.manifests[state.currentManifest]
+              [direction]: state.manifests[state.currentManifest]
                 .connectors[state.currentConnector][direction]
                 .splice(payload.index, 1)
             }

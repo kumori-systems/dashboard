@@ -1,23 +1,43 @@
 <template>
-  <div  style="position:relative" v-bind:class="{'open':openSuggestion, disabled:disabled}">
-    {{init()}}
-    <input  :disabled="disabled ? '' : null" :value="defaultVal"
-      class="form-control black--text" type="text" v-model="selection"
-      @keydown.enter = 'enter' @keydown.down = 'down' @keydown.up = 'up'
-      @focusout = 'close($event)' @focus = 'setFocus'/>
+  <div
+    style="position:relative"
+    :class="{'open':openSuggestion, 'disabled':disabled}">
+    
+    <input
+      type="text"
+      v-model="selection"
+      :disabled="disabled? '' : null"
+      :value="defaultVal"
+      class="form-control black--text"
+      @keydown.enter='enter'
+      @keydown.down='down'
+      @keydown.up='up'
+      @focusout='close($event)'
+      @focus='setFocus'/>
 
-      <ul class="dropdown-menu" style="width:100%; margin-top:25px;">
-        <li v-for="(suggestion, index) in matches" v-bind:key="index"
-          v-bind:class="{'active': isActive(index)}"
-          @click="suggestionClick(index)">
-            <a>{{ suggestion.label }}</a>
+      <ul
+        class="dropdown-menu"
+        style="width:100%; margin-top:25px;">
+
+        <li disabled class="disabled">
+          <a>select with enter key</a>
         </li>
+
+        <li
+          v-for="(suggestion, index) in matches"
+          :key="index"
+          :class="{'active': isActive(index)}"
+          v-on:click='suggestionClick(index)'>
+          
+          <a v-on:click='suggestionClick(index)'>{{ suggestion.label }}</a>
+
+        </li>
+
       </ul>
   </div>
 </template>
 <script>
 export default {
-
   props: ["disabled", "suggestions", "reset", "defaultVal"],
 
   data() {
@@ -29,8 +49,13 @@ export default {
       focus: false
     };
   },
-  computed: {
 
+  mounted: function() {
+    console.debug("Search helper has been mounted");
+    this.init();
+  },
+
+  computed: {
     //Filtering the suggestion based on the input
     matches() {
       if (this.focus && this.selection == "") return this.suggestions;
@@ -44,8 +69,8 @@ export default {
     openSuggestion() {
       return this.matches.length != 0 && this.open === true;
     }
-
   },
+
   methods: {
     setFocus() {
       this.focus = true;
@@ -54,12 +79,14 @@ export default {
         this.current = 0;
       }
     },
+
     init() {
       if (this.reset) {
         this.selection = "";
         this.$emit("reset", false);
       }
     },
+
     //When enter pressed on the input
     enter() {
       this.$emit("update", this.matches[this.current]);
@@ -99,8 +126,11 @@ export default {
         this.focus = false;
       }
     },
+
     //When one of the suggestion is clicked
     suggestionClick(index) {
+      console.debug("In suggestionClick the index is " + index);
+
       this.$emit("update", this.matches[index]);
       this.selection = this.matches[index].fullName;
       this.open = false;

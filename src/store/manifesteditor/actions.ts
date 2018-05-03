@@ -2497,14 +2497,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       let direction = payload.type === actionContext.state.Settings.listTypes
         .connectorList.provided ? 'provided' : 'depended';
 
-      let connChannels = actionContext.state.manifests[
-        actionContext.state.currentManifest
-      ].connectors[actionContext.state.currentConnector][direction];
+      actionContext.commit(
+        'deleteConnectionChannel',
+        {
+          key: actionContext.state.manifests[
+            actionContext.state.currentManifest
+          ].connectors[actionContext.state.currentConnector][direction],
+          value: payload.index
+        }
+      );
 
-      connChannels.splice(payload.index, 1);
-
+      /*
       maniAPI.updateManifest(
-        connChannels,
+        actionContext.state.manifests[
+          actionContext.state.currentManifest
+        ].connectors[actionContext.state.currentConnector][direction],
         'connectors.' + actionContext.state.currentConnector + '.' + direction,
         actionContext,
         {
@@ -2517,7 +2524,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           failure: []
         }
       );
-
+      */
+     
     }
 
   }

@@ -300,7 +300,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
 
   getAllConnProvided = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
+
     return tools.getAllChannels(state, getters, 'provides');
+    
   }
 
   getAllConnDepended = (state?: State, getters?: Getters, rootState?: any,
