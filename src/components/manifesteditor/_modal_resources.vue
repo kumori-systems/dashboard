@@ -49,6 +49,7 @@
               @change="updateStateRes(key)">
               <option
                 v-for="(res,i) in filteredResources(key)"
+                v-if="res.name"
                 :key="i"
                 :value="res"
                 :text="res._urn">
@@ -93,7 +94,7 @@ export default {
       return this.$store.state.manifesteditor.currentManifest;
     },
     manifests() {
-      return this.$store.state.manifests;
+      return this.$store.state.manifesteditor.manifests;
     },
     resources() {
       return this.$store.state.manifesteditor.deploymentState.resources;
@@ -114,6 +115,7 @@ export default {
     },
 
     filteredResources(key) {
+      console.debug("Entramos en filtered resources");
       // Contains all resources
       let allRes = this.getResources;
 
@@ -125,25 +127,28 @@ export default {
       let res = [];
 
       if (deploy && deploy.resources) {
-
-        console.debug('deploy');
-        console.debug('deploy.resources', deploy.resources);
-        console.debug('all resources', allRes);
+        console.debug("deploy");
+        console.debug("deploy.resources", deploy.resources);
+        console.debug("all resources", allRes);
         res = allRes.filter(resource => {
           return resource._type === deploy.resources[key].type;
         });
 
-        console.debug('res contains', res);
+        console.debug("res contains", res);
       }
 
       return res;
     },
 
     updateStateRes(res_name) {
+      /*
+      console.debug("The value is ", this.$refs["res_type" + res_name][0][0].value);
+
       this.updateDeployResState({
         key: res_name,
-        value: this.$refs[res_name][0].value
+        value: this.$refs["res_type" + res_name][0].value
       });
+      */
     }
   }
 };

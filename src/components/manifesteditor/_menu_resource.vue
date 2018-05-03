@@ -21,28 +21,33 @@
             :data-target="option.target ? option.target : ''"
             class="menu-title activator white--text"
             @click="option.clear? cleanCurrent(option.target): null">
-            <i :class="option.icon + ' activator'"/>
-            {{ $t(option.name) }}
+
+            <i :class="option.icon + ' activator'"/> {{ $t(option.name) }}
+
             <span
               v-if="option.secondLevel || option.id === 'deployment'"
               class="fa arrow activator"/>
+
             <i
               v-if="option.add && active==option.name"
               :id="option.add.id"
               class="menuAddr fa fa-plus-square pull-right activator"
               @click="openAdd(option.add.target, $event)"/>
+
           </a>
           <span
             v-if="option.add"
             :ref="'simulate-' + option.add.target"
             :data-target="option.add.target"
             data-toggle="modal"/>
+
           <ul
             v-if="option.secondLevel"
             :id="option.name"
             class="nav nav-second-level collapse"
             aria-expanded="false"
             style="height: 0px;">
+            
             <li v-if="option.id === 'resource'">
               <div class="row">
                 <div class="col-sm-3">

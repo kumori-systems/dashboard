@@ -380,7 +380,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
   updateDeployResState = (state: State, payload: { key: string, value: any }
   ): void => {
 
-    console.debug('MUTATION - updateDeployResState');
+    console.debug('MUTATION - updateDeployResState ' + JSON.stringify(payload));
 
     state.deploymentState = {
       ...state.deploymentState,
@@ -1223,6 +1223,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     payload.key = payload.value;
 
+  }
+
+  addConnection = (state: State, payload: { key: any, value: any }): void => {
+    payload.key.push(payload.value);
   }
 
   deleteConnList = (state: State, payload: any): void => {

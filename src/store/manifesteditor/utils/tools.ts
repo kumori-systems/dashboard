@@ -88,20 +88,18 @@ function getAllChannels(state, getters, type) {
         }
 
       }
-      
 
-        for (let entry in service.connectors[conn][connType]) {
+      for (let entry in service.connectors[conn][connType]) {
 
-          if (!service.connectors[conn][connType][entry].role) {
+        if (!service.connectors[conn][connType][entry].role) {
 
-            excludeSrvChann[
-              ':' + service.connectors[conn][connType][entry].endpoint
-            ] = true;
-          }
-
+          excludeSrvChann[
+            ':' + service.connectors[conn][connType][entry].endpoint
+          ] = true;
         }
 
-      
+      }
+
     }
 
     // Add component channels
@@ -137,9 +135,13 @@ function getAllChannels(state, getters, type) {
 
     // Add service channels
     let searched = type === 'provides' ? 'requires' : 'provides';
-    list = list.concat(
-      parseSugestionChannels(service.channels[searched], '')
-    );
+
+    if (service.channels && service.channels[searched]) {
+      list = list.concat(
+        parseSugestionChannels(service.channels[searched], '')
+      );
+    }
+
 
     console.debug(
       'In the middle of the method the list contains '

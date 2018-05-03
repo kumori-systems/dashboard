@@ -5,7 +5,9 @@
         <div class="panel panel-default">
           <div
             class="panel-heading headline text-center my-background white--text"
-          >Instances by Role</div>
+          >
+            Instances by Role
+          </div>
           <div class="panel-body my-background">
             <donut-chart 
               :id="charts.instances.id"
@@ -20,7 +22,9 @@
         <div class="panel panel-default">
           <div
             class="panel-heading headline text-center my-background white--text"
-          >CPU by Role</div>
+          >
+            CPU by Role
+          </div>
           <div class="panel-body my-background">
             <donut-chart
               :id="charts.cpu.id"
@@ -52,7 +56,9 @@
         <div class="panel panel-default">
           <div
             class="panel-heading headline text-center my-background white--text"
-          >Resume</div>
+          >
+            Resume
+          </div>
           <div class="panel-body my-background">
             <bar-chart 
               :id="charts.resume.id"

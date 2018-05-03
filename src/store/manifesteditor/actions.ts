@@ -204,14 +204,26 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   validateDeployRes = (actionContext: Vuex.ActionContext<State, any>): void => {
 
+
+    console.debug('Entramos en validateDeployRes');
+
     if (actionContext.state.currentManifest) {
+
+      console.debug('Hay manifesto actual ' + JSON.stringify(
+        actionContext.state.currentManifest, null, 2
+      ));
+
       // Current manifest - which must be a deployment
       let deploy: Manifest = actionContext.state
         .manifests[actionContext.state.currentManifest];
 
+      console.debug('Hay deployment ' + JSON.stringify(deploy, null, 2));
+
       // Service of the deployment referenced by current manifest
       let service: Manifest = actionContext.state
         .manifests[deploy.servicename];
+
+      console.debug('Hay servicio ' + JSON.stringify(service, null, 2));
 
       // Resources of the deploymentState
       let userState = actionContext.state.deploymentState.resources;
@@ -219,13 +231,24 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       for (let x in userState) { // For each resource at deploymentState
 
         // If the resource is a volatile volume, no change should be allowed
+
+        console.debug(
+          'Obteniendo la RESOURCE: ' + JSON.stringify(userState[x])
+        );
+
+        let resType = getResourceType(userState[x].type);
         if (
-          getResourceType(userState[x].type)
-          !== Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+          resType !== Resource.RESOURCE_TYPE.VOLATILE_VOLUME
+          &&
+          resType !== Resource.RESOURCE_TYPE.CERTIFICATE
         ) {
 
           // If a resource is selected
-          if (userState[x].resource.name.length > 0) {
+          if (
+            userState[x].resource
+            && userState[x].resource.name
+            && userState[x].resource.name.length > 0
+          ) {
 
             let res = actionContext.state.manifests[userState[x].resource.name];
             if (res) {
@@ -339,18 +362,36 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateDeployResState = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
 
+    console.debug(
+      'Entramos en updateDeployResState con ' + JSON.stringify(payload)
+    );
+
     actionContext.commit('updateDeployResState', payload);
+
+
+    console.debug('pasamos el commit updateDeployResState');
+
+
     actionContext.commit(
       'resetAllValidation',
       actionContext.state.deploymentState.resValidation
     );
+
+    console.debug('pasamos el commit resetAllValidation');
+
     actionContext.dispatch('validateDeployRes');
 
-    let path = 'configuration.resources.' + payload.key;
-    maniAPI.updateManifest(payload.value, path, actionContext, {
-      success: [],
-      failure: []
-    });
+    console.debug('pasamos la acción validateDeployRes');
+
+    maniAPI.updateManifest(
+      payload.value,
+      'configuration.resources.' + payload.key,
+      actionContext,
+      {
+        success: [],
+        failure: []
+      }
+    );
 
   }
 
@@ -486,17 +527,23 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     let colorsData = actionContext.state.deploymentState.colorsData;
 
     let setColor = (colors, key) => {
-      let color;
-      if (colorsData[key]) {
-        color = colorsData[key];
-      } else {
+      let color = colorsData[key];
+      if (!color) {
+
         color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
         while (colors.indexOf(color) > -1 || color.length < 7) {
+
           color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
         }
+
         colorsData[key] = color;
+
       }
+
       colors.push(color);
+
     };
 
     let charts = {
@@ -537,30 +584,33 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     let currentManifest = actionContext.state.currentManifest;
     if (currentManifest) {
+
       let roles = actionContext.state.manifests[currentManifest].roles;
 
       for (let key in roles) {
+
         charts.instances.data.push({
           label: key,
           value: roles[key].arrangement.instances
         });
 
         setColor(charts.instances.colors, key);
-
         charts.cpu.data.push({
           label: key,
           value: roles[key].arrangement.cpu
         });
+
         setColor(charts.cpu.colors, key);
         charts.memory.data.push({
           label: key,
           value: roles[key].arrangement.memory
         });
-        setColor(charts.memory.colors, key);
 
+        setColor(charts.memory.colors, key);
         totales.instances += roles[key].arrangement.instances;
         totales.cpu += roles[key].arrangement.cpu;
         totales.memory += roles[key].arrangement.memory;
+
       }
 
       Object.keys(totales).map(key => {
@@ -2468,9 +2518,11 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       actionContext.state.currentManifest
     ].connectors;
 
-    connectors[actionContext.state.currentConnector][payload.direction].push(
-      payload.element
-    );
+
+    actionContext.commit('addConnection', {
+      key: connectors[actionContext.state.currentConnector][payload.direction],
+      value: payload.element
+    });
 
     maniAPI.updateManifest(
       connectors,
@@ -2525,7 +2577,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         }
       );
       */
-     
+
     }
 
   }
