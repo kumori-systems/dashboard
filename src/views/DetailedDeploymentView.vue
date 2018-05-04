@@ -224,6 +224,21 @@
 
     </v-container>
   </v-card>
+      <!-- This deployment is already undeployed -->
+      <v-dialog v-model="noMoreInfoDialog" max-width="600px">
+        <v-card>
+          <v-card-title class="headline">This service has been undeployed and is not longer available</v-card-title>
+          <v-card-text>
+            You will be redirected to overview
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            
+            <v-btn flat="flat" @click.native="redirectToOverview">I understand</v-btn>
+
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 </v-form>
 </template>
 <script lang="ts" scoped>
@@ -282,6 +297,12 @@ import { setTimeout } from "timers";
   }
 })
 export default class DetailedDeploymentView extends Vue {
+  /**
+    This dialog should appear when the deployment which is beeing viewed was
+    undeployed (by someone else) and the information is no longer available.
+  */
+  noMoreInfoDialog: boolean = false;
+
   HTTPEntryPoint = HTTPEntryPoint;
 
   /** Temporary number of instances of a role. **/
@@ -314,6 +335,11 @@ export default class DetailedDeploymentView extends Vue {
 
   unwatch = [];
 
+  redirectToOverview() {
+    this.noMoreInfoDialog = false;
+    this.$router.push("/overview");
+  }
+
   mounted() {
     this.cancelChanges();
     this.unwatch.push(
@@ -322,6 +348,15 @@ export default class DetailedDeploymentView extends Vue {
         this.cancelChanges();
         this.clear = true;
         this.haveChanges = false;
+      })
+    );
+
+    this.unwatch.push(
+      // Watches for route changes
+      this.$watch("noMoreInfoDialog", val => {
+        if (val===false) {
+          this.redirectToOverview();
+        }
       })
     );
   }
@@ -340,7 +375,7 @@ export default class DetailedDeploymentView extends Vue {
       if (deployments[key]._path === this.$route.path) res = deployments[key];
     }
     if (!res) {
-      this.$router.push("/overview");
+      this.noMoreInfoDialog = true;
     }
     return res;
   }
@@ -585,7 +620,7 @@ export default class DetailedDeploymentView extends Vue {
           ];
           break;
 
-          case Channel.CHANNEL_TYPE.SEND:
+        case Channel.CHANNEL_TYPE.SEND:
           typeSearched = [Channel.CHANNEL_TYPE.RECEIVE];
           break;
 
