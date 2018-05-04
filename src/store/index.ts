@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import manifesteditor from './manifesteditor';
+// import manifesteditor from './manifesteditor';
 import pagestate from './pagestate';
 import stampstate from './stampstate';
 
@@ -16,6 +16,6 @@ export default new Vuex.Store({
   'modules': {
     pagestate,
     stampstate,
-    manifesteditor
+    // manifesteditor
   }
 });
