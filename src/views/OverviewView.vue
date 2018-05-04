@@ -1,5 +1,5 @@
 <template>  
-  <v-card id="overview-view" style="max-width:1300px" class="mybackground">
+  <v-card id="overview-view" class="mybackground">
     
     <v-card-title class="mybackground">
 

@@ -5,16 +5,18 @@
     <v-toolbar-title>
       <img src="/static/logo_text.png" alt="kumori systems" height="40px">
     </v-toolbar-title>
-      
+  
     <!-- Separator -->
     <v-spacer></v-spacer>
 
     <!-- Background actions -->
     <v-menu offset-y open-on-hover>
+      
       <v-badge class="mr-3" bottom slot="activator" overlap color="info">
         <span slot="badge" dark v-if="actions.length > 0">{{ actions.length }}</span>
         <v-icon large color="grey lighten-1">swap_vert</v-icon>
       </v-badge>
+
       <v-list v-if="actions.length > 0">
         <v-list-tile v-for="(action, index) in actions" v-bind:key="index">
           <v-list-tile-content>{{ action.type }}</v-list-tile-content>
@@ -23,21 +25,31 @@
     </v-menu>
 
     <!-- Notifications -->
-    <v-menu offset-y>
+    <v-menu offset-y v-model="showAlarmMenu">
+
       <v-badge class="mr-3" slot="activator" overlap color="error">
         <span slot="badge" v-if="alarms.length > 0">{{ alarms.length }}</span>
         <v-icon large color="grey lighten-1">notifications</v-icon>
       </v-badge>
+
       <v-list v-if="alarms.length > 0">
         <v-list-tile v-for="(alarm, index) in alarms" v-bind:key="index">
-          <v-list-tile-content v-on:click="toAlarmsAndLogs">{{ alarm.title }}</v-list-tile-content>
+          <v-card-actions>
+            <v-icon color="error">error</v-icon>
+          </v-card-actions>
+          <v-list-tile-content v-on:click="toAlarmsAndLogs">
+            {{ alarm.title }}
+          </v-list-tile-content>
         </v-list-tile>
       </v-list>
+
     </v-menu>
 
     <!-- User's avatar -->
     <v-avatar size="40px" class="mr-1">
+
       <img v-bind:src="user.avatar" alt="avatar">      
+
     </v-avatar>
 
     <!-- User's identification -->
@@ -57,7 +69,7 @@
         </v-list-tile>
       </v-list>
     </v-menu>
-
+    
   </v-toolbar>
 </template>
 <script lang="ts">
@@ -76,7 +88,26 @@ import {
   components: {}
 })
 export default class AppbarComponent extends Vue {
-  
+  showAlarmMenu: boolean = false;
+
+  watcher;
+  lastNotification: Notification = null;
+
+  mounted() {
+    this.watcher = this.$watch("showAlarmMenu", function(value) {
+      if (value) {
+        console.debug("timer on!");
+        setTimeout(() => {
+          console.debug("ShowAlarm menu changed its value");
+          this.showAlarmMenu = false;
+        }, 3000);
+      }
+    });
+  }
+  beforeDestroy() {
+    this.watcher();
+  }
+
   /** Gets the user authenticated in the system. */
   get user(): User {
     return ((<PSGetters>this.$store.getters).user as any) as User;
@@ -84,12 +115,17 @@ export default class AppbarComponent extends Vue {
 
   /** Obtains a list of notifications with level error not readed by the user. */
   get alarms(): Notification[] {
-    return (((<PSGetters>this.$store.getters)
+    let res: Notification[] = (((<PSGetters>this.$store.getters)
       .notifications as any) as Notification[]).filter(
       (item, index, arrayfun) => {
         return item.level === Notification.LEVEL.ERROR && !item.readed;
       }
     );
+    if (res.length > 0 && this.lastNotification !== res[res.length - 1]) {
+      this.showAlarmMenu = true;
+      this.lastNotification = res[res.length - 1];
+    }
+    return res;
   }
 
   /** Obtains a list of active background actions. */
@@ -108,7 +144,7 @@ export default class AppbarComponent extends Vue {
   }
 
   /** Changes the actual view to alarmsAndLogs view */
-   toAlarmsAndLogs() {
+  toAlarmsAndLogs() {
     this.$router.push("/alarmsAndLogs");
   }
 }
