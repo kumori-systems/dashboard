@@ -5,7 +5,7 @@
     <v-card class="ma-1 grey lighten-3">
 
       <!-- Card title: Deployment name -->
-      <v-card-title  primary-title class="headline" v-bind:class="stateColor">
+      <v-card-title  primary-title class="headline kumori-background">
 
         <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint">language</v-icon>
         <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint && hasCertificate">https</v-icon>

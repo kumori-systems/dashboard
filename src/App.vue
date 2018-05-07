@@ -1,5 +1,5 @@
 <template>
-  <v-app dark id="kumori-dashboard">
+  <v-app dark class="kumori-background">
     <template v-if="user && user.state === User.State.AUTHENTICATED">
       
       <!-- Left menu -->
@@ -119,7 +119,7 @@ export default class App extends Vue {
 </style>
 
 <style lang="scss">
-#kumori-dashboard {
+.kumori-background {
   background: #d1406b;
 }
 </style>
