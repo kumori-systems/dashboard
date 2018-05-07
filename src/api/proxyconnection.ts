@@ -595,6 +595,9 @@ export class ProxyConnection extends EventEmitter {
                     this.transformEcloudEventDataToVolumeMetrics(event)
                   );
                   break;
+                case EcloudEventName.node:
+                  // This case should be ignored
+                  break;
                 default:
 
                   this.emit(this.onAddNotification, new Notification(
