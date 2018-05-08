@@ -42,7 +42,7 @@
           </div>
         </td>
         <td class="text-xs-left">
-          <v-btn color="error" icon v-on:click="showDialog(props.item._urn)">
+          <v-btn color="error" v-bind:disabled="props.item.usedBy.length>0" icon v-on:click="showDialog(props.item._urn)">
             <v-icon class="white--text">delete_forever</v-icon>
           </v-btn>
         </td>
