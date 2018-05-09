@@ -1,7 +1,7 @@
 import { Deployment } from './deployment';
 import { Service, VolatileVolume } from './index';
 
-import * as config from '../../../api/config';
+import { config } from '../../../api';
 
 export function addPortToURL(url: string): string {
   let res: string = url;
