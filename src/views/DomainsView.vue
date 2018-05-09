@@ -33,11 +33,11 @@
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
           <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
-            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).name">
-              {{ deployment(elem).name }}
+            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).roles['sep'].configuration.domain">
+              {{ deployment(elem).roles['sep'].configuration.domain }}
             </a>
-            <a v-else v-bind:href="'http://' + deployment(elem).name">
-              {{ deployment(elem).name }}
+            <a v-else v-bind:href="'http://' + deployment(elem).roles['sep'].configuration.domain">
+              {{ deployment(elem).roles['sep'].configuration.domain}}
             </a>
           </div>
         </td>
@@ -71,7 +71,7 @@ import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
 
-import { Domain, Deployment } from "../store/stampstate/classes";
+import { Domain, HTTPEntryPoint } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "domains-view",
@@ -119,7 +119,7 @@ export default class DomainsView extends Vue {
     return domains;
   }
 
-  get deployment(): (stri: string) => Deployment {
+  get deployment(): (stri: string) => HTTPEntryPoint {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
     };
