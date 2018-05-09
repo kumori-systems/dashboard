@@ -33,12 +33,7 @@
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
           <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
-            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).roles['sep'].configuration.domain">
-              {{ deployment(elem).roles['sep'].configuration.domain }}
-            </a>
-            <a v-else v-bind:href="'http://' + deployment(elem).roles['sep'].configuration.domain">
-              {{ deployment(elem).roles['sep'].configuration.domain}}
-            </a>
+             <router-link v-bind:to="deployment(elem)._path">{{ deployment(elem)._urn }}</router-link>
           </div>
         </td>
         <td class="text-xs-left">
