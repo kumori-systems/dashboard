@@ -50,7 +50,9 @@ export default {
     },
 
     getRuntimes() {
-      return this.getSettings.manifestStructure.elementtype.runtime.enum;
+      let res = this.getSettings.manifestStructure.elementtype.runtime.enum;
+      console.debug("When calling getRuntimes the result is ", res);
+      return res;
     }
   },
   methods: {
