@@ -5,7 +5,7 @@
       
       <!-- View title-->
       <h3 class="headline mb-0">
-        <span v-if="deployment instanceof HTTPEntryPoint">
+        <span v-if="isEntrypoint">
           <v-icon class="ma-1">language</v-icon>
           <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
         </span>
@@ -93,7 +93,7 @@
               <v-list class="pa-0">
                 <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div" class="mybackground">
                   <v-card-actions>
-                    <v-icon class="orange--text text--lighten-2">storage</v-icon>
+                    <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
                   </v-card-actions>
                   <v-list-tile-title>
 
@@ -108,7 +108,7 @@
             </template>
 
             <!-- Websites -->
-            <v-layout v-if="deployment instanceof HTTPEntryPoint">
+            <v-layout v-if="isEntrypoint">
               <v-flex ma-1 xs12>
                 <strong>Websites:</strong>
                 <v-list class="pa-0">
@@ -303,8 +303,6 @@ export default class DetailedDeploymentView extends Vue {
   */
   noMoreInfoDialog: boolean = false;
 
-  HTTPEntryPoint = HTTPEntryPoint;
-
   /** Temporary number of instances of a role. **/
   roleNumInstances: { [rolId: string]: number } = {};
 
@@ -365,6 +363,10 @@ export default class DetailedDeploymentView extends Vue {
     for (let i in this.unwatch) {
       this.unwatch[i]();
     }
+  }
+  
+  get isEntrypoint(){
+    return this.deployment instanceof HTTPEntryPoint;
   }
 
   /** Obtains the deployment from the storage. */
@@ -941,24 +943,25 @@ export default class DetailedDeploymentView extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #81c784;
-$color_yellow: #fff176;
-$color_red: #e57373ed;
-$color_grey: #e0e0e0;
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
 $icon_size: 80px;
 
 #check_circle {
-  color: $color_green;
+  color: $color_success;
   font-size: $icon_size;
 }
 
 #warning {
-  color: $color_yellow;
+  color: $color_warning;
   font-size: $icon_size;
 }
 
 #error {
-  color: $color_red;
+  color: $color_error;
   font-size: $icon_size;
 }
 
