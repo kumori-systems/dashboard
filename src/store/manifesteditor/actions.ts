@@ -204,26 +204,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   validateDeployRes = (actionContext: Vuex.ActionContext<State, any>): void => {
 
-
-    console.debug('Entramos en validateDeployRes');
-
     if (actionContext.state.currentManifest) {
-
-      console.debug('Hay manifesto actual ' + JSON.stringify(
-        actionContext.state.currentManifest, null, 2
-      ));
 
       // Current manifest - which must be a deployment
       let deploy: Manifest = actionContext.state
         .manifests[actionContext.state.currentManifest];
 
-      console.debug('Hay deployment ' + JSON.stringify(deploy, null, 2));
-
       // Service of the deployment referenced by current manifest
       let service: Manifest = actionContext.state
         .manifests[deploy.servicename];
-
-      console.debug('Hay servicio ' + JSON.stringify(service, null, 2));
 
       // Resources of the deploymentState
       let userState = actionContext.state.deploymentState.resources;
@@ -231,11 +220,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       for (let x in userState) { // For each resource at deploymentState
 
         // If the resource is a volatile volume, no change should be allowed
-
-        console.debug(
-          'Obteniendo la RESOURCE: ' + JSON.stringify(userState[x])
-        );
-
         let resType = getResourceType(userState[x].type);
         if (
           resType !== Resource.RESOURCE_TYPE.VOLATILE_VOLUME
@@ -362,26 +346,14 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateDeployResState = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
 
-    console.debug(
-      'Entramos en updateDeployResState con ' + JSON.stringify(payload)
-    );
-
     actionContext.commit('updateDeployResState', payload);
-
-
-    console.debug('pasamos el commit updateDeployResState');
-
 
     actionContext.commit(
       'resetAllValidation',
       actionContext.state.deploymentState.resValidation
     );
 
-    console.debug('pasamos el commit resetAllValidation');
-
     actionContext.dispatch('validateDeployRes');
-
-    console.debug('pasamos la acción validateDeployRes');
 
     maniAPI.updateManifest(
       payload.value,
@@ -1329,18 +1301,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   updateRoleComp = (actionContext: Vuex.ActionContext<State, any>,
     newComponent: string): void => {
 
-    console.debug(
-      'Entramos en updateRole Component con el nombre %s', newComponent
-    );
-
     // Sets confirm callback
     actionContext.commit('updateConfirmationAccept', () => {
-
-
-      console.debug(
-        'En updateRoleState newComponent vale: '
-        + JSON.stringify(newComponent, null, 2)
-      );
 
       actionContext.commit('updateRoleState', {
         key: 'component', value: newComponent
@@ -1361,12 +1323,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       actionContext.dispatch(
         'deleteRoleFromParameters', actionContext.state.currentRole
       );
-
-      console.debug(
-        'En updateRoleState2 newComponent vale: '
-        + JSON.stringify(newComponent, null, 2)
-      );
-
 
       maniAPI.updateManifest(
         newComponent,

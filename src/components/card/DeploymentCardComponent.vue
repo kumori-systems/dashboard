@@ -13,6 +13,16 @@
       <v-container>
         <div>
 
+          <!-- Deployed date -->
+          <div class="black--text">
+            {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
+          </div>
+
+          <div class="black--text">
+            {{ deployment.service }}
+          </div>
+            
+
           <!-- Deployment sanity -->
             <v-icon
               v-if="state!=='unknown'"
@@ -53,14 +63,13 @@
 
             </v-tooltip>
                 
-
           </div>
           
           <v-layout>
 
-            <v-icon v-if="isEntrypoint" class="ma-1 black--text">language</v-icon>
+            <v-icon v-if="isEntrypoint" color="grey lighten-1">language</v-icon>
             
-            <v-icon v-if="hasCertificate" class="black--text">https</v-icon>
+            <v-icon v-if="hasCertificate" color="grey lighten-1">https</v-icon>
 
             <!-- Persistent volumes -->
             <v-badge
@@ -74,8 +83,8 @@
               <v-icon v-else-if="volumeUsage(vol) >= 75" slot="badge" color="warning">warning</v-icon>
               
               <v-tooltip bottom>
-                <v-icon slot="activator" class="indigo--text">storage</v-icon>
-                <span>{{ volumeUsage(vol) }}%</span>
+                <v-icon slot="activator" color="grey lighten-1">storage</v-icon>
+                <span>Persistent volume {{ volumeUsage(vol) }}% used</span>
               </v-tooltip>
 
             </v-badge>
@@ -92,24 +101,37 @@
               <v-icon v-else-if="volumeUsage(vol) >= 75" slot="badge" color="warning">warning</v-icon>
 
               <v-tooltip bottom>
-                <v-icon slot="activator" class="light-blue--text text--lighten-2">storage</v-icon>
-                <span>{{ volumeUsage(vol) }}%</span>
+                <v-icon slot="activator" color="grey lighten-1">sd_storage</v-icon>
+                <span>Volatile volume {{ volumeUsage(vol) }}% used</span>
               </v-tooltip>
 
             </v-badge>
 
           </v-layout>
 
-            <!-- Websites -->
-            <div>
-              <a
-                v-for="(web, index) in deployment.websites"
-                v-bind:key="index"
-                v-bind:href="hasCertificate? 'https://' + web : 'http://' + web">
-                <span v-if="index!==0">,</span>
-                {{ web }}
-              </a>
-            </div>
+          <!-- Websites -->
+          <div>
+
+            <template v-if="isEntrypoint">
+            <a
+              v-for="(web, index) in deployment.websites"
+              v-bind:key="index"
+              v-bind:href="hasCertificate? 'https://' + web : 'http://' + web">
+              <span v-if="index!==0">,</span>
+              {{ web }}
+            </a>
+            </template>
+
+            <a
+              v-else
+              v-for="(domain, index) in linkedDomains"
+              v-bind:key="index"
+              v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
+              <span v-if="index!==0">,</span>
+              {{ domain.web }}
+            </a>
+            
+          </div>
 
           <!-- More info -->
           <v-layout>
@@ -147,6 +169,7 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
+
 import {
   Certificate,
   Deployment,
@@ -154,7 +177,8 @@ import {
   PersistentVolume,
   VolatileVolume,
   Resource,
-  Service
+  Service,
+  HTTPEntryPoint
 } from "../../store/stampstate/classes";
 import SSGetters from "../../store/stampstate/getters";
 
@@ -164,6 +188,28 @@ import { utils } from "../../api";
   name: "deployment-card",
   props: {
     deploymentURN: { required: true, type: String }
+  },
+  components: {},
+  filters: {
+    truncateRight: function(text: string, value: number) {
+      if (text.length < value) return text;
+      return text.substring(0, value) + "...";
+    },
+    year: function(text: string) {
+      return text.split("/")[4].substring(0, 4);
+    },
+    month: function(text: string, value: number) {
+      return text.split("/")[4].substring(4, 6);
+    },
+    day: function(text: string, value: number) {
+      return text.split("/")[4].substring(6, 8);
+    },
+    hour: function(text: string, value: number) {
+      return text.split("/")[4].substring(9, 11);
+    },
+    min: function(text: string, value: number) {
+      return text.split("/")[4].substring(11, 13);
+    }
   }
 })
 export default class Card extends Vue {
@@ -214,6 +260,10 @@ export default class Card extends Vue {
     return res;
   }
 
+  get services(){
+    return this.$store.getters.services;
+  }
+
   get deploymentPersistentVolumes(): PersistentVolume[] {
     let res: PersistentVolume[] = [];
     let ser: Service = <Service>this.$store.getters.services[
@@ -257,7 +307,6 @@ export default class Card extends Vue {
         }
       }
     }
-    console.debug("The list of volatile volumes contains", res);
     return res;
   }
 
@@ -284,13 +333,41 @@ export default class Card extends Vue {
     this.onResize();
   }
 
+  get linkedDomains(): { web: string; certificate: boolean }[] {
+    let res: { web: string; certificate: boolean }[] = [];
+
+    for (let chann in this.deployment.channels) {
+      for (let conn in this.deployment.channels[chann]) {
+        let deployment = this.deployments[
+          this.deployment.channels[chann][conn].destinyDeploymentId
+        ];
+
+        if (deployment instanceof HTTPEntryPoint) {
+          res.push({
+            web: (<HTTPEntryPoint>deployment).roles["sep"].configuration.domain,
+            certificate:
+              Object.keys(
+                (<HTTPEntryPoint>deployment).roles["sep"].configuration.secrets
+              ).length > 0
+          });
+        }
+      }
+    }
+
+    console.debug("Linked domains devuelve " + JSON.stringify(res));
+
+    return res;
+  }
+
   get volumeUsage() {
     return volume => {
       let res = -1;
-      for (let item in volume.items){
-        if(volume.items[item].usage > res){res = volume.items[item].usage}
+      for (let item in volume.items) {
+        if (volume.items[item].usage > res) {
+          res = volume.items[item].usage;
+        }
       }
-       
+
       return res;
     };
   }
