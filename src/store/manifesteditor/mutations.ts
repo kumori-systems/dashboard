@@ -18,7 +18,15 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     console.debug('MUTATION - loadManifests');
 
+    // Sets the manifets
     state.manifests = manifests;
+
+  }
+
+  loadRuntimes = (state: State, runtimes: { eslap: string }[]): void => {
+    // Sets the runtimes
+    state.Settings.manifestStructure.elementtype.runtime.enum = runtimes;
+
   }
 
   updateManifest = (state: State, payload: { data: any, path: string }
@@ -46,6 +54,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
     };
 
+  }
+
+  clearLocalState = (state: State): void => {
+    this.clearState(state);
   }
 
   /**
