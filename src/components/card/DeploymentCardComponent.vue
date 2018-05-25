@@ -114,11 +114,11 @@
 
             <template v-if="isEntrypoint">
             <a
-              v-for="(web, index) in deployment.websites"
+              v-for="(domain, index) in deployment.websites"
               v-bind:key="index"
-              v-bind:href="hasCertificate? 'https://' + web : 'http://' + web">
+              v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
               <span v-if="index!==0">,</span>
-              {{ web }}
+              {{ domain.url }}
             </a>
             </template>
 
