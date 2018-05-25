@@ -996,13 +996,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
   updateRoleState = (state: State, payload: { key: string, value: any }
   ): void => {
 
-    console.debug('MUTATION - updateRoleState');
-
-    console.debug(
-      'Entramos en updateRoleState con key %s value '
-      + JSON.stringify(payload.value), payload.key
-    );
-
     state.roleState = {
       ...state.roleState,
       'role': {

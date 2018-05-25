@@ -71,7 +71,11 @@ import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
 
-import { Domain, HTTPEntryPoint } from "../store/stampstate/classes";
+import {
+  Deployment,
+  Domain,
+  HTTPEntryPoint
+} from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "domains-view",
