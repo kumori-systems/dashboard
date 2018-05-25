@@ -33,7 +33,7 @@
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
           <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
-            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).name">
+            <a v-if="hasCertificate(deployment(elem))" v-bind:href="'https://' + deployment(elem).name">
               {{ deployment(elem).name }}
             </a>
             <a v-else v-bind:href="'http://' + deployment(elem).name">
@@ -122,6 +122,12 @@ export default class DomainsView extends Vue {
   get deployment(): (stri: string) => Deployment {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
+    };
+  }
+
+  get hasCertificate() {
+    return (deployment: Deployment) => {
+      return deployment.resources["server_cert"] ? true : false;
     };
   }
 
