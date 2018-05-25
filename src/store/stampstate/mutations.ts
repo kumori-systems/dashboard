@@ -365,31 +365,76 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Adds one or more volume metrics to the state */
   addVolumeMetrics = (state: State, metricBundle: {
-    [itemId: string]: {
-      'timestamp': string,
-      'free': number,
-      'total': number,
-      'usage': number,
-      'used': number
+    'resource': string,
+    'metrics': {
+      [itemId: string]: {
+        'timestamp': string,
+        'free': number,
+        'total': number,
+        'usage': number,
+        'used': number
+      }
     }
   }) => {
 
     const METRICS_BUFFER_SIZE: number = 100;
 
-    for (let volumeInstaceId in metricBundle) { // This will only happen once
-      let metrics =
-        (state.volumeMetrics[volumeInstaceId] ?
-          state.volumeMetrics[volumeInstaceId] : [])
-          .concat([metricBundle[volumeInstaceId]]);
+    // This will only happen once
+    for (let volumeInstanceId in metricBundle.metrics) {
 
-      while (metrics.length > METRICS_BUFFER_SIZE) { metrics.shift(); }
+      let metrics =
+        (state.volumeMetrics[volumeInstanceId] ?
+          state.volumeMetrics[volumeInstanceId] : [])
+          .concat([metricBundle.metrics[volumeInstanceId]]);
+
+      while (metrics.length > METRICS_BUFFER_SIZE) {
+        metrics.shift();
+      }
 
       // Optimized way of adding metrics to the storage
       state.volumeMetrics = {
         ...state.volumeMetrics,
-        [volumeInstaceId]: metrics
+        [volumeInstanceId]: metrics
       };
+
+      // volatile volumes
+      if (state.volatileVolumes[metricBundle.resource]) {
+        state.volatileVolumes = {
+          ...state.volatileVolumes,
+          [metricBundle.resource]: {
+            ...state.volatileVolumes[metricBundle.resource],
+            'items': {
+              ...state.volatileVolumes[metricBundle.resource].items,
+              [volumeInstanceId]: {
+                ...state.volatileVolumes[metricBundle.resource]
+                  .items[volumeInstanceId],
+                'usage': metricBundle.metrics[volumeInstanceId].usage
+              }
+            }
+          }
+        };
+      }
+
+      // persistent volumes
+      if (state.persistentVolumes[metricBundle.resource]) {
+        state.persistentVolumes = {
+          ...state.persistentVolumes,
+          [metricBundle.resource]: {
+            ...state.persistentVolumes[metricBundle.resource],
+            'items': {
+              ...state.persistentVolumes[metricBundle.resource].items,
+              [volumeInstanceId]: {
+                ...state.persistentVolumes[metricBundle.resource]
+                  .items[volumeInstanceId],
+                'usage': metricBundle.metrics[volumeInstanceId].usage
+              }
+            }
+          }
+        };
+      }
+
     }
+
   }
 
   /** Links two services */

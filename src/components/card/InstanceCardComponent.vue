@@ -29,7 +29,7 @@
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
               <!-- A persistent volume -->
-              <v-list-tile-content v-if="vol instanceof PersistentVolume.Instance" >
+              <v-list-tile-content v-if="isPersistentVolumeInstance(vol)" >
                 <v-list-tile-title>
                   <v-icon class="indigo--text">storage</v-icon> {{ vol.id }}
                 </v-list-tile-title>
@@ -55,7 +55,7 @@
               </v-list-tile-content>
               
               <!-- A volatile volume -->
-              <v-list-tile-content v-else-if="vol instanceof VolatileVolume.Instance">
+              <v-list-tile-content v-else-if="isVolatileVolumeInstance(vol)">
 
                 <v-list-tile-title>
                   <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}
@@ -140,6 +140,13 @@ export default class InstanceCardComponent extends Vue {
   }
   beforeDestroy() {
     this.watcher();
+  }
+
+  isPersistentVolumeInstance(vol) {
+    return vol instanceof PersistentVolume.Instance;
+  }
+  isVolatileVolumeInstance(vol) {
+    return vol instanceof VolatileVolume.Instance;
   }
 
   get persistentVolumes(): { [volURN: string]: PersistentVolume } {
@@ -232,25 +239,26 @@ export default class InstanceCardComponent extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #81c784;
-$color_yellow: #fff176;
-$color_red: #e57373ed;
-$color_grey: #e0e0e0;
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
 $icon_size: 30px;
 $radius: 5px;
 
 #check_circle {
-  color: $color_green;
+  color: $color_success;
   font-size: $icon_size;
 }
 
 #warning {
-  color: $color_yellow;
+  color: $color_warning;
   font-size: $icon_size;
 }
 
 #error {
-  color: $color_red;
+  color: $color_error;
   font-size: $icon_size;
 }
 

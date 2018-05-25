@@ -1,159 +1,164 @@
 <template>
-  <v-flex xs12 sm6 md6 lg6 xl3>
+  <v-flex xs12 sm6 md6 lg4 xl3>
 
-    <!-- Card's background represents the deployment's state -->
     <v-card class="ma-1 grey lighten-3">
 
-      <!-- Card title: Deployment name -->
-      <v-card-title  primary-title class="headline kumori-background">
-
-        <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint">language</v-icon>
-        <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint && hasCertificate">https</v-icon>
-        {{ deployment.name }}
-
-        <v-spacer></v-spacer>
-
-        <v-tooltip bottom>
-          <span dark slot="activator">{{ deployment._urn | truncateLeft(8) }}</span>
-          <span>{{ deployment._urn }}</span>
-        </v-tooltip>
-  
+      <v-card-title class="corporative_background title" style="white-space: nowrap;">
+        {{ deploymentName }}
       </v-card-title>
 
-      <!-- Card body: Deployment stats -->
-      <v-container >
+      <v-divider light></v-divider>
 
-        <!-- Flexible content allows good resize -->
-        <v-flex>
+      <!-- List of deployment's properties -->              
+      <v-container>
+        <div>
 
-          <!-- List of deployment's properties -->
-          <v-list two-line class="grey lighten-3">
+          <!-- Deployed date -->
+          <div class="black--text">
+            {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
+          </div>
 
-            <!-- Deployment details -->
-            <template>
-              <v-subheader class="black--text">
-                <strong>DATE</strong>
-                <v-spacer></v-spacer>
-
-                <v-icon class="ma-1" v-if="state!=='unknown'" v-bind:id="state">{{ state }}</v-icon>
-                <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
-
-              </v-subheader>
-              <v-list-tile tag="div">
-                <v-list-tile-title class="black--text">
-                  {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
-                </v-list-tile-title>
-              </v-list-tile>
-            </template>
-
-            <!-- Service -->
-            <template>
-              <v-subheader class="black--text"><strong>SERVICE</strong></v-subheader>
-              <v-list-tile tag="div">
-                <v-list-tile-title>
-                  <v-tooltip bottom>
-                    <span dark slot="activator" class="black--text">{{ deployment.service }}</span>
-                    <span>{{ deployment.service }}</span>
-                  </v-tooltip>
-                </v-list-tile-title>
-              </v-list-tile>
-            </template>
-
-            <!-- Roles -->
-            <template>
-              <v-subheader class="black--text"><strong>ROLES</strong></v-subheader>
-              <v-list-tile v-for="(rol, urn) in deployment.roles" v-bind:key="urn" tag="div">
-                <v-list-tile-content class="black--text">
-                  <v-list-tile-title>{{ urn }}</v-list-tile-title>
-                  <v-list-tile-sub-title>
-                    <v-tooltip bottom>
-                      <span dark slot="activator" class="black--text">{{ rol.component }}</span>
-                      <span>{{ rol.component }}</span>
-                    </v-tooltip>
-                  </v-list-tile-sub-title>
-                </v-list-tile-content>
-                <v-card-actions class="black--text">{{ rol.actualInstances }}</v-card-actions>
-              </v-list-tile>
-            </template>
-
-            <!-- Links -->
-            <template>
-
-              <!-- Links are calculated with channel connections -->
-              <v-subheader class="black--text"><strong>LINKS</strong></v-subheader>
-              <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
-              <v-list-tile  v-for="(conn, index) in channConnections" v-bind:key="index" tag="div">
-                <v-list-tile-title class="black--text">{{ deployments[conn.destinyDeploymentId].name }}</v-list-tile-title>
-              </v-list-tile>
-              </div>
-
-            </template>
-
-            <!-- Persistent Volumes -->
-            <template v-if="deploymentPersistentVolumes.length > 0">
-              <v-subheader class="black--text"><strong>PERSISTENT VOLUMES</strong></v-subheader>
-              <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div">
-                <v-card-actions>
-                  <v-icon class="indigo--text">storage</v-icon>
-                </v-card-actions>
-                <v-list-tile-title>
-                  <v-tooltip bottom>
-                    <div dark slot="activator">
-                      <v-layout class="black--text">
-                        <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
-                        <v-flex xs6>{{ vol.size }} GB</v-flex>
-                      </v-layout>
-                    </div>
-                    <span>{{ vol._urn }}</span>
-                  </v-tooltip>
-                </v-list-tile-title>
-              </v-list-tile>
-            </template>
+          <div class="black--text">
+            {{ deployment.service }}
+          </div>
             
 
-             <!-- Volatile Volumes -->
-            <template v-if="deploymentVolatileVolumes.length > 0">
-              <v-subheader class="black--text"><strong>VOLATILE VOLUMES</strong></v-subheader>
-              <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div">
-                <v-card-actions>
-                  <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
-                </v-card-actions>
-                <v-list-tile-title>
-                  <v-layout class="black--text">
-                    <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
-                    <v-flex xs6>{{ vol.size }} GB</v-flex>
-                  </v-layout>
-                  <span>{{ vol._urn }}</span>
-                </v-list-tile-title>
-              </v-list-tile>
-            </template>
-            
+          <!-- Deployment sanity -->
+            <v-icon
+              v-if="state!=='unknown'"
+              id="sanity_icon"
+              v-bind:class="state">
+              {{ state }}
+            </v-icon>
 
-            <!-- Websites -->
-            <template v-if="deployment instanceof HTTPEntryPoint">
-              <v-subheader class="black--text"><strong>WEBSITES</strong></v-subheader>
-              <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" tag="div">
-                <v-card-actions>
-                  <!-- <v-icon></v-icon> -->
-                </v-card-actions>
-                <v-list-tile-title>
-                  <a v-if="hasCertificate" v-bind:href="'https://' + web.url">{{ web.text }}</a>
-                  <a v-else v-bind:href="'http://' + web.url">{{  web.text }}</a>
-                </v-list-tile-title>
-              </v-list-tile>
-            </template>
+            <v-progress-circular
+              v-else
+              indeterminate
+              id="sanity_icon"
+              v-bind:class="state"/>
 
-          </v-list>
+          <!-- Roles -->
+          <div
+            v-for="(role, urn) in deployment.roles"
+            v-bind:key="urn">
+
+            <v-list-tile-content class="black--text">
+
+              <v-list-tile-title class="body-2">
+                {{ urn }}
+              </v-list-tile-title>
+
+            </v-list-tile-content>
+
+            <v-tooltip bottom>
+
+              <v-progress-linear
+                slot="activator"
+                buffer-value=100
+                :value="roleInstanceUssage(role.actualInstances, role.maxInstances).value"
+                :color="roleInstanceUssage(role.actualInstances, role.maxInstances).color"
+                buffer/>
+
+              <span>{{role.actualInstances}}/{{role.maxInstances}} Instances</span>
+
+            </v-tooltip>
+                
+          </div>
           
-          <!-- More info -->
           <v-layout>
-            <v-spacer></v-spacer>
-              <router-link id="info_link" v-bind:to="deployment._path">
-                <v-icon id="info">info</v-icon>
-              </router-link>
+
+            <v-icon v-if="isEntrypoint" color="grey lighten-1">language</v-icon>
+            
+            <v-icon v-if="hasCertificate" color="grey lighten-1">https</v-icon>
+
+            <!-- Persistent volumes -->
+            <v-badge
+              overlap
+              bottom
+              color=null
+              v-for="(vol, index) in deploymentPersistentVolumes"
+              v-bind:key="index">
+              
+              <v-icon v-if="volumeUsage(vol) >= 90" slot="badge" color="error">error</v-icon>
+              <v-icon v-else-if="volumeUsage(vol) >= 75" slot="badge" color="warning">warning</v-icon>
+              
+              <v-tooltip bottom>
+                <v-icon slot="activator" color="grey lighten-1">storage</v-icon>
+                <span>Persistent volume {{ volumeUsage(vol) }}% used</span>
+              </v-tooltip>
+
+            </v-badge>
+
+            <!-- Volatile volumes -->
+            <v-badge
+              overlap
+              bottom
+              color=null
+              v-for="(vol, index) in deploymentVolatileVolumes"
+              v-bind:key="index">
+              
+              <v-icon v-if="volumeUsage(vol) >= 90" slot="badge" color="error">error</v-icon>
+              <v-icon v-else-if="volumeUsage(vol) >= 75" slot="badge" color="warning">warning</v-icon>
+
+              <v-tooltip bottom>
+                <v-icon slot="activator" color="grey lighten-1">sd_storage</v-icon>
+                <span>Volatile volume {{ volumeUsage(vol) }}% used</span>
+              </v-tooltip>
+
+            </v-badge>
+
           </v-layout>
 
-        </v-flex>
+          <!-- Websites -->
+          <div>
+
+            <template v-if="isEntrypoint">
+            <a
+              v-for="(web, index) in deployment.websites"
+              v-bind:key="index"
+              v-bind:href="hasCertificate? 'https://' + web : 'http://' + web">
+              <span v-if="index!==0">,</span>
+              {{ web }}
+            </a>
+            </template>
+
+            <a
+              v-else
+              v-for="(domain, index) in linkedDomains"
+              v-bind:key="index"
+              v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
+              <span v-if="index!==0">,</span>
+              {{ domain.web }}
+            </a>
+            
+          </div>
+
+          <!-- More info -->
+          <v-layout>
+
+            <!-- Links -->
+            <div>  
+              <v-chip
+                v-for="(link, index) in linkList"
+                v-bind:key="index"
+                color="light-blue lighten-1 white--text">
+                {{ trimName(link) }}
+              </v-chip>
+            </div>
+
+            <v-spacer></v-spacer>
+
+            <router-link
+              id="info_icon"
+              v-bind:to="deployment._path">
+
+              <v-icon id="info_link">info</v-icon>
+
+            </router-link>
+
+          </v-layout>
+
+        </div>
 
       </v-container>
 
@@ -164,14 +169,16 @@
 <script lang="ts">
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
+
 import {
   Certificate,
   Deployment,
-  HTTPEntryPoint,
+  EntryPoint,
   PersistentVolume,
   VolatileVolume,
   Resource,
-  Service
+  Service,
+  HTTPEntryPoint
 } from "../../store/stampstate/classes";
 import SSGetters from "../../store/stampstate/getters";
 
@@ -182,16 +189,11 @@ import { utils } from "../../api";
   props: {
     deploymentURN: { required: true, type: String }
   },
+  components: {},
   filters: {
     truncateRight: function(text: string, value: number) {
       if (text.length < value) return text;
       return text.substring(0, value) + "...";
-    },
-    truncateLeft: function(text: string, value: number) {
-      if (text) {
-        if (text.length < value) return text;
-        return text.substring(text.length - value, text.length);
-      }
     },
     year: function(text: string) {
       return text.split("/")[4].substring(0, 4);
@@ -211,18 +213,39 @@ import { utils } from "../../api";
   }
 })
 export default class Card extends Vue {
-  /** Just a reference to the HTTPEntrypoint class. */
-  HTTPEntryPoint = HTTPEntryPoint;
-
   /** The URN of the deployment represented by this card. */
-  deploymentURN = this.deploymentURN;
+  deploymentURN: string = this.deploymentURN;
 
-  get deployment() {
+  /**
+   * This variable gets fullfiled each time the window changes it's size with
+   * the onResize directive.
+   */
+  deploymentName: string = null;
+
+  get deployment(): Deployment {
     return this.deployments[this.deploymentURN];
   }
 
   get deployments() {
     return (<SSGetters>this.$store.getters).deployments;
+  }
+
+  get isEntrypoint() {
+    return this.deployment instanceof EntryPoint;
+  }
+
+  get linkList() {
+    let res: string[] = [];
+    for (let chann in this.deployment.channels) {
+      for (let conn in this.deployment.channels[chann]) {
+        res.push(
+          this.deployments[
+            this.deployment.channels[chann][conn].destinyDeploymentId
+          ].name
+        );
+      }
+    }
+    return res;
   }
 
   get hasCertificate(): boolean {
@@ -235,6 +258,10 @@ export default class Card extends Vue {
       }
     }
     return res;
+  }
+
+  get services(){
+    return this.$store.getters.services;
   }
 
   get deploymentPersistentVolumes(): PersistentVolume[] {
@@ -280,26 +307,7 @@ export default class Card extends Vue {
         }
       }
     }
-
     return res;
-  }
-
-  get stateColor() {
-    let res: string = "light-blue";
-    switch (this.deployment.state) {
-      case Deployment.Role.STATE.DANGER:
-        res = "red";
-        break;
-      case Deployment.Role.STATE.WARNING:
-        res = "yellow";
-        break;
-      case Deployment.Role.STATE.SUCCESS:
-        res = "green";
-        break;
-      default: // Deployment.Role.STATE.UNKOWN
-      // Value is already set as default
-    }
-    return res + " lighten-2";
   }
 
   get state(): string {
@@ -320,46 +328,148 @@ export default class Card extends Vue {
 
     return res;
   }
+
+  mounted() {
+    this.onResize();
+  }
+
+  get linkedDomains(): { web: string; certificate: boolean }[] {
+    let res: { web: string; certificate: boolean }[] = [];
+
+    for (let chann in this.deployment.channels) {
+      for (let conn in this.deployment.channels[chann]) {
+        let deployment = this.deployments[
+          this.deployment.channels[chann][conn].destinyDeploymentId
+        ];
+
+        if (deployment instanceof HTTPEntryPoint) {
+          res.push({
+            web: (<HTTPEntryPoint>deployment).roles["sep"].configuration.domain,
+            certificate:
+              Object.keys(
+                (<HTTPEntryPoint>deployment).roles["sep"].configuration.secrets
+              ).length > 0
+          });
+        }
+      }
+    }
+
+    console.debug("Linked domains devuelve " + JSON.stringify(res));
+
+    return res;
+  }
+
+  get volumeUsage() {
+    return volume => {
+      let res = -1;
+      for (let item in volume.items) {
+        if (volume.items[item].usage > res) {
+          res = volume.items[item].usage;
+        }
+      }
+
+      return res;
+    };
+  }
+
+  onResize() {
+    this.setDeploymentName();
+  }
+
+  setDeploymentName() {
+    this.deploymentName = this.trimName(this.deployment.name);
+  }
+
+  trimName(name: string): string {
+    let res: string = name;
+    let breakpointName = (<any>this).$vuetify.breakpoint.name;
+    let headerSize = {
+      xs: 23,
+      sm: 23,
+      md: 36,
+      lg: 23,
+      xl: 29
+    };
+
+    if (name.length >= headerSize[breakpointName]) {
+      res = name.substr(0, headerSize[breakpointName]) + "..";
+    }
+
+    return res;
+  }
+
+  /** Obtains the ussage in a percentaje */
+  roleInstanceUssage(
+    numInstances: number,
+    maxInstances: number
+  ): { value: number; color: string } {
+    let value: number = numInstances * 100 / maxInstances;
+    let color: string = "info";
+
+    if (value >= 75 && value < 90) {
+      color = "warning";
+    } else if (value > 90) {
+      color = "error";
+    }
+
+    return { value, color };
+  }
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #81c784;
-$color_yellow: #fff176;
-$color_red: #e57373ed;
-$color_grey: #e0e0e0;
-$color_blue: #64b5f6;
-$icon_size: 40px;
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
+
+%icon_size {
+  font-size: 35px;
+}
 
 .corporative_background {
   background: #d1406b;
 }
 
-#check_circle {
-  color: $color_green;
-  font-size: $icon_size;
+.check_circle {
+  @extend %icon_size;
+  color: $color_success;
 }
 
-#warning {
-  color: $color_yellow;
-  font-size: $icon_size;
+.warning {
+  @extend %icon_size;
+  color: $color_warning;
 }
 
-#error {
-  color: $color_red;
-  font-size: $icon_size;
+.error {
+  @extend %icon_size;
+  color: $color_error;
 }
 
-#unknown {
-  color: $color_grey;
-  font-size: $icon_size;
+.info {
+  @extend %icon_size;
+  color: $color_info;
 }
 
-#info {
-  color: $color_blue;
-  font-size: $icon_size;
+.unknown {
+  @extend %icon_size;
+  color: $color_unkown;
+}
+
+#info_icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
 }
 
 #info_link {
+  @extend .info;
   text-decoration: none;
+}
+
+#sanity_icon {
+  position: absolute;
+  top: 60px;
+  right: 10px;
 }
 </style>

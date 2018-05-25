@@ -229,7 +229,41 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       ProxyConnection.instance.onAddVolumeMetrics((metrics) => {
 
-        injectee.commit('addVolumeMetrics', metrics);
+        let deployments = injectee.getters.deployments;
+        let volumeId = Object.keys(metrics)[0];
+        let resource = null;
+
+        /*
+          All theese bucles are just to find the resource wich contains the
+          instance which sended the metrics.
+        */
+        for (let deploymentURN in deployments) {
+          for (let roleURN in deployments[deploymentURN].roles) {
+            for (
+              let instanceURN in deployments[deploymentURN].roles[roleURN]
+                .instances
+            ) {
+              for (
+                let resourceURN in deployments[deploymentURN].roles[roleURN]
+                  .instances[instanceURN].resources
+              ) {
+                if (
+                  deployments[deploymentURN].roles[roleURN]
+                    .instances[instanceURN].resources[resourceURN]
+                    .id === volumeId
+                ) {
+                  resource = deployments[deploymentURN].roles[roleURN]
+                  .instances[instanceURN].resources[resourceURN]
+                  ._urn;
+                }
+              }
+            }
+          }
+        }
+
+        injectee.commit(
+          'addVolumeMetrics', { resource, metrics }
+        );
 
       });
 

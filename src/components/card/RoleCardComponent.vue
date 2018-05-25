@@ -254,23 +254,25 @@ export default class RoleCardComponent extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #81c784;
-$color_yellow: #fff176;
-$color_red: #e57373ed;
-$color_grey: #e0e0e0;
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
 $icon_size: 60px;
+
 #check_circle {
-  color: $color_green;
+  color: $color_success;
   font-size: $icon_size;
 }
 
 #warning {
-  color: $color_yellow;
+  color: $color_warning;
   font-size: $icon_size;
 }
 
 #error {
-  color: $color_red;
+  color: $color_error;
   font-size: $icon_size;
 }
 
