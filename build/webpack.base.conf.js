@@ -24,7 +24,8 @@ module.exports = {
       'vue$': 'vue/dist/vue.esm.js',
       'jquery': 'jquery/src/jquery.js',
       'jQuery': 'jquery/src/jquery.js',
-      '@': resolve('src')
+      '@': resolve('src'),
+      '__static__': resolve('static')
     }
   },
   module: {
