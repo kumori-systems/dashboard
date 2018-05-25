@@ -70,13 +70,9 @@ function getAllChannels(state, getters, type) {
     let excludeSrvChann = {};
 
     let connType = type === 'requires' ? 'depended' : 'provided';
-    console.debug(
-      'The connection type is ' + JSON.stringify(connType, null, 2)
-    );
 
     // Current service
     let service = state.manifests[state.currentManifest];
-    console.debug('The actual service is ' + JSON.stringify(service, null, 2));
 
     // Create exclusions
     for (let conn in service.connectors) {
@@ -106,18 +102,8 @@ function getAllChannels(state, getters, type) {
     for (let role in service.roles) {
       let component = getters.getComponents[service.roles[role].component];
 
-      console.debug(
-        'The component contains' + JSON.stringify(component, null, 2)
-      );
-
       if (component) {
         let comChannels = component.channels[type];
-
-        console.debug('The type is ' + JSON.stringify(type));
-
-        console.debug(
-          'The component channels are ' + JSON.stringify(comChannels, null, 2)
-        );
 
         if (comChannels && comChannels.length > 0) {
           list = list.concat(
@@ -126,12 +112,6 @@ function getAllChannels(state, getters, type) {
         }
       }
     }
-
-
-    console.debug(
-      'Before adding the service channels the list contains '
-      + JSON.stringify(list, null, 2)
-    );
 
     // Add service channels
     let searched = type === 'provides' ? 'requires' : 'provides';
@@ -142,38 +122,11 @@ function getAllChannels(state, getters, type) {
       );
     }
 
-
-    console.debug(
-      'In the middle of the method the list contains '
-      + JSON.stringify(list, null, 2)
-    );
-
-    if (
-      type === 'requires'
-      && service.channels
-      && service.channels['provides']
-    ) {
-      list = list.concat(
-        parseSugestionChannels(service.channels['provides'], '')
-      );
-    }
-
-    console.debug('La lista de exclusion de roles contiene '
-      + JSON.stringify(excludeRolChann, null, 2));
-    console.debug('La lista de exclusion de servicios contiene '
-      + JSON.stringify(excludeSrvChann, null, 2));
-
     list = list.filter((x) => {
       return !excludeRolChann[x.fullName] && !excludeSrvChann[x.fullName];
     });
 
   }
-
-
-  console.debug(
-    'La lista de opciones de canales contiene: '
-    + JSON.stringify(list, null, 2)
-  );
 
   return list;
 }

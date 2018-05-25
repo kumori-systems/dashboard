@@ -6,30 +6,24 @@
     <input
       type="text"
       v-model="selection"
-      :disabled="disabled? '' : null"
+      :disabled="disabled"
       :value="defaultVal"
       class="form-control black--text"
-      @keydown.enter='enter'
-      @keydown.down='down'
-      @keydown.up='up'
       @focusout='close($event)'
       @focus='setFocus'/>
 
       <ul
         class="dropdown-menu"
-        style="width:100%; margin-top:25px;">
-
-        <li disabled class="disabled">
-          <a>select with enter key</a>
-        </li>
+        style="width:100%; margin-top:33px;">
 
         <li
           v-for="(suggestion, index) in matches"
           :key="index"
-          :class="{'active': isActive(index)}"
-          v-on:click='suggestionClick(index)'>
+          :class="{ 'active': isActive(index) }"
+          v-on:mousedown="suggestionClick(index)"
+          v-on:mouseover="current=index">
           
-          <a v-on:click='suggestionClick(index)'>{{ suggestion.label }}</a>
+          <a>{{ suggestion.label }}</a>
 
         </li>
 
@@ -38,10 +32,11 @@
 </template>
 <script>
 export default {
-  props: ["disabled", "suggestions", "reset", "defaultVal"],
+  props: ["suggestions", "reset", "defaultVal"],
 
   data() {
     return {
+      disabled: false,
       open: false,
       current: 0,
       selection: "",
@@ -51,7 +46,6 @@ export default {
   },
 
   mounted: function() {
-    console.debug("Search helper has been mounted");
     this.init();
   },
 
@@ -72,6 +66,9 @@ export default {
   },
 
   methods: {
+    liClick() {
+      this.selection = this.matches[this.current];
+    },
     setFocus() {
       this.focus = true;
       if (this.open == false) {
@@ -85,25 +82,6 @@ export default {
         this.selection = "";
         this.$emit("reset", false);
       }
-    },
-
-    //When enter pressed on the input
-    enter() {
-      this.$emit("update", this.matches[this.current]);
-      this.selection = this.matches[this.current].fullName;
-      this.open = false;
-    },
-
-    //When up pressed while suggestions are open
-    up() {
-      console.log("upp");
-      if (this.current > 0) this.current--;
-    },
-
-    //When up pressed while suggestions are open
-    down() {
-      console.log("down");
-      if (this.current < this.matches.length - 1) this.current++;
     },
 
     //For highlighting element
@@ -129,8 +107,6 @@ export default {
 
     //When one of the suggestion is clicked
     suggestionClick(index) {
-      console.debug("In suggestionClick the index is " + index);
-
       this.$emit("update", this.matches[index]);
       this.selection = this.matches[index].fullName;
       this.open = false;
