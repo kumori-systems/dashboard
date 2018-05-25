@@ -460,6 +460,7 @@ $color_warning: #ffc107;
   position: absolute;
   bottom: 10px;
   right: 10px;
+  z-index: 1;
 }
 
 #info_link {
