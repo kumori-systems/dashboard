@@ -42,7 +42,7 @@ import PSGetters from "./store/pagestate/getters";
 })
 export default class App extends Vue {
   User = User;
-  mounted() {
+  created() {
     let status = this.$route.query.status;
     if (status && status == "error") {
       // If token in URL and state error
@@ -75,7 +75,11 @@ export default class App extends Vue {
         )
       );
       this.$router.push("/");
-    } else if (typeof Storage !== "undefined") {
+    }
+  }
+
+  mounted() {
+    if (typeof Storage !== "undefined") {
       // Check if there is a token in localStorage
       let unformattedStoredUser: string | User = localStorage.getItem("user");
       if (unformattedStoredUser) {
