@@ -107,15 +107,15 @@
 </template>
 <script>
 /** MetisMenu */
-require("/home/osmuogar/workspace/dashboard/static/css/metisMenu/" +
+require("__static__/css/metisMenu/" +
   "metisMenu.min.js");
 /** Bootstrap */
-require("/home/osmuogar/workspace/dashboard/static/css/bootstrap/js/" +
+require("__static__/css/bootstrap/js/" +
   "bootstrap.min.js");
 /** D3 */
-require("/home/osmuogar/workspace/dashboard/static/js/d3.v3.js");
+require("__static__/js/d3.v3.js");
 /** FileSaver */
-require("/home/osmuogar/workspace/dashboard/static/js/FileSaver.min.js");
+require("__static__/js/FileSaver.min.js");
 
 import {
   Graph,
@@ -182,7 +182,6 @@ export default {
 
     manifestList() {
       let res = [];
-      console.debug('the list of manifests is', this.manifests);
       for (let i in this.manifests) {
         res.push(this.manifests[i]);
       }
@@ -194,17 +193,13 @@ export default {
     },
 
     options() {
-      let res =  this.manifestList.filter(x => {
+      return this.manifestList.filter(x => {
         return this.filterManifests.indexOf(x.type) > -1;
       });
-
-      console.debug('The list of manifests contains', this.manifestList);
-      console.debug('Options contains', res);
-      return res;
     }
   },
   mounted() {
-    this.$store.dispatch('loadManifests');
+    this.$store.dispatch("loadManifests");
     this.clear();
   },
   methods: {
@@ -241,15 +236,11 @@ export default {
   }
 };
 </script>
-<!--
-  There is a bug in which relative css paths are not correctly solved:
-  https://github.com/vuejs-templates/webpack/issues/932
--->
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/sb-admin-2/sb-admin-2.css"></style>
-<style src="/home/osmuogar/workspace/dashboard/static/css/font-awesome/css/font-awesome.min.css"></style>
-<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>
+<style scoped src="__static__/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="__static__/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="__static__/css/sb-admin-2/sb-admin-2.css"></style>
+<style src="__static__/css/font-awesome/css/font-awesome.min.css"></style>
+<style scoped src="__static__/css/graph-creator.css"></style>
 <style scoped>
 .panel,
 .panel-default,

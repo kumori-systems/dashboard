@@ -1,6 +1,26 @@
 import { Deployment } from './deployment';
 import { Service, VolatileVolume } from './index';
 
+import { config } from '../../../api';
+
+export function addPortToURL(url: string): string {
+  let res: string = url;
+
+  let pointer: number = res.length;
+
+  if (res.indexOf('/') >= 0) {
+    pointer = res.indexOf('/');
+  }
+
+  if ((<any>config).PORT) {
+    res = res.substring(0, pointer) + ':' + (<any>config).PORT
+      + res.substring(pointer, res.length);
+  }
+
+  return res;
+}
+
+
 /**
  * Especialitzed type of deployment with the functionality of connecting
  * another deployment to the outside.
@@ -32,7 +52,7 @@ export module EntryPoint {
 export class HTTPEntryPoint extends EntryPoint {
 
   /** List of websites associated to the entrypoint. */
-  websites: string[] = [];
+  websites: { url: string, text: string }[] = [];
 
   /**
    * Constructor of the HTTPEntryPoint class.
@@ -63,7 +83,13 @@ export class HTTPEntryPoint extends EntryPoint {
     );
 
     if (roles && roles['sep'].configuration) {
-      this.websites.push(roles['sep'].configuration.domain);
+      this.websites.push(
+        {
+          url: addPortToURL(roles['sep'].configuration.domain),
+          text: roles['sep'].configuration.domain
+        }
+
+      );
     }
 
   }

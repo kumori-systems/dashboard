@@ -53,13 +53,38 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // If the service is already in the state, it's marked as usedby
       if (state.services[serv]) {
-        if (state.services[serv].usedBy.indexOf(dep) < 0)
+        if (state.services[serv].usedBy.indexOf(dep) < 0) {
           state.services[serv].usedBy.push(dep);
+        }
+      }
+
+      // For each component and runtime, add a usedBy mark
+      for (let role in payload[dep].roles) {
+
+        let component: Component = state
+          .components[payload[dep].roles[role].component];
+
+        if (component) {
+
+          // Adds component used by
+          if (component.usedBy && component.usedBy.indexOf(dep) < 0) {
+            component.usedBy.push(dep);
+          }
+
+          // Adds runtime used by
+          let runtime = state.runtimes[component.runtime];
+          if (runtime && runtime.usedBy.indexOf(dep) < 0) {
+            runtime.usedBy.push(dep);
+          }
+
+        }
+
       }
 
       // Initialitze deployment metrics
-      if (!state.serviceMetrics[dep])
+      if (!state.serviceMetrics[dep]) {
         state.serviceMetrics[dep] = [];
+      }
 
     }
 
