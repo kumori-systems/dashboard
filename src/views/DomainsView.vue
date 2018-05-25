@@ -71,7 +71,7 @@ import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
 
-import { Domain, Deployment } from "../store/stampstate/classes";
+import { Domain, HTTPEntryPoint } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "domains-view",
@@ -119,7 +119,7 @@ export default class DomainsView extends Vue {
     return domains;
   }
 
-  get deployment(): (stri: string) => Deployment {
+  get deployment(): (stri: string) => HTTPEntryPoint {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
     };

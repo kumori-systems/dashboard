@@ -137,8 +137,8 @@
                   <!-- <v-icon></v-icon> -->
                 </v-card-actions>
                 <v-list-tile-title>
-                  <a v-if="hasCertificate" v-bind:href="'https://' + web">{{ web }}</a>
-                  <a v-else v-bind:href="'http://' + web">{{ web }}</a>
+                  <a v-if="hasCertificate" v-bind:href="'https://' + web.url">{{ web.text }}</a>
+                  <a v-else v-bind:href="'http://' + web.url">{{  web.text }}</a>
                 </v-list-tile-title>
               </v-list-tile>
             </template>
