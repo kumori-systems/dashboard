@@ -66,10 +66,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
    */
   loadManifests = (actionContext: Vuex.ActionContext<State, any>): void => {
 
+    actionContext.commit('clearLocalState');
+
     actionContext.commit(
-      'loadManifests',
-      actionContext.rootState.stampstate.manifests
+      'loadManifests', actionContext.rootState.stampstate.manifests
     );
+
+    let runtimes: { 'eslap': string }[] = [];
+
+    for (let runtimeURI in actionContext.rootState.stampstate.runtimes) {
+      if (actionContext.rootState.stampstate.runtimes[runtimeURI]) {
+        runtimes.push({ 'eslap': runtimeURI });
+      }
+    }
+
+    actionContext.commit('loadRuntimes', runtimes);
 
   }
   downloadTemporalManifest = (actionContext: Vuex.ActionContext<State, any>
