@@ -33,7 +33,7 @@
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
           <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
-            <a v-if="deployment(elem).resources['cert']" v-bind:href="'https://' + deployment(elem).name">
+            <a v-if="hasCertificate(deployment(elem))" v-bind:href="'https://' + deployment(elem).name">
               {{ deployment(elem).name }}
             </a>
             <a v-else v-bind:href="'http://' + deployment(elem).name">
@@ -42,7 +42,7 @@
           </div>
         </td>
         <td class="text-xs-left">
-          <v-btn color="error" icon v-on:click="showDialog(props.item._urn)">
+          <v-btn color="error" v-bind:disabled="props.item.usedBy.length>0" icon v-on:click="showDialog(props.item._urn)">
             <v-icon class="white--text">delete_forever</v-icon>
           </v-btn>
         </td>
@@ -71,7 +71,7 @@ import VueClassComponent from "vue-class-component";
 
 import SSGetters from "../store/stampstate/getters";
 
-import { Domain, Deployment } from "../store/stampstate/classes";
+import { Domain, HTTPEntryPoint } from "../store/stampstate/classes";
 
 @VueClassComponent({
   name: "domains-view",
@@ -119,9 +119,15 @@ export default class DomainsView extends Vue {
     return domains;
   }
 
-  get deployment(): (stri: string) => Deployment {
+  get deployment(): (stri: string) => HTTPEntryPoint {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
+    };
+  }
+
+  get hasCertificate() {
+    return (deployment: Deployment) => {
+      return deployment.resources["server_cert"] ? true : false;
     };
   }
 

@@ -29,7 +29,7 @@
 
       <v-badge class="mr-3" slot="activator" overlap color="error">
         <span slot="badge" v-if="alarms.length > 0">{{ alarms.length }}</span>
-        <v-icon large color="grey lighten-1">notifications</v-icon>
+        <v-icon large color="grey lighten-1" v-on:click="notificationClicked">notifications</v-icon>
       </v-badge>
 
       <v-list v-if="alarms.length > 0">
@@ -89,6 +89,7 @@ import {
 })
 export default class AppbarComponent extends Vue {
   showAlarmMenu: boolean = false;
+  clickedNotificationIcon: boolean = false;
 
   watcher;
   lastNotification: Notification = null;
@@ -96,16 +97,23 @@ export default class AppbarComponent extends Vue {
   mounted() {
     this.watcher = this.$watch("showAlarmMenu", function(value) {
       if (value) {
-        console.debug("timer on!");
         setTimeout(() => {
-          console.debug("ShowAlarm menu changed its value");
-          this.showAlarmMenu = false;
+          if (!this.clickedNotificationIcon) {
+            this.showAlarmMenu = false;
+          }
         }, 3000);
+      }else{
+        this.clickedNotificationIcon = false;
       }
     });
   }
+
   beforeDestroy() {
-    this.watcher();
+    this.watcher(); // Finishes the watcher
+  }
+
+  notificationClicked(value) {
+    this.clickedNotificationIcon = true;
   }
 
   /** Gets the user authenticated in the system. */

@@ -79,7 +79,7 @@
                         <v-btn color="info" icon v-on:click="showInfoElementDialog(runtime)">
                           <v-icon class="white--text">info_outline</v-icon>
                         </v-btn>
-                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(runtime)">
+                        <v-btn color="error" v-bind:disabled="runtimeUsedBy(runtime).length > 0" icon v-on:click="showDeleteElementDialog(runtime)">
                           <v-icon class="white--text">delete_forever</v-icon>
                         </v-btn>
                       </v-flex>
@@ -126,7 +126,7 @@
                         <v-btn color="info" icon v-on:click="showInfoElementDialog(component)">
                           <v-icon class="white--text">info_outline</v-icon>
                         </v-btn>
-                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(component)">
+                        <v-btn color="error" v-bind:disabled="componentUsedBy(component).length > 0" icon v-on:click="showDeleteElementDialog(component)">
                           <v-icon class="white--text">delete_forever</v-icon>
                         </v-btn>
                       </v-flex>
@@ -175,7 +175,7 @@
                         <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
                           <v-icon class="white--text">info_outline</v-icon>
                         </v-btn>
-                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(service)">
+                        <v-btn color="error" v-bind:disabled="serviceUsedBy(service).length > 0" icon v-on:click="showDeleteElementDialog(service)">
                           <v-icon class="white--text">delete_forever</v-icon>
                         </v-btn>
                       </v-flex>
@@ -227,7 +227,7 @@
                           <v-icon class="white--text">info_outline</v-icon>
                         </v-btn>
 
-                        <v-btn color="error" icon v-on:click="showDeleteElementDialog(certificate)">
+                        <v-btn color="error" v-bind:disabled="certificateUsedBy(certificate).length > 0" icon v-on:click="showDeleteElementDialog(certificate)">
                           <v-icon class="white--text">delete_forever</v-icon>
                         </v-btn>
 
