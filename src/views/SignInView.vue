@@ -174,9 +174,6 @@ export default class SignInView extends Vue {
   /** <boolean> Enables the visibility of the password. */
   viewPassword: boolean = false;
 
-  /** <string> URL where the browser is redirected to procceed to google's oauth. */
-  googleOauthURN: string = null;
-
   /** <boolean> Shows the config pannel. */
   showPannel: boolean = false;
 
@@ -189,14 +186,19 @@ export default class SignInView extends Vue {
   /** Mounted hook. */
   mounted() {
     this.loadURLS();
+  }
 
-    // Set redirection path for google oauth
-    this.googleOauthURN =
-      config.ACS_URI +
+  /**
+   * <string> URL where the browser is redirected to procceed to google's oauth.
+   */
+  get googleOauthURN() {
+    return (
+      this.acsURL +
       "/auth/google?redirectOnSuccessUrl=" +
       urlencode(location.origin + "/#/overview") +
       "&redirectOnFailureUrl=" +
-      urlencode(location.origin + "/#/overview");
+      urlencode(location.origin + "/#/overview")
+    );
   }
 
   /**
