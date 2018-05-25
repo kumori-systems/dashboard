@@ -16,6 +16,11 @@ import {
 export default class Getters implements Vuex.GetterTree<State, any> {
   [name: string]: Vuex.Getter<State, any>;
 
+  manifests = (state?: State, getters?: Getters, rootState?: any,
+    rootGetters?: any) => {
+    return state.manifests;
+  }
+
   certificates = (state?: State, getters?: Getters, rootState?: any,
     rootGetters?: any) => {
 

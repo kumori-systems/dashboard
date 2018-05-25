@@ -1,0 +1,118 @@
+<template>
+  <div>
+    <div
+      :updater="updater"
+      class="row">
+      <div
+        v-for="(hr, index) in form.headers"
+        :key="index"
+        :class="'col-sm-' + 12 / form.headers.length">
+        <p>
+          <label>
+            {{ hr }}
+          </label>
+        </p>
+      </div>
+    </div>
+    <div
+      v-for="(row, index) in form.rows"
+      :key="index"
+      class="row">
+      <div
+        :class="{
+          'form-group':true, 'has-error':validation[row[0].value].err,
+          'has-feedback':validation[row[0].value].err
+        }"
+      >  
+        <div
+          v-for="(col, index) in row"
+          :key="index"
+          :class="'col-sm-' + 12 / form.headers.length">
+          <template v-if="col.type === Settings.inlineForms.valueTypes.text">
+            <p class="rowText">
+              {{ col.value }}
+            </p>
+          </template>
+          <input
+            v-if="col.type === Settings.inlineForms.valueTypes.input"
+            :value="getValue(row, col.value)"
+            :ref="col.ref"
+            @input="fieldChanged(row,col,type)"
+            class="form-control">
+        </div>
+        <span
+          v-if="validation[row[0].value].err"
+          class="help-block">
+          {{ $t('validation.' + validation[row[0].value].msg) }}
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  props: ["data", "type", "validation"],
+  data() {
+    return {
+      elems: {},
+      updater: true,
+      form: {}
+    };
+  },
+  mounted: function() {
+    this.init();
+  },
+  computed: {
+    getCurrentRoleResource() {
+      return this.$store.getters.getCurrentRoleResource;
+    }
+  },
+  methods: {
+    setResource(payload) {
+      this.$store.dispatch("setResource", payload);
+    },
+
+    init() {
+      this.Settings = this.$store.state.manifesteditor.Settings;
+      this.form = this.getCurrentRoleResource;
+    },
+
+    fieldChanged(row, col, type) {
+      switch (type) {
+        case this.Settings.inlineForms.types.resource:
+          this.setResource({
+            name: row[0].value,
+            tag: this.$refs[col.ref][0].value,
+            oldTag: col.value,
+            type: row[1].fullType
+          });
+          this.elems[row[0].value] = this.$refs[col.ref][0].value;
+          this.updater = !this.updater;
+          break;
+        default:
+          break;
+      }
+    },
+
+    getValue(row, value) {
+      let val = this.elems[row[0].value];
+
+      if (!val) {
+        this.elems[row[0].value] = value;
+        val = value;
+      }
+
+      return val;
+    }
+  }
+};
+</script>
+<!--
+  There is a bug in which relative css paths are not correctly solved
+  https://github.com/vuejs-templates/webpack/issues/932
+-->
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/bootstrap/css/bootstrap.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/metisMenu/metisMenu.min.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/sb-admin-2/sb-admin-2.css"></style>
+<style scoped src="/home/osmuogar/workspace/dashboard/static/css/graph-creator.css"></style>

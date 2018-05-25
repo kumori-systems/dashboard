@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card light>
     <v-card-title primary-title class="grey lighten-3">
 
       <!-- Role state -->
@@ -14,15 +14,16 @@
 
       <!-- Num instances selector -->
       <span>Instances</span>
-      <v-btn-toggle class="grey lighten-3">
-        <v-btn flat v-on:click="lessInstances"><v-icon>remove</v-icon></v-btn>
-      </v-btn-toggle>
+      
+        <v-btn flat icon class="pa-0 ma-0 black--text" v-on:click="lessInstances"><v-icon >remove</v-icon></v-btn>
+      
       {{ localNumInstances }}
-      <v-btn-toggle class="grey lighten-3">
-        <v-btn flat v-on:click="moreInstances">
+      <v-flex xs1>
+        <v-btn flat icon class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
           <v-icon>add</v-icon>
         </v-btn>
-      </v-btn-toggle>
+      </v-flex>
+      
 
     </v-card-title>
   
@@ -33,54 +34,42 @@
        <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
           
           <!-- Component urn -->
-          <v-layout>
-            <v-flex ma-1 xs12>
-              <p v-if="!component">
-                <span class="subheading">Component:</span> retrieving info..</p>
-              <p v-else><span class="subheading">Component:</span> {{ component._urn }}</p>
-            </v-flex>
-          </v-layout>
+          <v-layout v-if="!component"><strong>Component:</strong>&nbsp;retrieving info..</v-layout>
+          <v-layout v-else><strong>Component:</strong>&nbsp;{{ component._urn }}</v-layout>
 
           <!-- Component runtime -->
-          <v-layout>
-            <v-flex ma-1 xs12>
-              <p v-if="!component"><span class="subheading">Runtime:</span> retrieving info..</p>
-              <p v-else><span class="subheading">Runtime:</span> {{ component.runtime }}</p>
-            </v-flex>
-          </v-layout>
-        
-          <!-- Role arrangement -->
-          <v-layout>
-            <v-flex ma-1 xs12>
-              <p>
-                {{ role.memory }} <span class="subheading">MEM</span>
-                {{ role.cpu }} <span class="subheading">CPU</span>
-                {{ role.bandwidth }} <span class="subheading">NET</span>
-              </p>
-            </v-flex>
-          </v-layout>
+          <v-layout v-if="!component"><strong>Runtime:</strong>&nbsp;retrieving info..</v-layout>
+          <v-layout v-else><strong>Runtime:</strong>&nbsp;{{ component.runtime }}</v-layout>
         
           <!-- Role channels -->
           <v-layout>
-            <v-flex ma-1 xs12>
-              <span class="subheading">Channels:</span>
-
+            <v-flex xs12>
+              <strong>Channels:</strong>
               <v-layout v-for="(channel, index) in roleChannels(service, role.name)" v-bind:key="index">
                 <div v-for="(pro, index) in channel.provided" v-bind:key="index">
-                  <v-chip color="lime" @input="pro">
+                  <v-chip color="lime darken-1 white--text" @input="pro">
                     <span v-if="pro.role">{{ pro.role }} ~</span>
                     <span v-else>Service ~</span>
                     <span v-if="pro.endpoint">&nbsp;{{ pro.endpoint }}</span>
                   </v-chip>
                 </div>
                 <div v-for="(dep, index) in channel.depended" v-bind:key="index">
-                  <v-chip color="light-blue lighten-3" @input="dep">
+                  <v-chip color="light-blue lighten-1 white--text" @input="dep">
                     <span v-if="dep.role">{{ dep.role }} ~</span>
                     <span v-else>Service ~</span>
                     <span v-if="dep.endpoint">&nbsp;{{ dep.endpoint }}</span>
                   </v-chip>
                 </div>
               </v-layout>
+            </v-flex>
+          </v-layout>
+
+          <!-- Role arrangement -->
+          <v-layout>
+            <v-flex ma-1 xs12>
+              <strong>MEM</strong> {{ role.memory }}
+              <strong>CPU</strong> {{ role.cpu }}
+              <strong>NET</strong> {{ role.bandwidth }}
             </v-flex>
           </v-layout>
 
@@ -99,7 +88,7 @@
       </v-layout>
       
       <!-- Role instances -->
-      <v-layout wrap v-if="service">
+       <v-layout wrap v-if="service">
         <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
           <v-expansion-panel expand>
             <v-expansion-panel-content>
@@ -114,6 +103,7 @@
           </v-expansion-panel>
         </v-flex>
       </v-layout>
+
 
     </v-container>
   </v-card>
@@ -286,5 +276,10 @@ $icon_size: 60px;
 
 #unknown {
   font-size: $icon_size;
+}
+
+#btn__content::before{
+  padding: 0px;
+  margin: 0px;
 }
 </style>

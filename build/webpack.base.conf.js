@@ -19,11 +19,12 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
-    // extensions: ['.js', '.ts', '.vue', '.json'],
     extensions: ['.js', '.ts', '.vue'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
+      'jquery': 'jquery/src/jquery.js',
+      'jQuery': 'jquery/src/jquery.js',
+      '@': resolve('src')
     }
   },
   module: {
@@ -47,11 +48,11 @@ module.exports = {
         loader: 'vue-loader',
         options: vueLoaderConfig
       },
-      // {
-      //   test: /\.js$/,
-      //   loader: 'babel-loader',
-      //   include: [resolve('src'), resolve('test')]
-      // },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        include: [resolve('src'), resolve('test')]
+      },
       {
         test: /\.ts$/,
         loader: 'ts-loader',

@@ -22,41 +22,37 @@ export function getElementType(urn: string): ECloudElement.ECLOUDELEMENT_TYPE {
 
   let res: ECloudElement.ECLOUDELEMENT_TYPE = null;
 
-  try {
+  let splitted = urn.split('/');
 
-    let splitted = urn.split('/');
+  let i = 3;
 
-    let i = 3;
+  // If this is a temporary element, the type will be twice realocated to
+  // the left
+  if (splitted[2] === 'temporary') { i = i + 2; }
 
-    // If this is a temporary element, the type will be twice realocated to
-    // the left
-    if (splitted[2] === 'temporary') { i = i + 2; }
-
-    switch (splitted[i]) {
-      case 'runtime':
-      case 'runtimes':
-        res = ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME;
-        break;
-      case 'service':
-      case 'services':
-        res = ECloudElement.ECLOUDELEMENT_TYPE.SERVICE;
-        break;
-      case 'component':
-      case 'components':
-        res = ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT;
-        break;
-      case 'resource':
-      case 'resources':
-        res = ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE;
-        break;
-      default:
-        throw Error('Unknown element type ' + splitted[i] + ' of ' + urn);
-    }
-
-  } catch (err) {
-    throw new Error(
-      'Unrecognized URN format \'' + urn + '\'. Error: ' + err
-    );
+  switch (splitted[i]) {
+    case 'runtime':
+    case 'runtimes':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME;
+      break;
+    case 'service':
+    case 'services':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.SERVICE;
+      break;
+    case 'component':
+    case 'components':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT;
+      break;
+    case 'resource':
+    case 'resources':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE;
+      break;
+    case 'deployment':
+    case 'deployments':
+      res = ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT;
+      break;
+    default:
+      console.error('Unknown element type ' + splitted[i] + ' of ' + urn);
   }
 
   return res;
@@ -112,14 +108,12 @@ export function getResourceType(urn: string): Resource.RESOURCE_TYPE {
             res = Resource.RESOURCE_TYPE.DOMAIN;
             break;
           default:
-            throw new Error(
-              'Not able to extract resource from \'' + urn + '\'.'
-            );
+            console.error('Not able to extract resource from \'' + urn + '\'.');
         }
     }
 
   } catch (err) {
-    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
   }
 
   return res;
@@ -138,7 +132,7 @@ export function getElementDomain(urn: string): string {
   try {
     res = urn.split('/')[2];
   } catch (err) {
-    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
   }
 
   return res;
@@ -163,7 +157,7 @@ export function getElementName(urn: string): string {
     }
 
   } catch (err) {
-    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
   }
   return res;
 
@@ -183,7 +177,7 @@ export function getElementVersion(urn: string): string {
     res = splitted[splitted.length - 1];
 
   } catch (err) {
-    throw new Error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
   }
   return res;
 

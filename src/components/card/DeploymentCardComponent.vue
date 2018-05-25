@@ -1,11 +1,11 @@
 <template>
-  <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
+  <v-flex xs12 sm6 md6 lg6 xl3>
 
     <!-- Card's background represents the deployment's state -->
-    <v-card>
+    <v-card class="ma-1 grey lighten-3">
 
       <!-- Card title: Deployment name -->
-      <v-card-title  primary-title class="headline" v-bind:class="stateColor">
+      <v-card-title  primary-title class="headline kumori-background">
 
         <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint">language</v-icon>
         <v-icon class="ma-1" v-if="deployment instanceof HTTPEntryPoint && hasCertificate">https</v-icon>
@@ -21,17 +21,17 @@
       </v-card-title>
 
       <!-- Card body: Deployment stats -->
-      <v-container>
+      <v-container >
 
         <!-- Flexible content allows good resize -->
         <v-flex>
 
           <!-- List of deployment's properties -->
-          <v-list two-line>
+          <v-list two-line class="grey lighten-3">
 
             <!-- Deployment details -->
             <template>
-              <v-subheader>
+              <v-subheader class="black--text">
                 <strong>DATE</strong>
                 <v-spacer></v-spacer>
 
@@ -40,7 +40,7 @@
 
               </v-subheader>
               <v-list-tile tag="div">
-                <v-list-tile-title>
+                <v-list-tile-title class="black--text">
                   {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
                 </v-list-tile-title>
               </v-list-tile>
@@ -48,11 +48,11 @@
 
             <!-- Service -->
             <template>
-              <v-subheader><strong>SERVICE</strong></v-subheader>
+              <v-subheader class="black--text"><strong>SERVICE</strong></v-subheader>
               <v-list-tile tag="div">
                 <v-list-tile-title>
                   <v-tooltip bottom>
-                    <span dark slot="activator">  {{ deployment.service }}</span>
+                    <span dark slot="activator" class="black--text">{{ deployment.service }}</span>
                     <span>{{ deployment.service }}</span>
                   </v-tooltip>
                 </v-list-tile-title>
@@ -61,18 +61,18 @@
 
             <!-- Roles -->
             <template>
-              <v-subheader><strong>ROLES</strong></v-subheader>
+              <v-subheader class="black--text"><strong>ROLES</strong></v-subheader>
               <v-list-tile v-for="(rol, urn) in deployment.roles" v-bind:key="urn" tag="div">
-                <v-list-tile-content>
+                <v-list-tile-content class="black--text">
                   <v-list-tile-title>{{ urn }}</v-list-tile-title>
                   <v-list-tile-sub-title>
                     <v-tooltip bottom>
-                      <span dark slot="activator">{{ rol.component }}</span>
+                      <span dark slot="activator" class="black--text">{{ rol.component }}</span>
                       <span>{{ rol.component }}</span>
                     </v-tooltip>
                   </v-list-tile-sub-title>
                 </v-list-tile-content>
-                <v-card-actions>{{ rol.actualInstances }}</v-card-actions>
+                <v-card-actions class="black--text">{{ rol.actualInstances }}</v-card-actions>
               </v-list-tile>
             </template>
 
@@ -80,10 +80,10 @@
             <template>
 
               <!-- Links are calculated with channel connections -->
-              <v-subheader><strong>LINKS</strong></v-subheader>
+              <v-subheader class="black--text"><strong>LINKS</strong></v-subheader>
               <div v-for="(channConnections, channName) in deployment.channels" v-bind:key="channName">
               <v-list-tile  v-for="(conn, index) in channConnections" v-bind:key="index" tag="div">
-                <v-list-tile-title>{{ deployments[conn.destinyDeploymentId].name }}</v-list-tile-title>
+                <v-list-tile-title class="black--text">{{ deployments[conn.destinyDeploymentId].name }}</v-list-tile-title>
               </v-list-tile>
               </div>
 
@@ -91,7 +91,7 @@
 
             <!-- Persistent Volumes -->
             <template v-if="deploymentPersistentVolumes.length > 0">
-              <v-subheader><strong>PERSISTENT VOLUMES</strong></v-subheader>
+              <v-subheader class="black--text"><strong>PERSISTENT VOLUMES</strong></v-subheader>
               <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <v-icon class="indigo--text">storage</v-icon>
@@ -99,7 +99,7 @@
                 <v-list-tile-title>
                   <v-tooltip bottom>
                     <div dark slot="activator">
-                      <v-layout>
+                      <v-layout class="black--text">
                         <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                         <v-flex xs6>{{ vol.size }} GB</v-flex>
                       </v-layout>
@@ -113,13 +113,13 @@
 
              <!-- Volatile Volumes -->
             <template v-if="deploymentVolatileVolumes.length > 0">
-              <v-subheader><strong>VOLATILE VOLUMES</strong></v-subheader>
+              <v-subheader class="black--text"><strong>VOLATILE VOLUMES</strong></v-subheader>
               <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
                 </v-card-actions>
                 <v-list-tile-title>
-                  <v-layout>
+                  <v-layout class="black--text">
                     <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
                     <v-flex xs6>{{ vol.size }} GB</v-flex>
                   </v-layout>
@@ -131,7 +131,7 @@
 
             <!-- Websites -->
             <template v-if="deployment instanceof HTTPEntryPoint">
-              <v-subheader><strong>WEBSITES</strong></v-subheader>
+              <v-subheader class="black--text"><strong>WEBSITES</strong></v-subheader>
               <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" tag="div">
                 <v-card-actions>
                   <!-- <v-icon></v-icon> -->
@@ -217,7 +217,7 @@ export default class Card extends Vue {
   /** The URN of the deployment represented by this card. */
   deploymentURN = this.deploymentURN;
 
-  get deployment(){
+  get deployment() {
     return this.deployments[this.deploymentURN];
   }
 
@@ -329,6 +329,10 @@ $color_red: #e57373ed;
 $color_grey: #e0e0e0;
 $color_blue: #64b5f6;
 $icon_size: 40px;
+
+.corporative_background {
+  background: #d1406b;
+}
 
 #check_circle {
   color: $color_green;

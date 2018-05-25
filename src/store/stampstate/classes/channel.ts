@@ -24,7 +24,10 @@ export abstract class Channel extends ECloudElement {
   constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(ECloudElement.ECLOUDELEMENT_TYPE.CHANNEL);
     if (!name) this.name = name;
-    if (!type) throw new Error('Invalid Type for Channel: ' + type);
+    if (!type) {
+      console.error('Invalid Type for Channel: ' + type);
+      throw new Error('Invalid Type for Channel: ' + type);
+    }
     this.type = type;
     if (!protocol) this.protocol = protocol;
   }
@@ -50,7 +53,8 @@ export class ProvidedChannel extends Channel {
 
   /** Allowed type of channels for a ProvidedChannel */
   readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
-    Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.SEND,
+    Channel.CHANNEL_TYPE.REPLY, Channel.CHANNEL_TYPE.RECEIVE,
+    Channel.CHANNEL_TYPE.SEND,
     Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
     Channel.CHANNEL_TYPE.ENDPOINT_REPLY
   ];
@@ -63,8 +67,10 @@ export class ProvidedChannel extends Channel {
    */
   constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
-    if (this.allowedTypes.indexOf(type) === -1)
+    if (this.allowedTypes.indexOf(type) === -1) {
+      console.error('Invalid Type for ProvidedChannel: ' + type);
       throw new Error('Invalid Type for ProvidedChannel: ' + type);
+    }
   }
 
 }
@@ -74,7 +80,9 @@ export class DependedChannel extends Channel {
 
   /** Allowed type of channels for a DependedChannel */
   readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
-    Channel.CHANNEL_TYPE.REQUEST, Channel.CHANNEL_TYPE.RECEIVE,
+    Channel.CHANNEL_TYPE.SEND,
+    Channel.CHANNEL_TYPE.RECEIVE,
+     Channel.CHANNEL_TYPE.REQUEST,
     Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
     Channel.CHANNEL_TYPE.ENDPOINT_REPLY
   ];
@@ -87,8 +95,10 @@ export class DependedChannel extends Channel {
    */
   constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
-    if (this.allowedTypes.indexOf(type) === -1) throw new Error('Invalid Type'
-      + ' for DependededChannel: ' + type);
+    if (this.allowedTypes.indexOf(type) === -1) {
+      console.error('Invalid Type for DependededChannel: ' + type);
+      throw new Error('Invalid Type for DependededChannel: ' + type);
+    }
   }
 
 }
@@ -112,16 +122,26 @@ export abstract class Connector {
    */
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
-    if (!provided)
+    if (!provided) {
+      console.error('Invalid value for provided in Connector');
       throw new Error('Invalid value for provided in Connector');
-    if (provided.length === 0)
+    }
+
+    if (provided.length === 0) {
+      console.error('Number of channels must be > 0.');
       throw new Error('Number of channels must be > 0.');
+    }
 
     this.provided = provided;
 
-    if (!depended) throw new Error('Invalid value for depended in Connector');
-    if (depended.length === 0)
+    if (!depended) {
+      console.error('Invalid value for depended in Connector');
+      throw new Error('Invalid value for depended in Connector');
+    }
+    if (depended.length === 0) {
+      console.error('Number of channels must be > 0.');
       throw new Error('Number of channels must be > 0.');
+    }
 
     this.depended = depended;
   };

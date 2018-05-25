@@ -114,7 +114,10 @@ export class Deployment extends ECloudElement {
     }) {
     super(ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT);
 
-    if (!urn) throw new Error('A deployment must have associated a URN.');
+    if (!urn) {
+      console.error('A deployment must have associated a URN.');
+      throw new Error('A deployment must have associated a URN.');
+    }
     this._urn = urn;
 
 
@@ -123,8 +126,10 @@ export class Deployment extends ECloudElement {
     // Calculate path
     this._path = '/deployment/' + urlencode(urn);
 
-    if (!service || service.length === 0) throw new Error('Invalid value for '
-      + 'service in Deployment:' + service);
+    if (!service || service.length === 0) {
+      console.error('Invalid value for service in Deployment:' + service);
+      throw new Error('Invalid value for service in Deployment:' + service);
+    }
     this.service = service;
     if (resources) this.resources = resources;
     if (parameters) this.parameters = parameters;
@@ -297,11 +302,17 @@ export module Deployment {
       instances: { [instanceId: string]: Role.Instance }, minInstances: number,
       maxInstances: number) {
 
-      if (!name || name.length === 0)
+      if (!name || name.length === 0) {
+        console.error('Invalid name for Role: ' + name);
         throw new Error('Invalid name for Role: ' + name);
+      }
+
       this.name = name;
-      if (!component)
+      if (!component) {
+        console.error('Invalid component for Role: ' + component);
         throw new Error('Invalid component for Role: ' + component);
+      }
+
       this.component = component;
       if (configuration) this.configuration = configuration;
       if (cpu && cpu > 0) this.cpu = cpu;
@@ -313,12 +324,17 @@ export module Deployment {
       if (instances) this.instances = instances;
       if (minInstances) {
         if (minInstances > 0) { this.minInstances = minInstances; }
-        else { throw new Error('MinInstances must be higher than 0'); }
+        else {
+          console.error('MinInstances must be higher than 0');
+          throw new Error('MinInstances must be higher than 0');
+        }
       }
       if (maxInstances) {
         if (maxInstances >= minInstances) {
           this.maxInstances = maxInstances;
         } else {
+          console
+            .error('MaxInstances must be equal or higher than minInstances');
           throw new
             Error('MaxInstances must be equal or higher than minInstances');
         }
@@ -411,8 +427,10 @@ export module Deployment {
           [resourceKey: string]: string
         },
         ports?: { [key: string]: string; }) {
-        if (!cnid || cnid.length === 0)
+        if (!cnid || cnid.length === 0) {
+          console.error('Invalid cnid for Instance: ' + cnid);
           throw new Error('Invalid cnid for Instance: ' + cnid);
+        }
         this.cnid = cnid;
         if (state) this.state = state;
         if (cpu && cpu >= 0) this.cpu = cpu;

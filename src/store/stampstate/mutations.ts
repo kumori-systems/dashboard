@@ -3,9 +3,10 @@ import Vuex from 'vuex';
 import State from './state';
 
 import {
-  Certificate, Component, Deployment, Domain, PersistentVolume, Runtime,
-  Service, VolatileVolume
+  Certificate, Component, Deployment, Domain, Manifest, PersistentVolume,
+  Runtime, Service, VolatileVolume
 } from './classes';
+
 /**
  * Mutations to handle the representation of the stamp state easier.
  * 
@@ -118,6 +119,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
       Vue.delete(state.deployments, deploymentURN);
     }
 
+  }
+
+  addManifest = (state: State, payload: Manifest): void => {
+    state.manifests = { ...state.manifests, [payload._urn]: payload };
   }
 
   addInstance = (state: State,

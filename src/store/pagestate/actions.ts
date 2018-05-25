@@ -5,7 +5,8 @@ import State from './state';
 import { ProxyConnection } from '../../api';
 import { getResourceType } from '../../api/utils';
 import {
-  Certificate, Component, Deployment, Domain, Resource, Runtime, Service, Volume
+  Certificate, Component, Deployment, Domain, Manifest, Resource, Runtime,
+  Service, Volume
 } from '../stampstate/classes';
 import { BackgroundAction, Notification, User } from './classes';
 
@@ -96,6 +97,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Finish signIn action in the state
 
+      console.debug('Sucessfully signed in');
+
       return injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.SIGNIN,
         'state': BackgroundAction.STATE.SUCCESS
@@ -118,6 +121,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ProxyConnection.instance.onRefreshToken((token) => {
 
         injectee.dispatch('refreshToken', token);
+
+      });
+
+      ProxyConnection.instance.onAddManifest((manifest: Manifest) => {
+
+        injectee.commit('addManifest', manifest);
 
       });
 
@@ -243,6 +252,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           injectee.dispatch('addNotification', notification);
 
         });
+
       return user;
 
     }).then((user) => { // Start loading action in the state
@@ -255,7 +265,13 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       ).then(() => user);
 
     }).then((user) => { // Load all elements
+
+      console.debug('Going to get a reference to all elements from the stamp');
+
       return ProxyConnection.instance.getRegisteredElements().then(() => {
+
+        console.debug('Retrieved all elements from the stamp');
+
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -269,7 +285,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all resources
 
+      console.debug('Retrieving all resources from the stamp');
+
       return ProxyConnection.instance.getResources().then(() => {
+
+        console.debug('Retrieved all resources from the stamp');
+
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -279,11 +300,15 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           )
         );
         return user;
+      }).catch((err) => {
+        console.error(err);
+        return user;
       });
 
     }).then((user) => { // Load all deployments
 
       return ProxyConnection.instance.getDeploymentList().then(() => {
+        console.debug('Retrieved info from all deployments');
 
         injectee.dispatch('addNotification',
           new Notification(
@@ -414,6 +439,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       }
 
     });
+
   }
 
   /** Marks a notification as readed. */

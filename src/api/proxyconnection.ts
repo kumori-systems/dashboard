@@ -17,13 +17,12 @@ import { Notification, User } from '../store/pagestate/classes';
 import {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
   Deployment, Domain, ECloudElement, HTTPEntryPoint, IntegerParameter,
-  JsonParameter, ListParameter, LoadBalancerConnector, NumberParameter,
-  Parameter, PersistentVolume, ProvidedChannel, PublishSubscribeConnector,
-  Resource, Runtime, Service, StringParameter, VolatileVolume, Volume
+  JsonParameter, ListParameter, LoadBalancerConnector, Manifest,
+  NumberParameter, Parameter, PersistentVolume, ProvidedChannel,
+  PublishSubscribeConnector, Resource, Runtime, Service, StringParameter,
+  VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
-
-import { ACS_URI, ADMISSION_URI } from './config.js';
 import { utils } from './index';
 
 
@@ -47,6 +46,9 @@ export class ProxyConnection extends EventEmitter {
 
   /** The user tries to refresh the already taken token. */
   public onRefreshToken: Function;
+
+  /** Notification to add a manifest. */
+  public onAddManifest: Function;
 
   /** Notification of deployment added. */
   public onDeploy: Function;
@@ -106,6 +108,7 @@ export class ProxyConnection extends EventEmitter {
   private constructor() {
 
     super();
+    this.onAddManifest = this.registerEvent<(manifest: Manifest) => void>();
     this.onAddComponent =
       this.registerEvent<(componentId: string, component: Component) => void>();
     this.onDeploy = this.registerEvent<(
@@ -229,8 +232,10 @@ export class ProxyConnection extends EventEmitter {
     username: string, password: string, userId?: string, token?: User.Token
   ): Promise<any> {
 
+    let acsURL = localStorage.getItem('acsURL');
+
     // ACS will be used in both cases to refresh the token
-    this.acs = new EcloudAcsClient(ACS_URI);
+    this.acs = new EcloudAcsClient(acsURL);
     let signIn: Promise<User>;
     if (!token) {
 
@@ -264,7 +269,9 @@ export class ProxyConnection extends EventEmitter {
       .then(() => signIn)
       .then((user: User) => {
 
-        this.admission = new EcloudAdmissionClient(ADMISSION_URI,
+        let admissionURL = localStorage.getItem('admissionURL');
+
+        this.admission = new EcloudAdmissionClient(admissionURL,
           user.token.accessToken);
 
         this.admission.onConnected(() => {
@@ -588,6 +595,9 @@ export class ProxyConnection extends EventEmitter {
                     this.transformEcloudEventDataToVolumeMetrics(event)
                   );
                   break;
+                case EcloudEventName.node:
+                  // This case should be ignored
+                  break;
                 default:
 
                   this.emit(this.onAddNotification, new Notification(
@@ -648,6 +658,15 @@ export class ProxyConnection extends EventEmitter {
     return this.admission.getResources().then((registeredResources) => {
 
       for (let registeredResIndex in registeredResources) {
+
+        this.emit(
+          this.onAddManifest,
+          new Manifest(
+            registeredResIndex, // urn
+            registeredResources[registeredResIndex] // manifest
+          )
+        );
+
         switch (
         utils.getResourceType(registeredResources[registeredResIndex].type)
         ) {
@@ -669,16 +688,24 @@ export class ProxyConnection extends EventEmitter {
             break;
 
           case Resource.RESOURCE_TYPE.DOMAIN:
-            this.emit(
-              this.onAddDomain,
-              registeredResIndex,
-              new Domain(
-                registeredResIndex, // urn
-                registeredResources[registeredResIndex].parameters.vhost, // url
-                Domain.STATE.SUCCESS, // State
-                registeredResources[registeredResIndex].deployment // UsedBy
-              )
-            );
+            try {
+              this.emit(
+                this.onAddDomain,
+                registeredResIndex,
+                new Domain(
+                  registeredResIndex, // urn
+                  // url
+                  registeredResources[registeredResIndex].parameters ?
+                    registeredResources[registeredResIndex].parameters.vhost :
+                    null,
+                  Domain.STATE.SUCCESS, // State
+                  registeredResources[registeredResIndex].deployment // UsedBy
+                )
+              );
+            } catch (err) {
+              console.error('Error emitting domain', registeredResIndex, err);
+            }
+
             break;
 
           case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
@@ -735,26 +762,32 @@ export class ProxyConnection extends EventEmitter {
                     .usage // usage
                 );
             }
-            this.emit(
-              this.onAddVolatileVolume,
-              registeredResIndex,
-              new VolatileVolume(
-                registeredResIndex, // id
-                registeredResources[registeredResIndex].name, // name
-                registeredResources[registeredResIndex].parameters.size, // size
-                volatileVolumeItems, // items
-                // filesystem
-                registeredResources[registeredResIndex].parameters.filesystem,
-                null, // associated role
-                registeredResources[registeredResIndex].deployment // usedBy
-              )
-            );
+
+            try {
+              this.emit(
+                this.onAddVolatileVolume,
+                registeredResIndex,
+                new VolatileVolume(
+                  registeredResIndex, // id
+                  registeredResources[registeredResIndex].name, // name
+                  // size
+                  registeredResources[registeredResIndex].parameters.size,
+                  volatileVolumeItems, // items
+                  // filesystem
+                  registeredResources[registeredResIndex].parameters.filesystem,
+                  null, // associated role
+                  registeredResources[registeredResIndex].deployment // usedBy
+                )
+              );
+            } catch (err) {
+              console.error('Error creating volume', registeredResIndex, err);
+            }
+
             break;
 
           default:
-            throw new Error(
-              'Unrecognized resource \'' + registeredResIndex + '\''
-            );
+            console.error('Unrecognized resource \'' + registeredResIndex
+              + '\'');
         }
       }
     });
@@ -774,17 +807,17 @@ export class ProxyConnection extends EventEmitter {
 
           case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
 
-            this.emit(this.onAddRuntime, registeredElements[i], undefined);
+            this.emit(this.onAddRuntime, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.SERVICE:
 
-            this.emit(this.onAddService, registeredElements[i], undefined);
+            this.emit(this.onAddService, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT:
 
-            this.emit(this.onAddComponent, registeredElements[i], undefined);
+            this.emit(this.onAddComponent, registeredElements[i], null);
             break;
 
           case ECloudElement.ECLOUDELEMENT_TYPE.RESOURCE:
@@ -792,34 +825,31 @@ export class ProxyConnection extends EventEmitter {
             switch (utils.getResourceType(registeredElements[i])) {
               case Resource.RESOURCE_TYPE.CERTIFICATE:
                 this.emit(
-                  this.onAddCertificate, registeredElements[i], undefined
+                  this.onAddCertificate, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.DOMAIN:
                 this.emit(
-                  this.onAddDomain, registeredElements[i], undefined
+                  this.onAddDomain, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
                 this.emit(
-                  this.onAddPersistentVolume, registeredElements[i], undefined
+                  this.onAddPersistentVolume, registeredElements[i], null
                 );
                 break;
               case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
                 this.emit(
-                  this.onAddVolatileVolume, registeredElements[i], undefined
+                  this.onAddVolatileVolume, registeredElements[i], null
                 );
                 break;
               default:
-                throw new Error(
-                  'Unknown resource type ' + registeredElements[i]
-                );
+                console.error('Unknown resource type ' + registeredElements[i]);
             }
             break;
 
           default:
-
-            throw new Error('Unkown element: ' + registeredElements[i]);
+            console.error('Unkown element: ' + registeredElements[i]);
         }
       }
     });
@@ -846,6 +876,8 @@ export class ProxyConnection extends EventEmitter {
 
     }).then((element) => {
       let ecloudElement: ECloudElement;
+
+      this.emit(this.onAddManifest, new Manifest(element.name, element));
 
       switch (utils.getElementType(element.spec)) {
         case ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME:
@@ -1021,7 +1053,7 @@ export class ProxyConnection extends EventEmitter {
       // Stores the manifest in a local file
       FileSaver.saveAs(
         new Blob([
-          JSON.stringify(manifest) + '\n'
+          JSON.stringify(manifest, null, 2) + '\n'
         ], { type: 'application/json;charset=utf-8' }),
         'Manifest.' + elementId + '.json'
       );
@@ -1032,17 +1064,22 @@ export class ProxyConnection extends EventEmitter {
 
   /* DEPLOYMENTS */
   getDeploymentList(): Promise<any> {
+    return this.admission.findDeployments().then((deploymentList) => {
 
-    let pro: Promise<any> = this.admission.findDeployments();
-    pro = pro.then((deploymentList) => {
       let promiseArray: Promise<any>[] = [];
-      for (let DeploymentURN in deploymentList) {
+      for (let deploymentURN in deploymentList) {
+
         let deployment: Deployment =
           this.transformEcloudDeploymentToDeployment(
-            deploymentList[DeploymentURN] // Deployment
+            deploymentList[deploymentURN] // Deployment
           );
 
-        this.emit(this.onDeploy, DeploymentURN, deployment);
+        this.emit(
+          this.onAddManifest,
+          new Manifest(deploymentURN, deploymentList[deploymentURN])
+        );
+
+        this.emit(this.onDeploy, deploymentURN, deployment);
 
         promiseArray.push(this.getElementInfo(deployment.service)
           .catch((err) => {
@@ -1054,22 +1091,25 @@ export class ProxyConnection extends EventEmitter {
         .then((values) => { })
         .catch(err => { })
         .then(() => { });
+
     });
-    return pro;
 
   }
 
   getDeployment(urn: string): Promise<any> {
 
     return this.admission.findDeployments(urn).then((deploymentList) => {
-      for (let DeploymentURN in deploymentList) {
+      for (let deploymentURN in deploymentList) {
+
+        this.emit(this.onAddManifest,
+          new Manifest(deploymentURN, deploymentList[deploymentURN]));
 
         let deployment: Deployment =
           this.transformEcloudDeploymentToDeployment(
-            deploymentList[DeploymentURN] // Deployment
+            deploymentList[deploymentURN] // Deployment
           );
 
-        this.emit(this.onDeploy, DeploymentURN, deployment);
+        this.emit(this.onDeploy, deploymentURN, deployment);
       }
     });
 
@@ -1239,7 +1279,6 @@ export class ProxyConnection extends EventEmitter {
     return this.admission.sendBundle(new FileStream(file));
   }
 
-
   /**
    * Transforms the library class Ecloud Deployment to a local Deployment.
    * @param emitter <ProxyConnection> Emmiter to send notifications of events.
@@ -1279,42 +1318,50 @@ export class ProxyConnection extends EventEmitter {
               .instances[instanceId].configuration.resources[res].type)) {
 
               case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
-                let volInst: PersistentVolume.Instance =
-                  new PersistentVolume.Instance(
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.id, // id
-                    res, // volume name
-                    // definition URN
-                    ecloudDeployment.resources[res].resource.name,
-                    rolId, // associated role
-                    instanceId, // associated instance
-                    null // usage
-                  );
+                try {
+                  let volInst: PersistentVolume.Instance =
+                    new PersistentVolume.Instance(
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.id, // id
+                      res, // volume name
+                      // definition URN
+                      ecloudDeployment.resources[res].resource.name,
+                      rolId, // associated role
+                      instanceId, // associated instance
+                      null // usage
+                    );
 
-                instanceResources[res] = volInst;
+                  instanceResources[res] = volInst;
 
-                resourceInstances.push(volInst);
-
+                  resourceInstances.push(volInst);
+                } catch (error) {
+                  console.error('Error transforming a persistent volume', res,
+                    error);
+                }
                 break;
 
               case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
+                try {
+                  let volatileVolInst: VolatileVolume.Instance =
+                    new VolatileVolume.Instance(
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.id, // id
+                      res, // volume name,
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].name,
+                      rolId, // associated role
+                      instanceId, // associated instance
+                      ecloudDeployment.roles[rolId].instances[instanceId]
+                        .configuration.resources[res].parameters.filesystem
+                    );
 
-                let volatileVolInst: VolatileVolume.Instance =
-                  new VolatileVolume.Instance(
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.id, // id
-                    res, // volume name,
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].name,
-                    rolId, // associated role
-                    instanceId, // associated instance
-                    ecloudDeployment.roles[rolId].instances[instanceId]
-                      .configuration.resources[res].parameters.filesystem
-                  );
+                  instanceResources[res] = volatileVolInst;
 
-                instanceResources[res] = volatileVolInst;
-
-                resourceInstances.push(volatileVolInst);
+                  resourceInstances.push(volatileVolInst);
+                } catch (error) {
+                  console.error('Error transforming a volatile volume', res,
+                    error);
+                }
 
                 break;
 
@@ -1381,36 +1428,45 @@ export class ProxyConnection extends EventEmitter {
           if (ecloudDeployment.resources[res].resource.parameters) {
             resources[res] = ecloudDeployment.resources[res].resource.name;
 
-            this.emit(
-              this.onAddCertificate,
-              ecloudDeployment.resources[res].resource.name,
-              new Certificate(
-                ecloudDeployment.resources[res].resource.name, // urn
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .key, // key
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .cert, // certificate
-                ecloudDeployment.resources[res].resource.parameters.content
-                  .ca, // ca
-                ecloudDeployment.urn // usedBy
-              )
-            );
+            try {
+              this.emit(
+                this.onAddCertificate,
+                ecloudDeployment.resources[res].resource.name,
+                new Certificate(
+                  ecloudDeployment.resources[res].resource.name, // urn
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .key, // key
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .cert, // certificate
+                  ecloudDeployment.resources[res].resource.parameters.content
+                    .ca, // ca
+                  ecloudDeployment.urn // usedBy
+                )
+              );
+            } catch (error) { console.error('Error: ' + error); }
           }
           break;
 
         case Resource.RESOURCE_TYPE.DOMAIN:
           resources[res] = ecloudDeployment.resources[res].resource.name;
-          this.emit(
-            this.onAddDomain,
-            ecloudDeployment.resources[res].resource.name,
-            new Domain(
-              ecloudDeployment.resources[res].resource.name, // urn
-              // domain
-              ecloudDeployment.resources[res].resource.parameters.vhost,
-              Domain.STATE.SUCCESS, // state
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddDomain,
+              ecloudDeployment.resources[res].resource.name,
+              new Domain(
+                ecloudDeployment.resources[res].resource.name, // urn
+                // domain
+                ecloudDeployment.resources[res].resource.parameters ?
+                  ecloudDeployment.resources[res].resource.parameters.vhost :
+                  null,
+                Domain.STATE.SUCCESS, // state
+                ecloudDeployment.urn // usedBy
+              )
+            );
+          } catch (err) {
+            console.error('Error emitting a domain', err);
+          }
+
           break;
 
         case Resource.RESOURCE_TYPE.PERSISTENT_VOLUME:
@@ -1426,20 +1482,26 @@ export class ProxyConnection extends EventEmitter {
             }
           }
 
-          this.emit(
-            this.onAddPersistentVolume,
-            ecloudDeployment.resources[res].resource.name,
-            new PersistentVolume(
-              ecloudDeployment.resources[res].resource.name, // urn
-              res, // name
-              ecloudDeployment.resources[res].resource.parameters.size, // size
-              persistentItems, // items
-              null, // associated role
-              ecloudDeployment.resources[res].resource.parameters.filesystem
-              || Volume.FILESYSTEM.XFS, // filesystem
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddPersistentVolume,
+              ecloudDeployment.resources[res].resource.name,
+              new PersistentVolume(
+                ecloudDeployment.resources[res].resource.name, // urn
+                res, // name
+                // size
+                ecloudDeployment.resources[res].resource.parameters.size,
+                persistentItems, // items
+                null, // associated role
+                ecloudDeployment.resources[res].resource.parameters.filesystem
+                || Volume.FILESYSTEM.XFS, // filesystem
+                ecloudDeployment.urn // usedBy
+              )
+            );
+          } catch (error) {
+            console.error('Error: ' + error);
+          }
+
           break;
 
         case Resource.RESOURCE_TYPE.VOLATILE_VOLUME:
@@ -1447,46 +1509,53 @@ export class ProxyConnection extends EventEmitter {
             [volatileVolInstance: string]: VolatileVolume.Instance
           } = {};
 
-          /* There is a problem in which the identifier of the volume must be
-          taken from the instances and not from the volume in the deployment
-          definition */
+          /*
+            There is a problem in which the identifier of the volume must be
+            taken from the instances and not from the volume in the deployment
+            definition
+          */
           let volumeURN: string;
 
-
           for (let resInstIndex in resourceInstances) {
+
             if (resourceInstances[resInstIndex].volumeName === res) {
+
               volatileItems[resourceInstances[resInstIndex].id] =
                 resourceInstances[resInstIndex];
+              volumeURN = volatileItems[resourceInstances[resInstIndex].id]
+                ._urn;
 
-              volumeURN =
-                volatileItems[resourceInstances[resInstIndex].id]._urn;
             }
-          }
 
+          }
           resources[res] = volumeURN;
 
-          // Due to the identifier, volatile volumes can't be added when getting
-          // the info of a deployment and must be added in a different call
-          this.emit(
-            this.onAddVolatileVolume,
-            volumeURN,
-            new VolatileVolume(
-              volumeURN, // id
-              res, // name
-              ecloudDeployment.resources[res].resource.parameters.size, // size
-              volatileItems, // items
-              // filesystem
-              ecloudDeployment.resources[res].resource.parameters.filesystem,
-              null, // associated role
-              ecloudDeployment.urn // usedBy
-            )
-          );
+          try {
+            this.emit(
+              this.onAddVolatileVolume,
+              volumeURN,
+              new VolatileVolume(
+                volumeURN, // id
+                res, // name
+                // size
+                ecloudDeployment.resources[res].resource.parameters.size,
+                volatileItems, // items
+                // filesystem
+                ecloudDeployment.resources[res].resource.parameters.filesystem,
+                null, // associated role
+                ecloudDeployment.urn // usedBy
+              )
+            );
+
+          } catch (err) {
+            console.error('Error creating volume', volumeURN, err);
+          }
+
           break;
 
         default:
-          throw new Error('Resource not following structure \'' + res + '\' ' +
-            ecloudDeployment.resources[res]
-          );
+          console.error('Resource not following structure \'' + res + '\' ' +
+            ecloudDeployment.resources[res]);
       }
     }
 
@@ -1520,23 +1589,32 @@ export class ProxyConnection extends EventEmitter {
 
 
     if (utils.isServiceEntrypoint(ecloudDeployment.service)) {
-      res = new HTTPEntryPoint(
-        ecloudDeployment.urn, // urn
-        parameters, // parameters: any
-        roles, // roles: { [rolName: string]: DeploymentRol }
-        resources, // resources: { [resource: string]: Resource }
-        channels // channels
-      );
+      try {
+        res = new HTTPEntryPoint(
+          ecloudDeployment.urn, // urn
+          parameters, // parameters: any
+          roles, // roles: { [rolName: string]: DeploymentRol }
+          resources, // resources: { [resource: string]: Resource }
+          channels // channels
+        );
+      } catch (error) {
+        console.error('Error: ' + error);
+      }
+
     } else {
-      res = new Deployment(
-        ecloudDeployment.urn, // urn
-        ecloudDeployment.nickname, // name: string
-        parameters, // parameters: any
-        ecloudDeployment.service, // serviceId: string
-        roles, // roles: { [rolName: string]: DeploymentRol }
-        resources, // resources: { [resource: string]: Resource }
-        channels // channels
-      );
+      try {
+        res = new Deployment(
+          ecloudDeployment.urn, // urn
+          ecloudDeployment.nickname, // name: string
+          parameters, // parameters: any
+          ecloudDeployment.service, // serviceId: string
+          roles, // roles: { [rolName: string]: DeploymentRol }
+          resources, // resources: { [resource: string]: Resource }
+          channels // channels
+        );
+      } catch (error) {
+        console.error('Error: ' + error);
+      }
     }
 
     return res;
@@ -2062,7 +2140,13 @@ export class ProxyConnection extends EventEmitter {
       }
     }
   }): Runtime {
-    return new Runtime(manifest.name);
+    let res: Runtime = null;
+    try {
+      res = new Runtime(manifest.name);
+    } catch (err) {
+      console.error(err);
+    }
+    return res;
   }
 
   private transformEcloudEventDataToServiceMetrics(

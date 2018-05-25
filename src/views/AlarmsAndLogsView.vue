@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->
@@ -163,10 +163,10 @@ const NUM_ITEMS_PER_PAGE = 10;
 
 @VueClassComponent({
   name: "alarms-and-logs-view",
-  filters:{
+  filters: {
     minutesFilter: function(value) {
-      return value < 10 ? '0' + value: value;
-    },
+      return value < 10 ? "0" + value : value;
+    }
   }
 })
 export default class AlarmsAndLogsView extends Vue {
@@ -232,10 +232,7 @@ export default class AlarmsAndLogsView extends Vue {
   ];
 
   /** Selected minimum log level. */
-  selectedLogLevel: { text: string; value: string } = {
-    text: "Info",
-    value: Notification.LEVEL.INFO
-  };
+  selectedLogLevel: string = "Info";
 
   /** Total number of pages. */
   numPages: number = 0;
@@ -329,29 +326,28 @@ export default class AlarmsAndLogsView extends Vue {
         return true;
       })
       .filter((item, index, arrayfun) => {
-        switch (this.selectedLogLevel.text) {
-          case "Info":
+        switch (this.selectedLogLevel) {
+          case "blue":
             return (
               item.level === Notification.LEVEL.INFO ||
               item.level === Notification.LEVEL.WARNING ||
               item.level === Notification.LEVEL.ERROR
             );
 
-          case "Warning":
+          case "yellow":
             return (
               item.level === Notification.LEVEL.WARNING ||
               item.level === Notification.LEVEL.ERROR
             );
-          case "Error":
+          case "red":
             return item.level === Notification.LEVEL.ERROR;
 
-          default:
+          default: // 'grey'
             return true;
         }
       }, this);
 
     // Switch the page
-
     let division = loglist.length / NUM_ITEMS_PER_PAGE;
     if (division % 1 === 0) {
       this.numPages = Math.trunc(division);

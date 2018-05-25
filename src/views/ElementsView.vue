@@ -1,5 +1,5 @@
 <template>
-  <v-card id="elements-view">
+  <v-card id="elements-view" style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->
@@ -12,7 +12,7 @@
       <v-card-actions>
 
         <!-- Upload bundle button -->
-        <v-btn outline color="primary" class="elevation-0" to="/uploadbundle">
+        <v-btn outline class="elevation-0" to="/uploadbundle">
           <span>Upload bundle</span>
           <v-icon right>file_upload</v-icon>
         </v-btn>
@@ -68,9 +68,7 @@
                       </v-flex>
                       <v-flex xs6>
                         <div v-if="runtimeUsedBy(runtime).length>0">
-                          <div>
-                            <span class="yellow">in use by:</span>
-                          </div>
+                          <div>in use by:</div>
                           <div v-for="(usedBy, index) in runtimeUsedBy(runtime)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
                             <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>
@@ -116,7 +114,7 @@
                       <v-flex xs6>
                         <div v-if="componentUsedBy(component).length>0">
                           <div>
-                            <span class="yellow">in use by:</span>
+                            <span>in use by:</span>
                           </div>
                           <div v-for="(usedBy, index) in componentUsedBy(component)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
                             <router-link  v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
@@ -163,7 +161,7 @@
                       </v-flex>
                       <v-flex xs6>
                         <div v-if="serviceUsedBy(service).length>0">
-                          <div><span class="yellow">in use by:</span></div>
+                          <div><span>in use by:</span></div>
                           <div v-for="(usedBy, index) in serviceUsedBy(service)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
                             <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>
@@ -215,7 +213,7 @@
                       <v-flex xs6>
 
                         <div v-if="certificateUsedBy(certificate).length>0">
-                          <div><span class="yellow">in use by:</span></div>
+                          <div><span>in use by:</span></div>
                           <div v-for="(usedBy, index) in certificateUsedBy(certificate)" v-bind:key="index" v-if="deploymentInfo(usedBy)">
                             <router-link v-bind:to="deploymentInfo(usedBy)._path">{{ deploymentInfo(usedBy).name }}</router-link>
                           </div>

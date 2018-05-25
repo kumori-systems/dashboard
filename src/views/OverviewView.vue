@@ -1,7 +1,7 @@
 <template>  
-  <v-card id="overview-view">
+  <v-card id="overview-view" class="mybackground">
     
-    <v-card-title>
+    <v-card-title class="mybackground">
 
         <!-- View title -->
         <h3 class="headline mb-0">Overview</h3>
@@ -13,13 +13,13 @@
         <v-card-actions>
           
           <!-- Add Deployment -->
-          <v-btn color="primary" outline to="/addDeployment">
+          <v-btn outline to="/addDeployment">
             <span>Add Common Deployment</span>
             <v-icon right>cloud</v-icon>
           </v-btn>
 
           <!-- Add Entrypoint -->
-          <v-btn color="primary" outline to="/addHTTPEntrypoint">
+          <v-btn outline to="/addHTTPEntrypoint">
             <span>Add Entrypoint</span>
             <v-icon right>language</v-icon>
           </v-btn>
@@ -32,7 +32,7 @@
     <v-divider></v-divider>
 
     <!-- View actions on deployments -->
-    <v-card-actions>
+    <v-card-actions class="mybackground">
 
       <!-- Show all, entrypoint or common deployment -->
       <v-btn-toggle mandatory v-model="show" class="elevation-0">
@@ -59,7 +59,7 @@
     </v-card-actions>
 
     <!-- The view changes depending on if we've got deployed services or not-->
-    <v-container fluid v-if="Object.keys(deployments).length > 0">
+    <v-container fluid v-if="Object.keys(deployments).length > 0" class="mybackground">
         
       <!-- EntryPoint Deployments -->
       <v-layout wrap v-if="show==='all' || show==='entrypoints'">
@@ -128,3 +128,6 @@ export default class OverviewView extends Vue {
   }
 }
 </script>
+<style lang="scss">
+
+</style>

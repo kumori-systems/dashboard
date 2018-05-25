@@ -1,5 +1,5 @@
 <template>
-  <v-card id="volumes-view">
+  <v-card id="volumes-view" style="max-width:1300px">
     <v-card-title>
 
       <!-- View title -->
@@ -11,12 +11,19 @@
       <!-- View actions -->
       <v-card-actions>
 
-        <!-- Cancels the action -->
-        <v-btn outline to="/addPersistentVolume">Add Volume</v-btn>
+        <!-- Add a volume -->
+        <v-btn outline to="/addPersistentVolume">
+          <span>Add Volume</span>
+          <v-icon right>storage</v-icon>
+        </v-btn>
 
       </v-card-actions>
 
     </v-card-title>
+
+    <!-- Divides different sections of the view -->
+    <v-divider></v-divider>
+
     <v-container>
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
@@ -24,7 +31,7 @@
 
           <td class="text-xs-left">
             <v-icon v-if="props.item[0]" class="indigo--text">storage</v-icon>
-            <v-icon v-else class="light-blue--text text--lighten-2">storage</v-icon>
+            <v-icon v-else class="orange--text text--lighten-2">storage</v-icon>
           </td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[1] }}</td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[2] }}</td>
@@ -47,8 +54,7 @@
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>
-
-
+          
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" max-width="800px">
@@ -209,7 +215,6 @@ export default class VolumesView extends Vue {
     }
 
     /* Volatile volumes */
-
     let volatileVolumes: { [urn: string]: VolatileVolume } = ((<SSGetters>this
       .$store.getters).volatileVolumes as any) as {
       [urn: string]: VolatileVolume;

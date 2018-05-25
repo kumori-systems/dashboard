@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+ <v-container fluid>
     <v-layout wrap>
       
       <!-- Instance name -->
@@ -129,12 +129,17 @@ export default class InstanceCardComponent extends Vue {
   VolatileVolume = VolatileVolume;
   PersistentVolume = PersistentVolume;
 
+  watcher;
+
   mounted() {
-    this.$watch("clear", function(value) {
+    this.watcher = this.$watch("clear", function(value) {
       if (value === true) {
         this.killInstance = false;
       }
     });
+  }
+  beforeDestroy() {
+    this.watcher();
   }
 
   get persistentVolumes(): { [volURN: string]: PersistentVolume } {

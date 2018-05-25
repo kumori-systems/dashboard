@@ -2,84 +2,147 @@
   <v-layout id="signin-view">
 
     <!-- Resizes the view -->
-    <v-flex class="mt-5" xs12 sm6 offset-sm3 md4 offset-md4 lg4 offset-lg4 xl2 offset-xl5 v-on:keyup.enter="signIn" wrap>
+    <v-flex class="mt-5" xs12 sm6 offset-sm3 v-on:keyup.enter="signIn" wrap v-if="!loading">
         
-        <!-- Signin form view -->
-        <v-card class="elevation-10" v-if="!loading">
-        
-          <!-- Logo image -->
-          <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
-        
-          <!-- Card title -->
-          <v-card-title primary-title>
-        
-            <div>
-              <h3 class="headline">Sign in</h3>
-              <p class="subheading grey--text">to continue to Ecloud's dashboard</p>
-            </div>
-        
-          </v-card-title>
+      <!-- Signin form view -->
+      <v-card class="elevation-10">
           
-          <!-- Card body-->
-          <v-card-text >
+        <!-- Card body-->
+        <v-card-text class="mybackground">
 
-            <v-form ref="form">
-
-              <!-- Username text field -->
-              <v-text-field autocomplete="username" v-model="userName" v-bind:disabled="loading" prepend-icon="person" label="Enter your User" autofocus></v-text-field>
-              
-              <!-- Current password text field -->
-              <v-text-field autocomplete="current-password" v-model="userPassword" v-bind:disabled="loading" prepend-icon="lock" label="Enter your password" min="1" v-bind:append-icon="viewPassword ? 'visibility' : 'visibility_off'" v-bind:append-icon-cb="() => (viewPassword = !viewPassword)" :type="viewPassword ? 'text' : 'password'"></v-text-field>
-            
-              <!-- Card actions -->
-              <v-card-actions>
-                
-                <!-- Friendly result message -->
-                <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
-                
-                <!-- Adds space between components -->
-                <v-spacer></v-spacer>
-
-                <!-- Main button -->
-                <v-btn color="primary" flat v-bind:loading="loading" class="primary--text ma-3" v-bind:disabled="loading" v-on:click="signIn">
-                  Continue
-                </v-btn>
-
-              </v-card-actions>
-
-            </v-form>            
-          </v-card-text>
-
-          <!-- Sign in with google -->
           <v-layout>
-            <v-spacer></v-spacer>
-            <a class="ma-3" v-bind:href="googleOauthURN">
-              <img src="/static/btn_google_signin_light_normal_web.png">
-            </a>
+
+            <v-flex xs6 wrap>
+
+              <!-- Logo image -->
+              <v-card-media class="mt-4 mb-4" src="/static/logo_text.png"
+                height="100px" contain></v-card-media>
+
+              <p class="subheading text-xs-center">Simple, transparent and competitive</p>
+
+              <p class="subheading grey--text pt-4 text-xs-center">
+                Kumori's PAAS provides the best experience for your
+                applications and services.
+              </p>
+
+            </v-flex>
+            <v-flex xs6 wrap>
+
+              <v-container>
+                  
+                <!-- Card title -->
+                <h3 class="headline">Sign in</h3>
+                <v-divider></v-divider>
+
+                <v-form ref="form" class="mt-4">
+
+                  <!-- Username text field -->
+                  <v-text-field autocomplete="username" v-model="userName"
+                    v-bind:disabled="loading" prepend-icon="person"
+                    label="Enter your User" autofocus></v-text-field>
+                    
+                  <!-- Current password text field -->
+                  <v-text-field autocomplete="current-password"
+                    v-model="userPassword" v-bind:disabled="loading"
+                    prepend-icon="lock" label="Enter your password" min="1"
+                    v-bind:append-icon="viewPassword ? 'visibility' :
+                    'visibility_off'" v-bind:append-icon-cb="() =>
+                    (viewPassword = !viewPassword)" :type="viewPassword ? 'text'
+                    : 'password'"></v-text-field>                
+                    
+                  <!-- Card actions -->
+                  <v-card-actions>                    
+                    
+                    <!-- Friendly result message -->
+                    <span class="ma-3" v-bind:class="friendlyMessageClass">
+                      {{ friendlyMessage }}</span>
+                  
+                    <!-- Adds space between components -->
+                    <v-spacer></v-spacer>
+                  
+                    <!-- Main button -->
+                    <v-btn color="primary" flat v-bind:loading="loading"
+                      class="primary--text ma-3" v-bind:disabled="loading"
+                      v-on:click="signIn">Continue</v-btn>
+                    
+                  </v-card-actions>
+                </v-form>
+
+                <!-- Sign in with google -->
+                <v-layout>
+
+                  <v-spacer></v-spacer>
+
+                  <a class="ma-3" v-bind:href="googleOauthURN">
+
+                    <img src="/static/btn_google_signin_light_normal_web.png">
+
+                  </a>
+
+                </v-layout>
+
+              </v-container>
+
+            </v-flex>
+
           </v-layout>
 
-        </v-card>
+          <v-btn flat icon v-on:click="showPannel=true"><v-icon>settings</v-icon></v-btn>
+
+        </v-card-text>
+
+      </v-card>
+
+    </v-flex>
+
+    <v-flex class="mt-5" xs12 sm4 offset-sm4 wrap v-else>
 
         <!-- Loading view -->
-        <v-card class="elevation-10" v-else>
+        <v-card class="elevation-10" >
 
-          <!-- Logo image -->
-          <v-card-media src="/static/logo_text.png" height="100px" contain></v-card-media>
+          <!-- Card body-->
+          <v-card-text class="mybackground">
 
-          <!-- Card title -->
-          <v-card-title primary-title>
-
-              <h3 class="headline">Accessing Ecloud Dashboard</h3>
-              <div>
-                <v-btn color="primary" flat loading></v-btn>
-                <span class="ma-3" v-bind:class="friendlyMessageClass">{{ friendlyMessage }}</span>
-              </div>
+            <!-- Logo image -->
+            <v-card-media src="/static/logo_text.png"
+              height="100px" contain></v-card-media>
               
-          </v-card-title>
+            
+            <div class="text-xs-center ma-4">
+
+              <!-- Loading spinner -->
+              <v-btn color="info" flat loading></v-btn>
+
+              <!-- Friendly message -->
+              <span class="ma-3" v-bind:class="friendlyMessageClass">
+                {{ friendlyMessage }}</span>
+
+            </div>
+
+          </v-card-text>
 
         </v-card>
 
     </v-flex>
+      
+      <v-dialog v-model="showPannel" max-width="800px">
+        <v-card>
+          <v-card-title class="headline">Configuration</v-card-title>
+          <v-card-text>
+              
+              <v-text-field label="acs URL" v-model="acsURL"></v-text-field>
+              <v-text-field label="admission URL" v-model="admissionURL"></v-text-field>
+
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn outline @click.native="updateConfig">Update</v-btn>
+            <v-btn outline @click.native="clearConfig">Clear</v-btn>
+            <v-btn flat @click.native="showPannel = false">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
 
   </v-layout>
 </template>
@@ -114,8 +177,19 @@ export default class SignInView extends Vue {
   /** <string> URL where the browser is redirected to procceed to google's oauth. */
   googleOauthURN: string = null;
 
+  /** <boolean> Shows the config pannel. */
+  showPannel: boolean = false;
+
+  /** <string> acs url. */
+  acsURL: string = null;
+
+  /** <string> admission url. */
+  admissionURL: string = null;
+
   /** Mounted hook. */
   mounted() {
+    this.loadURLS();
+
     // Set redirection path for google oauth
     this.googleOauthURN =
       config.ACS_URI +
@@ -168,14 +242,43 @@ export default class SignInView extends Vue {
     return "";
   }
 
+  loadURLS() {
+    // Intentamos buscar la direccion de acs en el storage
+    this.acsURL = localStorage.getItem("acsURL");
+    this.admissionURL = localStorage.getItem("admissionURL");
+
+    if (!this.acsURL) {
+      this.acsURL = config.ACS_URI;
+    }
+    if (!this.admissionURL) {
+      this.admissionURL = config.ADMISSION_URI;
+    }
+  }
+
   /**
    * Function to sign in to the system.
    */
   signIn() {
+    if (!this.acsURL || !this.admissionURL) this.loadURLS();
+
+    localStorage.setItem("acsURL", this.acsURL);
+    localStorage.setItem("admissionURL", this.admissionURL);
+
     this.$store.dispatch("signIn", {
       username: this.userName,
       userpassword: this.userPassword
     });
+  }
+
+  updateConfig() {
+    localStorage.setItem("acsURL", this.acsURL);
+    localStorage.setItem("admissionURL", this.admissionURL);
+    this.showPannel = false;
+  }
+
+  clearConfig() {
+    this.acsURL = config.ACS_URI;
+    this.admissionURL = config.ADMISSION_URI;
   }
 }
 </script>
