@@ -6,7 +6,6 @@
       <v-card-title>
         <h3 class="headline mb-0">Add a new entrypoint</h3>
 
-
         <!-- Applies a space between elements -->
         <v-spacer></v-spacer>
 
@@ -20,7 +19,6 @@
           <v-btn flat v-on:click="cancel">Cancel</v-btn>
 
         </v-card-actions>
-
 
       </v-card-title>
 
@@ -41,6 +39,7 @@
               placeholder="No SSL"
               clearable
               v-model="selectedCertificate"
+              v-bind:disabled="!selectedDomain"
               v-bind:items="certificates"
               item-text="_urn"
               item-value="_urn"
@@ -49,7 +48,8 @@
           </v-flex>
 
           <!-- Client certificate -->
-          <v-checkbox label="Require client certificates" v-model="requireClientCertificates"></v-checkbox>
+          <v-checkbox label="Require client certificates" v-model="requireClientCertificates"
+            v-bind:disabled="!selectedDomain"></v-checkbox>
 
           <!-- Number of instances -->
           <v-flex xs4>

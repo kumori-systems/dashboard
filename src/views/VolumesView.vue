@@ -50,7 +50,9 @@
           </td>
           
           <td class="text-xs-left">
-            <v-btn color="error" v-if="props.item[0] && props.item[8].length === 0" icon v-on:click="showDialog(props.item._urn)">
+            <v-btn color="error" v-if="!props.item[5]"
+            v-bind:disabled="props.item[8].length > 0"
+              icon v-on:click="showDialog(props.item._urn)">
               <v-icon class="white--text">delete_forever</v-icon>
             </v-btn>
           </td>

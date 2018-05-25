@@ -33,11 +33,16 @@
         <td class="text-xs-left">{{ props.item.state }}</td>
         <td class="text-xs-left">
           <div v-for="(elem, index) in props.item.usedBy" v-bind:key="index">
-             <router-link v-bind:to="deployment(elem)._path">{{ deployment(elem)._urn }}</router-link>
+            <a v-if="hasCertificate(deployment(elem))" v-bind:href="'https://' + deployment(elem).name">
+              {{ deployment(elem).name }}
+            </a>
+            <a v-else v-bind:href="'http://' + deployment(elem).name">
+              {{ deployment(elem).name }}
+            </a>
           </div>
         </td>
         <td class="text-xs-left">
-          <v-btn color="error" icon v-on:click="showDialog(props.item._urn)">
+          <v-btn color="error" v-bind:disabled="props.item.usedBy.length>0" icon v-on:click="showDialog(props.item._urn)">
             <v-icon class="white--text">delete_forever</v-icon>
           </v-btn>
         </td>
@@ -117,6 +122,12 @@ export default class DomainsView extends Vue {
   get deployment(): (stri: string) => HTTPEntryPoint {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
+    };
+  }
+
+  get hasCertificate() {
+    return (deployment: Deployment) => {
+      return deployment.resources["server_cert"] ? true : false;
     };
   }
 

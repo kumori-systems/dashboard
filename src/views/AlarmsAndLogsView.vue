@@ -111,8 +111,8 @@
 
       <!-- Log table -->
       <v-data-table v-bind:headers="headers" v-bind:items="logs" must-sort
-      v-bind:rows-per-page-items="rowsPerPageItems" v-bind:pagination.sync="pagination"
-      v-bind:search="search">
+        v-bind:rows-per-page-items="rowsPerPageItems" v-bind:search="search"
+        v-bind:pagination.sync="pagination">
 
         <template slot="items" scope="props">
           <td v-bind:class="props.item.level" width=20px></td>
@@ -234,12 +234,6 @@ export default class AlarmsAndLogsView extends Vue {
   /** Selected minimum log level. */
   selectedLogLevel: string = "Info";
 
-  /** Total number of pages. */
-  numPages: number = 0;
-
-  /** Actual page. */
-  actualPage: number = 1;
-
   pagination = {
     sortBy: "time",
     descending: true
@@ -326,6 +320,7 @@ export default class AlarmsAndLogsView extends Vue {
         return true;
       })
       .filter((item, index, arrayfun) => {
+        // log level
         switch (this.selectedLogLevel) {
           case "blue":
             return (
@@ -342,18 +337,12 @@ export default class AlarmsAndLogsView extends Vue {
           case "red":
             return item.level === Notification.LEVEL.ERROR;
 
-          default: // 'grey'
+          default:
+            // 'grey'
             return true;
         }
       }, this);
 
-    // Switch the page
-    let division = loglist.length / NUM_ITEMS_PER_PAGE;
-    if (division % 1 === 0) {
-      this.numPages = Math.trunc(division);
-    } else {
-      this.numPages = Math.trunc(division) + 1;
-    }
     return loglist;
   }
 
