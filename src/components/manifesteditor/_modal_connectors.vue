@@ -236,10 +236,7 @@ export default {
     },
 
     setCurrent(direction, data) {
-      console.debug('Llamamos a setCurrent');
-
       this.current[direction] = data;
-
     },
 
     makeConnection(direction) {
@@ -261,7 +258,6 @@ export default {
     },
 
     manageReset(direction, value) {
-      console.debug('Llamamos a manageReset');
       this.reset[direction] = value;
     },
 

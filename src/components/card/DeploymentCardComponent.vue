@@ -353,9 +353,6 @@ export default class Card extends Vue {
         }
       }
     }
-
-    console.debug("Linked domains devuelve " + JSON.stringify(res));
-
     return res;
   }
 

@@ -160,9 +160,6 @@ export default {
   data() {
     return {};
   },
-  mounted: function() {
-    console.debug("Modal roles has been mounted");
-  },
   computed: {
     getComponents() {
       return this.$store.getters.getComponents;
