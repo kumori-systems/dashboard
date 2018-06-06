@@ -31,6 +31,7 @@ import { SignInView } from "./views";
 import { AppbarComponent, NavigationComponent } from "./components";
 import { User, BackgroundAction } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
+import { config } from "./api";
 
 @VueClassComponent({
   name: "App",
@@ -42,6 +43,7 @@ import PSGetters from "./store/pagestate/getters";
 })
 export default class App extends Vue {
   User = User;
+
   created() {
     let status = this.$route.query.status;
     if (status && status == "error") {
@@ -74,6 +76,18 @@ export default class App extends Vue {
           )
         )
       );
+      
+    // Intentamos buscar la direccion de acs en el storage
+    let acsURL = localStorage.getItem("acsURL");
+    let admissionURL = localStorage.getItem("admissionURL");
+
+    if (!acsURL) {
+      localStorage.setItem("acsURL", config.ACS_URI);
+    }
+    if (!admissionURL) {
+      localStorage.setItem("admissionURL", config.ADMISSION_URI);
+    }
+  
       this.$router.push("/");
     }
   }
