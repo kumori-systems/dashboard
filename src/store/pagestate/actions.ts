@@ -97,8 +97,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Finish signIn action in the state
 
-      console.debug('Sucessfully signed in');
-
       return injectee.dispatch('finishBackgroundAction', {
         'type': BackgroundAction.TYPE.SIGNIN,
         'state': BackgroundAction.STATE.SUCCESS
@@ -300,11 +298,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all elements
 
-      console.debug('Going to get a reference to all elements from the stamp');
-
       return ProxyConnection.instance.getRegisteredElements().then(() => {
-
-        console.debug('Retrieved all elements from the stamp');
 
         injectee.dispatch('addNotification',
           new Notification(
@@ -319,11 +313,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all resources
 
-      console.debug('Retrieving all resources from the stamp');
-
       return ProxyConnection.instance.getResources().then(() => {
-
-        console.debug('Retrieved all resources from the stamp');
 
         injectee.dispatch('addNotification',
           new Notification(
@@ -342,8 +332,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }).then((user) => { // Load all deployments
 
       return ProxyConnection.instance.getDeploymentList().then(() => {
-        console.debug('Retrieved info from all deployments');
-
+        
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,

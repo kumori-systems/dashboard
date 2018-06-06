@@ -151,10 +151,6 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       // Current role
       let role = service.roles[state.currentRole];
 
-      console.debug('The current Role Index is ' + state.currentRole);
-      console.debug('The service is ' + JSON.stringify(service, null, 2));
-      console.debug('The current Role is ' + JSON.stringify(role, null, 2));
-
       res = {
         name: role.name,
         component: role.component,
@@ -186,31 +182,11 @@ export default class Getters implements Vuex.GetterTree<State, any> {
       // Current Service
       let service = state.manifests[state.currentManifest];
 
-      console.debug(
-        'Current manifest URI ' + JSON.stringify(state.currentManifest, null, 2)
-      );
-
-      console.debug(
-        'Current service ' + JSON.stringify(service, null, 2)
-      );
-
       // Current Role
       let role = service.roles[state.currentRole];
 
-      console.debug(
-        'Current role URI ' + JSON.stringify(state.currentRole, null, 2)
-      );
-
-      console.debug(
-        'Current role ' + JSON.stringify(role, null, 2)
-      );
-
       // Current Role component
       let component = getters.getComponents[role.component];
-
-      console.debug(
-        'Current component ' + JSON.stringify(component, null, 2)
-      );
 
       // Current Role Resources
       let resources = component.configuration.resources;

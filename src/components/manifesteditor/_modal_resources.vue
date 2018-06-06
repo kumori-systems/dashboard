@@ -133,14 +133,7 @@ export default {
     },
 
     updateStateRes(res_name) {
-      /*
-      console.debug("The value is ", this.$refs["res_type" + res_name][0][0].value);
-
-      this.updateDeployResState({
-        key: res_name,
-        value: this.$refs["res_type" + res_name][0].value
-      });
-      */
+      // This method should not longer be called
     }
   }
 };

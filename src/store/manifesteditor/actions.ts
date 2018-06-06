@@ -1052,11 +1052,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   setRole = (actionContext: Vuex.ActionContext<State, any>,
     actualRoleNumber: number): void => {
 
-    console.debug(
-      'Cuando entramos a setRole (action) tenemos como rol'
-      + JSON.stringify(actualRoleNumber)
-    );
-
     // Resets the state.currentRole
     actionContext.commit('resetRole');
 
@@ -1069,25 +1064,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     // TODO - Analizando
     actionContext.commit('setRole', actualRoleNumber);
 
-    console.debug(
-      'The current manifest URI is ' + actionContext.state.currentManifest
-    );
     let currentManifest =
       actionContext.getters.manifests[actionContext.state.currentManifest];
-    console.debug(
-      'The current manifest is' + JSON.stringify(currentManifest, null, 2)
-    );
 
-    console.debug('The current role URI is' + actionContext.state.currentRole);
     let role = currentManifest.roles[actionContext.state.currentRole];
-    console.debug(
-      'The current role is' + JSON.stringify(role, null, 2)
-    );
 
     let component = actionContext.getters.manifests[role.component];
-    console.debug(
-      'The current component is' + JSON.stringify(component, null, 2)
-    );
 
     if (component.configuration.resources) {
       component.configuration.resources.map(elem => {
@@ -1109,8 +1091,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   updateRoleName = (actionContext: Vuex.ActionContext<State, any>,
     payload: any): void => {
-
-    console.debug('Entramos en updateRoleName con', payload);
 
     let validation = actionContext.state.roleState.validation;
     if (validation) {
@@ -1213,8 +1193,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   updateRoleNameInConnectors = (actionContext: Vuex.ActionContext<State, any>,
     payload: { oldName: string, newName: string }): void => {
-
-    console.debug('At updateRoleNameInConnectors the payload is', payload);
 
     // Manifest connectors
     let connectors = actionContext.state.manifests[
@@ -2182,8 +2160,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       actionContext.commit('displayAlertPan', true);
 
     } else {
-
-      console.debug('ENTRA POR AQUÍ');
 
       let validation = actionContext.state.channelState.validation;
 
