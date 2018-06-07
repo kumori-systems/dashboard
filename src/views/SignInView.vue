@@ -195,9 +195,9 @@ export default class SignInView extends Vue {
     return (
       this.acsURL +
       "/auth/google?redirectOnSuccessUrl=" +
-      urlencode(location.origin + "/#/overview") +
+      urlencode(location.origin + "/overview") +
       "&redirectOnFailureUrl=" +
-      urlencode(location.origin + "/#/overview")
+      urlencode(location.origin + "/overview")
     );
   }
 
