@@ -72,12 +72,18 @@
                 <v-layout>
 
                   <v-spacer></v-spacer>
+                  <div>
 
                   <a class="ma-3" v-bind:href="googleOauthURN">
 
                     <img src="/static/btn_google_signin_light_normal_web.png">
 
                   </a>
+                  
+                  <a class="ma-3" v-bind:href="githubOauthURN">
+                    <img src="static/btn_github_signin_dark_normal_web.png"/>
+                  </a>
+                  </div>
 
                 </v-layout>
 
@@ -195,6 +201,16 @@ export default class SignInView extends Vue {
     return (
       this.acsURL +
       "/auth/google?redirectOnSuccessUrl=" +
+      urlencode(location.origin + "/") +
+      "&redirectOnFailureUrl=" +
+      urlencode(location.origin + "/")
+    );
+  }
+
+  get githubOauthURN() {
+    return (
+      this.acsURL +
+      "/auth/github?redirectOnSuccessUrl=" +
       urlencode(location.origin + "/") +
       "&redirectOnFailureUrl=" +
       urlencode(location.origin + "/")
