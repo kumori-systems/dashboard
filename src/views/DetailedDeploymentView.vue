@@ -53,7 +53,7 @@
             <!-- Deployment creation date -->
             
               <v-flex ma-1 xs12>
-                <strong>Date: </strong>{{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
+                <strong>Date: </strong>{{ deploymentDate}}
               </v-flex>
             
 
@@ -278,21 +278,6 @@ import { setTimeout } from "timers";
     truncateRight: function(text: string, value: number) {
       if (text.length < value) return text;
       return text.substring(0, value) + "...";
-    },
-    year: function(text: string) {
-      return text.split("/")[4].substring(0, 4);
-    },
-    month: function(text: string, value: number) {
-      return text.split("/")[4].substring(4, 6);
-    },
-    day: function(text: string, value: number) {
-      return text.split("/")[4].substring(6, 8);
-    },
-    hour: function(text: string, value: number) {
-      return text.split("/")[4].substring(9, 11);
-    },
-    min: function(text: string, value: number) {
-      return text.split("/")[4].substring(11, 13);
     }
   }
 })
@@ -363,6 +348,22 @@ export default class DetailedDeploymentView extends Vue {
     for (let i in this.unwatch) {
       this.unwatch[i]();
     }
+  }
+
+  get deploymentDate() {
+    let text = this.deployment._urn;
+
+    let year = parseInt(text.split("/")[4].substring(0, 4));
+
+    let month = parseInt(text.split("/")[4].substring(4, 6));
+
+    let date = parseInt(text.split("/")[4].substring(6, 8));
+
+    let hours = parseInt(text.split("/")[4].substring(9, 11));
+
+    let minutes = parseInt(text.split("/")[4].substring(11, 13));
+
+    return new Date(year, month, date, hours, minutes).toUTCString();
   }
   
   get isEntrypoint(){
