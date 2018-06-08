@@ -16,13 +16,22 @@
 
       </v-card-actions>
     </v-card-title>
-    <v-container>
-      <p>Avatar: {{ user.avatar}}</p>
-      <p>Id: {{ user.id }}</p>
-      <p>Token</p>
-      <p class="ml-3">access token: {{ user.token.accessToken }}</p>
-      <p class="ml-3">time-to-live: {{ user.token.expiresIn }}</p>
-      <p class="ml-3">refresh token: {{ user.token.refreshToken }}</p>
+    <v-container> 
+
+      <v-flex xs12 sm10 md10 lg6>
+      <v-text-field
+        readonly
+        id="APItoken"
+        prefix="API token"
+        single-line
+        v-model="userApiToken"
+        append-icon="fas fa-clipboard"
+        :append-icon-cb="copyToClipboard">
+      </v-text-field>
+      </v-flex>
+        <!--
+      <p class="ml-3">API token: {{ user.token.accessToken }}</p>
+      -->
     </v-container>
   </v-card>
 </template>
@@ -36,6 +45,7 @@ import { User } from "../store/pagestate/classes";
   name: "user-settings-view"
 })
 export default class UserSettingsView extends Vue {
+
   /** Obtains the authentified user in the system. */
   get user(): User {
     return this.$store.getters.user;
@@ -43,6 +53,25 @@ export default class UserSettingsView extends Vue {
 
   cancel() {
     this.$router.go(-1);
+  }
+
+  get userApiToken() {
+    return this.user.token.accessToken;
+  }
+
+  set userApiToken(val) {}
+
+  copyToClipboard() {
+    /* Get the text field */
+    let copyText: HTMLInputElement = document.getElementById(
+      "APItoken"
+    ) as HTMLInputElement;
+
+    /* Select the text field */
+    copyText.select();
+
+    /* Copy the text inside the text field */
+    document.execCommand("copy");
   }
 }
 </script>
