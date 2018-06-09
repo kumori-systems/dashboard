@@ -21,8 +21,8 @@
               <p class="subheading text-xs-center">Simple, transparent and competitive</p>
 
               <p class="subheading grey--text pt-4 text-xs-center">
-                Kumori's PAAS provides the best experience for your
-                applications and services.
+                Kumori provides the best experience for your applications and
+                services.
               </p>
 
             </v-flex>
