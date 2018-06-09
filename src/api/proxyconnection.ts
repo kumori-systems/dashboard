@@ -2146,7 +2146,10 @@ export class ProxyConnection extends EventEmitter {
   }): Runtime {
     let res: Runtime = null;
     try {
-      res = new Runtime(manifest.name);
+      res = new Runtime(
+        manifest.name,
+        manifest.derived ? manifest.derived.from : null,
+        manifest.sourcedir, manifest.entrypoint, manifest.metadata);
     } catch (err) {
       console.error(err);
     }
