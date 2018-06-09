@@ -3,7 +3,7 @@ import Router from 'vue-router';
 
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
-  ManifestEditorView, NewBundleView, NewDeploymentView, NewDomainView,
+  HelpView, ManifestEditorView, NewBundleView, NewDeploymentView, NewDomainView,
   NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
   UserSettingsView, VolumesView
 } from '../views';
@@ -40,7 +40,7 @@ export default new Router({
     },
     {
       path: '/help',
-      component: null
+      component: HelpView
     },
     {
       path: '/addHTTPEntrypoint',
