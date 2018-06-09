@@ -25,7 +25,6 @@ export abstract class Channel extends ECloudElement {
     super(ECloudElement.ECLOUDELEMENT_TYPE.CHANNEL);
     if (!name) this.name = name;
     if (!type) {
-      console.error('Invalid Type for Channel: ' + type);
       throw new Error('Invalid Type for Channel: ' + type);
     }
     this.type = type;
@@ -68,7 +67,6 @@ export class ProvidedChannel extends Channel {
   constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
     if (this.allowedTypes.indexOf(type) === -1) {
-      console.error('Invalid Type for ProvidedChannel: ' + type);
       throw new Error('Invalid Type for ProvidedChannel: ' + type);
     }
   }
@@ -96,7 +94,6 @@ export class DependedChannel extends Channel {
   constructor(name: string, type: Channel.CHANNEL_TYPE, protocol: string) {
     super(name, type, protocol);
     if (this.allowedTypes.indexOf(type) === -1) {
-      console.error('Invalid Type for DependededChannel: ' + type);
       throw new Error('Invalid Type for DependededChannel: ' + type);
     }
   }
@@ -123,23 +120,19 @@ export abstract class Connector {
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
     if (!provided) {
-      console.error('Invalid value for provided in Connector');
       throw new Error('Invalid value for provided in Connector');
     }
 
     if (provided.length === 0) {
-      console.error('Number of channels must be > 0.');
       throw new Error('Number of channels must be > 0.');
     }
 
     this.provided = provided;
 
     if (!depended) {
-      console.error('Invalid value for depended in Connector');
       throw new Error('Invalid value for depended in Connector');
     }
     if (depended.length === 0) {
-      console.error('Number of channels must be > 0.');
       throw new Error('Number of channels must be > 0.');
     }
 

@@ -15,7 +15,7 @@
 
           <!-- Deployed date -->
           <div class="black--text">
-            {{ deployment._urn | day }}-{{ deployment._urn | month }}-{{ deployment._urn | year }}  {{ deployment._urn | hour }}:{{ deployment._urn | min }}
+            {{ deploymentDate }}
           </div>
 
           <div class="black--text">
@@ -194,21 +194,6 @@ import { utils } from "../../api";
     truncateRight: function(text: string, value: number) {
       if (text.length < value) return text;
       return text.substring(0, value) + "...";
-    },
-    year: function(text: string) {
-      return text.split("/")[4].substring(0, 4);
-    },
-    month: function(text: string, value: number) {
-      return text.split("/")[4].substring(4, 6);
-    },
-    day: function(text: string, value: number) {
-      return text.split("/")[4].substring(6, 8);
-    },
-    hour: function(text: string, value: number) {
-      return text.split("/")[4].substring(9, 11);
-    },
-    min: function(text: string, value: number) {
-      return text.split("/")[4].substring(11, 13);
     }
   }
 })
@@ -221,6 +206,22 @@ export default class Card extends Vue {
    * the onResize directive.
    */
   deploymentName: string = null;
+
+  get deploymentDate() {
+    let text = this.deployment._urn;
+
+    let year = parseInt(text.split("/")[4].substring(0, 4));
+
+    let month = parseInt(text.split("/")[4].substring(4, 6));
+
+    let date = parseInt(text.split("/")[4].substring(6, 8));
+
+    let hours = parseInt(text.split("/")[4].substring(9, 11));
+
+    let minutes = parseInt(text.split("/")[4].substring(11, 13));
+
+    return new Date(year, month, date, hours, minutes).toUTCString();
+  }
 
   get deployment(): Deployment {
     return this.deployments[this.deploymentURN];
@@ -260,7 +261,7 @@ export default class Card extends Vue {
     return res;
   }
 
-  get services(){
+  get services() {
     return this.$store.getters.services;
   }
 

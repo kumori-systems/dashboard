@@ -52,7 +52,9 @@ export function getElementType(urn: string): ECloudElement.ECLOUDELEMENT_TYPE {
       res = ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT;
       break;
     default:
+    /*
       console.error('Unknown element type ' + splitted[i] + ' of ' + urn);
+    */
   }
 
   return res;
@@ -108,12 +110,16 @@ export function getResourceType(urn: string): Resource.RESOURCE_TYPE {
             res = Resource.RESOURCE_TYPE.DOMAIN;
             break;
           default:
+          /*
             console.error('Not able to extract resource from \'' + urn + '\'.');
+          */
         }
     }
 
   } catch (err) {
+    /*
     console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    */
   }
 
   return res;
@@ -132,7 +138,9 @@ export function getElementDomain(urn: string): string {
   try {
     res = urn.split('/')[2];
   } catch (err) {
+    /*
     console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    */
   }
 
   return res;
@@ -157,7 +165,9 @@ export function getElementName(urn: string): string {
     }
 
   } catch (err) {
+    /*
     console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    */
   }
   return res;
 
@@ -177,7 +187,9 @@ export function getElementVersion(urn: string): string {
     res = splitted[splitted.length - 1];
 
   } catch (err) {
+    /*
     console.error('Unrecognized URN format \'' + urn + '\'. Error: ' + err);
+    */
   }
   return res;
 

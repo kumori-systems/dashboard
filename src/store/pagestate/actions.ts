@@ -299,7 +299,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }).then((user) => { // Load all elements
 
       return ProxyConnection.instance.getRegisteredElements().then(() => {
-
+        /*
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -308,6 +308,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             null
           )
         );
+        */
         return user;
       });
 
@@ -315,6 +316,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       return ProxyConnection.instance.getResources().then(() => {
 
+        /*
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -323,9 +325,12 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             null
           )
         );
+        */
         return user;
       }).catch((err) => {
+        /*
         console.error(err);
+        */
         return user;
       });
 
@@ -333,6 +338,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       return ProxyConnection.instance.getDeploymentList().then(() => {
         
+        /*
         injectee.dispatch('addNotification',
           new Notification(
             Notification.LEVEL.DEBUG,
@@ -341,6 +347,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             null
           )
         );
+        */
 
         return user;
       });

@@ -3,7 +3,7 @@ import Router from 'vue-router';
 
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
-  ManifestEditorView, NewBundleView, NewDeploymentView, NewDomainView,
+  HelpView, ManifestEditorView, NewBundleView, NewDeploymentView, NewDomainView,
   NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
   UserSettingsView, VolumesView
 } from '../views';
@@ -12,7 +12,6 @@ Vue.use(Router);
 
 export default new Router({
   mode: 'history',
-  base: '/',
   scrollBehavior: (to, from, savedPosition) => { return { x: 0, y: 0 }; },
   routes: [
     {
@@ -41,7 +40,7 @@ export default new Router({
     },
     {
       path: '/help',
-      component: null
+      component: HelpView
     },
     {
       path: '/addHTTPEntrypoint',

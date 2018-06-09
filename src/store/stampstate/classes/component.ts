@@ -56,7 +56,6 @@ export class Component extends ECloudElement {
     reqChannels: { [channel: string]: Channel }) {
     super(ECloudElement.ECLOUDELEMENT_TYPE.COMPONENT);
     if (!urn) {
-      console.error('A component needs an URN associated.');
       throw new Error('A component needs an URN associated.');
     }
     this._urn = urn;

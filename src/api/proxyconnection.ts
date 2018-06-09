@@ -703,7 +703,9 @@ export class ProxyConnection extends EventEmitter {
                 )
               );
             } catch (err) {
+              /*
               console.error('Error emitting domain', registeredResIndex, err);
+              */
             }
 
             break;
@@ -780,14 +782,20 @@ export class ProxyConnection extends EventEmitter {
                 )
               );
             } catch (err) {
-              console.error('Error creating volume', registeredResIndex, err);
+              /*
+              console.error(
+                'Error creating volume', registeredResIndex, err
+              );
+              */
             }
 
             break;
 
           default:
-            console.error('Unrecognized resource \'' + registeredResIndex
-              + '\'');
+          /*
+          console.error('Unrecognized resource \'' + registeredResIndex
+            + '\'');
+          */
         }
       }
     });
@@ -844,12 +852,16 @@ export class ProxyConnection extends EventEmitter {
                 );
                 break;
               default:
+              /*
                 console.error('Unknown resource type ' + registeredElements[i]);
+              */
             }
             break;
 
           default:
+          /*
             console.error('Unkown element: ' + registeredElements[i]);
+          */
         }
       }
     });
@@ -1335,8 +1347,11 @@ export class ProxyConnection extends EventEmitter {
 
                   resourceInstances.push(volInst);
                 } catch (error) {
-                  console.error('Error transforming a persistent volume', res,
-                    error);
+                  /*
+                  console.error(
+                    'Error transforming a persistent volume', res, error
+                  );
+                  */
                 }
                 break;
 
@@ -1359,8 +1374,11 @@ export class ProxyConnection extends EventEmitter {
 
                   resourceInstances.push(volatileVolInst);
                 } catch (error) {
-                  console.error('Error transforming a volatile volume', res,
-                    error);
+                  /*
+                  console.error(
+                    'Error transforming a volatile volume', res, error
+                  );
+                  */
                 }
 
                 break;
@@ -1443,12 +1461,17 @@ export class ProxyConnection extends EventEmitter {
                   ecloudDeployment.urn // usedBy
                 )
               );
-            } catch (error) { console.error('Error: ' + error); }
+            } catch (error) {
+              /*
+               console.error('Error: ' + error);
+               */
+            }
           }
           break;
 
         case Resource.RESOURCE_TYPE.DOMAIN:
           resources[res] = ecloudDeployment.resources[res].resource.name;
+
           try {
             this.emit(
               this.onAddDomain,
@@ -1464,7 +1487,10 @@ export class ProxyConnection extends EventEmitter {
               )
             );
           } catch (err) {
-            console.error('Error emitting a domain', err);
+
+            // console.error('Error emitting a domain', err);
+            // When a random domain is created, it's given an empty resource
+            // and this can't be treated by the page
           }
 
           break;
@@ -1499,7 +1525,9 @@ export class ProxyConnection extends EventEmitter {
               )
             );
           } catch (error) {
+            /*
             console.error('Error: ' + error);
+            */
           }
 
           break;
@@ -1548,14 +1576,20 @@ export class ProxyConnection extends EventEmitter {
             );
 
           } catch (err) {
+            /*
             console.error('Error creating volume', volumeURN, err);
+            */
           }
 
           break;
 
         default:
-          console.error('Resource not following structure \'' + res + '\' ' +
-            ecloudDeployment.resources[res]);
+        /*
+          console.error(
+            'Resource not following structure \'' + res + '\' ' +
+            ecloudDeployment.resources[res]
+          );
+        */
       }
     }
 
@@ -1598,7 +1632,9 @@ export class ProxyConnection extends EventEmitter {
           channels // channels
         );
       } catch (error) {
+        /*
         console.error('Error: ' + error);
+        */
       }
 
     } else {
@@ -1613,7 +1649,9 @@ export class ProxyConnection extends EventEmitter {
           channels // channels
         );
       } catch (error) {
+        /*
         console.error('Error: ' + error);
+        */
       }
     }
 
@@ -2142,9 +2180,14 @@ export class ProxyConnection extends EventEmitter {
   }): Runtime {
     let res: Runtime = null;
     try {
-      res = new Runtime(manifest.name);
+      res = new Runtime(
+        manifest.name,
+        manifest.derived ? manifest.derived.from : null,
+        manifest.sourcedir, manifest.entrypoint, manifest.metadata);
     } catch (err) {
+      /*
       console.error(err);
+      */
     }
     return res;
   }

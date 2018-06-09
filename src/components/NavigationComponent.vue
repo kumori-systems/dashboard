@@ -2,6 +2,7 @@
   <v-navigation-drawer clipped permanent app>
     <!-- Menu items -->
     <v-list dense v-for="(item, i) in items" v-bind:key="i">
+
       <!-- If item doesn't have children -->
       <v-list-tile v-if="item.children.length==0" v-bind:to="item.path">
         <v-list-tile-action>
@@ -27,6 +28,7 @@
           <v-list-tile-title>{{ child.title }}</v-list-tile-title>
         </v-list-tile>
       </v-list-group>
+      
     </v-list>
   </v-navigation-drawer>
 </template>
