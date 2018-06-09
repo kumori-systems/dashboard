@@ -1,245 +1,252 @@
 <template>
-<v-form ref="form" lazy-validation>
-  <v-card v-if="deployment" style="max-width:1300px">
-    <v-card-title class="mybackground">
-      
-      <!-- View title-->
-      <h3 class="headline mb-0">
-        <span v-if="isEntrypoint">
-          <v-icon class="ma-1">language</v-icon>
-          <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
-        </span>
-        {{ deployment.name }}
-      </h3>
+  <v-form ref="form" lazy-validation>
+
+    <v-card v-if="deployment" style="max-width:1300px">
+
+      <v-card-title class="mybackground">
         
-      <!-- Applies a space between elements -->
-      <v-spacer></v-spacer>
+        <!-- View title-->
+        <h3 class="headline mb-0">
+          <span v-if="isEntrypoint">
+            <v-icon class="ma-1">language</v-icon>
+            <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
+          </span>
+          {{ deployment.name }}
+        </h3>
+          
+        <!-- Applies a space between elements -->
+        <v-spacer></v-spacer>
+        
+        <!-- Deployment actions -->
+        <v-card-actions>
+
+          <!-- Undeploy -->
+          <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
+
+          <!-- Apply changes -->
+          <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
+
+          <!-- Cancel -->
+          <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
+
+        </v-card-actions>
+        
+      </v-card-title>
       
-      <!-- Deployment actions -->
-      <v-card-actions>
-        <v-btn class="elevation-0" color="error" v-on:click="showUndeployModal">Undeploy</v-btn>
-        <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
-        <v-btn outline v-bind:disabled="!haveChanges" v-on:click="cancelChanges">Cancel</v-btn>
-      </v-card-actions>
-      
-    </v-card-title>
-    
-    <!-- Divides the swections of the card -->
-    <v-divider></v-divider>
+      <!-- Divides the swections of the card -->
+      <v-divider></v-divider>
 
-    <!-- Main content of the view-->
-    <v-container fluid id="deployment-item-view" class="mybackground">
+      <!-- Main content of the view-->
+      <v-container fluid id="deployment-item-view" class="mybackground">
 
-      <!-- Deployment general info -->
-      <v-container fluid id="deployment-item-view">
-        <v-layout wrap>
+        <!-- Deployment general info -->
+        <v-container fluid id="deployment-item-view">
+          <v-layout wrap>
 
-          <!-- Deployment state -->
-          <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
-            <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
-            <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
-          </v-flex>
+            <!-- Deployment state -->
+            <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
+              <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
+              <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
+            </v-flex>
 
-          <!-- Detailed info -->
-          <v-flex ma-1 xs12 sm6>
+            <!-- Detailed info -->
+            <v-flex ma-1 xs12 sm6>
 
-            <!-- Deployment urn -->
-            <v-layout wrap>
-              <v-flex ma-1 xs12>
-                <strong>URN: </strong>{{ deployment._urn }}
-              </v-flex>
-            
+              <!-- Deployment urn -->
+              <v-layout wrap>
 
-            <!-- Deployment creation date -->
-            
-              <v-flex ma-1 xs12>
-                <strong>Date: </strong>{{ deploymentDate}}
-              </v-flex>
-            
+                <v-flex ma-1 xs12>
+                  <strong>URN: </strong>{{ deployment._urn }}
+                </v-flex>
 
-            <!-- Deployment service -->
-            
-              <v-flex ma-1 xs12>
-                <strong>Service: </strong>{{ deployment.service }}
-              </v-flex>
-            </v-layout>
+                <!-- Deployment creation date -->
+                <v-flex ma-1 xs12>
+                  <strong>Date: </strong>{{ deploymentDate}}
+                </v-flex>
 
-            <!-- Persistent Volumes -->
-            <template v-if="deploymentPersistentVolumes.length > 0">
-              <strong class="ma-1">Persistent volumes:</strong>
-              <v-list class="pa-0">
-                <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div" class="mybackground">
-                  <v-card-actions>
-                    <v-icon class="indigo--text">storage</v-icon>
-                  </v-card-actions>
-                  <v-list-tile-title>
-                    <v-tooltip bottom>
-                      <div dark slot="activator">
-                        <v-layout>
-                          <v-flex xs6>{{ vol.name }}</v-flex>
-                          <v-flex xs6>{{ vol.size }} GB</v-flex>
-                        </v-layout>
-                      </div>
-                      <span>{{ vol._urn }}</span>
-                    </v-tooltip>
-                  </v-list-tile-title>
-                </v-list-tile>
-              </v-list>
-            </template>
-            
-             <!-- Volatile Volumes -->
-            <template v-if="deploymentVolatileVolumes.length > 0">
-              <strong>Volatile volumes:</strong>
-              <v-list class="pa-0">
-                <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div" class="mybackground">
-                  <v-card-actions>
-                    <v-icon class="light-blue--text text--lighten-2">storage</v-icon>
-                  </v-card-actions>
-                  <v-list-tile-title>
+                <!-- Deployment service -->
+                <v-flex ma-1 xs12>
+                  <strong>Service: </strong>{{ deployment.service }}
+                </v-flex>
 
-                    <v-layout>
-                      <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
-                      <v-flex xs6>{{ vol.size }} GB</v-flex>
-                    </v-layout>
-                    
-                  </v-list-tile-title>
-                </v-list-tile>
-              </v-list>
-            </template>
+              </v-layout>
 
-            <!-- Websites -->
-            <v-layout v-if="isEntrypoint">
-              <v-flex ma-1 xs12>
-                <strong>Websites:</strong>
+              <!-- Persistent Volumes -->
+              <template v-if="deploymentPersistentVolumes.length > 0">
+                <strong class="ma-1">Persistent volumes:</strong>
                 <v-list class="pa-0">
-                <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" class="mybackground">
-                  <v-list-tile-title>
-                    <a v-if="hasCertificate" v-bind:href="'https://' + web.url">{{ web.text }}</a>
-                    <a v-else v-bind:href="'http://' + web.url">{{ web.text }}</a>
-                  </v-list-tile-title>
-                </v-list-tile>
+                  <v-list-tile v-for="(vol, index) in deploymentPersistentVolumes" v-bind:key="index" tag="div" class="mybackground">
+                    <v-card-actions>
+                      <v-icon>storage</v-icon>
+                    </v-card-actions>
+                    <v-list-tile-title>
+                      <v-tooltip bottom>
+                        <div dark slot="activator">
+                          <v-layout>
+                            <v-flex xs6>{{ vol.name }}</v-flex>
+                            <v-flex xs6>{{ vol.size }} GB</v-flex>
+                          </v-layout>
+                        </div>
+                        <span>{{ vol._urn }}</span>
+                      </v-tooltip>
+                    </v-list-tile-title>
+                  </v-list-tile>
                 </v-list>
-              </v-flex>
-            </v-layout>
+              </template>
+              
+              <!-- Volatile Volumes -->
+              <template v-if="deploymentVolatileVolumes.length > 0">
+                <strong>Volatile volumes:</strong>
+                <v-list class="pa-0">
+                  <v-list-tile v-for="(vol, index) in deploymentVolatileVolumes" v-bind:key="index" tag="div" class="mybackground">
+                    <v-card-actions>
+                      <v-icon>sd_card</v-icon>
+                    </v-card-actions>
+                    <v-list-tile-title>
 
-            <!-- Deployment links -->
-            <v-layout>
-              <v-flex ma-1 xs12>
-                <strong>Connections:</strong>
-                  
-                <!-- Link table representation -->
-                <table>
+                      <v-layout>
+                        <v-flex xs6>{{ vol.name | truncateRight(15) }}</v-flex>
+                        <v-flex xs6>{{ vol.size }} GB</v-flex>
+                      </v-layout>
+                      
+                    </v-list-tile-title>
+                  </v-list-tile>
+                </v-list>
+              </template>
 
-                  <!-- Provided Channels -->
-                  <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
-                    <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
-                    <th>
-                      <v-select
-                        v-model="serviceNewProvidedConnections[name]"
-                        v-bind:items="totalDependedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" autocomplete
-                        return-object>
+              <!-- Websites -->
+              <v-layout v-if="isEntrypoint">
+                <v-flex ma-1 xs12>
+                  <strong>Websites:</strong>
+                  <v-list class="pa-0">
+                  <v-list-tile v-for="(web, index) in deployment.websites" v-bind:key="index" class="mybackground">
+                    <v-list-tile-title>
+                      <a v-if="hasCertificate" v-bind:href="'https://' + web.url">{{ web.text }}</a>
+                      <a v-else v-bind:href="'http://' + web.url">{{ web.text }}</a>
+                    </v-list-tile-title>
+                  </v-list-tile>
+                  </v-list>
+                </v-flex>
+              </v-layout>
 
-                        <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip
-                            @input="items.parent.selectItem(items.item)"
+              <!-- Deployment links -->
+              <v-layout>
+                <v-flex ma-1 xs12>
+                  <strong>Connections:</strong>
+                    
+                  <!-- Link table representation -->
+                  <table>
+
+                    <!-- Provided Channels -->
+                    <tr v-for="(conn, name) in service.providedChannels" v-bind:key="name">
+                      <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
+                      <th>
+                        <v-select
+                          v-model="serviceNewProvidedConnections[name]"
+                          v-bind:items="totalDependedDeploymentChannels(name)"
+                          multiple chips v-on:input="handleInput" autocomplete
+                          return-object>
+
+                          <!-- Chips config-->
+                          <template slot="selection" scope="items">
+                            <v-chip
+                              @input="items.parent.selectItem(items.item)"
+                                close color="light-blue lighten-1 white--text">
+                              {{ items.item.text }}
+                            </v-chip>
+                          </template>
+                          
+                        </v-select>
+                      </th>
+                    </tr>
+
+                    <!-- Depended channels -->
+                    <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
+                      <th>
+                        <v-select v-model="serviceNewDependedConnections[name]"
+                          v-bind:items="totalProvidedDeploymentChannels(name)"
+                          multiple chips v-on:input="handleInput" autocomplete
+                          return-object>
+                    
+                          <!-- Chips config-->
+                          <template slot="selection" scope="items">
+                            <v-chip 
+                              @input="items.parent.selectItem(items.item)"
                               close color="light-blue lighten-1 white--text">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                        
-                      </v-select>
-                    </th>
-                  </tr>
+                              {{ items.item.text }}
+                            </v-chip>
+                          </template>
+                    
+                        </v-select>
+                      </th>
+                      <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
+                    </tr>
 
-                  <!-- Depended channels -->
-                  <tr v-for="(conn, name) in service.dependedChannels" v-bind:key="name">
-                    <th>
-                      <v-select v-model="serviceNewDependedConnections[name]"
-                        v-bind:items="totalProvidedDeploymentChannels(name)"
-                        multiple chips v-on:input="handleInput" autocomplete
-                        return-object>
-                  
-                        <!-- Chips config-->
-                        <template slot="selection" scope="items">
-                          <v-chip 
-                            @input="items.parent.selectItem(items.item)"
-                            close color="light-blue lighten-1 white--text">
-                            {{ items.item.text }}
-                          </v-chip>
-                        </template>
-                  
-                      </v-select>
-                    </th>
-                    <th><v-chip color="lime darken-1 white--text">{{ name }}</v-chip></th>
-                  </tr>
+                  </table>
+                </v-flex>
+              </v-layout>
 
-                </table>
-              </v-flex>
-            </v-layout>
+            </v-flex>
 
+            <!-- Applies space between elements -->
+            <v-spacer></v-spacer>
+
+            <!-- Deployment chart -->
+            <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+              <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentMetrics.data"
+                v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
+              </deployment-chart-component>
+            </v-flex>
+
+          </v-layout>
+
+        </v-container>
+
+        <!-- Deployment roles -->
+        <v-layout wrap>
+          <v-flex ma-1 xs12 sm12 md12 lg12 xl12 v-for="(rolContent, roleId) in deployment.roles" v-bind:key="roleId">
+            <role-card-component v-bind:role="rolContent" v-bind:service="service"
+            v-bind:roleMetrics="deploymentMetrics.roles"
+            v-on:killInstanceChange="handleKillInstanceChange"
+            v-on:numInstancesChange="handleNumInstancesChange"
+            v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
           </v-flex>
-
-          <!-- Applies space between elements -->
-          <v-spacer></v-spacer>
-
-          <!-- Deployment chart -->
-          <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-            <deployment-chart-component class="deployment-chart" v-bind:chartData="deploymentMetrics.data"
-              v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
-            </deployment-chart-component>
-          </v-flex>
-
         </v-layout>
 
+        <!-- Undeploy dialog -->
+        <v-dialog v-model="undeployElementDialog" max-width="800px">
+          <v-card>
+            <v-card-title class="headline">Undeploy?</v-card-title>
+            <v-card-text>
+              This action <strong>CAN'T BE UNDONE</strong> and will
+              undeploy {{ deployment.name }}.
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
+              <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
       </v-container>
+    </v-card>
+        <!-- This deployment is already undeployed -->
+        <v-dialog v-model="noMoreInfoDialog" max-width="600px">
+          <v-card>
+            <v-card-title class="headline">This service has been undeployed and is not longer available</v-card-title>
+            <v-card-text>
+              You will be redirected to overview
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              
+              <v-btn flat="flat" @click.native="redirectToOverview">I understand</v-btn>
 
-      <!-- Deployment roles -->
-      <v-layout wrap>
-        <v-flex ma-1 xs12 sm12 md12 lg12 xl12 v-for="(rolContent, roleId) in deployment.roles" v-bind:key="roleId">
-          <role-card-component v-bind:role="rolContent" v-bind:service="service"
-          v-bind:roleMetrics="deploymentMetrics.roles"
-          v-on:killInstanceChange="handleKillInstanceChange"
-          v-on:numInstancesChange="handleNumInstancesChange"
-          v-bind:clear="clear" v-on:clearedRol="clear=false"></role-card-component>
-        </v-flex>
-      </v-layout>
-
-      <!-- Undeploy dialog -->
-      <v-dialog v-model="undeployElementDialog" max-width="800px">
-        <v-card>
-          <v-card-title class="headline">Undeploy?</v-card-title>
-          <v-card-text>
-            This action <strong>CAN'T BE UNDONE</strong> and will
-            undeploy {{ deployment.name }}.
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
-            <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-    </v-container>
-  </v-card>
-      <!-- This deployment is already undeployed -->
-      <v-dialog v-model="noMoreInfoDialog" max-width="600px">
-        <v-card>
-          <v-card-title class="headline">This service has been undeployed and is not longer available</v-card-title>
-          <v-card-text>
-            You will be redirected to overview
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            
-            <v-btn flat="flat" @click.native="redirectToOverview">I understand</v-btn>
-
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-</v-form>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+  </v-form>
 </template>
 <script lang="ts" scoped>
 import Vue from "vue";
@@ -282,6 +289,7 @@ import { setTimeout } from "timers";
   }
 })
 export default class DetailedDeploymentView extends Vue {
+
   /**
     This dialog should appear when the deployment which is beeing viewed was
     undeployed (by someone else) and the information is no longer available.
@@ -363,7 +371,11 @@ export default class DetailedDeploymentView extends Vue {
 
     let minutes = parseInt(text.split("/")[4].substring(11, 13));
 
-    return new Date(year, month, date, hours, minutes).toUTCString();
+    let myDate = new Date(year, month, date, hours, minutes);
+    
+    return myDate.getUTCDate() +'-'+ myDate.getUTCMonth() +'-'+
+    myDate.getUTCFullYear() +' '+ myDate.getUTCHours() +':'+
+    myDate.getUTCMinutes();
   }
   
   get isEntrypoint(){

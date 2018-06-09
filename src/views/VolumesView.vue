@@ -30,8 +30,8 @@
 
 
           <td class="text-xs-left">
-            <v-icon v-if="props.item[0]" class="indigo--text">storage</v-icon>
-            <v-icon v-else class="orange--text text--lighten-2">storage</v-icon>
+            <v-icon v-if="props.item[0]">storage</v-icon>
+            <v-icon v-else>sd_card</v-icon>
           </td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[1] }}</td>
           <td class="text-xs-left">{{ props.item[5]? null : props.item[2] }}</td>
