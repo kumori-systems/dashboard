@@ -44,13 +44,13 @@
           <v-layout wrap>
 
             <!-- Deployment state -->
-            <v-flex ma-1 xs1 sm1 md1 lg1 xl1>
+            <v-flex xs1>
               <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
               <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
             </v-flex>
 
             <!-- Detailed info -->
-            <v-flex ma-1 xs12 sm6>
+            <v-flex xs5>
 
               <!-- Deployment urn -->
               <v-layout wrap>
