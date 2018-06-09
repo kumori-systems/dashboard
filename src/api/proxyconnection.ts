@@ -1449,6 +1449,7 @@ export class ProxyConnection extends EventEmitter {
 
         case Resource.RESOURCE_TYPE.DOMAIN:
           resources[res] = ecloudDeployment.resources[res].resource.name;
+
           try {
             this.emit(
               this.onAddDomain,
@@ -1464,7 +1465,10 @@ export class ProxyConnection extends EventEmitter {
               )
             );
           } catch (err) {
-            console.error('Error emitting a domain', err);
+
+            // console.error('Error emitting a domain', err);
+            // When a random domain is created, it's given an empty resource
+            // and this can't be treated by the page
           }
 
           break;
