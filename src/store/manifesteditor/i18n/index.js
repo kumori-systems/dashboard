@@ -14,7 +14,6 @@ if (module.hot) {
   module.hot.accept(['./en.json', './ja.json'], () => {
     i18n.setLocaleMessage('en', require('./en.json'))
     i18n.setLocaleMessage('ja', require('./ja.json'))
-    console.log('hot reload', this, arguments)
   })
 }
 

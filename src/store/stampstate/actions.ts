@@ -47,7 +47,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             res = injectee.state.volatileVolumes[elementURN];
             break;
           default:
-            console.error('ResourceType not covered ' + resourceType);
             throw new Error('ResourceType not covered ' + resourceType);
         }
         break;
@@ -56,13 +55,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       case ECloudElement.ECLOUDELEMENT_TYPE.MANIFEST:
       case ECloudElement.ECLOUDELEMENT_TYPE.PARAMETER:
       case ECloudElement.ECLOUDELEMENT_TYPE.PROTOCOL:
-        console.error('Not expected to handle a manifest of this element '
-          + elementURN);
         throw new Error(
           'Not expected to handle a manifest of this element ' + elementURN
         );
       default:
-        console.error('Unkown element type at ' + elementURN);
         throw new Error('Unkown element type at ' + elementURN);
     }
 

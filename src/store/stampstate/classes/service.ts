@@ -70,7 +70,6 @@ export class Service extends ECloudElement {
 
     super(ECloudElement.ECLOUDELEMENT_TYPE.SERVICE);
     if (!urn) {
-      console.error('A service requires an URN');
       throw new Error('A service requires an URN');
     }
     this._urn = urn;
@@ -117,7 +116,6 @@ export module Service {
     ) {
 
       if (!component) {
-        console.error('Invalid value for component in Role');
         throw new Error('Invalid value for component in Role');
       }
       this.component = component;

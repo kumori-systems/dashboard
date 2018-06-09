@@ -65,22 +65,18 @@ export module User {
       tokenType: string
     ) {
       if (!accessToken) {
-        console.error('Required param accessToken');
         throw new Error('Required param accessToken');
       }
       this.accessToken = accessToken;
       if (!expiresIn) {
-        console.error('Required param expiresIn');
         throw new Error('Required param expiresIn');
       }
       this.expiresIn = expiresIn;
       if (!refreshToken) {
-        console.error('Required param refreshToken');
         throw new Error('Required param refreshToken');
       }
       this.refreshToken = refreshToken;
       if (!tokenType) {
-        console.error('Required param tokenType');
         throw new Error('Required param tokenType');
       }
       this.tokenType = tokenType;

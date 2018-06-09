@@ -44,7 +44,6 @@ export class Runtime extends ECloudElement {
 
     super(ECloudElement.ECLOUDELEMENT_TYPE.RUNTIME);
     if (!urn) {
-      console.error('A runtime requires an URN');
       throw new Error('A runtime requires an URN');
     }
     this._urn = urn;

@@ -325,7 +325,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         );
         return user;
       }).catch((err) => {
+        /*
         console.error(err);
+        */
         return user;
       });
 

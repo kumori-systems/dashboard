@@ -115,7 +115,6 @@ export class Deployment extends ECloudElement {
     super(ECloudElement.ECLOUDELEMENT_TYPE.DEPLOYMENT);
 
     if (!urn) {
-      console.error('A deployment must have associated a URN.');
       throw new Error('A deployment must have associated a URN.');
     }
     this._urn = urn;
@@ -127,7 +126,6 @@ export class Deployment extends ECloudElement {
     this._path = '/deployment/' + urlencode(urn);
 
     if (!service || service.length === 0) {
-      console.error('Invalid value for service in Deployment:' + service);
       throw new Error('Invalid value for service in Deployment:' + service);
     }
     this.service = service;
@@ -303,13 +301,11 @@ export module Deployment {
       maxInstances: number) {
 
       if (!name || name.length === 0) {
-        console.error('Invalid name for Role: ' + name);
         throw new Error('Invalid name for Role: ' + name);
       }
 
       this.name = name;
       if (!component) {
-        console.error('Invalid component for Role: ' + component);
         throw new Error('Invalid component for Role: ' + component);
       }
 
@@ -325,7 +321,6 @@ export module Deployment {
       if (minInstances) {
         if (minInstances > 0) { this.minInstances = minInstances; }
         else {
-          console.error('MinInstances must be higher than 0');
           throw new Error('MinInstances must be higher than 0');
         }
       }
@@ -428,7 +423,6 @@ export module Deployment {
         },
         ports?: { [key: string]: string; }) {
         if (!cnid || cnid.length === 0) {
-          console.error('Invalid cnid for Instance: ' + cnid);
           throw new Error('Invalid cnid for Instance: ' + cnid);
         }
         this.cnid = cnid;

@@ -28,8 +28,9 @@ const maniAPI = {
 
   },
   getGraph: (data, actionContext) => {
-
+    /*
     console.error('GETGRAPH is under development');
+    */
     let url = '/getgraph?service=' + data;
     // maniAPI.GET(url, actionContext, maniAPI.manageRes);
 
@@ -985,7 +986,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         break;
 
       default:
+        /*
         console.error('Unidentified element type at manifest editor', element);
+        */
     }
 
     if (state) {
@@ -1269,7 +1272,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       } catch (e) {
 
-        console.log(e);
         actionContext.commit('clearModals', true);
 
       }
@@ -1938,7 +1940,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         actionContext.state.currentManifest
       ].configuration.parameters.slice();
       let pIndex = params.findIndex(x => x.name === role.name);
-      //     console.log(pIndex)
       if (pIndex > -1) {
         params.splice(pIndex, 1);
       } else {
@@ -1948,7 +1949,6 @@ export default class Actions implements Vuex.ActionTree<State, any> {
             .parameter.enum.find(x => x.name === 'json').eslap
         });
       }
-      //  console.log(JSON.stringify(params))
       let path = 'configuration.parameters';
       maniAPI.updateManifest(params, path, actionContext, {
         success: [

@@ -128,7 +128,9 @@ export class Manifest extends ECloudElement {
         this.type = spec[3];
       }
     } catch (error) {
+      /*
       console.error('Error: ' + error);
+      */
     }
     /* For manifest editor - END */
   }

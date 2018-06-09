@@ -142,11 +142,9 @@ export abstract class Volume extends Resource {
     if (name) this.name = name;
 
     if (!size) {
-      console.error('A volume must have a size associated.');
       throw new Error('A volume must have a size associated.');
     }
     if (size <= 0) {
-      console.error('A volume\'s size must be higher than 0.');
       throw new Error('A volume\'s size must be higher than 0.');
     }
     this.size = size;
@@ -204,12 +202,10 @@ export module Volume {
     ) {
 
       if (!id) {
-        console.error('A volume instance must have an id');
         throw new Error('A volume instance must have an id');
       }
       this.id = id;
       if (!volumeName) {
-        console.error('A volume instance must reference a volume');
         throw new Error('A volume instance must reference a volume');
       }
       this.volumeName = volumeName;
@@ -217,7 +213,6 @@ export module Volume {
       if (associatedRole) this.associatedRole = associatedRole;
       if (associatedInstance) this.associatedInstance = associatedInstance;
       if (usage && usage < 0) {
-        console.error('A volume usage cant be negative');
         throw new Error('A volume usage cant be negative');
       }
       if (usage) this.usage = usage;
@@ -363,12 +358,10 @@ export class Certificate extends Resource {
 
     super(urn, Resource.RESOURCE_TYPE.CERTIFICATE, usedBy);
     if (!key) {
-      console.error('A certificate requires a key.');
       throw new Error('A certificate requires a key.');
     }
     this.key = key;
     if (!cert) {
-      console.error('A certificate requires a cert.');
       throw new Error('A certificate requires a cert.');
     }
     this.cert = cert;
