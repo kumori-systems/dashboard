@@ -220,7 +220,19 @@ export default class Card extends Vue {
 
     let minutes = parseInt(text.split("/")[4].substring(11, 13));
 
-    return new Date(year, month, date, hours, minutes).toUTCString();
+    let myDate = new Date(year, month, date, hours, minutes);
+
+    return (
+      myDate.getUTCDay() +
+      "-" +
+      myDate.getUTCMonth() +
+      "-" +
+      myDate.getUTCFullYear() +
+      " " +
+      myDate.getUTCHours() +
+      ":" +
+      myDate.getUTCMinutes()
+    );
   }
 
   get deployment(): Deployment {
@@ -330,9 +342,9 @@ export default class Card extends Vue {
     return res;
   }
 
-  get stateColor(){
-    let res:string = null;
-    switch(this.state){
+  get stateColor() {
+    let res: string = null;
+    switch (this.state) {
       case "check_circle":
         res = "check_circle";
         break;
@@ -344,7 +356,6 @@ export default class Card extends Vue {
         break;
       default:
         res = "unknown";
-
     }
     return res;
   }
@@ -455,7 +466,7 @@ $color_warning: #ffc107;
 
 .state_warning {
   @extend %icon_size;
-  color:$color_warning;  
+  color: $color_warning;
 }
 
 .state_error {

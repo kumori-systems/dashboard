@@ -289,7 +289,6 @@ import { setTimeout } from "timers";
   }
 })
 export default class DetailedDeploymentView extends Vue {
-
   /**
     This dialog should appear when the deployment which is beeing viewed was
     undeployed (by someone else) and the information is no longer available.
@@ -345,7 +344,7 @@ export default class DetailedDeploymentView extends Vue {
     this.unwatch.push(
       // Watches for route changes
       this.$watch("noMoreInfoDialog", val => {
-        if (val===false) {
+        if (val === false) {
           this.redirectToOverview();
         }
       })
@@ -372,13 +371,21 @@ export default class DetailedDeploymentView extends Vue {
     let minutes = parseInt(text.split("/")[4].substring(11, 13));
 
     let myDate = new Date(year, month, date, hours, minutes);
-    
-    return myDate.getUTCDate() +'-'+ myDate.getUTCMonth() +'-'+
-    myDate.getUTCFullYear() +' '+ myDate.getUTCHours() +':'+
-    myDate.getUTCMinutes();
+
+    return (
+      myDate.getUTCDate() +
+      "-" +
+      myDate.getUTCMonth() +
+      "-" +
+      myDate.getUTCFullYear() +
+      " " +
+      myDate.getUTCHours() +
+      ":" +
+      myDate.getUTCMinutes()
+    );
   }
-  
-  get isEntrypoint(){
+
+  get isEntrypoint() {
     return this.deployment instanceof HTTPEntryPoint;
   }
 
