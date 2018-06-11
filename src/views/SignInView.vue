@@ -41,7 +41,7 @@
                   <!-- Username text field -->
                   <v-text-field autocomplete="username" v-model="userName"
                     v-bind:disabled="loading" prepend-icon="person"
-                    label="Enter your User" autofocus></v-text-field>
+                    label="Enter your user" autofocus></v-text-field>
                     
                   <!-- Current password text field -->
                   <v-text-field autocomplete="current-password"
