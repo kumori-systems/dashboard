@@ -27,7 +27,7 @@
             <v-icon
               v-if="state!=='unknown'"
               id="sanity_icon"
-              v-bind:class="state">
+              v-bind:class="stateColor">
               {{ state }}
             </v-icon>
 
@@ -220,7 +220,19 @@ export default class Card extends Vue {
 
     let minutes = parseInt(text.split("/")[4].substring(11, 13));
 
-    return new Date(year, month, date, hours, minutes).toUTCString();
+    let myDate = new Date(year, month, date, hours, minutes);
+
+    return (
+      myDate.getUTCDay() +
+      "-" +
+      myDate.getUTCMonth() +
+      "-" +
+      myDate.getUTCFullYear() +
+      " " +
+      myDate.getUTCHours() +
+      ":" +
+      myDate.getUTCMinutes()
+    );
   }
 
   get deployment(): Deployment {
@@ -312,7 +324,7 @@ export default class Card extends Vue {
   }
 
   get state(): string {
-    let res: string;
+    let res: string = null;
     switch (this.deployment.state) {
       case Deployment.Role.STATE.SUCCESS:
         res = "check_circle";
@@ -327,6 +339,24 @@ export default class Card extends Vue {
         res = "unknown";
     }
 
+    return res;
+  }
+
+  get stateColor() {
+    let res: string = null;
+    switch (this.state) {
+      case "check_circle":
+        res = "check_circle";
+        break;
+      case "error":
+        res = "state_error";
+        break;
+      case "warning":
+        res = "state_warning";
+        break;
+      default:
+        res = "unknown";
+    }
     return res;
   }
 
@@ -434,12 +464,12 @@ $color_warning: #ffc107;
   color: $color_success;
 }
 
-.warning {
+.state_warning {
   @extend %icon_size;
   color: $color_warning;
 }
 
-.error {
+.state_error {
   @extend %icon_size;
   color: $color_error;
 }

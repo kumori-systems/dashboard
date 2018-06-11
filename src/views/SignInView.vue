@@ -25,6 +25,8 @@
                 services.
               </p>
 
+              <v-btn flat icon id="config-icon" v-on:click="showPannel=true"><v-icon>settings</v-icon></v-btn>
+
             </v-flex>
             <v-flex xs6 wrap>
 
@@ -62,7 +64,7 @@
                   
                     <!-- Main button -->
                     <v-btn color="primary" flat v-bind:loading="loading"
-                      class="primary--text ma-3" v-bind:disabled="loading"
+                      class="white--text ma-3" v-bind:disabled="loading"
                       v-on:click="signIn">Continue</v-btn>
                     
                   </v-card-actions>
@@ -81,7 +83,7 @@
                   </a>
                   
                   <a class="ma-3" v-bind:href="githubOauthURN">
-                    <img src="static/btn_github_signin_dark_normal_web.png"/>
+                    <img src="static/btn_github_signin_light_normal_web.png"/>
                   </a>
                   </div>
 
@@ -92,8 +94,6 @@
             </v-flex>
 
           </v-layout>
-
-          <v-btn flat icon v-on:click="showPannel=true"><v-icon>settings</v-icon></v-btn>
 
         </v-card-text>
 
@@ -337,7 +337,8 @@ export default class SignInView extends Vue {
   }
 }
 
-#googleoauth {
-  text-decoration: initial;
+#config-icon{
+  position: absolute;
+  bottom: 10px;
 }
 </style>

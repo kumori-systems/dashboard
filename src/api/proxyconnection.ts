@@ -2386,7 +2386,10 @@ export class ProxyConnection extends EventEmitter {
     return {
       'spec': 'http://eslap.cloud/manifest/deployment/1_0_0',
       'servicename': deployment.service,
-      'nickname': deployment.name,
+      'nickname':
+        deployment.service
+          !== 'eslap://eslap.cloud/services/http/inbound/1_0_0' ?
+          deployment.name : undefined,
       'interconnection': true,
       'configuration': {
         'resources': deployment.resources,
