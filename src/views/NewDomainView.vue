@@ -63,9 +63,15 @@ export default class AddDomainView extends Vue {
     this.$router.push("/domains");
   }
 
+  /*
+
+eslap://a.a/resources/vhost/a/1_0_0
+
+  */
+
   checkURN(value: string) {
     return RegExp(
-      "^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
+      "^eslap://\\w+(.\\w)*/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
     ).test(value);
   }
 
