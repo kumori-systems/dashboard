@@ -16,9 +16,9 @@ import { EventEmitter, Listener } from 'typed-event-emitter';
 import { Notification, User } from '../store/pagestate/classes';
 import {
   BooleanParameter, Certificate, Channel, Component, Connector, DependedChannel,
-  Deployment, Domain, ECloudElement, HTTPEntryPoint, IntegerParameter,
-  JsonParameter, ListParameter, LoadBalancerConnector, Manifest,
-  NumberParameter, Parameter, PersistentVolume, ProvidedChannel,
+  Deployment, Domain, ECloudElement, FullConnector, HTTPEntryPoint,
+  IntegerParameter, JsonParameter, ListParameter, LoadBalancerConnector,
+  Manifest, NumberParameter, Parameter, PersistentVolume, ProvidedChannel,
   PublishSubscribeConnector, Resource, Runtime, Service, StringParameter,
   VolatileVolume, Volume
 } from '../store/stampstate/classes';
@@ -1694,6 +1694,7 @@ export class ProxyConnection extends EventEmitter {
     }]
   }): Service {
 
+
     // Collecting service resources
     let resources: { [resourceId: string]: string } = {};
     for (let i = 0; i < manifest.configuration.resources.length; i++) {
@@ -1703,6 +1704,7 @@ export class ProxyConnection extends EventEmitter {
 
     // Collecting service parameters
     let parameters: { [parameter: string]: Parameter } = {};
+
     for (let paramIndex in manifest.configuration.parameters) {
       let par: Parameter;
       switch (manifest.configuration.parameters[paramIndex].type) {
@@ -1737,6 +1739,7 @@ export class ProxyConnection extends EventEmitter {
       parameters[manifest.configuration.parameters[paramIndex].name] = par;
     }
 
+
     // Collecting service roles
     let roles: { [rolId: string]: Service.Role } = {};
     for (let i = 0; i < manifest.roles.length; i++) {
@@ -1749,6 +1752,7 @@ export class ProxyConnection extends EventEmitter {
 
     // Collecting service provided channels
     let proChannels: { [channelId: string]: ProvidedChannel } = {};
+
     for (let i = 0; i < manifest.channels.provides.length; i++) {
       let res: ProvidedChannel;
       switch (manifest.channels.provides[i].type) {
@@ -1882,6 +1886,7 @@ export class ProxyConnection extends EventEmitter {
 
     // Collecting service connectors
     let connectors: Array<Connector> = [];
+
     for (let conn in manifest.connectors) {
       let res: Connector;
       switch (manifest.connectors[conn].type) {
@@ -1898,7 +1903,7 @@ export class ProxyConnection extends EventEmitter {
           );
           break;
         case 'eslap://eslap.cloud/connector/complete/1_0_0':
-          res = new PublishSubscribeConnector(
+          res = new FullConnector(
             manifest.connectors[conn].provided, // provided
             manifest.connectors[conn].depended // depended
           );
