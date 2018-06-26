@@ -80,7 +80,7 @@ export class DependedChannel extends Channel {
   readonly allowedTypes: Channel.CHANNEL_TYPE[] = [
     Channel.CHANNEL_TYPE.SEND,
     Channel.CHANNEL_TYPE.RECEIVE,
-     Channel.CHANNEL_TYPE.REQUEST,
+    Channel.CHANNEL_TYPE.REQUEST,
     Channel.CHANNEL_TYPE.DUPLEX, Channel.CHANNEL_TYPE.ENDPOINT_REQUEST,
     Channel.CHANNEL_TYPE.ENDPOINT_REPLY
   ];
@@ -119,24 +119,14 @@ export abstract class Connector {
    */
   constructor(provided: Connector.Direction[],
     depended: Connector.Direction[]) {
-    if (!provided) {
-      throw new Error('Invalid value for provided in Connector');
+    if (provided) {
+      this.provided = provided;
     }
 
-    if (provided.length === 0) {
-      throw new Error('Number of channels must be > 0.');
+    if (depended) {
+      this.depended = depended;
     }
-
-    this.provided = provided;
-
-    if (!depended) {
-      throw new Error('Invalid value for depended in Connector');
-    }
-    if (depended.length === 0) {
-      throw new Error('Number of channels must be > 0.');
-    }
-
-    this.depended = depended;
+    
   };
 
 }

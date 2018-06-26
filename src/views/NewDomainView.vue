@@ -65,7 +65,7 @@ export default class AddDomainView extends Vue {
 
   checkURN(value: string) {
     return RegExp(
-      "^eslap://(\\w+)/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
+      "^eslap://\\w+(.\\w)*/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
     ).test(value);
   }
 
