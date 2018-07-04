@@ -149,10 +149,10 @@
             <v-spacer></v-spacer>
 
             <router-link
-              id="info_icon"
+              id="info_link"
               v-bind:to="deployment._path">
 
-              <v-icon id="info_link">info</v-icon>
+              <v-icon id="info_icon">info</v-icon>
 
             </router-link>
 
@@ -223,7 +223,7 @@ export default class Card extends Vue {
     let myDate = new Date(year, month, date, hours, minutes);
 
     return (
-      myDate.getUTCDay() +
+      myDate.getUTCDate() +
       "-" +
       myDate.getUTCMonth() +
       "-" +
@@ -484,16 +484,16 @@ $color_warning: #ffc107;
   color: $color_unkown;
 }
 
-#info_icon {
+#info_link {
   position: absolute;
   bottom: 10px;
   right: 10px;
   z-index: 1;
+  text-decoration: none;
 }
 
-#info_link {
+#info_icon { 
   @extend .info;
-  text-decoration: none;
 }
 
 #sanity_icon {
