@@ -303,7 +303,7 @@ export class ProxyConnection extends EventEmitter {
                         null, // parameters
                         null, // roles
                         null, // resourcesConfig
-                        null, // links
+                        null, // channels
                       ) // Deployment
                     );
                   }
@@ -362,7 +362,7 @@ export class ProxyConnection extends EventEmitter {
                         null, // parameters
                         roles, // roles
                         null, // resourcesConfig
-                        null, // links
+                        null, // channels
                       ) // Deployment
                     );
                   }
@@ -1628,7 +1628,7 @@ export class ProxyConnection extends EventEmitter {
           ecloudDeployment.urn, // urn
           parameters, // parameters: any
           roles, // roles: { [rolName: string]: DeploymentRol }
-          resources, // resources: { [resource: string]: Resource }
+          resources, // resourcesConfig
           channels // channels
         );
       } catch (error) {

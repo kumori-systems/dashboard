@@ -221,10 +221,10 @@ export default class NewHTTPEntrypointView extends Vue {
         "deploy",
         new HTTPEntryPoint(
           "slap://domain/deployments/date/this_will_be_overrited", // urn
-          config,
-          roles,
-          resourcesConfig,
-          {}
+          config, // parameters
+          roles, // roles
+          resourcesConfig, // resourcesConfig
+          {} // channels
         )
       );
 
