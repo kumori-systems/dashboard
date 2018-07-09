@@ -3,8 +3,8 @@ import Vuex from 'vuex';
 import State from './state';
 
 import {
-  Certificate, Component, Deployment, Domain, Manifest, PersistentVolume,
-  Runtime, Service, VolatileVolume
+  Certificate, Component, Deployment, Domain, HTTPEntryPoint, Manifest,
+  PersistentVolume, Runtime, Service, VolatileVolume
 } from './classes';
 
 /**
@@ -457,7 +457,38 @@ export default class Mutations implements Vuex.MutationTree<State> {
             && (elem.destinyDeploymentId === conn.destinyDeploymentId);
         })
         === -1) { // if connexion isn't already inserted
+
+        // This is a way to try to trigger a change. The class of the object
+        // mutated is lost, thus this seems the only way to make the change
         state.deployments[deploymentOne].channels[channelOne].push(conn);
+        let res: Deployment;
+        if (state.deployments[deploymentOne] instanceof HTTPEntryPoint) {
+          res = new HTTPEntryPoint(
+            deploymentOne,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).parameters,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).roles,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).resources,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).channels
+          );
+        }
+        else {
+          res = new Deployment(
+            deploymentOne,
+            (<Deployment>state.deployments[deploymentOne]).name,
+            (<Deployment>state.deployments[deploymentOne]).parameters,
+            (<Deployment>state.deployments[deploymentOne]).service,
+            (<Deployment>state.deployments[deploymentOne]).roles,
+            (<Deployment>state.deployments[deploymentOne]).resources,
+            (<Deployment>state.deployments[deploymentOne]).channels
+
+          );
+        }
+
+        state.deployments = {
+          ...state.deployments,
+          [deploymentOne]: res
+        };
+
       }
     }
 
@@ -476,7 +507,39 @@ export default class Mutations implements Vuex.MutationTree<State> {
             && (elem.destinyDeploymentId === conn.destinyDeploymentId);
         })
         === -1) { // if connexion isn't already inserted
-        state.deployments[deploymentTwo].channels[channelTwo].push(conn);
+
+        // This is a way to try to trigger a change. The class of the object
+        // mutated is lost, thus this seems the only way to make the change
+        let channels = state.deployments[deploymentTwo].channels[channelTwo];
+        channels.push(conn);
+
+        let res: Deployment;
+        if (state.deployments[deploymentTwo] instanceof HTTPEntryPoint) {
+          res = new HTTPEntryPoint(
+            deploymentTwo,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).parameters,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).roles,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).resources,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).channels
+          );
+        }
+        else {
+          res = new Deployment(
+            deploymentTwo,
+            (<Deployment>state.deployments[deploymentTwo]).name,
+            (<Deployment>state.deployments[deploymentTwo]).parameters,
+            (<Deployment>state.deployments[deploymentTwo]).service,
+            (<Deployment>state.deployments[deploymentTwo]).roles,
+            (<Deployment>state.deployments[deploymentTwo]).resources,
+            (<Deployment>state.deployments[deploymentTwo]).channels
+
+          );
+        }
+
+        state.deployments = {
+          ...state.deployments,
+          [deploymentTwo]: res
+        };
       }
     }
   }
@@ -496,7 +559,40 @@ export default class Mutations implements Vuex.MutationTree<State> {
         });
       // Remove connexion
       if (index >= 0) {
-        state.deployments[deploymentOne].channels[channelOne].splice(index, 1);
+
+        // This is a way to try to trigger a change. The class of the object
+        // mutated is lost, thus this seems the only way to make the change
+        let channels = state.deployments[deploymentOne].channels[channelOne];
+        channels.splice(index, 1);
+
+        let res: Deployment;
+        if (state.deployments[deploymentOne] instanceof HTTPEntryPoint) {
+          res = new HTTPEntryPoint(
+            deploymentOne,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).parameters,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).roles,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).resources,
+            (<HTTPEntryPoint>state.deployments[deploymentOne]).channels
+          );
+        }
+        else {
+          res = new Deployment(
+            deploymentOne,
+            (<Deployment>state.deployments[deploymentOne]).name,
+            (<Deployment>state.deployments[deploymentOne]).parameters,
+            (<Deployment>state.deployments[deploymentOne]).service,
+            (<Deployment>state.deployments[deploymentOne]).roles,
+            (<Deployment>state.deployments[deploymentOne]).resources,
+            (<Deployment>state.deployments[deploymentOne]).channels
+
+          );
+        }
+
+        state.deployments = {
+          ...state.deployments,
+          [deploymentOne]: res
+        };
+
       }
     }
 
@@ -510,7 +606,41 @@ export default class Mutations implements Vuex.MutationTree<State> {
         });
       // Remove connexion
       if (index >= 0) {
-        state.deployments[deploymentTwo].channels[channelTwo].splice(index, 1);
+
+        // This is a way to try to trigger a change. The class of the object
+        // mutated is lost, thus this seems the only way to make the change
+        let channels = state.deployments[deploymentTwo].channels[channelTwo];
+        channels.splice(index, 1);
+
+
+        let res: Deployment;
+        if (state.deployments[deploymentTwo] instanceof HTTPEntryPoint) {
+          res = new HTTPEntryPoint(
+            deploymentTwo,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).parameters,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).roles,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).resources,
+            (<HTTPEntryPoint>state.deployments[deploymentTwo]).channels
+          );
+        }
+        else {
+          res = new Deployment(
+            deploymentTwo,
+            (<Deployment>state.deployments[deploymentTwo]).name,
+            (<Deployment>state.deployments[deploymentTwo]).parameters,
+            (<Deployment>state.deployments[deploymentTwo]).service,
+            (<Deployment>state.deployments[deploymentTwo]).roles,
+            (<Deployment>state.deployments[deploymentTwo]).resources,
+            (<Deployment>state.deployments[deploymentTwo]).channels
+
+          );
+        }
+
+        state.deployments = {
+          ...state.deployments,
+          [deploymentTwo]: res
+        };
+
       }
     }
 
@@ -523,4 +653,5 @@ export default class Mutations implements Vuex.MutationTree<State> {
   selectedService = (state: State, serviceURN: string): void => {
     state.selectedService = serviceURN;
   }
+
 };

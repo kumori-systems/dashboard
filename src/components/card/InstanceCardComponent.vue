@@ -21,17 +21,35 @@
           <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
         </v-layout>
 
-        <v-layout>
-          <v-checkbox label="kill instance" v-model="killInstance" disabled></v-checkbox>
+        <v-layout wrap>
+          <v-tooltip bottom>
+            <v-checkbox slot="activator" v-model="killInstance" label="kill instance" disabled/>
+            <span>Actually unavailable</span>
+          </v-tooltip>
         </v-layout>
 
-        
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
               <!-- A persistent volume -->
               <v-list-tile-content v-if="isPersistentVolumeInstance(vol)" >
                 <v-list-tile-title>
-                  <v-icon class="indigo--text">storage</v-icon> {{ vol.id }}
+
+                  <v-badge
+                    overlap
+                    bottom
+                    color=null>
+
+                    <v-icon v-if="persistentVolumes[vol._urn].size >= 90" slot="badge" color="error">error</v-icon>
+                    <v-icon v-else-if="persistentVolumes[vol._urn].size >= 75" slot="badge" color="warning">warning</v-icon>
+
+                    <v-icon color="grey lighten-1">storage</v-icon>
+
+                  </v-badge>
+
+                  {{ vol.id }}
+
+                
+                   
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
@@ -50,6 +68,7 @@
                   </v-flex>
                   
                   </v-layout>
+
                   
                 </v-list-tile-sub-title>
               </v-list-tile-content>
@@ -58,7 +77,21 @@
               <v-list-tile-content v-else-if="isVolatileVolumeInstance(vol)">
 
                 <v-list-tile-title>
-                  <v-icon class="light-blue--text text--lighten-2">storage</v-icon> {{ vol.id }}
+                  
+                  <v-badge
+                    overlap
+                    bottom
+                    color=null>
+
+                    <v-icon v-if="volatileVolumes[vol._urn].size >= 90" slot="badge" color="error">error</v-icon>
+                    <v-icon v-else-if="volatileVolumes[vol._urn].size >= 75" slot="badge" color="warning">warning</v-icon>
+
+                    <v-icon color="grey lighten-1">sd_storage</v-icon>
+                  
+                  </v-badge>
+
+                {{ vol.id }}
+
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
@@ -87,7 +120,7 @@
 
       <!-- Instance chart data -->
       <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
-        <chart-component v-bind:chartData="instanceChartData.data" v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
+        <chart-component v-bind:chartData="instanceChartData.data" v-bind:options="ChartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
       </v-flex>
 
     </v-layout>
@@ -98,6 +131,7 @@ import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
 // Components
+import { utils } from "../../api";
 import { ChartComponentOptions, ChartComponentUtils } from "../index";
 import {
   Deployment,
@@ -105,17 +139,19 @@ import {
   Volume,
   VolatileVolume
 } from "../../store/stampstate/classes";
-
 import SSGetters from "../../store/stampstate/getters";
-
 import ChartComponent from "./../chart";
+
 
 @VueClassComponent({
   name: "instance-card-component",
   props: {
     instance: { required: true },
     clear: { required: true, type: Boolean }, // Used to clean 'kill instances' when changes are canceled
-    instanceMetrics: { required: true }
+    instanceMetrics: { required: true },
+    volumeMetrics: { required: true },
+    persistentVolumes: { required: true },
+    volatileVolumes: { required: true }
   },
   components: {
     "chart-component": ChartComponent
@@ -124,41 +160,32 @@ import ChartComponent from "./../chart";
 export default class InstanceCardComponent extends Vue {
   instance: Deployment.Role.Instance = this.instance;
   killInstance: boolean = false;
-  chartOptions = ChartComponentOptions;
   instanceMetrics = this.instanceMetrics;
-  VolatileVolume = VolatileVolume;
-  PersistentVolume = PersistentVolume;
+  persistentVolumes = this.persistentVolumes;
+  volatileVolumes = this.volatileVolumes;
+  volumeMetrics = this.volumeMetrics;
 
-  watcher;
+  /**
+   * Mantains all watchers
+   */
+  unwatch: Function[] = [];
 
   mounted() {
-    this.watcher = this.$watch("clear", function(value) {
-      if (value === true) {
-        this.killInstance = false;
-      }
-    });
+    this.unwatch.push(
+      // Watches for clear events
+      this.$watch("clear", value => {
+        if (value === true) {
+          this.clearHandler();
+        }
+      })
+    );
   }
+
   beforeDestroy() {
-    this.watcher();
-  }
-
-  isPersistentVolumeInstance(vol) {
-    return vol instanceof PersistentVolume.Instance;
-  }
-  isVolatileVolumeInstance(vol) {
-    return vol instanceof VolatileVolume.Instance;
-  }
-
-  get persistentVolumes(): { [volURN: string]: PersistentVolume } {
-    return ((<SSGetters>this.$store.getters).persistentVolumes as any) as {
-      [volURN: string]: PersistentVolume;
-    };
-  }
-
-  get volatileVolumes(): { [volURN: string]: VolatileVolume } {
-    return ((<SSGetters>this.$store.getters).volatileVolumes as any) as {
-      [volURN: string]: VolatileVolume;
-    };
+    // Removes all watchers
+    for (let i in this.unwatch) {
+      this.unwatch[i]();
+    }
   }
 
   get instanceVolumes(): any {
@@ -169,14 +196,6 @@ export default class InstanceCardComponent extends Vue {
       }
     }
     return res;
-  }
-
-  get volumeMetrics(): {
-    [volumeInstanceId: string]: {
-      [property: string]: number | string;
-    }[];
-  } {
-    return this.$store.getters.volumeMetrics;
   }
 
   get onInstanceMetricsUpdate() {
@@ -229,6 +248,10 @@ export default class InstanceCardComponent extends Vue {
     return res;
   }
 
+  get ChartOptions() {
+    return ChartComponentOptions;
+  }
+
   /**
    * Sends a notification to the superiour component to be aware of a change
    * in the value of kill instances
@@ -236,6 +259,22 @@ export default class InstanceCardComponent extends Vue {
   killInstanceChange() {
     this.$emit("killInstanceChange", [this.instance.cnid, this.killInstance]);
   }
+
+  /**
+   * Clears the temporal state
+   */
+  clearHandler() {
+    this.killInstance = false;
+  }
+
+  isPersistentVolumeInstance(vol:Volume.Instance){
+    return utils.isPersistentVolumeInstance(vol);
+  }
+
+  isVolatileVolumeInstance(vol: Volume.Instance){
+    return utils.isVolatileVolumeInstance(vol);
+  }
+
 }
 </script>
 <style lang="scss" scoped>

@@ -13,17 +13,21 @@
       <v-flex xs1></v-flex>
 
       <!-- Num instances selector -->
-      <span>Instances</span>
-      
-        <v-btn flat icon class="pa-0 ma-0 black--text" v-on:click="lessInstances"><v-icon >remove</v-icon></v-btn>
-      
-      {{ localNumInstances }}
-      <v-flex xs1>
-        <v-btn flat icon class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
+      <template>
+
+        <span>Instances&nbsp;</span>
+        
+        <v-btn v-if="editing" flat icon class="pa-0 ma-0 black--text" v-on:click="lessInstances">
+          <v-icon >remove</v-icon>
+        </v-btn>
+
+        {{ localNumInstances }}
+
+        <v-btn v-if="editing" flat icon class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
           <v-icon>add</v-icon>
         </v-btn>
-      </v-flex>
-      
+
+      </template>
 
     </v-card-title>
   
@@ -31,8 +35,9 @@
 
       <!-- Role info -->
       <v-layout wrap>
-       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
-          
+
+        <v-flex xs12 sm6 md5 lg5 xl3>
+
           <!-- Component urn -->
           <v-layout v-if="!component"><strong>Component:</strong>&nbsp;retrieving info..</v-layout>
           <v-layout v-else><strong>Component:</strong>&nbsp;{{ component._urn }}</v-layout>
@@ -66,7 +71,7 @@
 
           <!-- Role arrangement -->
           <v-layout>
-            <v-flex ma-1 xs12>
+            <v-flex xs12>
               <strong>MEM</strong> {{ role.memory }}
               <strong>CPU</strong> {{ role.cpu }}
               <strong>NET</strong> {{ role.bandwidth }}
@@ -79,7 +84,7 @@
         <v-spacer></v-spacer>
         
         <!-- Role chart -->
-        <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+        <v-flex xs12 sm6 md5 lg5 xl4>
           <role-chart-component class="role-chart" v-bind:chartData="roleChartData.data"
             v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
           </role-chart-component>
@@ -89,16 +94,22 @@
       
       <!-- Role instances -->
        <v-layout wrap v-if="service">
-        <v-flex ma-1 xs12 sm12 md12 lg12 xl12>
+        <v-flex xs12 sm12 md12 lg12 xl12>
           <v-expansion-panel expand>
             <v-expansion-panel-content>
               <div slot="header">Instances</div>
-                <instance-card-component v-for="(instanceContent, instanceId) in role.instances"
-                  v-bind:key="instanceId" v-bind:instance="instanceContent"
+
+                <instance-card-component
+                  v-for="(instanceContent, instanceId) in role.instances"
+                  v-bind:key="instanceId"
+                  v-bind:instance="instanceContent"
                   v-bind:instanceMetrics="roleChartData.instances"
-                  v-on:killInstanceChange="handleKillInstanceChange"
-                  v-bind:clear="onClearHandler">
-                </instance-card-component>
+                  v-bind:clear="onClearHandler"
+                  v-bind:volumeMetrics="volumeMetrics"
+                  v-bind:persistentVolumes="persistentVolumes"
+                  v-bind:volatileVolumes="volatileVolumes"
+                  v-on:killInstanceChange="handleKillInstanceChange"/>
+
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-flex>
@@ -136,15 +147,22 @@ import ChartComponent from "./../chart";
     /**  Clear changes when user cancels. */
     clear: { required: true, type: Boolean },
     /** Role and instance metrics. */
-    roleMetrics: { required: true }
+    roleMetrics: { required: true },
+    volumeMetrics: { required: true },
+    persistentVolumes: { required: true },
+    volatileVolumes: { required: true },
+    editing: { required: true }
   }
 })
 export default class RoleCardComponent extends Vue {
   role: Deployment.Role = this.role;
   localNumInstances: number = this.role.actualInstances;
-  roleMetrics = this.roleMetrics;
   service: Service = this.service;
-  chartOptions = ChartComponentOptions;
+  roleMetrics = this.roleMetrics;
+  volumeMetrics = this.volumeMetrics;
+  persistentVolumes = this.persistentVolumes;
+  volatileVolumes = this.volatileVolumes;
+  editing: boolean = this.editing;
 
   get onClearHandler() {
     if (this.$props.clear) {
@@ -211,6 +229,10 @@ export default class RoleCardComponent extends Vue {
     return res;
   }
 
+  get chartOptions() {
+    return ChartComponentOptions;
+  }
+
   get roleChannels() {
     return (service: Service, roleId: string) => {
       let res: Connector[] = [];
@@ -259,7 +281,7 @@ $color_error: #ff5252;
 $color_info: #2196f3;
 $color_success: #4caf50;
 $color_warning: #ffc107;
-$icon_size: 60px;
+$icon_size: 40px;
 
 #check_circle {
   color: $color_success;
@@ -280,7 +302,7 @@ $icon_size: 60px;
   font-size: $icon_size;
 }
 
-#btn__content::before{
+#btn__content::before {
   padding: 0px;
   margin: 0px;
 }

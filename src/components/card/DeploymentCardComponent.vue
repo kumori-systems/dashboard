@@ -19,7 +19,7 @@
           </div>
 
           <div class="black--text">
-            {{ deployment.service }}
+            {{ serviceShortName(deployment.service) }}
           </div>
             
 
@@ -131,7 +131,7 @@
               {{ domain.web }}
             </a>
             
-          </div>
+        </div>
 
           <!-- More info -->
           <v-layout>
@@ -398,6 +398,18 @@ export default class Card extends Vue {
 
       return res;
     };
+  }
+
+  serviceShortName(serviceName:string){
+    let res = serviceName;
+    let i = res.indexOf("services") + 9;
+    if(i === -1){
+      i = res.indexOf("service") + 8;
+    }
+    if(i>-1){
+      res = res.substring(i);
+    }
+    return res;
   }
 
   onResize() {
