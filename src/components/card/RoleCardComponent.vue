@@ -8,7 +8,7 @@
 
       <!-- Role name -->
       <span class="headline">Role: {{ role.name }}</span>
-      
+
       <!-- Gives space between elements -->
       <v-flex xs1></v-flex>
 
@@ -17,21 +17,39 @@
 
         <span>Instances&nbsp;</span>
         
-        <v-btn v-if="editing" flat icon class="pa-0 ma-0 black--text" v-on:click="lessInstances">
+        <v-btn
+          v-if="editing"
+          flat
+          icon
+          class="pa-0 ma-0 black--text"
+          v-on:click="lessInstances">
+
           <v-icon >remove</v-icon>
+
         </v-btn>
 
         {{ localNumInstances }}
 
-        <v-btn v-if="editing" flat icon class="pa-0 ma-0 blue--text text--lighten-1" v-on:click="moreInstances">
+        <v-btn
+          v-if="editing"
+          flat
+          icon
+          class="pa-0 ma-0 blue--text text--lighten-1"
+          v-on:click="moreInstances">
+
           <v-icon>add</v-icon>
+
         </v-btn>
+
+        of {{maxNumInstances}}
 
       </template>
 
     </v-card-title>
   
-    <v-container fluid class="grey lighten-3">
+    <v-container
+      fluid
+      class="grey lighten-3">
 
       <!-- Role info -->
       <v-layout wrap>
@@ -39,13 +57,21 @@
         <v-flex xs12 sm6 md5 lg5 xl3>
 
           <!-- Component urn -->
-          <v-layout v-if="!component"><strong>Component:</strong>&nbsp;retrieving info..</v-layout>
-          <v-layout v-else><strong>Component:</strong>&nbsp;{{ component._urn }}</v-layout>
+          <v-layout v-if="!component">
+            <strong>Component:</strong>&nbsp;retrieving info..
+          </v-layout>
+          <v-layout v-else>
+            <strong>Component:</strong>&nbsp;{{ component._urn }}
+          </v-layout>
 
           <!-- Component runtime -->
-          <v-layout v-if="!component"><strong>Runtime:</strong>&nbsp;retrieving info..</v-layout>
-          <v-layout v-else><strong>Runtime:</strong>&nbsp;{{ component.runtime }}</v-layout>
-        
+          <v-layout v-if="!component">
+            <strong>Runtime:</strong>&nbsp;retrieving info..
+          </v-layout>
+          <v-layout v-else>
+            <strong>Runtime:</strong>&nbsp;{{ component.runtime }}
+          </v-layout>
+
           <!-- Role channels -->
           <v-layout>
             <v-flex xs12>
@@ -71,50 +97,52 @@
 
           <!-- Role arrangement -->
           <v-layout>
-            <v-flex xs12>
-              <strong>MEM</strong> {{ role.memory }}
-              <strong>CPU</strong> {{ role.cpu }}
-              <strong>NET</strong> {{ role.bandwidth }}
-            </v-flex>
+            <span class="ma-1"><strong>MEM</strong> {{ role.memory }}</span>
+            <span class="ma-1"><strong>CPU</strong> {{ role.cpu }}</span>
+            <span class="ma-1"><strong>NET</strong> {{ role.bandwidth }}</span>
           </v-layout>
 
         </v-flex>
 
         <!-- Applies space between elements -->
         <v-spacer></v-spacer>
-        
+
         <!-- Role chart -->
         <v-flex xs12 sm6 md5 lg5 xl4>
-          <role-chart-component class="role-chart" v-bind:chartData="roleChartData.data"
-            v-bind:options="chartOptions" v-bind:width="800" v-bind:height="600">
+          <role-chart-component
+            class="role-chart"
+            v-bind:chartData="roleChartData.data"
+            v-bind:options="chartOptions"
+            v-bind:width="800"
+            v-bind:height="600">
           </role-chart-component>
         </v-flex>
 
       </v-layout>
-      
+
       <!-- Role instances -->
        <v-layout wrap v-if="service">
         <v-flex xs12 sm12 md12 lg12 xl12>
           <v-expansion-panel expand>
             <v-expansion-panel-content>
+
               <div slot="header">Instances</div>
 
-                <instance-card-component
-                  v-for="(instanceContent, instanceId) in role.instances"
-                  v-bind:key="instanceId"
-                  v-bind:instance="instanceContent"
-                  v-bind:instanceMetrics="roleChartData.instances"
-                  v-bind:clear="onClearHandler"
-                  v-bind:volumeMetrics="volumeMetrics"
-                  v-bind:persistentVolumes="persistentVolumes"
-                  v-bind:volatileVolumes="volatileVolumes"
-                  v-on:killInstanceChange="handleKillInstanceChange"/>
+              <instance-card-component
+                v-for="(instanceContent, instanceId) in role.instances"
+                v-bind:key="instanceId"
+                v-bind:instance="instanceContent"
+                v-bind:instanceMetrics="roleChartData.instances"
+                v-bind:clear="onClearHandler"
+                v-bind:volumeMetrics="volumeMetrics"
+                v-bind:persistentVolumes="persistentVolumes"
+                v-bind:volatileVolumes="volatileVolumes"
+                v-on:killInstanceChange="handleKillInstanceChange"/>
 
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-flex>
       </v-layout>
-
 
     </v-container>
   </v-card>
@@ -156,7 +184,6 @@ import ChartComponent from "./../chart";
 })
 export default class RoleCardComponent extends Vue {
   role: Deployment.Role = this.role;
-  localNumInstances: number = this.role.actualInstances;
   service: Service = this.service;
   roleMetrics = this.roleMetrics;
   volumeMetrics = this.volumeMetrics;
@@ -164,9 +191,17 @@ export default class RoleCardComponent extends Vue {
   volatileVolumes = this.volatileVolumes;
   editing: boolean = this.editing;
 
+  get localNumInstances(): number {
+    return this.role.actualInstances;
+  }
+  
+  get maxNumInstances(): number {
+    return this.role.maxInstances;
+  }
+
   get onClearHandler() {
     if (this.$props.clear) {
-      this.localNumInstances = this.role.actualInstances;
+      // this.localNumInstances = this.role.actualInstances;
       this.$emit("clearedRol");
     }
     return this.$props.clear;
@@ -261,7 +296,7 @@ export default class RoleCardComponent extends Vue {
 
   lessInstances() {
     if (this.localNumInstances > 0) {
-      this.localNumInstances--;
+      // this.localNumInstances--;
       this.$emit("numInstancesChange", [
         this.role.name,
         this.localNumInstances
@@ -270,7 +305,7 @@ export default class RoleCardComponent extends Vue {
   }
 
   moreInstances() {
-    this.localNumInstances++;
+    // this.localNumInstances++;
     this.$emit("numInstancesChange", [this.role.name, this.localNumInstances]);
   }
 }

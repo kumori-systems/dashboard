@@ -24,18 +24,18 @@
             
 
           <!-- Deployment sanity -->
-            <v-icon
-              v-if="state!=='unknown'"
-              id="sanity_icon"
-              v-bind:class="stateColor">
-              {{ state }}
-            </v-icon>
+          <v-icon
+            v-if="state!=='unknown'"
+            id="sanity_icon"
+            v-bind:class="stateColor">
+            {{ state }}
+          </v-icon>
 
-            <v-progress-circular
-              v-else
-              indeterminate
-              id="sanity_icon"
-              v-bind:class="state"/>
+          <v-progress-circular
+            v-else
+            indeterminate
+            id="sanity_icon"
+            v-bind:class="state"/>
 
           <!-- Roles -->
           <div

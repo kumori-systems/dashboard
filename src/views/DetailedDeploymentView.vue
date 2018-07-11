@@ -206,13 +206,12 @@
                       <th>
                         <v-select
                           v-bind:disabled="!editing"
-                          v-model="serviceNewProvidedConnections[name]"
+                          v-model="deploymentProvidedConnections[name]"
                           v-bind:items="totalDependedDeploymentChannels(name)"
-                          multiple
-                          chips
                           v-on:input="handleInput"
                           autocomplete
-                          return-object>
+                          multiple
+                          chips>
 
                           <!-- Chips config-->
                           <template
@@ -235,13 +234,13 @@
                       <th>
                         <v-select
                           v-bind:disabled="!editing"
-                          v-model="serviceNewDependedConnections[name]"
+                          v-model="deploymentDependedConnections[name]"
                           v-bind:items="totalProvidedDeploymentChannels(name)"
-                          multiple
-                          chips
                           v-on:input="handleInput"
+                          return-object
                           autocomplete
-                          return-object>
+                          multiple
+                          chips>
 
                           <!-- Chips config-->
                           <template slot="selection" scope="items">
@@ -438,16 +437,6 @@ export default class DetailedDeploymentView extends Vue {
   /** Vue wrapper for the Chart options. */
   chartOptions = ChartComponentOptions;
 
-  /** Temporary depended connections. */
-  serviceNewDependedConnections: {
-    [channel: string]: { text: string; value: string }[];
-  } = {};
-
-  /** Temporary provided connections. */
-  serviceNewProvidedConnections: {
-    [channel: string]: { text: string; value: string }[];
-  } = {};
-
   unwatch: Function[] = [];
 
   mounted() {
@@ -471,161 +460,6 @@ export default class DetailedDeploymentView extends Vue {
       })      
     );
 
-    this.unwatch.push(
-      // Watches for deployment changes
-      this.$watch("deployment", val => {
-
-        /*
-        // Remove links
-        for (let chann in this.deployment.channels) {
-          for (let realConn in this.deployment.channels[chann]) {
-            let found = false; // Marks if the connection has been found
-
-            // Search in provided links
-            for (let tempConn in this.serviceNewProvidedConnections[chann]) {
-              if (
-                this.serviceNewProvidedConnections[chann][tempConn].value ===
-                JSON.stringify({
-                  deployment: this.deployment.channels[chann][realConn]
-                    .destinyDeploymentId,
-                  channel: this.deployment.channels[chann][realConn]
-                    .destinyChannelId
-                })
-              ) {
-                found = true;
-              }
-            }
-
-            // Search in depended links
-            for (let tempConn in this.serviceNewDependedConnections[chann]) {
-              if (
-                this.serviceNewDependedConnections[chann][tempConn].value ===
-                JSON.stringify({
-                  deployment: this.deployment.channels[chann][realConn]
-                    .destinyDeploymentId,
-                  channel: this.deployment.channels[chann][realConn]
-                    .destinyChannelId
-                })
-              ) {
-                found = true;
-              }
-            }
-
-            // If the link haven't been found, the link is erased
-            if (!found) {
-              this.$store.dispatch("unlink", {
-                deploymentOne: this.deployment._urn,
-                channelOne: chann,
-                deploymentTwo: this.deployment.channels[chann][realConn]
-                  .destinyDeploymentId,
-                channelTwo: this.deployment.channels[chann][realConn]
-                  .destinyChannelId
-              });
-            }
-          }
-        }
-        */
-        
-        // Add new provided links
-        for (let chann in this.serviceNewProvidedConnections) {
-          for (let tempConn in this.serviceNewProvidedConnections[chann]) {
-            let found = false; // Checks if the connection has been found
-
-            // Search in deployment channels
-            for (let realConn in this.deployment.channels[chann]) {
-              if (
-                this.serviceNewProvidedConnections[chann][tempConn].value ===
-                JSON.stringify({
-                  deployment: this.deployment.channels[chann][realConn]
-                    .destinyDeploymentId,
-                  channel: this.deployment.channels[chann][realConn]
-                    .destinyChannelId
-                })
-              ) {
-                found = true;
-              }
-            }
-
-            // If the connection haven't been found, a new one is created
-            if (!found) {
-              let newConnexion: {
-                deployment: string;
-                channel: string;
-              } = JSON.parse(
-                this.serviceNewProvidedConnections[chann][tempConn].value
-              );
-
-              this.$store.dispatch("link", {
-                deploymentOne: this.deployment._urn,
-                channelOne: chann,
-                deploymentTwo: newConnexion.deployment,
-                channelTwo: newConnexion.channel
-              });
-            }
-          }
-        }
-
-        // Add new depended links
-        for (let chann in this.serviceNewDependedConnections) {
-          for (let tempConn in this.serviceNewDependedConnections[chann]) {
-            let found = false; // Checks if the connection has been found
-
-            // Search in deployment channels
-            for (let realConn in this.deployment.channels[chann]) {
-              if (
-                this.serviceNewDependedConnections[chann][tempConn].value ===
-                JSON.stringify({
-                  deployment: this.deployment.channels[chann][realConn]
-                    .destinyDeploymentId,
-                  channel: this.deployment.channels[chann][realConn]
-                    .destinyChannelId
-                })
-              ) {
-                found = true;
-              }
-            }
-
-            // If the connection haven't been found, a new one is created
-            if (!found) {
-              let newConnexion: {
-                deployment: string;
-                channel: string;
-              } = JSON.parse(
-                this.serviceNewDependedConnections[chann][tempConn].value
-              );
-
-              this.$store.dispatch("link", {
-                deploymentOne: this.deployment._urn,
-                channelOne: chann,
-                deploymentTwo: newConnexion.deployment,
-                channelTwo: newConnexion.channel
-              });
-            }
-          }
-        }
-
-        // If the number of instances has changed, a petition is sent
-        let changedNumInstances = false;
-        for (let role in this.deployment.roles) {
-          if (
-            this.roleNumInstances[role] &&
-            this.deployment.roles[role].actualInstances !==
-              this.roleNumInstances[role]
-          ) {
-            changedNumInstances = true;
-          }
-        }
-
-        if (changedNumInstances) {
-          // Send changes to the stamp
-          this.$store.dispatch("aplyingChangesToDeployment", {
-            deploymentURN: this.deployment._urn,
-            roleNumInstances: this.roleNumInstances,
-            killInstances: this.instanceKill
-          });
-        }
-      })
-    );
   }
 
   beforeDestroy() {
@@ -633,6 +467,72 @@ export default class DetailedDeploymentView extends Vue {
     for (let i in this.unwatch) {
       this.unwatch[i]();
     }
+  }
+
+  /** Temporary provided connections. */
+  get deploymentProvidedConnections() {
+    let res:{[channel:string]:{ text:string, value:string }[]} = {};
+
+    // Obtain provided connections from the service
+    for(let chann in this.service.providedChannels) {
+      if(!res[chann]) res[chann]=[];
+      if(this.deployment.channels[chann]){
+        for(let conn in this.deployment.channels[chann]){
+
+          console.debug('This connection contains: '+JSON.stringify(conn));
+
+          res[chann].push({
+            text:
+            this.deployments[this.deployment.channels[chann][conn].destinyDeploymentId].name
+            + ' ~ '
+            + this.deployment.channels[chann][conn].destinyChannelId,
+            value:JSON.stringify({
+              deployment: this.deployment.channels[chann][conn].destinyDeploymentId,
+              channel: this.deployment.channels[chann][conn].destinyChannelId
+            })
+          });
+        }
+      }
+    };
+
+    return res;
+  }
+
+  set deploymentProvidedConnections(val) {
+    console.debug(
+      "Trying to set a deploymentProvidedConnection with value: "
+      +
+      JSON.stringify(val)
+      );
+  }
+
+  get deploymentDependedConnections() {
+    let res:{[channel:string]:{ text:string, value:string }[]} = {};
+
+    // Obtain provided connections from the service
+    for(let chann in this.service.dependedChannels) {
+      if(!res[chann]) res[chann]=[];
+      if(this.deployment.channels[chann]){
+        for(let conn in this.deployment.channels[chann]){
+          res[chann].push({
+            text:
+            this.deployments[this.deployment.channels[chann][conn].destinyDeploymentId].name + ' a~ ' +
+            
+            this.deployment.channels[chann][conn].destinyChannelId,
+            value:JSON.stringify({
+              deployment: this.deployment.channels[chann][conn].destinyDeploymentId,
+              channel: this.deployment.channels[chann][conn].destinyChannelId
+            })
+          });
+        }
+      }
+    };
+
+    return res;
+    
+  }
+  set deploymentDependedConnections(val) {
+    console.debug("Trying to set a deploymentDependedConnection with value: "+JSON.stringify(val));
   }
 
   get deployments() {
@@ -1072,15 +972,16 @@ export default class DetailedDeploymentView extends Vue {
     //  YES => Send changes
     //  NO => Message to the user and cancel changes.
 
+
     // Remove links
     for (let chann in this.deployment.channels) {
       for (let realConn in this.deployment.channels[chann]) {
         let found = false; // Marks if the connection has been found
 
         // Search in provided links
-        for (let tempConn in this.serviceNewProvidedConnections[chann]) {
+        for (let tempConn in this.deploymentProvidedConnections[chann]) {
           if (
-            this.serviceNewProvidedConnections[chann][tempConn].value ===
+            this.deploymentProvidedConnections[chann][tempConn].value ===
             JSON.stringify({
               deployment: this.deployment.channels[chann][realConn]
                 .destinyDeploymentId,
@@ -1093,9 +994,9 @@ export default class DetailedDeploymentView extends Vue {
         }
 
         // Search in depended links
-        for (let tempConn in this.serviceNewDependedConnections[chann]) {
+        for (let tempConn in this.deploymentDependedConnections[chann]) {
           if (
-            this.serviceNewDependedConnections[chann][tempConn].value ===
+            this.deploymentDependedConnections[chann][tempConn].value ===
             JSON.stringify({
               deployment: this.deployment.channels[chann][realConn]
                 .destinyDeploymentId,
@@ -1122,14 +1023,14 @@ export default class DetailedDeploymentView extends Vue {
     }
 
     // Add new provided links
-    for (let chann in this.serviceNewProvidedConnections) {
-      for (let tempConn in this.serviceNewProvidedConnections[chann]) {
+    for (let chann in this.deploymentProvidedConnections) {
+      for (let tempConn in this.deploymentProvidedConnections[chann]) {
         let found = false; // Checks if the connection has been found
 
         // Search in deployment channels
         for (let realConn in this.deployment.channels[chann]) {
           if (
-            this.serviceNewProvidedConnections[chann][tempConn].value ===
+            this.deploymentProvidedConnections[chann][tempConn].value ===
             JSON.stringify({
               deployment: this.deployment.channels[chann][realConn]
                 .destinyDeploymentId,
@@ -1147,7 +1048,7 @@ export default class DetailedDeploymentView extends Vue {
             deployment: string;
             channel: string;
           } = JSON.parse(
-            this.serviceNewProvidedConnections[chann][tempConn].value
+            this.deploymentProvidedConnections[chann][tempConn].value
           );
 
           this.$store.dispatch("link", {
@@ -1161,14 +1062,14 @@ export default class DetailedDeploymentView extends Vue {
     }
 
     // Add new depended links
-    for (let chann in this.serviceNewDependedConnections) {
-      for (let tempConn in this.serviceNewDependedConnections[chann]) {
+    for (let chann in this.deploymentDependedConnections) {
+      for (let tempConn in this.deploymentDependedConnections[chann]) {
         let found = false; // Checks if the connection has been found
 
         // Search in deployment channels
         for (let realConn in this.deployment.channels[chann]) {
           if (
-            this.serviceNewDependedConnections[chann][tempConn].value ===
+            this.deploymentDependedConnections[chann][tempConn].value ===
             JSON.stringify({
               deployment: this.deployment.channels[chann][realConn]
                 .destinyDeploymentId,
@@ -1186,7 +1087,7 @@ export default class DetailedDeploymentView extends Vue {
             deployment: string;
             channel: string;
           } = JSON.parse(
-            this.serviceNewDependedConnections[chann][tempConn].value
+            this.deploymentDependedConnections[chann][tempConn].value
           );
 
           this.$store.dispatch("link", {
@@ -1198,6 +1099,7 @@ export default class DetailedDeploymentView extends Vue {
         }
       }
     }
+    
 
     // If the number of instances has changed, a petition is sent
     let changedNumInstances = false;
@@ -1222,6 +1124,7 @@ export default class DetailedDeploymentView extends Vue {
 
     // Marc as there are no changes
     this.haveChanges = false;
+    this.editing = false;
   }
 
   redirectToOverview() {
@@ -1256,25 +1159,25 @@ export default class DetailedDeploymentView extends Vue {
 
           // Is a depended or provided channel?
           if (ser.dependedChannels[chann]) {
-            if (!this.serviceNewDependedConnections[chann]) {
-              this.serviceNewDependedConnections[chann] = [];
+            if (!this.deploymentDependedConnections[chann]) {
+              this.deploymentDependedConnections[chann] = [];
             }
             if (
-              this.serviceNewDependedConnections[chann].indexOf(element) === -1
+              this.deploymentDependedConnections[chann].indexOf(element) === -1
             ) {
-              this.serviceNewDependedConnections[chann].push(element);
+              this.deploymentDependedConnections[chann].push(element);
             }
           }
 
           if (ser.providedChannels[chann]) {
-            if (!this.serviceNewProvidedConnections[chann]) {
-              this.serviceNewProvidedConnections[chann] = [];
+            if (!this.deploymentProvidedConnections[chann]) {
+              this.deploymentProvidedConnections[chann] = [];
             }
 
             if (
-              this.serviceNewProvidedConnections[chann].indexOf(element) === -1
+              this.deploymentProvidedConnections[chann].indexOf(element) === -1
             )
-              this.serviceNewProvidedConnections[chann].push(element);
+              this.deploymentProvidedConnections[chann].push(element);
           }
         }
       }
@@ -1307,8 +1210,9 @@ export default class DetailedDeploymentView extends Vue {
     this.haveChanges = true;
   }
 
-  /** Handles changes in the input event of children components. */
+  /** Handles changes in the input event of link input elements. */
   handleInput(value): void {
+    this.deploymentProvidedConnections = value;
     if (!this.clear) this.haveChanges = true;
   }
 

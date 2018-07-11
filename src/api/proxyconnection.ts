@@ -47,6 +47,9 @@ export class ProxyConnection extends EventEmitter {
   /** The user tries to refresh the already taken token. */
   public onRefreshToken: Function;
 
+  /** Event to update the state of an instance. */
+  public onUpdateState: Function;
+
   /** Notification to add a manifest. */
   public onAddManifest: Function;
 
@@ -161,6 +164,14 @@ export class ProxyConnection extends EventEmitter {
       notification: Notification
     ) => void>();
     this.onRefreshToken = this.registerEvent<(token) => void>();
+    this.onUpdateState = this.registerEvent<(
+      payload: {
+        deployment: string,
+        role: string,
+        instance: string,
+        state: Deployment.Role.Instance.STATE
+      }
+    ) => void>();
     this.requestedElements = [];
 
   }
@@ -458,7 +469,36 @@ export class ProxyConnection extends EventEmitter {
                   );
                   break;
 
-                case EcloudEventName.scale:
+                case EcloudEventName.scaling:
+
+                  console.debug(
+                    'Received event scaling: ' +
+                    event.strType +
+                    '/' +
+                    event.strName +
+                    '\n' +
+                    JSON.stringify(event, null, 2)
+                  );
+
+                  break;
+
+                case EcloudEventName.scaled:
+                  console.debug(
+                    'Received event scaled: ' +
+                    event.strType +
+                    '/' +
+                    event.strName +
+                    '\n' +
+                    JSON.stringify(event, null, 2)
+                  );
+
+                  this.emit(
+                    this.onAddInstance, // Method
+                    event.entity['service'], // DeploymentURN
+                    event.data.instances.add, // Added instances
+                    event.data.instances.remove // Removed instances
+                  );
+
                   this.emit(
                     this.onAddNotification,
                     new Notification(Notification.LEVEL.INFO,
@@ -472,57 +512,42 @@ export class ProxyConnection extends EventEmitter {
 
                 default:
 
-                  this.emit(this.onAddNotification, new Notification(
-                    Notification.LEVEL.WARNING,
-                    'Not expected ecloud event name',
-                    'Not expected ecloud event name ' + event.strType + '/'
-                    + event.strName,
+                  console.debug(
+                    'Not expected ecloud event name ' +
+                    event.strType +
+                    '/' +
+                    event.strName +
+                    '\n' +
                     JSON.stringify(event, null, 2)
-                  ));
+                  );
+
+                /* // Silenced warnings
+                this.emit(this.onAddNotification, new Notification(
+                  Notification.LEVEL.WARNING,
+                  'Not expected ecloud event name',
+                  'Not expected ecloud event name ' + event.strType + '/'
+                  + event.strName,
+                  JSON.stringify(event, null, 2)
+                ));
+                */
               }
               break;
 
             case EcloudEventType.node:
-              this.emit(this.onAddNotification, new Notification(
-                Notification.LEVEL.WARNING,
-                'Not expected ecloud event type',
-                'Not expected ecloud event type ' + event.strType,
-                JSON.stringify(event, null, 2)
-              ));
               break;
 
             case EcloudEventType.instance:
               switch (event.name) {
                 case EcloudEventName.status:
-                  let inst = new Deployment.Role.Instance(
-                    event.entity['instance'], // cnid
-                    event.data.status === 'connected' ?
-                      Deployment.Role.Instance.STATE.CONNECTED :
-                      Deployment.Role.Instance.STATE.DISCONNECTED, // state
-                    null, // cpu
-                    null, // memory
-                    null, // bandwidth
-                    null, // resources
-                    null // ports
-                  ); // Instance
-                  this.emit(
-                    this.onAddInstance, // Method
-                    event.entity['service'], // DeploymentURN
-                    event.entity['role'], // roleId
-                    event.entity['instance'], // instanceId
-                    inst
-                  );
 
                   this.emit(
-                    this.onAddNotification,
-                    new Notification(Notification.LEVEL.INFO,
-                      'Added instance',
-                      'Added instance'
-                      + 'Instance ' + event.entity['instance']
-                      + ' from Role ' + event.entity['role']
-                      + ' from Service' + event.entity['service'],
-                      JSON.stringify(event, null, 4)
-                    )
+                    this.onUpdateState,
+                    {
+                      deployment: event.entity['service'],
+                      role: event.entity['role'],
+                      instance: event.entity['instance'],
+                      state: event.data.status
+                    }
                   );
 
                   break;
@@ -571,6 +596,17 @@ export class ProxyConnection extends EventEmitter {
                   break;
 
                 default:
+
+                  console.debug(
+                    'Not expected ecloud event name ' +
+                    event.strType +
+                    '/' +
+                    event.strName +
+                    '\n' +
+                    JSON.stringify(event, null, 2)
+                  );
+
+                /* // Silenced warnings
                   this.emit(this.onAddNotification, new Notification(
                     Notification.LEVEL.WARNING,
                     'Not expected ecloud event name',
@@ -578,6 +614,7 @@ export class ProxyConnection extends EventEmitter {
                     + event.strName,
                     JSON.stringify(event, null, 2)
                   ));
+                */
               }
               break;
 
@@ -600,24 +637,46 @@ export class ProxyConnection extends EventEmitter {
                   break;
                 default:
 
-                  this.emit(this.onAddNotification, new Notification(
-                    Notification.LEVEL.WARNING,
-                    'Not expected ecloud event name',
-                    'Not expected ecloud event name ' + event.strType + '/'
-                    + event.strName,
+                  console.debug(
+                    'Not expected ecloud event name ' +
+                    event.strType +
+                    '/' +
+                    event.strName +
+                    '\n' +
                     JSON.stringify(event, null, 2)
-                  ));
+                  );
+
+                /* // Silenced warnings
+                this.emit(this.onAddNotification, new Notification(
+                  Notification.LEVEL.WARNING,
+                  'Not expected ecloud event name',
+                  'Not expected ecloud event name ' + event.strType + '/'
+                  + event.strName,
+                  JSON.stringify(event, null, 2)
+                ));
+                */
 
               }
               break;
 
+            case EcloudEventType.admission:
+              break;
+
             default:
-              this.emit(this.onAddNotification, new Notification(
-                Notification.LEVEL.WARNING,
-                'Not expected ecloud event type',
-                'Not expected ecloud event type ' + event.strType,
+              console.debug(
+                'Not expected ecloud event type ' +
+                event.strType +
+                '\n' +
                 JSON.stringify(event, null, 2)
-              ));
+              );
+            /* // Silenced warnings
+            this.emit(this.onAddNotification, new Notification(
+              Notification.LEVEL.WARNING,
+              'Not expected ecloud event type',
+              'Not expected ecloud event type ' + event.strType,
+              JSON.stringify(event, null, 2)
+            ));
+            */
           }
 
         });

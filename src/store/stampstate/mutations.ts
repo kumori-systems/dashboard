@@ -153,16 +153,69 @@ export default class Mutations implements Vuex.MutationTree<State> {
   addInstance = (state: State,
     payload: {
       'deploymentId': string,
-      'roleId': string,
-      'instanceId': string,
-      'instance': Deployment.Role.Instance
+      'addedInstances': { [role: string]: string[] },
+      'removedInstances': { [role: string]: string[] }
     }
   ): void => {
 
-    (<Deployment>state.deployments[payload.deploymentId])
-      .roles[payload.roleId].instances[payload.instanceId].state =
-      payload.instance.state;
+    console.debug('Adding/removing an instance: ' + JSON.stringify(payload));
 
+    for (let roleId in payload.addedInstances) {
+      for (let instanceCounter in payload.addedInstances[roleId]) {
+
+        let instanceId = payload.addedInstances[roleId][instanceCounter];
+
+        Vue.set(
+          (<Deployment>state.deployments[payload.deploymentId]).roles[roleId]
+            .instances,
+          instanceId,
+          new Deployment.Role.Instance(
+            instanceId,
+            Deployment.Role.Instance.STATE.UNKOWN,
+            (<Deployment>state.deployments[payload.deploymentId]).roles[roleId]
+              .cpu,
+            (<Deployment>state.deployments[payload.deploymentId]).roles[roleId]
+              .memory,
+            (<Deployment>state.deployments[payload.deploymentId]).roles[roleId]
+              .bandwidth,
+            null, // Resources??
+            null // Ports??
+          )
+        );
+
+      }
+    }
+
+    for (let roleId in payload.removedInstances) {
+      for (let instanceId in payload.removedInstances[roleId]) {
+
+        Vue.delete(
+          (<Deployment>state.deployments[payload.deploymentId])
+            .roles[roleId].instances,
+          payload.removedInstances[roleId][instanceId]
+        );
+
+      }
+    }
+
+  }
+
+  /** Updates an instance state. */
+  updateState = (
+    state: State,
+    payload: {
+      deployment: string,
+      role: string,
+      instance: string,
+      state: Deployment.Role.Instance.STATE
+    }): void => {
+
+    Vue.set(
+      (<Deployment>state.deployments[payload.deployment])
+        .roles[payload.role].instances[payload.instance],
+      'state',
+      payload.state
+    );
 
   }
 

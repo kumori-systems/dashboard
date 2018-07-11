@@ -16,17 +16,16 @@
       <v-flex ma-1 xs12 sm6 md5 lg5 xl3>
 
         <v-layout>
-          <v-flex ma-1 xs2>{{ instance.memory }} MEM</v-flex>
-          <v-flex ma-1 xs2>{{ instance.cpu }} CPU</v-flex>
-          <v-flex ma-1 xs2>{{ instance.bandwidth }} NET</v-flex>
+          <span class="ma-1">MEM {{ instance.memory }}</span>
+          <span class="ma-1">CPU {{ instance.cpu }}</span>
+          <span class="ma-1">NET {{ instance.bandwidth }}</span>
         </v-layout>
 
-        <v-layout wrap>
-          <v-tooltip bottom>
-            <v-checkbox slot="activator" v-model="killInstance" label="kill instance" disabled/>
-            <span>Actually unavailable</span>
-          </v-tooltip>
+        <!--
+        <v-layout>
+          <v-checkbox v-model="killInstance" label="kill instance" disabled/>
         </v-layout>
+        -->
 
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
