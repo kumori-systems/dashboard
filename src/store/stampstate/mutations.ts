@@ -158,8 +158,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
     }
   ): void => {
 
-    console.debug('Adding/removing an instance: ' + JSON.stringify(payload));
-
     for (let roleId in payload.addedInstances) {
       for (let instanceCounter in payload.addedInstances[roleId]) {
 
@@ -328,9 +326,6 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   /** Removes one runtime from the state */
   removeRuntime = (state: State, runtimeURN: string): void => {
-    //  All components which are using this runtime must be removed before this
-    //  runtime can be removed
-
     // Remove runtime from the state
     Vue.delete(state.runtimes, runtimeURN);
   }
@@ -445,6 +440,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
       }
 
       // Optimized way of adding metrics to the storage
+      
       state.volumeMetrics = {
         ...state.volumeMetrics,
         [volumeInstanceId]: metrics
@@ -452,6 +448,8 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
       // volatile volumes
       if (state.volatileVolumes[metricBundle.resource]) {
+
+        
         state.volatileVolumes = {
           ...state.volatileVolumes,
           [metricBundle.resource]: {
@@ -460,16 +458,18 @@ export default class Mutations implements Vuex.MutationTree<State> {
               ...state.volatileVolumes[metricBundle.resource].items,
               [volumeInstanceId]: {
                 ...state.volatileVolumes[metricBundle.resource]
-                  .items[volumeInstanceId],
+                .items[volumeInstanceId],
                 'usage': metricBundle.metrics[volumeInstanceId].usage
               }
             }
           }
         };
+        
       }
 
       // persistent volumes
       if (state.persistentVolumes[metricBundle.resource]) {
+        
         state.persistentVolumes = {
           ...state.persistentVolumes,
           [metricBundle.resource]: {
@@ -484,6 +484,7 @@ export default class Mutations implements Vuex.MutationTree<State> {
             }
           }
         };
+
       }
 
     }

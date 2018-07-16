@@ -470,27 +470,9 @@ export class ProxyConnection extends EventEmitter {
                   break;
 
                 case EcloudEventName.scaling:
-
-                  console.debug(
-                    'Received event scaling: ' +
-                    event.strType +
-                    '/' +
-                    event.strName +
-                    '\n' +
-                    JSON.stringify(event, null, 2)
-                  );
-
                   break;
 
                 case EcloudEventName.scaled:
-                  console.debug(
-                    'Received event scaled: ' +
-                    event.strType +
-                    '/' +
-                    event.strName +
-                    '\n' +
-                    JSON.stringify(event, null, 2)
-                  );
 
                   this.emit(
                     this.onAddInstance, // Method
@@ -511,15 +493,6 @@ export class ProxyConnection extends EventEmitter {
                   break;
 
                 default:
-
-                  console.debug(
-                    'Not expected ecloud event name ' +
-                    event.strType +
-                    '/' +
-                    event.strName +
-                    '\n' +
-                    JSON.stringify(event, null, 2)
-                  );
 
                 /* // Silenced warnings
                 this.emit(this.onAddNotification, new Notification(
@@ -597,15 +570,6 @@ export class ProxyConnection extends EventEmitter {
 
                 default:
 
-                  console.debug(
-                    'Not expected ecloud event name ' +
-                    event.strType +
-                    '/' +
-                    event.strName +
-                    '\n' +
-                    JSON.stringify(event, null, 2)
-                  );
-
                 /* // Silenced warnings
                   this.emit(this.onAddNotification, new Notification(
                     Notification.LEVEL.WARNING,
@@ -637,15 +601,6 @@ export class ProxyConnection extends EventEmitter {
                   break;
                 default:
 
-                  console.debug(
-                    'Not expected ecloud event name ' +
-                    event.strType +
-                    '/' +
-                    event.strName +
-                    '\n' +
-                    JSON.stringify(event, null, 2)
-                  );
-
                 /* // Silenced warnings
                 this.emit(this.onAddNotification, new Notification(
                   Notification.LEVEL.WARNING,
@@ -663,12 +618,7 @@ export class ProxyConnection extends EventEmitter {
               break;
 
             default:
-              console.debug(
-                'Not expected ecloud event type ' +
-                event.strType +
-                '\n' +
-                JSON.stringify(event, null, 2)
-              );
+            
             /* // Silenced warnings
             this.emit(this.onAddNotification, new Notification(
               Notification.LEVEL.WARNING,

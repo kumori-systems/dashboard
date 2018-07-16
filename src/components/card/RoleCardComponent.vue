@@ -133,7 +133,6 @@
                 v-bind:key="instanceId"
                 v-bind:instance="instanceContent"
                 v-bind:instanceMetrics="roleChartData.instances"
-                v-bind:clear="onClearHandler"
                 v-bind:volumeMetrics="volumeMetrics"
                 v-bind:persistentVolumes="persistentVolumes"
                 v-bind:volatileVolumes="volatileVolumes"
@@ -162,6 +161,7 @@ import {
 /* Theese components are loaded separatedly to avoid recursivity problems. */
 import InstanceCardComponent from "./InstanceCardComponent.vue";
 import ChartComponent from "./../chart";
+import { isNumber } from "util";
 
 @VueClassComponent({
   name: "role-card-component",
@@ -172,8 +172,6 @@ import ChartComponent from "./../chart";
   props: {
     role: { required: true },
     service: { required: true },
-    /**  Clear changes when user cancels. */
-    clear: { required: true, type: Boolean },
     /** Role and instance metrics. */
     roleMetrics: { required: true },
     volumeMetrics: { required: true },
@@ -190,21 +188,42 @@ export default class RoleCardComponent extends Vue {
   persistentVolumes = this.persistentVolumes;
   volatileVolumes = this.volatileVolumes;
   editing: boolean = this.editing;
+  _localNumInstances: number = 1;
+
+  unwatch: Function[] = [];
+
+  mounted() {
+    this.unwatch.push(
+      // Watches for editing changes
+      this.$watch("editing", val => {
+        if (val) {
+          this.localNumInstances = this.role.actualInstances;
+        }
+      })
+    );
+  }
+
+  beforeDestroy() {
+    // Removes all watchers
+    for (let i in this.unwatch) {
+      this.unwatch[i]();
+    }
+  }
 
   get localNumInstances(): number {
-    return this.role.actualInstances;
-  }
-  
-  get maxNumInstances(): number {
-    return this.role.maxInstances;
+    let res: number = this.role.actualInstances;
+    if (this.editing) {
+      res = (<any>this.$data)._localNumInstances;
+    }
+    return res;
   }
 
-  get onClearHandler() {
-    if (this.$props.clear) {
-      // this.localNumInstances = this.role.actualInstances;
-      this.$emit("clearedRol");
-    }
-    return this.$props.clear;
+  set localNumInstances(val: number) {
+    (<any>this.$data)._localNumInstances = val;
+  }
+
+  get maxNumInstances(): number {
+    return this.role.maxInstances;
   }
 
   get onRoleMetricsUpdate() {
@@ -295,8 +314,8 @@ export default class RoleCardComponent extends Vue {
   }
 
   lessInstances() {
-    if (this.localNumInstances > 0) {
-      // this.localNumInstances--;
+    if (this.localNumInstances > this.role.minInstances) {
+      this.localNumInstances--;
       this.$emit("numInstancesChange", [
         this.role.name,
         this.localNumInstances
@@ -305,8 +324,13 @@ export default class RoleCardComponent extends Vue {
   }
 
   moreInstances() {
-    // this.localNumInstances++;
-    this.$emit("numInstancesChange", [this.role.name, this.localNumInstances]);
+    if (this.localNumInstances < this.role.maxInstances) {
+      this.localNumInstances++;
+      this.$emit("numInstancesChange", [
+        this.role.name,
+        this.localNumInstances
+      ]);
+    }
   }
 }
 </script>

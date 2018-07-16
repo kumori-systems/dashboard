@@ -35,7 +35,7 @@
           <template v-else>
 
             <!-- Apply changes -->
-            <v-btn class="elevation-0" color="warning" v-bind:disabled="!haveChanges" v-on:click="applyChanges">Apply changes</v-btn>
+            <v-btn class="elevation-0" v-bind:disabled="!haveChanges" color="warning" v-on:click="applyChanges">Apply changes</v-btn>
 
             <!-- Cancel -->
             <v-btn outline v-on:click="cancelChanges">Cancel</v-btn>
@@ -206,9 +206,9 @@
                       <th>
                         <v-select
                           v-bind:disabled="!editing"
-                          v-model="deploymentProvidedConnections[name]"
+                          v-bind:value="deploymentProvidedConnections(name)"
                           v-bind:items="totalDependedDeploymentChannels(name)"
-                          v-on:input="handleInput"
+                          v-on:change="(val)=>{HandleDeploymentProvidedConnections(name, val)}"
                           autocomplete
                           multiple
                           chips>
@@ -234,10 +234,9 @@
                       <th>
                         <v-select
                           v-bind:disabled="!editing"
-                          v-model="deploymentDependedConnections[name]"
+                          v-bind:value="deploymentDependedConnections(name)"
                           v-bind:items="totalProvidedDeploymentChannels(name)"
-                          v-on:input="handleInput"
-                          return-object
+                          v-on:change="(val)=>{HandleDeploymentDependedConnections(name, val)}"
                           autocomplete
                           multiple
                           chips>
@@ -293,14 +292,12 @@
               v-bind:role="rolContent"
               v-bind:service="service"
               v-bind:roleMetrics="deploymentMetrics.roles"
-              v-bind:clear="clear"
               v-bind:volumeMetrics="volumeMetrics"
               v-bind:persistentVolumes="persistentVolumes"
               v-bind:volatileVolumes="volatileVolumes"
               v-bind:editing="editing"
               v-on:killInstanceChange="handleKillInstanceChange"
-              v-on:numInstancesChange="handleNumInstancesChange"
-              v-on:clearedRol="clear=false"/>
+              v-on:numInstancesChange="handleNumInstancesChange"/>
 
           </v-flex>
 
@@ -321,6 +318,21 @@
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" flat="flat" @click.native="undeploy">Undeploy</v-btn>
           <v-btn flat="flat" @click.native="undeployElementDialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Unable to change -->
+    <v-dialog v-model="unableToChangeDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="headline">Change conflict</v-card-title>
+        <v-card-text>
+          The service has changed since you entered in edit mode and the actual
+          changes won't be applied
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat="flat" @click.native="unableToChangeDialog = false">accept</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -392,8 +404,7 @@ import { Notification } from "../store/pagestate/classes";
 import SSGetters from "../store/stampstate/getters";
 import { utils } from "../api";
 import { setTimeout } from "timers";
-import { sha256 } from 'js-sha256';
-
+import { sha256, Hasher } from "js-sha256";
 
 @VueClassComponent({
   name: "detailed-deployment-view",
@@ -409,43 +420,55 @@ import { sha256 } from 'js-sha256';
   }
 })
 export default class DetailedDeploymentView extends Vue {
-  editing: boolean = false;
+  /** Vue wrapper for the Chart options. */
+  chartOptions = ChartComponentOptions;
 
-  originStateHash = null;
-  temporalDeployment:Deployment =null;
   /**
     This dialog should appear when the deployment which is beeing viewed was
     undeployed (by someone else) and the information is no longer available.
   */
   noMoreInfoDialog: boolean = false;
 
-  /** Temporary number of instances of a role. **/
-  roleNumInstances: { [rolId: string]: number } = {};
+  /** Show/Hide dialog undeploy element. */
+  undeployElementDialog: boolean = false;
 
-  /** Signal to kill instances. */
-  instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+  /**
+   * While the local user was in edition mode something has changed and changes
+   * can't be applied.
+   */
+  unableToChangeDialog: boolean = false;
 
   /** Marks if there are changes to commit. */
   haveChanges: boolean = false;
 
-  /** Marks if the state should be cleared. */
-  clear: boolean = false;
+  /** Marks if the user is editing the deployment. */
+  editing: boolean = false;
 
-  /** Show/Hide dialog undeploy element. */
-  undeployElementDialog: boolean = false;
+  /** Stores a hash of the state before entering in editting mode. */
+  temporaryOriginStateHash: Hasher = null;
 
-  /** Vue wrapper for the Chart options. */
-  chartOptions = ChartComponentOptions;
+  /** Temporary stored for editting mode provided links. */
+  temporaryProvidedLinks = {};
 
+  /** Temporary stored for editting mode depended links. */
+  temporaryDependedLinks = {};
+
+  /** Temporary stored for editting mode role instances. */
+  temporaryRoleInstances: { [rolId: string]: number } = {};
+
+  /** Signal to kill instances. */
+  instanceKill: { [rolId: string]: { [instanceId: string]: boolean } } = {};
+
+  /** Array of watcher functions. */
   unwatch: Function[] = [];
 
   mounted() {
     this.cancelChanges();
+
     this.unwatch.push(
       // Watches for route changes
       this.$watch("$route.path", val => {
         this.cancelChanges();
-        this.clear = true;
         this.haveChanges = false;
       })
     );
@@ -457,9 +480,8 @@ export default class DetailedDeploymentView extends Vue {
         if (val === false) {
           this.redirectToOverview();
         }
-      })      
+      })
     );
-
   }
 
   beforeDestroy() {
@@ -469,85 +491,25 @@ export default class DetailedDeploymentView extends Vue {
     }
   }
 
-  /** Temporary provided connections. */
-  get deploymentProvidedConnections() {
-    let res:{[channel:string]:{ text:string, value:string }[]} = {};
-
-    // Obtain provided connections from the service
-    for(let chann in this.service.providedChannels) {
-      if(!res[chann]) res[chann]=[];
-      if(this.deployment.channels[chann]){
-        for(let conn in this.deployment.channels[chann]){
-
-          console.debug('This connection contains: '+JSON.stringify(conn));
-
-          res[chann].push({
-            text:
-            this.deployments[this.deployment.channels[chann][conn].destinyDeploymentId].name
-            + ' ~ '
-            + this.deployment.channels[chann][conn].destinyChannelId,
-            value:JSON.stringify({
-              deployment: this.deployment.channels[chann][conn].destinyDeploymentId,
-              channel: this.deployment.channels[chann][conn].destinyChannelId
-            })
-          });
-        }
-      }
+  get deployments(): { [deploymentURN: string]: Deployment } {
+    return ((<SSGetters>this.$store.getters).deployments as any) as {
+      [deploymentURN: string]: Deployment;
     };
-
-    return res;
   }
 
-  set deploymentProvidedConnections(val) {
-    console.debug(
-      "Trying to set a deploymentProvidedConnection with value: "
-      +
-      JSON.stringify(val)
-      );
-  }
-
-  get deploymentDependedConnections() {
-    let res:{[channel:string]:{ text:string, value:string }[]} = {};
-
-    // Obtain provided connections from the service
-    for(let chann in this.service.dependedChannels) {
-      if(!res[chann]) res[chann]=[];
-      if(this.deployment.channels[chann]){
-        for(let conn in this.deployment.channels[chann]){
-          res[chann].push({
-            text:
-            this.deployments[this.deployment.channels[chann][conn].destinyDeploymentId].name + ' a~ ' +
-            
-            this.deployment.channels[chann][conn].destinyChannelId,
-            value:JSON.stringify({
-              deployment: this.deployment.channels[chann][conn].destinyDeploymentId,
-              channel: this.deployment.channels[chann][conn].destinyChannelId
-            })
-          });
-        }
-      }
+  get services(): { [serviceURN: string]: Service } {
+    return ((<SSGetters>this.$store.getters).services as any) as {
+      [serviceName: string]: Service;
     };
-
-    return res;
-    
   }
-  set deploymentDependedConnections(val) {
-    console.debug("Trying to set a deploymentDependedConnection with value: "+JSON.stringify(val));
-  }
-
-  get deployments() {
-    return (<SSGetters>this.$store.getters).deployments;
-  }
-
-   /** Required to obtain additional information of a role. */
+  /** Required to obtain additional information of a role. */
   get service(): Service {
-    let serviceURN = this.deployment.service
-    let ser: Service = (<SSGetters>this.$store.getters).services[serviceURN];
+    let serviceURN = this.deployment.service;
+    let ser: Service = this.services[serviceURN];
     if (!ser) {
       // This will be reached when deploying new services with bundles.
       this.$store.dispatch("getElementInfo", serviceURN);
     }
-
     return ser;
   }
 
@@ -556,7 +518,7 @@ export default class DetailedDeploymentView extends Vue {
     let res: Deployment = null;
     let deployments = this.deployments;
     for (let key in deployments) {
-      if (deployments[key]._path === this.$route.path){
+      if (deployments[key]._path === this.$route.path) {
         res = deployments[key];
       }
     }
@@ -615,6 +577,114 @@ export default class DetailedDeploymentView extends Vue {
     );
   }
 
+  /** Temporary provided connections. */
+  get deploymentProvidedConnections() {
+    return channel => {
+      let res: { [channel: string]: { text: string; value: string }[] } = {};
+
+      if (this.editing) {
+        res = this.temporaryProvidedLinks;
+      } else {
+        // Obtain provided connections from the service
+        for (let chann in this.service.providedChannels) {
+          if (!res[chann]) {
+            res[chann] = [];
+          }
+
+          if (this.deployment.channels[chann]) {
+            for (let conn in this.deployment.channels[chann]) {
+              res[chann].push({
+                text:
+                  this.deployments[
+                    this.deployment.channels[chann][conn].destinyDeploymentId
+                  ].name +
+                  " ~ " +
+                  this.deployment.channels[chann][conn].destinyChannelId,
+                value: JSON.stringify({
+                  deployment: this.deployment.channels[chann][conn]
+                    .destinyDeploymentId,
+                  channel: this.deployment.channels[chann][conn]
+                    .destinyChannelId
+                })
+              });
+            }
+          }
+        }
+      }
+      return channel ? res[channel] : res;
+    };
+  }
+
+  set deploymentProvidedConnections(val) {
+    this.temporaryProvidedLinks [
+      (<any>val(1)).channel
+      ] =  (<any>val(1)).value;
+    this.haveChanges = true;
+  }
+
+  get deploymentDependedConnections() {
+    return channel => {
+
+      let res: { [channel: string]: { text: string; value: string }[] } = {};
+
+      if (this.editing) {
+        res = this.temporaryDependedLinks;
+      } else {
+        // Obtain provided connections from the service
+        for (let chann in this.service.dependedChannels) {
+          if (!res[chann]) {
+            res[chann] = [];
+          }
+
+          if (this.deployment.channels[chann]) {
+            for (let conn in this.deployment.channels[chann]) {
+              res[chann].push({
+                text:
+                  this.deployments[
+                    this.deployment.channels[chann][conn].destinyDeploymentId
+                  ].name +
+                  " ~ " +
+                  this.deployment.channels[chann][conn].destinyChannelId,
+                value: JSON.stringify({
+                  deployment: this.deployment.channels[chann][conn]
+                    .destinyDeploymentId,
+                  channel: this.deployment.channels[chann][conn]
+                    .destinyChannelId
+                })
+              });
+            }
+          }
+        }
+      }
+      return channel ? res[channel] : res;
+    };
+  }
+  set deploymentDependedConnections(val) {
+    this.temporaryDependedLinks[
+      (<any>val(1)).channel
+      ] =  (<any>val(1)).value;
+    this.haveChanges = true;
+  }
+
+  HandleDeploymentDependedConnections(channel, value) {
+    this.deploymentDependedConnections = (a)=>{return  {channel:channel, value:value}; };
+  }
+  HandleDeploymentProvidedConnections(channel, value) {
+    this.deploymentProvidedConnections = (a)=>{return  {channel:channel, value:value}; };
+  }
+
+  get volumeMetrics() {
+    return this.$store.getters.volumeMetrics;
+  }
+
+  get persistentVolumes(): { [volumeURN: string]: PersistentVolume } {
+    return this.$store.getters.persistentVolumes;
+  }
+
+  get volatileVolumes(): { [volumeURN: string]: VolatileVolume } {
+    return this.$store.getters.volatileVolumes;
+  }
+
   get volumeUsage() {
     return volume => {
       let res = -1;
@@ -628,33 +698,17 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
-  get volumeMetrics() {
-    return this.$store.getters.volumeMetrics;
-  }
-
-  get persistentVolumes() {
-    return this.$store.getters.persistentVolumes;
-  }
-
-  get volatileVolumes() {
-    return this.$store.getters.volatileVolumes;
-  }
-
   get deploymentPersistentVolumes(): PersistentVolume[] {
+    let ser = this.service;
+    let volumes = this.persistentVolumes;
     let res: PersistentVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.services[
-      this.deployment.service
-    ];
     for (let resName in ser.resources) {
       if (
         utils.getResourceType(ser.resources[resName]) ===
         Resource.RESOURCE_TYPE.PERSISTENT_VOLUME
       ) {
         if (this.deployment.resources[resName]) {
-          let volumes = this.$store.getters.persistentVolumes;
-          if (volumes) {
-            res.push(volumes[this.deployment.resources[resName]]);
-          }
+          res.push(volumes[this.deployment.resources[resName]]);
         }
       }
     }
@@ -662,20 +716,16 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   get deploymentVolatileVolumes(): VolatileVolume[] {
+    let ser = this.service;
+    let volumes = this.volatileVolumes;
     let res: VolatileVolume[] = [];
-    let ser: Service = <Service>this.$store.getters.services[
-      this.deployment.service
-    ];
     for (let resName in ser.resources) {
       if (
         utils.getResourceType(ser.resources[resName]) ===
         Resource.RESOURCE_TYPE.VOLATILE_VOLUME
       ) {
         if (this.deployment.resources[resName]) {
-          let volumes = this.$store.getters.volatileVolumes;
-          if (volumes) {
-            res.push(volumes[this.deployment.resources[resName]]);
-          }
+          res.push(volumes[this.deployment.resources[resName]]);
         }
       }
     }
@@ -737,8 +787,7 @@ export default class DetailedDeploymentView extends Vue {
   /** Obtains all provided deployment channels of actual deployed services. */
   get totalProvidedDeploymentChannels() {
     return channelId => {
-      let sers = this.$store.getters.services;
-      let ser: Service = sers[this.deployment.service];
+      let ser: Service = this.service;
       let type: string = ser.dependedChannels[channelId].type;
       let typeSearched: Channel.CHANNEL_TYPE[] = [];
       switch (type) {
@@ -788,17 +837,19 @@ export default class DetailedDeploymentView extends Vue {
 
       let res: { value: string; text: string }[] = [];
 
-      let deps = this.$store.getters.deployments;
+      let deployments = this.deployments;
 
-      for (let deploymentId in deps) {
-        if (!(deps[deploymentId] instanceof EntryPoint)) {
-          let serviceId: string = deps[deploymentId].service;
-          if (sers[serviceId]) {
+      for (let deploymentId in deployments) {
+        if (!(deployments[deploymentId] instanceof EntryPoint)) {
+          let serviceId: string = deployments[deploymentId].service;
+          if (this.services[serviceId]) {
             // if service exists
-            for (let providedChannelId in sers[serviceId].providedChannels) {
+            for (let providedChannelId in this.services[serviceId]
+              .providedChannels) {
               if (
                 typeSearched.indexOf(
-                  sers[serviceId].providedChannels[providedChannelId].type
+                  this.services[serviceId].providedChannels[providedChannelId]
+                    .type
                 ) !== -1
               ) {
                 let elem: {
@@ -809,7 +860,8 @@ export default class DetailedDeploymentView extends Vue {
                     deployment: deploymentId,
                     channel: providedChannelId
                   }),
-                  text: deps[deploymentId].name + " ~ " + providedChannelId
+                  text:
+                    deployments[deploymentId].name + " ~ " + providedChannelId
                 };
 
                 if (res.indexOf(elem) === -1) res.push(elem);
@@ -825,8 +877,7 @@ export default class DetailedDeploymentView extends Vue {
   /** Obtains all depended deployment channels of actual deployed services. */
   get totalDependedDeploymentChannels() {
     return channelId => {
-      let sers = this.$store.getters.services;
-      let ser = sers[this.deployment.service];
+      let ser = this.service;
       // Depending on the channel type, the search will be different
       let type: string = ser.providedChannels[channelId].type;
       let typeSearched: Channel.CHANNEL_TYPE[] = [];
@@ -891,12 +942,14 @@ export default class DetailedDeploymentView extends Vue {
           // it's not in the list of possibles
         } else {
           let serviceId: string = deps[deploymentId].service;
-          if (sers[serviceId]) {
+          if (this.services[serviceId]) {
             // if service exists
-            for (let requiredChannelId in sers[serviceId].dependedChannels) {
+            for (let requiredChannelId in this.services[serviceId]
+              .dependedChannels) {
               if (
                 typeSearched.indexOf(
-                  sers[serviceId].dependedChannels[requiredChannelId].type
+                  this.services[serviceId].dependedChannels[requiredChannelId]
+                    .type
                 ) !== -1
               ) {
                 let elem: {
@@ -950,14 +1003,20 @@ export default class DetailedDeploymentView extends Vue {
   }
 
   prepareEdition() {
-
     // Get the hash value of the actual deployment
-    this.originStateHash=sha256.create();
-    this.originStateHash.update(JSON.stringify(this.deployment));
+    this.temporaryOriginStateHash = sha256.create();
+    this.temporaryOriginStateHash.update(JSON.stringify(this.deployment));
 
-    // Create a temporal state copy of the permanent state
-    this.temporalDeployment = this.deployment;
+    this.temporaryProvidedLinks = this.deploymentProvidedConnections(null);
 
+    this.temporaryDependedLinks = this.deploymentDependedConnections(null);
+
+    this.temporaryRoleInstances = {};
+
+    // Ignores the innitial assignations
+    this.haveChanges = false;
+
+    // Setts edditing mode to true
     this.editing = true;
   }
 
@@ -966,160 +1025,169 @@ export default class DetailedDeploymentView extends Vue {
    * the differences.
    */
   applyChanges(): void {
-    // @todo
     // Get the hash of the actual state and compare it with the old hash
-    // ¿Is the same?
-    //  YES => Send changes
-    //  NO => Message to the user and cancel changes.
+    let actualHash = sha256.create();
+    actualHash.update(JSON.stringify(this.deployment));
 
+    if (actualHash.toString() !== this.temporaryOriginStateHash.toString()) {
+      /*
+        Changes can't be applied because the hash has changed and that means
+        someone has been doing changes in the deployment while the local user
+        was in edit mode.
+      */
+     
+     console.error('Changes cant be applied');
+     this.unableToChangeDialog = true;
 
-    // Remove links
-    for (let chann in this.deployment.channels) {
-      for (let realConn in this.deployment.channels[chann]) {
-        let found = false; // Marks if the connection has been found
+      // @todo Message to the user and cancel changes.
+    } else {
+      // Remove links
+      for (let chann in this.deployment.channels) {
+        for (let realConn in this.deployment.channels[chann]) {
+          let found = false; // Marks if the connection has been found
 
-        // Search in provided links
+          // Search in provided links
+          for (let tempConn in this.deploymentProvidedConnections[chann]) {
+            if (
+              this.deploymentProvidedConnections[chann][tempConn].value ===
+              JSON.stringify({
+                deployment: this.deployment.channels[chann][realConn]
+                  .destinyDeploymentId,
+                channel: this.deployment.channels[chann][realConn]
+                  .destinyChannelId
+              })
+            ) {
+              found = true;
+            }
+          }
+
+          // Search in depended links
+          for (let tempConn in this.deploymentDependedConnections[chann]) {
+            if (
+              this.deploymentDependedConnections[chann][tempConn].value ===
+              JSON.stringify({
+                deployment: this.deployment.channels[chann][realConn]
+                  .destinyDeploymentId,
+                channel: this.deployment.channels[chann][realConn]
+                  .destinyChannelId
+              })
+            ) {
+              found = true;
+            }
+          }
+
+          // If the link haven't been found, the link is erased
+          if (!found) {
+            this.$store.dispatch("unlink", {
+              deploymentOne: this.deployment._urn,
+              channelOne: chann,
+              deploymentTwo: this.deployment.channels[chann][realConn]
+                .destinyDeploymentId,
+              channelTwo: this.deployment.channels[chann][realConn]
+                .destinyChannelId
+            });
+          }
+        }
+      }
+
+      // Add new provided links
+      for (let chann in this.deploymentProvidedConnections) {
         for (let tempConn in this.deploymentProvidedConnections[chann]) {
-          if (
-            this.deploymentProvidedConnections[chann][tempConn].value ===
-            JSON.stringify({
-              deployment: this.deployment.channels[chann][realConn]
-                .destinyDeploymentId,
-              channel: this.deployment.channels[chann][realConn]
-                .destinyChannelId
-            })
-          ) {
-            found = true;
+          let found = false; // Checks if the connection has been found
+
+          // Search in deployment channels
+          for (let realConn in this.deployment.channels[chann]) {
+            if (
+              this.deploymentProvidedConnections[chann][tempConn].value ===
+              JSON.stringify({
+                deployment: this.deployment.channels[chann][realConn]
+                  .destinyDeploymentId,
+                channel: this.deployment.channels[chann][realConn]
+                  .destinyChannelId
+              })
+            ) {
+              found = true;
+            }
+          }
+
+          // If the connection haven't been found, a new one is created
+          if (!found) {
+            let newConnexion: {
+              deployment: string;
+              channel: string;
+            } = JSON.parse(
+              this.deploymentProvidedConnections[chann][tempConn].value
+            );
+
+            this.$store.dispatch("link", {
+              deploymentOne: this.deployment._urn,
+              channelOne: chann,
+              deploymentTwo: newConnexion.deployment,
+              channelTwo: newConnexion.channel
+            });
           }
         }
+      }
 
-        // Search in depended links
+      // Add new depended links
+      for (let chann in this.deploymentDependedConnections) {
         for (let tempConn in this.deploymentDependedConnections[chann]) {
-          if (
-            this.deploymentDependedConnections[chann][tempConn].value ===
-            JSON.stringify({
-              deployment: this.deployment.channels[chann][realConn]
-                .destinyDeploymentId,
-              channel: this.deployment.channels[chann][realConn]
-                .destinyChannelId
-            })
-          ) {
-            found = true;
+          let found = false; // Checks if the connection has been found
+
+          // Search in deployment channels
+          for (let realConn in this.deployment.channels[chann]) {
+            if (
+              this.deploymentDependedConnections[chann][tempConn].value ===
+              JSON.stringify({
+                deployment: this.deployment.channels[chann][realConn]
+                  .destinyDeploymentId,
+                channel: this.deployment.channels[chann][realConn]
+                  .destinyChannelId
+              })
+            ) {
+              found = true;
+            }
+          }
+
+          // If the connection haven't been found, a new one is created
+          if (!found) {
+            let newConnexion: {
+              deployment: string;
+              channel: string;
+            } = JSON.parse(
+              this.deploymentDependedConnections[chann][tempConn].value
+            );
+
+            this.$store.dispatch("link", {
+              deploymentOne: this.deployment._urn,
+              channelOne: chann,
+              deploymentTwo: newConnexion.deployment,
+              channelTwo: newConnexion.channel
+            });
           }
         }
+      }
 
-        // If the link haven't been found, the link is erased
-        if (!found) {
-          this.$store.dispatch("unlink", {
-            deploymentOne: this.deployment._urn,
-            channelOne: chann,
-            deploymentTwo: this.deployment.channels[chann][realConn]
-              .destinyDeploymentId,
-            channelTwo: this.deployment.channels[chann][realConn]
-              .destinyChannelId
-          });
+      // If the number of instances has changed, a petition is sent
+      let changedNumInstances = false;
+      for (let role in this.deployment.roles) {
+        if (
+          this.temporaryRoleInstances[role] &&
+          this.deployment.roles[role].actualInstances !==
+            this.temporaryRoleInstances[role]
+        ) {
+          changedNumInstances = true;
         }
       }
-    }
 
-    // Add new provided links
-    for (let chann in this.deploymentProvidedConnections) {
-      for (let tempConn in this.deploymentProvidedConnections[chann]) {
-        let found = false; // Checks if the connection has been found
-
-        // Search in deployment channels
-        for (let realConn in this.deployment.channels[chann]) {
-          if (
-            this.deploymentProvidedConnections[chann][tempConn].value ===
-            JSON.stringify({
-              deployment: this.deployment.channels[chann][realConn]
-                .destinyDeploymentId,
-              channel: this.deployment.channels[chann][realConn]
-                .destinyChannelId
-            })
-          ) {
-            found = true;
-          }
-        }
-
-        // If the connection haven't been found, a new one is created
-        if (!found) {
-          let newConnexion: {
-            deployment: string;
-            channel: string;
-          } = JSON.parse(
-            this.deploymentProvidedConnections[chann][tempConn].value
-          );
-
-          this.$store.dispatch("link", {
-            deploymentOne: this.deployment._urn,
-            channelOne: chann,
-            deploymentTwo: newConnexion.deployment,
-            channelTwo: newConnexion.channel
-          });
-        }
+      if (changedNumInstances) {
+        // Send changes to the stamp
+        this.$store.dispatch("aplyingChangesToDeployment", {
+          deploymentURN: this.deployment._urn,
+          roleNumInstances: this.temporaryRoleInstances,
+          killInstances: this.instanceKill
+        });
       }
-    }
-
-    // Add new depended links
-    for (let chann in this.deploymentDependedConnections) {
-      for (let tempConn in this.deploymentDependedConnections[chann]) {
-        let found = false; // Checks if the connection has been found
-
-        // Search in deployment channels
-        for (let realConn in this.deployment.channels[chann]) {
-          if (
-            this.deploymentDependedConnections[chann][tempConn].value ===
-            JSON.stringify({
-              deployment: this.deployment.channels[chann][realConn]
-                .destinyDeploymentId,
-              channel: this.deployment.channels[chann][realConn]
-                .destinyChannelId
-            })
-          ) {
-            found = true;
-          }
-        }
-
-        // If the connection haven't been found, a new one is created
-        if (!found) {
-          let newConnexion: {
-            deployment: string;
-            channel: string;
-          } = JSON.parse(
-            this.deploymentDependedConnections[chann][tempConn].value
-          );
-
-          this.$store.dispatch("link", {
-            deploymentOne: this.deployment._urn,
-            channelOne: chann,
-            deploymentTwo: newConnexion.deployment,
-            channelTwo: newConnexion.channel
-          });
-        }
-      }
-    }
-    
-
-    // If the number of instances has changed, a petition is sent
-    let changedNumInstances = false;
-    for (let role in this.deployment.roles) {
-      if (
-        this.roleNumInstances[role] &&
-        this.deployment.roles[role].actualInstances !==
-          this.roleNumInstances[role]
-      ) {
-        changedNumInstances = true;
-      }
-    }
-
-    if (changedNumInstances) {
-      // Send changes to the stamp
-      this.$store.dispatch("aplyingChangesToDeployment", {
-        deploymentURN: this.deployment._urn,
-        roleNumInstances: this.roleNumInstances,
-        killInstances: this.instanceKill
-      });
     }
 
     // Marc as there are no changes
@@ -1136,52 +1204,8 @@ export default class DetailedDeploymentView extends Vue {
     if (this.$refs.form) {
       (<any>this.$refs.form).reset();
     }
-
-    this.clear = true;
-    this.loadDeploymentConnections(this.deployment, this.service);
-
     this.haveChanges = false;
     this.editing = false;
-  }
-
-  /** Loads service available connections. */
-  loadDeploymentConnections(dep: Deployment, ser: Service): void {
-    if (dep && ser) {
-      for (let chann in dep.channels) {
-        for (let conn in dep.channels[chann]) {
-          let element = {
-            value: JSON.stringify({
-              deployment: dep.channels[chann][conn].destinyDeploymentId,
-              channel: dep.channels[chann][conn].destinyChannelId
-            }),
-            text: dep.name + " ~ " + chann
-          };
-
-          // Is a depended or provided channel?
-          if (ser.dependedChannels[chann]) {
-            if (!this.deploymentDependedConnections[chann]) {
-              this.deploymentDependedConnections[chann] = [];
-            }
-            if (
-              this.deploymentDependedConnections[chann].indexOf(element) === -1
-            ) {
-              this.deploymentDependedConnections[chann].push(element);
-            }
-          }
-
-          if (ser.providedChannels[chann]) {
-            if (!this.deploymentProvidedConnections[chann]) {
-              this.deploymentProvidedConnections[chann] = [];
-            }
-
-            if (
-              this.deploymentProvidedConnections[chann].indexOf(element) === -1
-            )
-              this.deploymentProvidedConnections[chann].push(element);
-          }
-        }
-      }
-    }
   }
 
   /** Show/Hide undeploy modal. */
@@ -1206,17 +1230,11 @@ export default class DetailedDeploymentView extends Vue {
 
   /** Handles changes in the number of instances of role children. */
   handleNumInstancesChange([tempRol, value]): void {
-    this.roleNumInstances[tempRol] = value;
+    this.temporaryRoleInstances[tempRol] = value;
     this.haveChanges = true;
   }
 
-  /** Handles changes in the input event of link input elements. */
-  handleInput(value): void {
-    this.deploymentProvidedConnections = value;
-    if (!this.clear) this.haveChanges = true;
-  }
-
-  isEntrypoint(deployment: Deployment) {
+  isEntrypoint(deployment: Deployment): boolean {
     return utils.isEntrypoint(deployment);
   }
 }

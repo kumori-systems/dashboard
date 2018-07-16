@@ -146,7 +146,6 @@ import ChartComponent from "./../chart";
   name: "instance-card-component",
   props: {
     instance: { required: true },
-    clear: { required: true, type: Boolean }, // Used to clean 'kill instances' when changes are canceled
     instanceMetrics: { required: true },
     volumeMetrics: { required: true },
     persistentVolumes: { required: true },
@@ -163,29 +162,6 @@ export default class InstanceCardComponent extends Vue {
   persistentVolumes = this.persistentVolumes;
   volatileVolumes = this.volatileVolumes;
   volumeMetrics = this.volumeMetrics;
-
-  /**
-   * Mantains all watchers
-   */
-  unwatch: Function[] = [];
-
-  mounted() {
-    this.unwatch.push(
-      // Watches for clear events
-      this.$watch("clear", value => {
-        if (value === true) {
-          this.clearHandler();
-        }
-      })
-    );
-  }
-
-  beforeDestroy() {
-    // Removes all watchers
-    for (let i in this.unwatch) {
-      this.unwatch[i]();
-    }
-  }
 
   get instanceVolumes(): any {
     let res: any = [];
