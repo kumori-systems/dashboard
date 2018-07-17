@@ -284,12 +284,12 @@
         <v-layout wrap>
 
           <v-flex
-            v-for="(rolContent, roleId) in deployment.roles"
+            v-for="(rolContent, roleId) in service.roles"
             v-bind:key="roleId"
             xs12>
 
             <role-card-component
-              v-bind:role="rolContent"
+              v-bind:role="deployment.roles[roleId]"
               v-bind:service="service"
               v-bind:roleMetrics="deploymentMetrics.roles"
               v-bind:volumeMetrics="volumeMetrics"
@@ -659,6 +659,7 @@ export default class DetailedDeploymentView extends Vue {
       return channel ? res[channel] : res;
     };
   }
+
   set deploymentDependedConnections(val) {
     this.temporaryDependedLinks[
       (<any>val(1)).channel
@@ -669,6 +670,7 @@ export default class DetailedDeploymentView extends Vue {
   HandleDeploymentDependedConnections(channel, value) {
     this.deploymentDependedConnections = (a)=>{return  {channel:channel, value:value}; };
   }
+
   HandleDeploymentProvidedConnections(channel, value) {
     this.deploymentProvidedConnections = (a)=>{return  {channel:channel, value:value}; };
   }
