@@ -171,22 +171,27 @@
                 <v-flex xs12>
                   <strong>Websites:</strong>
                   <template v-if="isEntrypoint(deployment)">
-                    <a
+                    <div
                       v-for="(domain, index) in deployment.websites"
-                      v-bind:key="index"
-                      v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
-                      <span v-if="index!==0">,</span>
-                      {{ domain.url }}
-                    </a>
+                      v-bind:key="index">
+                      <a
+                        v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
+                        <span v-if="index!==0">,</span>
+                        {{ domain.url }}
+                      </a>
+                    </div>
                   </template>
-                  <a
-                    v-else
-                    v-for="(domain, index) in linkedDomains"
-                    v-bind:key="index"
-                    v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
-                    <span v-if="index!==0">,</span>
-                    {{ domain.web }}
-                  </a>    
+                  <template v-else>
+                    <div
+                      v-for="(domain, index) in linkedDomains"
+                      v-bind:key="index">
+                      <a
+                      v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
+                      <span v-if="index!==0">,</span>
+                      {{ domain.web }}
+                      </a>
+                    </div>
+                  </template>
                 </v-flex>
               </v-layout>
 
