@@ -108,7 +108,7 @@
         <v-spacer></v-spacer>
 
         <!-- Role chart -->
-        <v-flex xs12 sm6 md5 lg5 xl4>
+        <v-flex xs12 sm5>
           <role-chart-component
             class="role-chart"
             v-bind:chartData="roleChartData.data"
