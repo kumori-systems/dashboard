@@ -1,7 +1,7 @@
 <template>
   <v-form ref="form" lazy-validation>
 
-    <v-card v-if="deployment" style="max-width:1300px">
+    <v-card v-if="deployment">
 
       <v-card-title class="mybackground">
         
@@ -13,8 +13,18 @@
           <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
 
           <span v-if="isEntrypoint(deployment)">
-            <v-icon class="ma-1">language</v-icon>
-            <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
+            <v-tooltip bottom>
+
+              <v-icon slot="activator">language</v-icon>
+              <span>is entrypoint</span>
+
+            </v-tooltip>
+            <v-tooltip v-if="hasCertificate" bottom>
+
+              <v-icon slot="activator">https</v-icon>
+              <span>has certificates</span>
+
+            </v-tooltip>
           </span>
           {{ deployment.name }}
         </h3>

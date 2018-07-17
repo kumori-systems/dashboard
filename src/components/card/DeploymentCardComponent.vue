@@ -67,9 +67,18 @@
           
           <v-layout>
 
-            <v-icon v-if="isEntrypoint" color="grey lighten-1">language</v-icon>
-            
-            <v-icon v-if="hasCertificate" color="grey lighten-1">https</v-icon>
+            <v-tooltip v-if="isEntrypoint" bottom>
+
+              <v-icon slot="activator" color="grey lighten-1">language</v-icon>
+              <span>is entrypoint</span>
+
+            </v-tooltip>
+            <v-tooltip v-if="hasCertificate" bottom>
+
+              <v-icon slot="activator" color="grey lighten-1">https</v-icon>
+              <span>has certificates</span>
+
+            </v-tooltip>
 
             <!-- Persistent volumes -->
             <v-badge
@@ -153,7 +162,12 @@
               id="info_link"
               v-bind:to="deployment._path">
 
-              <v-icon id="info_icon">info</v-icon>
+              <v-tooltip bottom>
+
+                <v-icon  slot="activator" id="info_icon">info</v-icon>
+                <span>info</span>
+
+              </v-tooltip>
 
             </router-link>
 
