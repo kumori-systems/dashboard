@@ -19,23 +19,23 @@
           </div>
 
           <div class="black--text">
-            {{ deployment.service }}
+            {{ serviceShortName(deployment.service) }}
           </div>
             
 
           <!-- Deployment sanity -->
-            <v-icon
-              v-if="state!=='unknown'"
-              id="sanity_icon"
-              v-bind:class="stateColor">
-              {{ state }}
-            </v-icon>
+          <v-icon
+            v-if="state!=='unknown'"
+            id="sanity_icon"
+            v-bind:class="stateColor">
+            {{ state }}
+          </v-icon>
 
-            <v-progress-circular
-              v-else
-              indeterminate
-              id="sanity_icon"
-              v-bind:class="state"/>
+          <v-progress-circular
+            v-else
+            indeterminate
+            id="sanity_icon"
+            v-bind:class="state"/>
 
           <!-- Roles -->
           <div
@@ -131,7 +131,7 @@
               {{ domain.web }}
             </a>
             
-          </div>
+        </div>
 
           <!-- More info -->
           <v-layout>
@@ -149,10 +149,10 @@
             <v-spacer></v-spacer>
 
             <router-link
-              id="info_icon"
+              id="info_link"
               v-bind:to="deployment._path">
 
-              <v-icon id="info_link">info</v-icon>
+              <v-icon id="info_icon">info</v-icon>
 
             </router-link>
 
@@ -223,7 +223,7 @@ export default class Card extends Vue {
     let myDate = new Date(year, month, date, hours, minutes);
 
     return (
-      myDate.getUTCDay() +
+      myDate.getUTCDate() +
       "-" +
       myDate.getUTCMonth() +
       "-" +
@@ -400,6 +400,18 @@ export default class Card extends Vue {
     };
   }
 
+  serviceShortName(serviceName:string){
+    let res = serviceName;
+    let i = res.indexOf("services") + 9;
+    if(i === -1){
+      i = res.indexOf("service") + 8;
+    }
+    if(i>-1){
+      res = res.substring(i);
+    }
+    return res;
+  }
+
   onResize() {
     this.setDeploymentName();
   }
@@ -484,16 +496,16 @@ $color_warning: #ffc107;
   color: $color_unkown;
 }
 
-#info_icon {
+#info_link {
   position: absolute;
   bottom: 10px;
   right: 10px;
   z-index: 1;
+  text-decoration: none;
 }
 
-#info_link {
+#info_icon { 
   @extend .info;
-  text-decoration: none;
 }
 
 #sanity_icon {

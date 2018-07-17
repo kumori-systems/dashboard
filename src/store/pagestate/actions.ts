@@ -138,21 +138,49 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
 
       ProxyConnection.instance.onAddInstance((deploymentId: string,
-        roleId: string, instanceId: string, instance: Deployment.Role.Instance
+        addedInstances: { [role: string]: string[] },
+        removedInstances: { [role: string]: string[] }
       ) => {
+        
+        /*
+          Here there is a temporal fix related to ticket1289
+          (https://gitlab.com/ECloud/project-management/issues/1289)
 
+          This ticket is actually ON_HOLD, due to a dependency with other ticket
+          when the ticket is available this should be the entire code:
+
+          injectee.commit('addInstance', {
+            'deploymentId': deploymentId,
+            'addedInstances': addedInstances,
+            'removedInstances': removedInstances
+          });
+
+          * Depending on the solution given by the STAMP ticket, other changes
+          and possibly a new call will be required. *
+
+        */
+        
         injectee.commit('addInstance', {
           'deploymentId': deploymentId,
-          'roleId': roleId,
-          'instanceId': instanceId,
-          'instance': instance
+          'addedInstances': {},
+          'removedInstances': removedInstances
         });
 
+        // This is part of the temporal fix
+        if (Object.keys(addedInstances).length > 0) {
+          ProxyConnection.instance.getDeployment(deploymentId);
+        }
+        
       });
 
-      ProxyConnection.instance.onUndeploy((deploymentId) => {
+      ProxyConnection.instance.onUpdateState((payload: {
+        deployment: string,
+        role: string,
+        instance: string,
+        state: Deployment.Role.Instance.STATE
+      }) => {
 
-        injectee.commit('undeploy', deploymentId);
+        injectee.commit('updateState', payload);
 
       });
 
@@ -251,8 +279,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
                     .id === volumeId
                 ) {
                   resource = deployments[deploymentURN].roles[roleURN]
-                  .instances[instanceURN].resources[resourceURN]
-                  ._urn;
+                    .instances[instanceURN].resources[resourceURN]
+                    ._urn;
                 }
               }
             }
@@ -337,7 +365,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
     }).then((user) => { // Load all deployments
 
       return ProxyConnection.instance.getDeploymentList().then(() => {
-        
+
         /*
         injectee.dispatch('addNotification',
           new Notification(

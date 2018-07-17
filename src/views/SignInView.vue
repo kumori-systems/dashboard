@@ -297,6 +297,8 @@ export default class SignInView extends Vue {
   clearConfig() {
     this.acsURL = config.ACS_URI;
     this.admissionURL = config.ADMISSION_URI;
+    localStorage.setItem("acsURL", this.acsURL);
+    localStorage.setItem("admissionURL", this.admissionURL);
   }
 }
 </script>

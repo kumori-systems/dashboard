@@ -1,5 +1,6 @@
 import {
-  ECloudElement, EntryPoint, Resource
+  Deployment, ECloudElement, EntryPoint, HTTPEntryPoint, PersistentVolume,
+  Resource, VolatileVolume, Volume
 } from '../store/stampstate/classes';
 
 /**
@@ -211,4 +212,28 @@ export function isServiceEntrypoint(urn: string): boolean {
   }
   return res;
 
+}
+
+/**
+ * Given a volume instance returns if it's a persistent volume instance
+ * @param vol Volume instance
+ */
+export function isPersistentVolumeInstance(vol: Volume.Instance) {
+  return vol instanceof PersistentVolume.Instance;
+}
+
+/**
+ * Given a volume instance returns if it's a volatile volume instance
+ * @param vol Volume instance
+ */
+export function isVolatileVolumeInstance(vol: Volume.Instance) {
+  return vol instanceof VolatileVolume.Instance;
+}
+
+/**
+ * Given a deployment returns if it's an Entrypoint
+ * @param deployment Deployment to check.
+ */
+export function isEntrypoint(deployment: Deployment) {
+  return deployment instanceof HTTPEntryPoint;
 }
