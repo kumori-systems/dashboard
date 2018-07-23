@@ -14,7 +14,7 @@
     <v-spacer></v-spacer>
 
     <!-- Background actions -->
-    <v-menu offset-y open-on-hover>
+    <v-menu v-if="actions.length > 0" offset-y open-on-hover>
       
       <v-badge class="mr-3" bottom slot="activator" overlap color="info">
         <span slot="badge" dark v-if="actions.length > 0">{{ actions.length }}</span>

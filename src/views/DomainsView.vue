@@ -26,7 +26,7 @@
     <!-- Divides different sections of the view -->
     <v-divider></v-divider>
 
-    <v-container>
+    <v-container fluid>
     <v-data-table
       v-bind:headers="headers"
       v-bind:items="domains"
@@ -44,8 +44,13 @@
           </div>
         </td>
         <td class="text-xs-left">
-          <v-btn color="error" v-bind:disabled="props.item.usedBy.length>0" icon v-on:click="showDialog(props.item._urn)">
-            <v-icon class="white--text">delete_forever</v-icon>
+          <v-btn v-bind:disabled="props.item.usedBy.length>0" icon v-on:click="showDialog(props.item._urn)">
+            <v-tooltip right>
+
+              <v-icon id="delete_icon" slot="activator">delete</v-icon>
+              <span>delete</span>
+
+            </v-tooltip>
           </v-btn>
         </td>
       </template>
@@ -174,23 +179,58 @@ export default class DomainsView extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-$color_green: #93c47d;
-$color_yellow: #f5d164;
-$color_red: #ff6666;
-$icon_size: 20px;
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
 
-.fa-check-circle {
-  color: $color_green;
-  font-size: $icon_size;
+%icon_size {
+  font-size: 35px;
 }
 
-.fa-exclamation-triangle {
-  color: $color_yellow;
-  font-size: $icon_size;
+.play {
+  @extend %icon_size;
+  color: $color_success;  
 }
 
-.fa-exclamation-circle {
-  color: $color_red;
-  font-size: $icon_size;
+.info {
+  @extend %icon_size;
+  color: $color_info;  
+}
+
+.delete{
+  @extend %icon_size;
+  color: $color_error;
+}
+
+#info_icon{
+  @extend .info;
+}
+
+#play_icon{
+  @extend .play;
+}
+
+#delete_icon{
+  @extend .delete;
+}
+
+.corporative_background {
+  background: #d1406b;
+}
+
+#info_link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1;
+  text-decoration: none;
+}
+
+#sanity_icon {
+  position: absolute;
+  top: 60px;
+  right: 10px;
 }
 </style>

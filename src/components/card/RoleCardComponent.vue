@@ -6,7 +6,7 @@
     <v-card-title primary-title class="grey lighten-3">
 
       <!-- Role state -->
-      <v-icon v-bind:id="state"  v-if="state!=='unknown'">{{ state }}</v-icon>
+      <v-icon v-bind:id="state" v-if="state!=='unknown'">{{ state }}</v-icon>
       <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
 
       <!-- Role name -->
@@ -24,10 +24,15 @@
           v-if="editing"
           flat
           icon
-          class="pa-0 ma-0 black--text"
+          class="pa-0 ma-0 blue--text text--lighten-1"
           v-on:click="lessInstances">
 
-          <v-icon >remove</v-icon>
+          <v-tooltip bottom>
+
+            <v-icon slot="activator">remove</v-icon>
+            <span>Remove instance</span>
+
+          </v-tooltip>
 
         </v-btn>
 
@@ -40,7 +45,12 @@
           class="pa-0 ma-0 blue--text text--lighten-1"
           v-on:click="moreInstances">
 
-          <v-icon>add</v-icon>
+          <v-tooltip bottom>
+
+            <v-icon slot="activator">add</v-icon>
+            <span>Add instance</span>
+
+          </v-tooltip>
 
         </v-btn>
 
@@ -111,7 +121,7 @@
         <v-spacer></v-spacer>
 
         <!-- Role chart -->
-        <v-flex xs12 sm6 md5 lg5 xl4>
+        <v-flex xs12 sm5>
           <role-chart-component
             class="role-chart"
             v-bind:chartData="roleChartData.data"

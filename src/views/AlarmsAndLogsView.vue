@@ -2,7 +2,7 @@
   This component represents the alarms and log view.
 -->
 <template>
-  <v-card style="max-width:1300px">
+  <v-card>
     <v-card-title>
 
       <!-- View title -->
@@ -13,7 +13,7 @@
     <!-- Divides different sections of the view -->
     <v-divider></v-divider>
 
-    <v-container>
+    <v-container fluid>
       <v-layout>
 
         <!-- Level filter -->
@@ -126,12 +126,22 @@
           <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.text }}</td>
           <td class="text-xs-right">
-            <v-btn color="yellow darken-1" v-if="props.item.level===Notification.LEVEL.ERROR
+            <v-btn v-if="props.item.level===Notification.LEVEL.ERROR
             && !props.item.readed" flat v-on:click="markAlarmAsSeen(props.item)">
-              <v-icon>visibility</v-icon>
+              <v-tooltip left>
+
+                <v-icon id="warn_icon" slot="activator">visibility</v-icon>
+                <span>mark as read</span>
+
+              </v-tooltip>
             </v-btn>
-            <v-btn color="blue darken-1" flat v-on:click="showLogInfoDialog(props.item.data)">
-              <v-icon>info</v-icon>
+            <v-btn flat v-on:click="showLogInfoDialog(props.item.data)">
+              <v-tooltip right>
+
+                <v-icon id="info_icon" slot="activator">info</v-icon>
+                <span>info</span>
+
+              </v-tooltip>
             </v-btn>
           </td>
         </template>
@@ -401,3 +411,68 @@ export default class AlarmsAndLogsView extends Vue {
   }
 }
 </script>
+<style lang="scss" scoped>
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
+
+%icon_size {
+  font-size: 35px;
+}
+
+.play {
+  @extend %icon_size;
+  color: $color_success;  
+}
+
+.info {
+  @extend %icon_size;
+  color: $color_info;  
+}
+
+.delete{
+  @extend %icon_size;
+  color: $color_error;
+}
+
+.warn{
+  @extend %icon_size;
+  color: $color_warning;
+}
+
+#warn_icon{
+  @extend .warn;
+}
+
+#info_icon{
+  @extend .info;
+}
+
+#play_icon{
+  @extend .play;
+}
+
+#delete_icon{
+  @extend .delete;
+}
+
+.corporative_background {
+  background: #d1406b;
+}
+
+#info_link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1;
+  text-decoration: none;
+}
+
+#sanity_icon {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+}
+</style>

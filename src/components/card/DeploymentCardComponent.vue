@@ -71,9 +71,18 @@
           
           <v-layout>
 
-            <v-icon v-if="isEntrypoint" color="grey lighten-1">language</v-icon>
-            
-            <v-icon v-if="hasCertificate" color="grey lighten-1">https</v-icon>
+            <v-tooltip v-if="isEntrypoint" bottom>
+
+              <v-icon slot="activator" color="grey lighten-1">language</v-icon>
+              <span>is entrypoint</span>
+
+            </v-tooltip>
+            <v-tooltip v-if="hasCertificate" bottom>
+
+              <v-icon slot="activator" color="grey lighten-1">https</v-icon>
+              <span>has certificates</span>
+
+            </v-tooltip>
 
             <!-- Persistent volumes -->
             <v-badge
@@ -117,23 +126,24 @@
           <div>
 
             <template v-if="isEntrypoint">
-            <a
-              v-for="(domain, index) in deployment.websites"
-              v-bind:key="index"
-              v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
-              <span v-if="index!==0">,</span>
-              {{ domain.url }}
-            </a>
+              <div v-for="(domain, index) in deployment.websites" v-bind:key="index">
+                <a
+                  v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
+                  {{ domain.url }}
+                </a>
+              </div>
             </template>
-
-            <a
-              v-else
-              v-for="(domain, index) in linkedDomains"
-              v-bind:key="index"
-              v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
-              <span v-if="index!==0">,</span>
-              {{ domain.web }}
-            </a>
+            <template v-else>
+              <div
+                v-for="(domain, index) in linkedDomains"
+                v-bind:key="index">
+                <a
+                  v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
+                  {{ domain.web }}
+                </a>
+              </div>
+            </template>
+            
             
         </div>
 
@@ -156,7 +166,12 @@
               id="info_link"
               v-bind:to="deployment._path">
 
-              <v-icon id="info_icon">info</v-icon>
+              <v-tooltip bottom>
+
+                <v-icon  slot="activator" id="info_icon">info</v-icon>
+                <span>info</span>
+
+              </v-tooltip>
 
             </router-link>
 

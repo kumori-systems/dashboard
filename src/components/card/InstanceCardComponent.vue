@@ -126,7 +126,7 @@
       <v-spacer></v-spacer>
 
       <!-- Instance chart data -->
-      <v-flex ma-1 xs12 sm6 md5 lg5 xl4>
+      <v-flex xs12 sm5>
         <chart-component v-bind:chartData="instanceChartData.data" v-bind:options="ChartOptions" v-bind:width="800" v-bind:height="600"></chart-component>
       </v-flex>
 
