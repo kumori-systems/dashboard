@@ -1,3 +1,6 @@
+<!--
+  This component represents the new bundle view.
+-->
 <template>
     <v-card id="upload-bundle-view" style="max-width:1300px">
       <v-card-title>
@@ -35,18 +38,35 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "new-bundle-view"
 })
 export default class NewBundleView extends Vue {
   fileList: FileList = null;
 
+  /**
+   * Method which is called when a file changes.
+   */
   onFileChange(e): void {
     this.fileList =
       (<HTMLInputElement>e.target).files ||
       (<DataTransfer>e.dataTransfer).files;
   }
 
+  /**
+   * Method called when an element is selected.
+   */
   addElement(): void {
     if (this.fileList !== null) {
       this.$store.dispatch("addNewBundle", this.fileList.item(0));
@@ -54,6 +74,9 @@ export default class NewBundleView extends Vue {
     }
   }
 
+  /**
+   * Method called when the user cancels changes.
+   */
   cancel() {
     this.$router.go(-1);
   }

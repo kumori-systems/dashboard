@@ -1,3 +1,11 @@
+<!--
+  Component for sign in view. This view changes deppending if the user is trying
+  to authenticate or the page is waiting for use input.
+  It also changes if the user is trying to register with oauth.
+
+  When this view has got something about storage take care, so it could be
+  the 'local storage' provided by html5 or the vue store 'vuex'
+-->
 <template>
   <v-layout id="signin-view">
 
@@ -130,7 +138,8 @@
         </v-card>
 
     </v-flex>
-      
+
+      <!-- Shows configuration pannel -->
       <v-dialog v-model="showPannel" max-width="800px">
         <v-card>
           <v-card-title class="headline">Configuration</v-card-title>
@@ -149,7 +158,6 @@
         </v-card>
       </v-dialog>
 
-
   </v-layout>
 </template>
 <script lang="ts">
@@ -161,10 +169,22 @@ import urlencode from "urlencode";
 
 import { config } from "../api";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "sign-in-view"
 })
 export default class SignInView extends Vue {
+
   /** <boolean> Says if there is a process loading the user. */
   loading: boolean = false;
 
@@ -189,7 +209,7 @@ export default class SignInView extends Vue {
   /** <string> admission url. */
   admissionURL: string = null;
 
-  /** Mounted hook. */
+  /** Mounted hook. Loads stores urls. */
   mounted() {
     this.loadURLS();
   }
@@ -207,6 +227,9 @@ export default class SignInView extends Vue {
     );
   }
 
+  /**
+   * Obtains the oauth urn for github.
+   */
   get githubOauthURN() {
     return (
       this.acsURL +
@@ -260,6 +283,9 @@ export default class SignInView extends Vue {
     return "";
   }
 
+  /**
+   * Loads urls from the local storage.
+   */
   loadURLS() {
     // Intentamos buscar la direccion de acs en el storage
     this.acsURL = localStorage.getItem("acsURL");
@@ -288,12 +314,18 @@ export default class SignInView extends Vue {
     });
   }
 
+  /**
+   * Updates configuration to the local storage.
+   */
   updateConfig() {
     localStorage.setItem("acsURL", this.acsURL);
     localStorage.setItem("admissionURL", this.admissionURL);
     this.showPannel = false;
   }
 
+  /**
+   * Removes configuration from the local storage. Adds the default config.
+   */
   clearConfig() {
     this.acsURL = config.ACS_URI;
     this.admissionURL = config.ADMISSION_URI;

@@ -1,3 +1,7 @@
+<!--
+  This component is the small card showed in overview which represents each
+  deployment.
+-->
 <template>
   <v-flex xs12 sm6 md6 lg4 xl3>
 
@@ -199,6 +203,17 @@ import SSGetters from "../../store/stampstate/getters";
 
 import { utils } from "../../api";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "deployment-card",
   props: {
@@ -222,6 +237,12 @@ export default class Card extends Vue {
    */
   deploymentName: string = null;
 
+  /** Lifecycle point mounted. */
+  mounted() {
+    this.onResize();
+  }
+
+  /** Date when the service was deployed. */
   get deploymentDate() {
     let text = this.deployment._urn;
 
@@ -250,18 +271,22 @@ export default class Card extends Vue {
     );
   }
 
+  /** Actual deployment. */
   get deployment(): Deployment {
     return this.deployments[this.deploymentURN];
   }
 
+  /** Obtains all deployments stored in the state. */
   get deployments() {
     return (<SSGetters>this.$store.getters).deployments;
   }
 
+  /** Gets if the deployment is an instance of Entrypoint. */
   get isEntrypoint() {
     return this.deployment instanceof EntryPoint;
   }
 
+  /** Obtains the link list of the actual deployment. */
   get linkList() {
     let res: string[] = [];
     for (let chann in this.deployment.channels) {
@@ -276,6 +301,7 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Shows if the deployment (entrypoint) contains a certificate. */
   get hasCertificate(): boolean {
     let res: boolean = false;
     for (let resource in this.deployment.resources) {
@@ -288,10 +314,12 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Services stored in the store. */
   get services() {
     return this.$store.getters.services;
   }
 
+  /** Deployment persistent volumes. */
   get deploymentPersistentVolumes(): PersistentVolume[] {
     let res: PersistentVolume[] = [];
     let ser: Service = <Service>this.$store.getters.services[
@@ -315,6 +343,7 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Deployment volatile volumes. */
   get deploymentVolatileVolumes(): VolatileVolume[] {
     let res: VolatileVolume[] = [];
     let ser: Service = <Service>this.$store.getters.services[
@@ -338,6 +367,7 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Deployment state. */
   get state(): string {
     let res: string = null;
     switch (this.deployment.state) {
@@ -357,6 +387,7 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Deployment state color. */
   get stateColor() {
     let res: string = null;
     switch (this.state) {
@@ -375,10 +406,12 @@ export default class Card extends Vue {
     return res;
   }
 
-  mounted() {
-    this.onResize();
-  }
-
+  /**
+   * Obtains all domains of this service. If it's an entrypoint then this will
+   * return all domains associated with this entrypoint. If this is not an
+   * entrypoint, then this will return a list of all domains of the entrypoints
+   * linked whith this service.
+   */
   get linkedDomains(): { web: string; certificate: boolean }[] {
     let res: { web: string; certificate: boolean }[] = [];
 
@@ -402,6 +435,7 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Returns the ussage of a volume. */
   get volumeUsage() {
     return volume => {
       let res = -1;
@@ -415,6 +449,7 @@ export default class Card extends Vue {
     };
   }
 
+  /** Returns the short name of a service. */
   serviceShortName(serviceName:string){
     let res = serviceName;
     let i = res.indexOf("services") + 9;
@@ -427,14 +462,21 @@ export default class Card extends Vue {
     return res;
   }
 
+  /** Sets an action to the onResize event. */
   onResize() {
     this.setDeploymentName();
   }
 
+  /**
+   * This is done to change the number of letters of the deployment name at the
+   * card, thus this version of vuetify doesn't correctly hide the required
+   * number of letters when the card component resizes.
+   */
   setDeploymentName() {
     this.deploymentName = this.trimName(this.deployment.name);
   }
 
+  /** Trims a string depending on the size view. */
   trimName(name: string): string {
     let res: string = name;
     let breakpointName = (<any>this).$vuetify.breakpoint.name;

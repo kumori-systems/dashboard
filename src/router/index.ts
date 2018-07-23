@@ -1,3 +1,6 @@
+/**
+ * This is the configuration for the official suported router by vue.
+ */
 import Vue from 'vue';
 import Router from 'vue-router';
 

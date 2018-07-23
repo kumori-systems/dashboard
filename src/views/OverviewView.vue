@@ -1,3 +1,6 @@
+<!--
+  Component for overview.
+-->
 <template>  
   <v-card id="overview-view" class="mybackground">
     
@@ -89,6 +92,17 @@ import { Deployment, EntryPoint } from "../store/stampstate/classes";
 
 import { DeploymentCardComponent } from "../components";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "OverviewView",
   components: {
@@ -128,6 +142,3 @@ export default class OverviewView extends Vue {
   }
 }
 </script>
-<style lang="scss">
-
-</style>

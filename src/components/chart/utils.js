@@ -1,3 +1,9 @@
+/**
+ * Utils used to render charts. Different utils are used deppending if the chart
+ * is for an instance, for a role or for a deployment. The reason is the way
+ * data is taken from the components. It shouldn't be so difficult to join
+ * all in the same method, but this haven't been actually done.
+ */
 import * as moment from 'moment';
 
 const color = {

@@ -1,3 +1,6 @@
+<!--
+  Component which represents the new volume view.
+-->
 <template>
 <v-card id="volumes-view" style="max-width:1300px">
     <v-card-title>
@@ -69,16 +72,36 @@ import VueClassComponent from "vue-class-component";
 
 import { Volume } from "../store/stampstate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "new-volume-view",
   components: {}
 })
 export default class NewVolumeView extends Vue {
+
+  /** Template for the component. */
   urn: string = "eslap://<namespace>/resources/volume/<volume_name>/persistent";
+
+  /** Default selected file system. */
   selectedFilesystem: Volume.FILESYSTEM = Volume.FILESYSTEM.XFS;
+
+  /** Default selected volume size. */
   size: number = 1;
+
+  /** Marks if the form has got valid params. */
   valid: boolean = false;
 
+  /** Obtains the actual filesystem. */
   get filesystem() {
     let res: string[] = [];
     for (let filesys in Volume.FILESYSTEM) {
@@ -87,6 +110,7 @@ export default class NewVolumeView extends Vue {
     return res;
   }
 
+  /** Method to confirm the addition of a persistent volume. */
   addPersistentVolume() {
     this.$store.dispatch("addPersistentVolume", {
       urn: this.urn,
@@ -96,14 +120,17 @@ export default class NewVolumeView extends Vue {
     this.$router.go(-1);
   }
 
+  /** Checks the correctness of the component urn. */
   checkURN(value: string) {
     return RegExp(
       "^eslap://(\\w+)/resource(s)?/volume/(\\w+)/persistent$"
     ).test(value);
   }
 
+  /** Cancels the creation of a new volume. */
   cancel() {
     this.$router.go(-1);
   }
+  
 }
 </script>

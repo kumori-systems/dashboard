@@ -1,3 +1,29 @@
+<!--
+  This component represents the detailed deployment view.
+ *******************************************************************************
+ * README - Gestión de los diferentes estados y modificaciones. Motivado porque
+ *   un mismo equipo utiliza el mismo usuario, por lo que tenemos varias
+ *   personas realizando cambios con el mismo identificador, de forma
+ *   concurrente y con distintas herramientas sobre la plataforma.
+ *******************************************************************************
+ * 1 - Se muestra el estado de la plataforma.
+ * 2 - Se clica sobre 'edit'.
+ *    * Se calcula un hash del estado permanente del despliegue => H
+ *    * Se crea un estado temporal copia del estado permanente
+ * 3 - Se realizan modificaciones.
+ *    * Mientras se realizan modificaciones el estado temporal no es actualizado
+ *       por los cambios de la plaltaforma
+ *    * Visualmente se refleja el estado temporal
+ *    * Las modificaciones se guardan en el estado temporal
+ * 4.A - Se pulsa en 'apply changes'.
+ *    * Se realiza un hash del estado persistente => H'; ¿H = H'?
+ *        SI -> Evío de los cambios a la plataforma
+ *        NO -> - Advertimos al usuario de que hay conflictos
+ *              - Cancelamos los cambios
+ * 4.B - Se cancelan los cambios.
+ *    * Se descarta H y el estado temporal
+ *******************************************************************************
+-->
 <template>
   <v-form ref="form" lazy-validation>
 
@@ -369,31 +395,6 @@
   </v-form>
 </template>
 <script lang="ts" scoped>
-/**
- * -----------------------------------------------------------------------------
- * README - Gestión de los diferentes estados y modificaciones. Motivado porque
- *   un mismo equipo utiliza el mismo usuario, por lo que tenemos varias
- *   personas realizando cambios con el mismo identificador, de forma
- *   concurrente y con distintas herramientas sobre la plataforma.
- * -----------------------------------------------------------------------------
- * 1 - Se muestra el estado de la plataforma.
- * 2 - Se clica sobre 'edit'.
- *    * Se calcula un hash del estado permanente del despliegue => H
- *    * Se crea un estado temporal copia del estado permanente
- * 3 - Se realizan modificaciones.
- *    * Mientras se realizan modificaciones el estado temporal no es actualizado
- *       por los cambios de la plaltaforma
- *    * Visualmente se refleja el estado temporal
- *    * Las modificaciones se guardan en el estado temporal
- * 4.A - Se pulsa en 'apply changes'.
- *    * Se realiza un hash del estado persistente => H'; ¿H = H'?
- *        SI -> Evío de los cambios a la plataforma
- *        NO -> - Advertimos al usuario de que hay conflictos
- *              - Cancelamos los cambios
- * 4.B - Se cancelan los cambios.
- *    * Se descarta H y el estado temporal
- * -----------------------------------------------------------------------------
- */
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 import Moment from "moment";
@@ -421,6 +422,17 @@ import { utils } from "../api";
 import { setTimeout } from "timers";
 import { sha256, Hasher } from "js-sha256";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "detailed-deployment-view",
   components: {
@@ -435,6 +447,7 @@ import { sha256, Hasher } from "js-sha256";
   }
 })
 export default class DetailedDeploymentView extends Vue {
+
   /** Vue wrapper for the Chart options. */
   chartOptions = ChartComponentOptions;
 
@@ -477,6 +490,7 @@ export default class DetailedDeploymentView extends Vue {
   /** Array of watcher functions. */
   unwatch: Function[] = [];
 
+  /** Vue lifecycle. Adds watchers. */
   mounted() {
     this.cancelChanges();
 
@@ -499,6 +513,7 @@ export default class DetailedDeploymentView extends Vue {
     );
   }
 
+  /** Vue lifecycle. Removes watchers. */
   beforeDestroy() {
     // Removes all watchers
     for (let i in this.unwatch) {
@@ -506,18 +521,24 @@ export default class DetailedDeploymentView extends Vue {
     }
   }
 
+  /** Obtains all stored deployments. */
   get deployments(): { [deploymentURN: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [deploymentURN: string]: Deployment;
     };
   }
 
+  /** Obtains all stored services. */
   get services(): { [serviceURN: string]: Service } {
     return ((<SSGetters>this.$store.getters).services as any) as {
       [serviceName: string]: Service;
     };
   }
-  /** Required to obtain additional information of a role. */
+
+  /**
+   * Obtains the actual service. Required to obtain additional information of a
+   * role.
+   */
   get service(): Service {
     let serviceURN = this.deployment.service;
     let ser: Service = this.services[serviceURN];
@@ -564,6 +585,7 @@ export default class DetailedDeploymentView extends Vue {
     return res;
   }
 
+  /** Obtains and parses the deployment date from it's urn. */
   get deploymentDate() {
     let text = this.deployment._urn;
 
@@ -608,6 +630,8 @@ export default class DetailedDeploymentView extends Vue {
 
           if (this.deployment.channels[chann]) {
             for (let conn in this.deployment.channels[chann]) {
+
+              // Adds chips with readable text
               res[chann].push({
                 text:
                   this.deployments[
@@ -622,6 +646,7 @@ export default class DetailedDeploymentView extends Vue {
                     .destinyChannelId
                 })
               });
+
             }
           }
         }
@@ -630,13 +655,20 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+    /**
+   * Sets the deployment provided connections. Here a trick was used because
+   * it was the only way to fit with all requirements.
+   */
   set deploymentProvidedConnections(val) {
     this.temporaryProvidedLinks [
       (<any>val(1)).channel
       ] =  (<any>val(1)).value;
     this.haveChanges = true;
   }
-
+  /**
+   * Obtains deployment depended connections. The result will be different
+   * depending if the edit mode is on or off.
+   */
   get deploymentDependedConnections() {
     return channel => {
 
@@ -653,6 +685,8 @@ export default class DetailedDeploymentView extends Vue {
 
           if (this.deployment.channels[chann]) {
             for (let conn in this.deployment.channels[chann]) {
+
+              // Adds chips with readable text
               res[chann].push({
                 text:
                   this.deployments[
@@ -667,6 +701,7 @@ export default class DetailedDeploymentView extends Vue {
                     .destinyChannelId
                 })
               });
+
             }
           }
         }
@@ -675,6 +710,10 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /**
+   * Sets the deployment depended connections. Here a trick was used because
+   * it was the only way to fit with all requirements.
+   */
   set deploymentDependedConnections(val) {
     this.temporaryDependedLinks[
       (<any>val(1)).channel
@@ -682,26 +721,32 @@ export default class DetailedDeploymentView extends Vue {
     this.haveChanges = true;
   }
 
+  /** This is a trick to update links which fits with all requirements. */
   HandleDeploymentDependedConnections(channel, value) {
     this.deploymentDependedConnections = (a)=>{return  {channel:channel, value:value}; };
   }
 
+  /** This is a trick to update links which fits with all requirements. */
   HandleDeploymentProvidedConnections(channel, value) {
     this.deploymentProvidedConnections = (a)=>{return  {channel:channel, value:value}; };
   }
 
+  /** Obtains volume metrics from the storage. */
   get volumeMetrics() {
     return this.$store.getters.volumeMetrics;
   }
 
+  /** Obtains persistent volumes from the storage. */
   get persistentVolumes(): { [volumeURN: string]: PersistentVolume } {
     return this.$store.getters.persistentVolumes;
   }
 
+  /** Obtains volatile volumes from the storage. */
   get volatileVolumes(): { [volumeURN: string]: VolatileVolume } {
     return this.$store.getters.volatileVolumes;
   }
 
+  /** Obtains volume ussage from the storage. */
   get volumeUsage() {
     return volume => {
       let res = -1;
@@ -715,6 +760,7 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /** Obtains persistent volumes related to this deployment. */
   get deploymentPersistentVolumes(): PersistentVolume[] {
     let ser = this.service;
     let volumes = this.persistentVolumes;
@@ -732,6 +778,7 @@ export default class DetailedDeploymentView extends Vue {
     return res;
   }
 
+  /** Obtains volatile volumes related to this deployment. */
   get deploymentVolatileVolumes(): VolatileVolume[] {
     let ser = this.service;
     let volumes = this.volatileVolumes;
@@ -992,10 +1039,17 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
+  /** Does this deployment have a certificate? */
   get hasCertificate() {
     return this.deployment.resources["server_cert"] ? true : false;
   }
 
+  /**
+   * Obtains linked domains. If this deployment is an entrypoint, then it's
+   * domains will be returned. If this deployment is not an entrypoint, then
+   * links will be followed to see all linked entrypoints with it's respective
+   * domains.
+   */
   get linkedDomains(): { web: string; certificate: boolean }[] {
     let res: { web: string; certificate: boolean }[] = [];
 
@@ -1019,6 +1073,9 @@ export default class DetailedDeploymentView extends Vue {
     return res;
   }
 
+  /**
+   * Prepares the data to the edition mode.
+   */
   prepareEdition() {
     // Get the hash value of the actual deployment
     this.temporaryOriginStateHash = sha256.create();
@@ -1212,11 +1269,18 @@ export default class DetailedDeploymentView extends Vue {
     this.editing = false;
   }
 
+  /**
+   * Method called when another used undeployed this deployment and this user
+   * has to be redirected to overview.
+   */
   redirectToOverview() {
     this.noMoreInfoDialog = false;
     this.$router.push("/overview");
   }
 
+  /**
+   * Cancel changes done in edit mode.
+   */
   cancelChanges(): void {
     if (this.$refs.form) {
       (<any>this.$refs.form).reset();
@@ -1251,6 +1315,9 @@ export default class DetailedDeploymentView extends Vue {
     this.haveChanges = true;
   }
 
+  /**
+   * Returns if a given deployment is an instance of entrypoint
+   */
   isEntrypoint(deployment: Deployment): boolean {
     return utils.isEntrypoint(deployment);
   }

@@ -1,3 +1,6 @@
+<!--
+  This component represents the user settings view.
+-->
 <template>
   <v-card id="user-settings-view" style="max-width:1300px">
     <v-card-title>
@@ -41,6 +44,17 @@ import VueClassComponent from "vue-class-component";
 
 import { User } from "../store/pagestate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "user-settings-view"
 })
@@ -51,16 +65,20 @@ export default class UserSettingsView extends Vue {
     return this.$store.getters.user;
   }
 
+  /** This is to return to overview. Is not really a cancel. */
   cancel() {
     this.$router.go(-1);
   }
 
+  /** Obtains the user access token. */
   get userApiToken() {
     return this.user.token.accessToken;
   }
 
+  /** Sets the user access token. Not used. */
   set userApiToken(val) {}
 
+  /** Copies the access token to the clip board. */
   copyToClipboard() {
     /* Get the text field */
     let copyText: HTMLInputElement = document.getElementById(

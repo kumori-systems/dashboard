@@ -1,3 +1,6 @@
+<!--
+  This component represents the elements view.
+-->
 <template>
   <v-card id="elements-view" style="max-width:1300px">
     <v-card-title>
@@ -360,6 +363,17 @@ import {
   Service
 } from "../store/stampstate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "ElementsView"
 })
@@ -390,6 +404,7 @@ export default class ElementsView extends Vue {
   /** Selected element for dialogs. */
   selectedElement: string = null;
 
+  /** Vue lifecycle. Preppears all required data. */
   mounted() {
     // Retrieve all actually deployed services
     for (let dep in this.$store.getters.deployments) {
@@ -406,6 +421,7 @@ export default class ElementsView extends Vue {
     }
   }
 
+  /** Done to show the apply changes as enabled or disabled. */
   get someoneSelected() {
     if (
       this.selectedComponents.length > 0 ||
@@ -417,12 +433,14 @@ export default class ElementsView extends Vue {
     return false;
   }
 
+  /** Obtains deployment info. */
   get deploymentInfo() {
     return (urn: string) => {
       return this.$store.getters.deployments[urn];
     };
   }
 
+  /** Orders components by owner. */
   get componentsByOwner() {
     let res: {
       [owner: string]: { [name: string]: { [version: string]: string } };
@@ -447,6 +465,7 @@ export default class ElementsView extends Vue {
     return res;
   }
 
+  /** Obtains components used by property. */
   get componentUsedBy(): Function {
     return (componentURN: string) => {
       let res: string[] = [];
@@ -458,6 +477,7 @@ export default class ElementsView extends Vue {
     };
   }
 
+  /** Orders certificates by owner. */
   get certificatesByOwner() {
     let res: {
       [owner: string]: {
@@ -483,6 +503,7 @@ export default class ElementsView extends Vue {
     return res;
   }
 
+  /** Obtains certificates used by property. */
   get certificateUsedBy(): Function {
     return (certificateURN: string) => {
       let res: string[] = [];
@@ -494,6 +515,7 @@ export default class ElementsView extends Vue {
     };
   }
 
+  /** Orders services by owner. */
   get servicesByOwner() {
     let res: {
       [owner: string]: {
@@ -519,6 +541,7 @@ export default class ElementsView extends Vue {
     return res;
   }
 
+  /** Returns service property used by. */
   get serviceUsedBy(): Function {
     return (serviceURN): string[] => {
       let res: string[] = [];
@@ -530,6 +553,7 @@ export default class ElementsView extends Vue {
     };
   }
 
+  /** Returns the runtimes ordered by owner. */
   get runtimesByOwner() {
     let res: {
       [owner: string]: {
@@ -555,6 +579,7 @@ export default class ElementsView extends Vue {
     return res;
   }
 
+  /** Returns the runtime properties used by. */
   get runtimeUsedBy(): Function {
     return (runtimeURN: string) => {
       let res: string[] = [];
@@ -566,9 +591,7 @@ export default class ElementsView extends Vue {
     };
   }
 
-  /**
-   * Shows all stored info related to the selected element.
-   */
+  /** Shows all stored info related to the selected element. */
   get selectedElementInfo(): string {
     let res: string = "";
     let getter: string = null;
@@ -602,28 +625,32 @@ export default class ElementsView extends Vue {
     return res;
   }
 
+  /** Show delete element dialog. */
   showDeleteElementDialog(element: string) {
     this.selectedElement = element;
     this.deleteElementDialog = true;
   }
 
+  /** Confirms to delete an element. */
   deleteElement() {
     this.$store.dispatch("deleteElement", this.selectedElement);
     this.deleteElementDialog = false;
     this.selectedElement = null;
   }
-
+  /** Show info element dialog. */
   showInfoElementDialog(element: string) {
     this.selectedElement = element;
     this.infoElementDialog = true;
   }
 
+  /** Downloads the manifest of an element. */
   showElementInfo() {
     this.$store.dispatch("downloadManifest", this.selectedElement);
     this.infoElementDialog = false;
     this.selectedElement = null;
   }
 
+  /** Downloads multiple manifests from selected elements. */
   downloadSelected() {
     for (let serv in this.selectedServices) {
       this.$store.dispatch("downloadManifest", this.selectedServices[serv]);
@@ -639,10 +666,12 @@ export default class ElementsView extends Vue {
     }
   }
 
+  /** Shows the delete group dialog. */
   ShowDeleteGroupDialog() {
     this.deleteGroupDialog = true;
   }
 
+  /** Confirms the deletion of more than one element. */
   deleteGroup() {
     let deleteList: string[] = [];
     for (let index in this.selectedComponents) {
@@ -668,6 +697,11 @@ export default class ElementsView extends Vue {
     this.deleteGroupDialog = false;
   }
 
+  /**
+   * This is triggered when the user clicks on the play icon at a service. This
+   * will redirect the user to 'add service view' with the service as the
+   * selected service.
+   */
   deployService(service) {
     // Keep the service in the state
     this.$store.dispatch("selectedService", service);

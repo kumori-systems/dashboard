@@ -17,6 +17,7 @@ sync(store, router);
 import Vuetify from 'vuetify';
 Vue.use(Vuetify);
 
+// Vue instance which wil contain the entire page.
 new Vue({
   el: '#app',
   store,

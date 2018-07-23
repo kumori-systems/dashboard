@@ -23,6 +23,9 @@ let checktokeninterval = null;
 export default class Actions implements Vuex.ActionTree<State, any> {
   [name: string]: Vuex.Action<State, any>;
 
+  /**
+   * Adds a background action. This is what is seen by the user as an action.
+   */
   addBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
     action): void => {
 
@@ -30,6 +33,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   }
 
+  /**
+   * Finishes a background action. Marks it as success or fail.
+   */
   finishBackgroundAction = (injectee: Vuex.ActionContext<State, any>,
     { type, state, details }): void => {
 
@@ -37,6 +43,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
   }
 
+  /** Stores the new token. */
   refreshToken = (injectee: Vuex.ActionContext<State, any>, token: User.Token):
     void => {
 
@@ -75,7 +82,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
   }
 
   /**
-   * Tries to sign the user into the system.
+   * Tries to sign the user into the system. If the signin is successfull then
+   * also sets a few handlers for different events provided by admission-client.
    * @requires payload <{ username: string, userpassword: string }>
    * @description The required actions are started in the background.
    * If the user successfully signs-in the loaded user is saved in the state.
@@ -104,6 +112,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Define all listeners
 
+      /*
+        Listener for when a user is forced to sign out. This happens when the
+        token is not valid and could not be updated
+       */
       ProxyConnection.instance.onMustSignOut((reason: string) => {
 
         injectee.dispatch('signOut').then(() => {
@@ -116,18 +128,28 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        This method is when a token is refreshed and the new token must be
+        stored in the store.
+       */
       ProxyConnection.instance.onRefreshToken((token) => {
 
         injectee.dispatch('refreshToken', token);
 
       });
 
+      /*
+        Listens for add manifest event and adds a manifest to the storage.
+       */
       ProxyConnection.instance.onAddManifest((manifest: Manifest) => {
 
         injectee.commit('addManifest', manifest);
 
       });
 
+      /*
+        Listens for ondeploy events and adds new deployments to the storage.
+       */
       ProxyConnection.instance.onDeploy((deploymentId: string,
         deployment: Deployment) => {
 
@@ -137,6 +159,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens for add instance events and adds instances to the storage.
+       */
       ProxyConnection.instance.onAddInstance((deploymentId: string,
         addedInstances: { [role: string]: string[] },
         removedInstances: { [role: string]: string[] }
@@ -158,7 +183,7 @@ export default class Actions implements Vuex.ActionTree<State, any> {
           * Depending on the solution given by the STAMP ticket, other changes
           and possibly a new call will be required. *
 
-        */
+         */
         
         injectee.commit('addInstance', {
           'deploymentId': deploymentId,
@@ -173,6 +198,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         
       });
 
+      /*
+        Listens to instance state updates and applies modifications to the
+        storage.
+       */
       ProxyConnection.instance.onUpdateState((payload: {
         deployment: string,
         role: string,
@@ -184,6 +213,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to the add service event and adds the new service to the
+        storage.
+      */
       ProxyConnection.instance.onAddService((serviceId: string,
         service: Service) => {
 
@@ -193,6 +226,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to the add component event and adds it to the storage.
+       */
       ProxyConnection.instance.onAddComponent((componentId: string,
         component: Component) => {
 
@@ -202,6 +238,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to the add runtime event and adds it to the storage.
+       */
       ProxyConnection.instance.onAddRuntime((runtimeId: string,
         runtime: Runtime) => {
 
@@ -211,6 +250,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to the add certificate event and adds it to the storage.
+       */
       ProxyConnection.instance.onAddCertificate((resourceId: string,
         resource: Certificate) => {
 
@@ -220,6 +262,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to the add domain event and adds the new domain to the storage.
+       */
       ProxyConnection.instance.onAddDomain((resourceId: string,
         resource: Domain) => {
 
@@ -229,6 +274,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to add persistent volume events and adds new volumes to the
+        storage.
+      */
       ProxyConnection.instance.onAddPersistentVolume((resourceURN: string,
         resource: PersistentVolume) => {
 
@@ -238,6 +287,10 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to add volatile volumes events and adds new volumes to the
+        storage.
+      */
       ProxyConnection.instance.onAddVolatileVolume((resourceId: string,
         resource: VolatileVolume) => {
 
@@ -247,12 +300,18 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
+      /*
+        Listens to add service metrics and stores them in the storage.
+      */
       ProxyConnection.instance.onAddServiceMetrics((metrics) => {
 
         injectee.commit('addServiceMetrics', metrics);
 
       });
 
+      /*
+        Listens to volume metrics events and stores them in the storage.
+      */
       ProxyConnection.instance.onAddVolumeMetrics((metrics) => {
 
         let deployments = injectee.getters.deployments;
@@ -293,19 +352,28 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       });
 
-
+      /*
+        Listens to link events and makes the relative changes in the storage.
+      */
       ProxyConnection.instance.onLink((params) => {
 
         injectee.commit('link', params);
 
       });
 
+
+      /*
+        Listens to unlink events and makes the relative changes in the storage.
+      */
       ProxyConnection.instance.onUnlink((params) => {
 
         injectee.commit('unlink', params);
 
       });
 
+      /*
+        Listens to add notification events and adds them to the storage.
+      */
       ProxyConnection.instance.onAddNotification(
         (notification: Notification) => {
 
@@ -317,6 +385,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Start loading action in the state
 
+      /*
+        This is used to show a message when the page is loading.
+      */
       return injectee.dispatch(
         'addBackgroundAction',
         new BackgroundAction(
@@ -326,6 +397,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all elements
 
+      /*
+        This retrieves the storaged elements in the stamp
+      */
       return ProxyConnection.instance.getRegisteredElements().then(() => {
         /*
         injectee.dispatch('addNotification',
@@ -342,6 +416,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all resources
 
+      /*
+        This retrieves the storaged resources in the stamp
+      */
       return ProxyConnection.instance.getResources().then(() => {
 
         /*
@@ -364,6 +441,9 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
     }).then((user) => { // Load all deployments
 
+      /*
+        This retrieves the actual deployments in the stamp
+      */
       return ProxyConnection.instance.getDeploymentList().then(() => {
 
         /*
@@ -467,14 +547,19 @@ export default class Actions implements Vuex.ActionTree<State, any> {
         error.message === 'Network Error'
         || error.message === 'Connection error!'
       ) {
+
+        // This stops the login of the page
         injectee.dispatch('finishBackgroundAction', {
           'type': BackgroundAction.TYPE.SIGNIN,
           'state': BackgroundAction.STATE.FAIL,
           'details': 'Network error'
         });
+
       }
       else if (error.message === 'Element not covered') {
 
+        // If a not covered error happens, to avoid troubles in the storage
+        // the user is signed out -> Remove user form storage
         injectee.dispatch('signOut').then(() => {
 
           return injectee.dispatch('finishBackgroundAction', {
@@ -488,6 +573,8 @@ export default class Actions implements Vuex.ActionTree<State, any> {
 
       } else {
 
+        // The authentication request was successfull but the user-password
+        // was not recognized by the stamp
         injectee.dispatch('finishBackgroundAction', {
           'type': BackgroundAction.TYPE.SIGNIN,
           'state': BackgroundAction.STATE.FAIL,

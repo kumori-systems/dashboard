@@ -1,3 +1,10 @@
+<!--
+  This component represents the manifest editor. To fit whith the page a
+  refactorization is needed. All clases ussed here could be the classes from
+  other storage modules.
+
+  The storage module manifest editor needs a hard rework.
+-->
 <template>
   <div>
     <div class="notifier alertNoty">
@@ -135,6 +142,11 @@ import {
 import i18n from "../store/manifesteditor/i18n";
 import vSelect from "vue-select";
 
+
+/*
+  All components inside the manifest editor have been developed in javascript.
+  Babel is not in the webpack configuration thus not es6 javascript can be used.
+*/
 export default {
   i18n: i18n,
   components: {
