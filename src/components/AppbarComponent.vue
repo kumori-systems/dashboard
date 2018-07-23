@@ -1,3 +1,7 @@
+<!--
+  This component is the app bar component shown at the top of the screen. It
+  contains the company logo and the user name between others.
+-->
 <template>
   <v-toolbar class="elevation-1" fixed clipped-left app>
 
@@ -83,17 +87,47 @@ import {
   BackgroundAction
 } from "../store/pagestate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "appbar-component",
   components: {}
 })
 export default class AppbarComponent extends Vue {
+
+  /** This marks if the alarm 'pop-ip' menu should be shown. */
   showAlarmMenu: boolean = false;
+
+  /**
+   * This marks if the notification icon has been clicked. It's ussefull
+   * because of the spected behaviour of the menu; if no one clicked it, then it
+   * should appear for a few seconds when a new notification arrives. If someone
+   * clicked it, then it should remain visible until another click is done in
+   * any other place of the page.
+   */
   clickedNotificationIcon: boolean = false;
 
-  watcher;
+  /**
+   * Pointer to the last notification. This is done because notifications are
+   * computed each time any notification arrives, but here will only be shown
+   * notifications with error level, thus a pointer to the last notification has
+   * to be keept to know if the last notification has already be advertised.
+   */
   lastNotification: Notification = null;
 
+  /** This is for an showAlarmMenu watcher */
+  watcher;
+
+  /** Vue lifecycle. Adds watchers. */
   mounted() {
     this.watcher = this.$watch("showAlarmMenu", function(value) {
       if (value) {
@@ -108,10 +142,12 @@ export default class AppbarComponent extends Vue {
     });
   }
 
+  /** Vue lifecycle. Removes watchers. */
   beforeDestroy() {
     this.watcher(); // Finishes the watcher
   }
 
+  /** Marks a notification as clicked. */
   notificationClicked(value) {
     this.clickedNotificationIcon = true;
   }

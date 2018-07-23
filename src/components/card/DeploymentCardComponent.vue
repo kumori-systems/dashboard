@@ -1,3 +1,7 @@
+<!--
+  This component is the small card showed in overview which represents each
+  deployment.
+-->
 <template>
   <v-flex xs12 sm6 md6 lg4 xl3>
 
@@ -184,6 +188,17 @@ import SSGetters from "../../store/stampstate/getters";
 
 import { utils } from "../../api";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "deployment-card",
   props: {

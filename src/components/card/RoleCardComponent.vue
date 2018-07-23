@@ -1,3 +1,6 @@
+<!--
+  This component represents a role inside the detailed deployment view.
+-->
 <template>
   <v-card light>
     <v-card-title primary-title class="grey lighten-3">
@@ -158,11 +161,25 @@ import {
   Channel
 } from "../../store/stampstate/classes";
 
-/* Theese components are loaded separatedly to avoid recursivity problems. */
+/*
+  Theese components are loaded separatedly to avoid recursivity troubles. Maybe
+  solved in a newer vue version.
+*/
 import InstanceCardComponent from "./InstanceCardComponent.vue";
 import ChartComponent from "./../chart";
 import { isNumber } from "util";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "role-card-component",
   components: {
@@ -181,17 +198,35 @@ import { isNumber } from "util";
   }
 })
 export default class RoleCardComponent extends Vue {
+  
+  /** Role represented in this component. */
   role: Deployment.Role = this.role;
+
+  /** Service of the deployment. */
   service: Service = this.service;
+
+  /** Role metrics. */
   roleMetrics = this.roleMetrics;
+
+  /** Metrics of the volumes of this role. */
   volumeMetrics = this.volumeMetrics;
+
+  /** Persistent volumes of this role. */
   persistentVolumes = this.persistentVolumes;
+
+  /** Volatile volumes of this role. */
   volatileVolumes = this.volatileVolumes;
+
+  /** Marks if the user is in edit mode. */
   editing: boolean = this.editing;
+
+  /** Private way of storing the number of instances. */
   _localNumInstances: number = 1;
 
+  /** Property which stores all watchers associated to this component. */
   unwatch: Function[] = [];
 
+  /** Event cicle mounted. Stores all watchers. */
   mounted() {
     this.unwatch.push(
       // Watches for editing changes
@@ -203,6 +238,7 @@ export default class RoleCardComponent extends Vue {
     );
   }
 
+  /** Event cicle before destroy. Removes all watchers. */
   beforeDestroy() {
     // Removes all watchers
     for (let i in this.unwatch) {
@@ -210,6 +246,10 @@ export default class RoleCardComponent extends Vue {
     }
   }
 
+  /**
+   * Obtains the number of instances. Depending if the edit mode is on, the data
+   * will be obtained from different places.
+   */
   get localNumInstances(): number {
     let res: number = this.role.actualInstances;
     if (this.editing) {
@@ -218,14 +258,22 @@ export default class RoleCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * Sets the instances. This will only be called from edit mode.
+   */
   set localNumInstances(val: number) {
     (<any>this.$data)._localNumInstances = val;
   }
 
+  /** Obtains the maximum number of instances. */
   get maxNumInstances(): number {
     return this.role.maxInstances;
   }
 
+  /**
+   * This is a way to avoid a watcher on role metrics. It will make
+   * some computations before giving the data to the chart component.
+   */
   get onRoleMetricsUpdate() {
     let res: {
       data: { [property: string]: number | string }[];
@@ -245,10 +293,16 @@ export default class RoleCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * Passes the data to the chart component.
+   */
   get roleChartData() {
     return ChartComponentUtils.prepareRoleData(this.onRoleMetricsUpdate);
   }
 
+  /**
+   * Obtains the state of the role.
+   */
   get state(): string {
     let res: string;
     switch (this.role.state) {
@@ -267,6 +321,9 @@ export default class RoleCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * Obtains the component of the role
+   */
   get component() {
     let res;
     if (this.service) {
@@ -283,10 +340,17 @@ export default class RoleCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * This is the only way of passing a vue-external imported code to
+   * vue-internal code.
+   */
   get chartOptions() {
     return ChartComponentOptions;
   }
 
+  /**
+   * Obtains the channels related to this code.
+   */
   get roleChannels() {
     return (service: Service, roleId: string) => {
       let res: Connector[] = [];
@@ -313,6 +377,9 @@ export default class RoleCardComponent extends Vue {
     this.$emit("killInstanceChange", [this.role.name, ...payload]);
   }
 
+  /**
+   * Removes one instance from the local instances counter. Only in edit mode.
+   */
   lessInstances() {
     if (this.localNumInstances > this.role.minInstances) {
       this.localNumInstances--;
@@ -323,6 +390,9 @@ export default class RoleCardComponent extends Vue {
     }
   }
 
+  /**
+   * Adds one instance to the local instances counter. Only in edit mode.
+   */
   moreInstances() {
     if (this.localNumInstances < this.role.maxInstances) {
       this.localNumInstances++;

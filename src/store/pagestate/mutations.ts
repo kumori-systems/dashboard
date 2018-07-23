@@ -100,6 +100,10 @@ export default class Mutations implements Vuex.MutationTree<State> {
     
   }
 
+  /**
+   * Marks a notification as readed. This is done to remove the eye icon in the
+   * logs view.
+   */
   readNotification = (state: State, { time, title }): void => {
 
     for (let not in state.notifications) {

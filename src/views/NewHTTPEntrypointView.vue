@@ -1,3 +1,6 @@
+<!--
+  View of a new http entrypoint.
+-->
 <template>
   <v-form v-model="valid" ref="form">
     <v-card id="add-htt-entrypoint-view" style="max-width:1300px">
@@ -104,20 +107,50 @@ import {
 import SSGetters from "../store/stampstate/getters";
 import { HTTPEntryPoint } from "../store/stampstate/classes/entrypoint";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "new-http-entrypoint-view",
   components: {}
 })
 export default class NewHTTPEntrypointView extends Vue {
+  /** Marks if the data in the form is valid. */
   valid: boolean = false;
+
+  /** Stores the selected domain. */
   selectedDomain: Domain = null;
+
+  /** Stores the selected cert. */
   selectedCertificate: string = null;
+
+  /** Stores if the client requires certificates. */
   requireClientCertificates: boolean = false;
+
+  /** Stores the minimum number of instances. */
   minInstances: number = 1;
+
+  /** Stores the actual instances. */
   instances: number = 1;
+
+  /** Stores the max number of instances. */
   maxInstances: number = 1;
+
+  /** Stores the entrypoint resilience. */
   resilience: number = 1;
 
+  /**
+   * Vue lifecycle. Obtains infor in there is not information of the http
+   * inbound service.
+   */
   mounted() {
     this.$store.dispatch(
       "getElementInfo",
@@ -169,6 +202,7 @@ export default class NewHTTPEntrypointView extends Vue {
     (<any>this.$refs.maxInstancesField).validate();
   }
 
+  /** Submits the creation of a new entrypoint. */
   submit(): void {
     if ((<any>this.$refs.form).validate()) {
       let resourcesConfig = {
@@ -232,6 +266,7 @@ export default class NewHTTPEntrypointView extends Vue {
     }
   }
 
+  /** Cancels the creation of a new entrypoint. */
   cancel() {
     this.$router.go(-1);
   }

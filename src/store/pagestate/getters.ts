@@ -30,7 +30,9 @@ export default class Getters implements Vuex.GetterTree<State, any> {
     return state.pendingBackgroundActions;
   }
 
-
+  /**
+   * Returns finished background actions.
+   */
   finishedBackgroundActions = (state?: State, getters?: Getters,
     rootState?: any, rootGetters?: any): BackgroundAction[] => {
     return state.finishedBackgroundActions;

@@ -1,3 +1,6 @@
+<!--
+  This component represents the alarms and log view.
+-->
 <template>
   <v-card style="max-width:1300px">
     <v-card-title>
@@ -161,6 +164,17 @@ import { Notification } from "../store/pagestate/classes";
 
 const NUM_ITEMS_PER_PAGE = 10;
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "alarms-and-logs-view",
   filters: {
@@ -170,8 +184,13 @@ const NUM_ITEMS_PER_PAGE = 10;
   }
 })
 export default class AlarmsAndLogsView extends Vue {
+  
+  /**
+   * This is just a way of passing a  imported vue-external element inside vue.
+   */
   Notification = Notification;
 
+  /** Number of rows per page. */
   rowsPerPageItems = [25, 50, { text: "All", value: -1 }];
 
   /** Table headers. */
@@ -269,6 +288,7 @@ export default class AlarmsAndLogsView extends Vue {
   /** Selected to time. */
   toTime: string = null;
 
+  /** Obtains the logs. In the storage logs are stored as notifications. */
   get logs() {
     let loglist: Notification[] = this.$store.getters.notifications;
 
@@ -346,6 +366,7 @@ export default class AlarmsAndLogsView extends Vue {
     return loglist;
   }
 
+  /** Formats the date in the spanish way. */
   formatDate(date) {
     if (!date) {
       return null;
@@ -355,6 +376,7 @@ export default class AlarmsAndLogsView extends Vue {
     return `${day}-${month}-${year}`;
   }
 
+  /** This is done to match the spanish format date. */
   parseDate(date) {
     if (!date) {
       return null;
@@ -364,11 +386,13 @@ export default class AlarmsAndLogsView extends Vue {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
 
+  /* This is the method which shows the log info dialog. */
   showLogInfoDialog(data: string) {
     this.data = data;
     this.logInfoDialog = true;
   }
 
+  /** This is the method to mark an alarm as readed. */
   markAlarmAsSeen(item) {
     this.$store.dispatch("readNotification", {
       time: item.time,

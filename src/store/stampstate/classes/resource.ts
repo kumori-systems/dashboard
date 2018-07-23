@@ -92,7 +92,6 @@ export module Domain {
 
 }
 
-
 /**
  * Phisical data volume.
  */

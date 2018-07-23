@@ -1,3 +1,6 @@
+/**
+ * Static options for a line chart.
+ */
 export default {
   /*
   legend: {

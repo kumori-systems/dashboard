@@ -81,7 +81,7 @@ the service.
 2 - When the information arrives, if you are making the commits well, the data
 will be automatically updated.
 
-* IMPORTANT Well commmiting; Vue relies on javascript to update the data from
+* IMPORTANT Well commiting; Vue relies on javascript to update the data from
   it's visual side, but it has got some limitations. The store can update
   changes when them have been done in a first-level propperty, like
   numInstances = 5;
@@ -237,3 +237,35 @@ between all components.
 
 main.ts - This is the entrypoint of all the project. It will require all vue
 libraries and assign vue to a label in the html code.
+
+## Minimum number of petitions
+
+The innitialitzation of the dashboard is done with the minimal number of calls,
+so there only the required information to show overview.
+
+If the user moves between pages and new information is required, then a new
+action will be triggered, usually getElementInfo (store/stampstate/actions).
+This is the method to get more info from the state.
+
+The information is only retrieved if the user successfully signs into the stamp,
+thus if you want to understand the dashboard innitialitzation it's a good idea
+to see the signin action (store/stampstate/actions).
+
+## Modifiying the dashboard
+
+The recommended way is to see the view which is givin a fail or wanna be
+editted. This view will make different calls to the store, just follow the calls
+and methods until you arrive to the storage.
+
+If you think the changes should be done before adding the data to the storage,
+then you are looking for admission-client. Try to search for the modificactions
+done before emitting the data to the vue instance.
+
+The way in which the dashboard innitializes admission-client and listens changes
+to the events is done in the sign in action (store/stampstate/actions).
+
+## New elements
+
+When saying 'new' in the emmited events or the commits, it doesn't really mean
+these are new elements in the platform; it means these are new elements in the
+dashbaord.

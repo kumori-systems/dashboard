@@ -19,9 +19,9 @@ import {
  * The mean of time of Destructurator is more or less 2ms less than
  * vue.set's mean.
  * 
- * The case of array.push() is not clear. Sometimes it semms to deppend on the
+ * The case of array.push() is not clear. Sometimes it sems to deppend on the
  * size of the array and sometimes it seems it's depending on the work of
- * the browser. But both arent always true.
+ * the browser. But both cases aren't always true.
  */
 export default class Mutations implements Vuex.MutationTree<State> {
   [name: string]: Vuex.Mutation<State>;
@@ -146,10 +146,12 @@ export default class Mutations implements Vuex.MutationTree<State> {
 
   }
 
+  /** Adds a manifest to the state. */
   addManifest = (state: State, payload: Manifest): void => {
     state.manifests = { ...state.manifests, [payload._urn]: payload };
   }
 
+  /** Adds an instance to the state. */
   addInstance = (state: State,
     payload: {
       'deploymentId': string,

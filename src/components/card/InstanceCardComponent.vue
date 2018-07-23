@@ -1,3 +1,8 @@
+<!--
+  This component represents an instance in the detailed deployment view. This
+  means this will be under 'DetailedDeploymentView' > 'RoleCardComponent' >
+  'InstanceCardComponent'
+-->
 <template>
  <v-container fluid>
     <v-layout wrap>
@@ -34,6 +39,7 @@
               <v-list-tile-content v-if="isPersistentVolumeInstance(vol)" >
                 <v-list-tile-title>
 
+                  <!-- This is to show the little icon if the volume ussage is high -->
                   <v-badge
                     overlap
                     bottom
@@ -47,29 +53,26 @@
                   </v-badge>
 
                   {{ vol.id }}
-
-                
                    
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
                   <v-layout>
-                  <v-flex xs12 class="ml-1">
-                  <span>{{ persistentVolumes[vol._urn].filesystem }}</span>
-                  <span>{{ persistentVolumes[vol._urn].size }} GB</span>
-                  </v-flex>
-                  
-                  <v-flex xs6>
-                  <span>Used: {{
-                    volumeMetrics[vol.id]
-                    && volumeMetrics[vol.id].length > 0?
-                    volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%'
-                    : '..' }}
-                  </span>
-                  </v-flex>
+
+                    <v-flex xs12 class="ml-1">
+                      <span>{{ persistentVolumes[vol._urn].filesystem }}</span>
+                      <span>{{ persistentVolumes[vol._urn].size }} GB</span>
+                    </v-flex>
+                    
+                    <v-flex xs6>
+                      <span>Used: {{
+                        volumeMetrics[vol.id]
+                        && volumeMetrics[vol.id].length > 0?
+                        volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%' :
+                        '..' }}
+                      </span>
+                    </v-flex>
                   
                   </v-layout>
-
-                  
                 </v-list-tile-sub-title>
               </v-list-tile-content>
               
@@ -77,7 +80,8 @@
 
                 <!-- A volatile volume -->
                 <v-list-tile-title>
-                  
+
+                  <!-- This is to show the little icon if the volume ussage is high -->
                   <v-badge
                     overlap
                     bottom
@@ -94,21 +98,24 @@
 
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
+
                   <v-layout>
-                  <v-flex xs6 class="ml-1">
-                    <span>{{ volatileVolumes[vol._urn].filesystem }}</span>
-                    <span>{{ volatileVolumes[vol._urn].size }} GB</span>
-                  </v-flex>
-                  <v-flex xs6>
-                  <span>Used: {{
-                    volumeMetrics[vol.id]
-                    && volumeMetrics[vol.id].length > 0?
-                    volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%'
-                    : '..' }}
-                  </span>
-                  </v-flex>
+                    <v-flex xs6 class="ml-1">
+                      <span>{{ volatileVolumes[vol._urn].filesystem }}</span>
+                      <span>{{ volatileVolumes[vol._urn].size }} GB</span>
+                    </v-flex>
+                    <v-flex xs6>
+                    <span>
+                      Used: {{
+                      volumeMetrics[vol.id]
+                      && volumeMetrics[vol.id].length > 0?
+                      volumeMetrics[vol.id][volumeMetrics[vol.id].length - 1].usage + '%'
+                      : '..' }}
+                    </span>
+                    </v-flex>
                   </v-layout>
                 </v-list-tile-sub-title>
+
               </v-list-tile-content>
             
           </v-list-tile>
@@ -142,7 +149,17 @@ import {
 import SSGetters from "../../store/stampstate/getters";
 import ChartComponent from "./../chart";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
 
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "instance-card-component",
   props: {
@@ -157,11 +174,23 @@ import ChartComponent from "./../chart";
   }
 })
 export default class InstanceCardComponent extends Vue {
+  
+  /** Represented instance. */
   instance: Deployment.Role.Instance = this.instance;
+
+  /** Marks if the instance should be killed. */
   killInstance: boolean = false;
+
+  /** Metrics of the instance. */
   instanceMetrics = this.instanceMetrics;
+
+  /** Instance persistent volumes. */
   persistentVolumes = this.persistentVolumes;
+
+  /** Instance volatile volumes. */
   volatileVolumes = this.volatileVolumes;
+
+  /** Instance volume metrics. */
   volumeMetrics = this.volumeMetrics;
 
   /** Obtains the volumes associated to this instance. */
@@ -208,12 +237,17 @@ export default class InstanceCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * This is a way to avoid using watchers. When data is updated this computed
+   * propperty will take care and update the chart.
+   */
   get instanceChartData() {
     return ChartComponentUtils.prepareInstanceData(
       this.onInstanceMetricsUpdate
     );
   }
 
+  /** Instance state. */
   get state(): string {
     let res: string;
     switch (this.instance.state) {
@@ -229,6 +263,10 @@ export default class InstanceCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * This is redundant but it's the only way of passing the chart options to the
+   * chart component
+   */
   get ChartOptions() {
     return ChartComponentOptions;
   }
@@ -248,10 +286,12 @@ export default class InstanceCardComponent extends Vue {
     this.killInstance = false;
   }
 
+  /** Returns if the volume is a persistent volume. */
   isPersistentVolumeInstance(vol:Volume.Instance){
     return utils.isPersistentVolumeInstance(vol);
   }
 
+  /** Returns if the volume is a volatile volume. */
   isVolatileVolumeInstance(vol: Volume.Instance){
     return utils.isVolatileVolumeInstance(vol);
   }

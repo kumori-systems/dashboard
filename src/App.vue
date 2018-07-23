@@ -1,3 +1,6 @@
+<!--
+  This is the main vue file. This mounts all the vue structure.
+-->
 <template>
   <v-app dark class="kumori-background">
     <template v-if="user && user.state === User.State.AUTHENTICATED">
@@ -33,6 +36,17 @@ import { User, BackgroundAction } from "./store/pagestate/classes";
 import PSGetters from "./store/pagestate/getters";
 import { config } from "./api";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "App",
   components: {
@@ -42,8 +56,15 @@ import { config } from "./api";
   }
 })
 export default class App extends Vue {
+  
+  /** User class. */
   User = User;
 
+  /**
+   * Vue lifecycle. Reads the url for query params. This is done because of
+   * oauth. In the case params are in the urn, a new user is created and the
+   * page tries to authenticate the user in the stamp.
+   */
   created() {
     let status = this.$route.query.status;
     if (status && status == "error") {
@@ -92,6 +113,10 @@ export default class App extends Vue {
     }
   }
 
+  /**
+   * If no params are found in the url, then the user is tried to obtain from
+   * the local storage. This case happens when a user visited the page before.
+   */
   mounted() {
     if (typeof Storage !== "undefined") {
       // Check if there is a token in localStorage
@@ -132,6 +157,7 @@ export default class App extends Vue {
 }
 </script>
 
+<!-- This style is applied to the entire application -->
 <style lang="stylus">
 @import './stylus/main';
 </style>

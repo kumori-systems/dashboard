@@ -1,3 +1,6 @@
+<!--
+  This represents the domain views
+-->
 <template>
   <v-card style="max-width:1300px">
     <v-card-title>
@@ -76,19 +79,39 @@ import {
   HTTPEntryPoint
 } from "../store/stampstate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "domains-view",
   components: {}
 })
 export default class DomainsView extends Vue {
+  
+  /** Shows the  delete domain dialog. */
   dialog: boolean = false;
+
+  /** Stores the selected domain for the dialog. */
   selectedDomain: string = null;
 
-  // Modal Arguments
+  /** Stores if the delete modal dialog should be visible. */
   deleteModalIsVisible: boolean = false;
+
+  /** Stores the element id */
   modalElementId: string = "";
+
+  /** Stores the element name. */
   modalElementName: string = "";
 
+  /** Headers for the data table. */
   headers: any[] = [
     {
       text: "URL",
@@ -110,6 +133,7 @@ export default class DomainsView extends Vue {
     }
   ];
 
+  /** Returns domains stored in the storage. */
   get domains(): Domain[] {
     let domains: Domain[] = [];
     for (let domainURN in this.$store.getters.domains) {
@@ -122,23 +146,27 @@ export default class DomainsView extends Vue {
     return domains;
   }
 
+  /** Returns deployments stored in the storage. */
   get deployment(): (stri: string) => HTTPEntryPoint {
     return (deploymentURN: string) => {
       return (<SSGetters>this.$store.getters).deployments[deploymentURN];
     };
   }
 
+  /** Returns if a deployment has a certificate. */
   get hasCertificate() {
     return (deployment: Deployment) => {
       return deployment.resources["server_cert"] ? true : false;
     };
   }
 
+  /** Shows the delete domain dialog. */
   showDialog(domainURN): void {
     this.dialog = true;
     this.selectedDomain = domainURN;
   }
 
+  /** Confirms the deletion of a domain. */
   deleteDomain(): void {
     this.$store.dispatch("deleteElement", this.selectedDomain);
     this.dialog = false;

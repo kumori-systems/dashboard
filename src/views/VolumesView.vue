@@ -1,3 +1,6 @@
+<!--
+  Component for volumes view.
+-->
 <template>
   <v-card id="volumes-view" style="max-width:1300px">
     <v-card-title>
@@ -88,10 +91,23 @@ import {
   VolatileVolume
 } from "../store/stampstate/classes";
 
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "volumes-view"
 })
 export default class VolumesView extends Vue {
+  
+  /** Headers for the data table. */
   headers: any[] = [
     {
       text: "Persistent",
@@ -148,7 +164,11 @@ export default class VolumesView extends Vue {
       value: "actions"
     }
   ];
+
+  /** Show/Hide the dialog to remove volumes. */
   dialog: boolean = false;
+
+  /** Stores the selected element. */
   selectedElement: string = null;
 
   /**
@@ -252,12 +272,14 @@ export default class VolumesView extends Vue {
     return res;
   }
 
+  /** Obtains a deployment from the storage. */
   get deployment(): (stri: string) => Deployment {
     return (deploymentURN: string) => {
       return this.$store.getters.deployments[deploymentURN];
     };
   }
 
+  /** Obtains the ussage of a volume. */
   get itemUsage() {
     return (id: string) => {
       let res = null;
@@ -268,14 +290,17 @@ export default class VolumesView extends Vue {
     };
   }
 
+  /** Method to show the delete dialog. */
   showDialog(elementURN: string): void {
     this.dialog = true;
     this.selectedElement = elementURN;
   }
 
+  /** Confirmed to remove an element. */
   removeElement(): void {
     this.$store.dispatch("deleteElement", this.selectedElement);
     this.dialog = false;
   }
+  
 }
 </script>

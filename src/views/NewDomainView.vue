@@ -1,3 +1,6 @@
+<!--
+  Component which represents a new domain view.
+-->
 <template>
   <v-form v-model="valid" ref="form">
     <v-card style="max-width:1300px">
@@ -47,14 +50,33 @@
 import Vue from "vue";
 import VueClassComponent from "vue-class-component";
 
+
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "add-domain-view"
 })
 export default class AddDomainView extends Vue {
+
+  /** Name of the new domain. */
   newDomain: string = null;
+
+  /** URN of the component contaning the new domain. */
   domainURN: string = "eslap://<name_space>/resources/vhost/<element_urn>/<number>_<number>_<number>";
+
+  /** Marks if the component is valid or not. */
   valid: boolean = false;
 
+  /** Method to submit the new domain. */
   submit() {
     this.$store.dispatch("addDomain", {
       urn: this.domainURN,
@@ -63,12 +85,14 @@ export default class AddDomainView extends Vue {
     this.$router.push("/domains");
   }
 
+  /** Checks the urn of the component. */
   checkURN(value: string) {
     return RegExp(
       "^eslap://\\w+(.\\w)*/resource(s)?/vhost/(\\w+/)+\\d+_\\d+_\\d+(_\\d+)?$"
     ).test(value);
   }
 
+  /** Cancels the creation of a new domain. */
   cancel() {
     this.$router.go(-1);
   }

@@ -54,12 +54,25 @@ export module User {
   };
 
   export class Token {
+
+    /** Token user to authenticate the user without user-password needed. */
     readonly accessToken: string;
+
+    /** Time in which the token is valid. */
     readonly expiresIn: number;
+
+    /** Token used to refresh the actual access token. */
     readonly refreshToken: string;
+
+    /** Type of token. */
     readonly tokenType: string;
+
+    /** Date when the token has been created. */
     readonly creationDate: Date;
 
+    /**
+     * A user-related-token used to authenticate the user in the stamp.
+     */
     constructor(
       accessToken: string, expiresIn: number, refreshToken: string,
       tokenType: string

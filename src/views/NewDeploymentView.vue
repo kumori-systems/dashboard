@@ -1,3 +1,7 @@
+<!--
+  This component represents the new deployment view. This view is intended for
+  common deployments (that means no http entrypoints).
+-->
 <template>
   <v-form v-model="valid" ref="form">
     <v-card id="add-deployment-view" style="max-width:1300px">
@@ -180,6 +184,18 @@ import {
 
 import SSGetters from "../store/stampstate/getters";
 
+
+/*
+  This is a decorator and it's used because typescript doesn't implement all
+  required properties of a vue component.
+
+  All properties of the typescript class will be compiled as vue data.
+  All methods inside the class will be compiled as computed properties (get, set
+  methods)
+  or common methods (non-get, non-set).
+  There are special methods like mounted, created or destroy which are part of
+  the vue lifecycle and will be rendered as special lifecycle methods.
+*/
 @VueClassComponent({
   name: "new-service-view",
   components: {},
@@ -193,31 +209,62 @@ import SSGetters from "../store/stampstate/getters";
   }
 })
 export default class NewDeploymentView extends Vue {
+
+  /** This is for when a user selects a service in the elements view. */
   selectedService: string = null;
+
+  /** Stores the actual deployment name. Passed to the stamp as nickname. */
   deploymentName: string = null;
+
+  /** List of role memories. Care when edditin this. */
   roleMem: string[] = [];
+
+  /** List of role cpu. Care when edditin this. */
   roleCPU: string[] = [];
+
+  /** List of role net. Care when edditin this. */
   roleNet: string[] = [];
+
+  /** List of role min instances. Care when edditin this. */
   roleMinInstances: string[] = [];
+
+  /** List of role actual instances. Care when edditin this. */
   roleInstances: string[] = [];
+
+  /** List of role max instances. Care when edditin this. */
   roleMaxInstances: string[] = [];
+
+  /** List of role resilience. Care when edditin this. */
   roleResilence: string[] = [];
+
+  /** List of role resilience. Care when edditin this. */
   resourceConfig: string[] = [];
+
+  /** Service configuration params. */
   serviceConfig: string = null;
+
+  /** Marks if the form has valid data. */
   valid: boolean = false;
 
+  /**
+   * Vue lifecycle. Used to load a selected service from elements view. This
+   * should be changed in the future to fit whith good habits. It's the only one
+   * not following good habits.
+   */
   mounted() {
     // If there is a preselected service, load it
     this.selectedService = this.$store.getters.selectedService || null;
     if (this.selectedService) this.$store.dispatch("selectedService", null);
   }
 
+  /** Obtains deployments stored in the state. */
   get deployments(): { [urn: string]: Deployment } {
     return ((<SSGetters>this.$store.getters).deployments as any) as {
       [urn: string]: Deployment;
     };
   }
 
+  /** Obtains the service relative to the actual deployment. */
   get service(): Service {
     let ser: Service = (<SSGetters>this.$store.getters).services[
       this.selectedService
@@ -289,6 +336,7 @@ export default class NewDeploymentView extends Vue {
     return ser;
   }
 
+  /** Obtains the services stored in the state. */
   get services(): string[] {
     // All deployed services must be loaded to show available channels
     for (let deploymentURN in this.deployments) {
@@ -312,6 +360,7 @@ export default class NewDeploymentView extends Vue {
     return servicesList;
   }
 
+  /** Obtains resources required from the selected service. */
   get serviceResourcesList(): [string, string][] {
     let resourcesList: [string, string][] = [];
     if (this.selectedService) {
@@ -327,6 +376,7 @@ export default class NewDeploymentView extends Vue {
     return resourcesList;
   }
 
+  /** Obtains the role list from the selected service. */
   get serviceRolesList(): string[] {
     let roleList: string[] = [];
     if (this.selectedService) {
@@ -342,6 +392,7 @@ export default class NewDeploymentView extends Vue {
     return roleList;
   }
 
+  /** Obtains the total resource configuration. */
   get totalResourceConfig() {
     return resourceId => {
       return ((<SSGetters>this.$store.getters).getFreeResource as any)(
@@ -368,6 +419,7 @@ export default class NewDeploymentView extends Vue {
     return volumeList;
   }
 
+  /** Checks if all required properties have been fullfiled. */
   get allSelected() {
     if (!this.selectedService) return false;
     if (!this.deploymentName) return false;
@@ -403,6 +455,7 @@ export default class NewDeploymentView extends Vue {
     (<any>this.$refs.form).validate();
   }
 
+  /** This method checks the json configurations. */
   parseable(v: string): boolean {
     try {
       JSON.parse(v);
@@ -412,6 +465,7 @@ export default class NewDeploymentView extends Vue {
     }
   }
 
+  /** Submits the creation of a new deployment. */
   submit() {
     if ((<any>this.$refs.form).validate()) {
       let roles = {};
@@ -481,6 +535,8 @@ export default class NewDeploymentView extends Vue {
       this.$router.push("/");
     }
   }
+
+  /** Cancels the creation of a new deployment. */
   cancel() {
     this.$router.go(-1);
   }
