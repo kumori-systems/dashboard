@@ -76,11 +76,21 @@
                         <div v-else>not in use</div>
                       </v-flex>
                       <v-flex xs2>
-                        <v-btn color="info" icon v-on:click="showInfoElementDialog(runtime)">
-                          <v-icon class="white--text">info_outline</v-icon>
+                        <v-btn icon v-on:click="showInfoElementDialog(runtime)">
+                          <v-tooltip left>
+
+                            <v-icon id="info_icon" slot="activator">info</v-icon>
+                            <span>info</span>
+                            
+                          </v-tooltip>
                         </v-btn>
-                        <v-btn color="error" v-bind:disabled="runtimeUsedBy(runtime).length > 0" icon v-on:click="showDeleteElementDialog(runtime)">
-                          <v-icon class="white--text">delete_forever</v-icon>
+                        <v-btn v-bind:disabled="runtimeUsedBy(runtime).length > 0" icon v-on:click="showDeleteElementDialog(runtime)">
+                          <v-tooltip right>
+
+                            <v-icon id="delete_icon" slot="activator">delete</v-icon>
+                            <span>delete</span>
+
+                          </v-tooltip>
                         </v-btn>
                       </v-flex>
                     </v-layout>
@@ -123,11 +133,21 @@
                         <div v-else>not in use</div>
                       </v-flex>
                       <v-flex xs2>
-                        <v-btn color="info" icon v-on:click="showInfoElementDialog(component)">
-                          <v-icon class="white--text">info_outline</v-icon>
+                        <v-btn icon v-on:click="showInfoElementDialog(component)">
+                          <v-tooltip left>
+
+                            <v-icon id="info_icon" slot="activator">info</v-icon>
+                            <span>info</span>
+                            
+                          </v-tooltip>
                         </v-btn>
-                        <v-btn color="error" v-bind:disabled="componentUsedBy(component).length > 0" icon v-on:click="showDeleteElementDialog(component)">
-                          <v-icon class="white--text">delete_forever</v-icon>
+                        <v-btn v-bind:disabled="componentUsedBy(component).length > 0" icon v-on:click="showDeleteElementDialog(component)">
+                          <v-tooltip right>
+                            
+                            <v-icon id="delete_icon" slot="activator">delete</v-icon>
+                            <span>delete</span>
+
+                          </v-tooltip>
                         </v-btn>
                       </v-flex>
                     </v-layout>
@@ -169,14 +189,29 @@
                         <div v-else>not in use</div>
                       </v-flex>
                       <v-flex xs2>
-                        <v-btn color="green" icon v-on:click="deployService(service)">
-                          <v-icon class="white--text">play_arrow</v-icon>
+                        <v-btn icon v-on:click="showInfoElementDialog(service)">
+                          <v-tooltip left>
+
+                            <v-icon slot="activator" id="info_icon">info</v-icon>
+                            <span>info</span>
+                            
+                          </v-tooltip>
                         </v-btn>
-                        <v-btn color="info" icon v-on:click="showInfoElementDialog(service)">
-                          <v-icon class="white--text">info_outline</v-icon>
+                        <v-btn icon v-on:click="deployService(service)">
+                          <v-tooltip top>
+
+                            <v-icon id="play_icon" slot="activator">play_arrow</v-icon>
+                            <span>run service</span>
+                            
+                          </v-tooltip>
                         </v-btn>
-                        <v-btn color="error" v-bind:disabled="serviceUsedBy(service).length > 0" icon v-on:click="showDeleteElementDialog(service)">
-                          <v-icon class="white--text">delete_forever</v-icon>
+                        <v-btn v-bind:disabled="serviceUsedBy(service).length > 0" icon v-on:click="showDeleteElementDialog(service)">
+                          <v-tooltip right>
+
+                            <v-icon id="delete_icon" slot="activator">delete</v-icon>
+                            <span>delete</span>
+
+                          </v-tooltip>
                         </v-btn>
                       </v-flex>
                     </v-layout>
@@ -223,12 +258,22 @@
                       </v-flex>
                       <v-flex xs2>
 
-                        <v-btn color="info" icon v-on:click="showInfoElementDialog(certificate)">
-                          <v-icon class="white--text">info_outline</v-icon>
+                        <v-btn icon v-on:click="showInfoElementDialog(certificate)">
+                          <v-tooltip left>
+
+                            <v-icon id="info_icon" slot="activator">info</v-icon>
+                            <span>info</span>
+
+                          </v-tooltip>
                         </v-btn>
 
-                        <v-btn color="error" v-bind:disabled="certificateUsedBy(certificate).length > 0" icon v-on:click="showDeleteElementDialog(certificate)">
-                          <v-icon class="white--text">delete_forever</v-icon>
+                        <v-btn v-bind:disabled="certificateUsedBy(certificate).length > 0" icon v-on:click="showDeleteElementDialog(certificate)">
+                          <v-tooltip right>
+
+                            <v-icon id="delete_icon" slot="activator">delete</v-icon>
+                            <span>delete</span>
+
+                          </v-tooltip>
                         </v-btn>
 
                       </v-flex>
@@ -643,3 +688,59 @@ export default class ElementsView extends Vue {
   }
 }
 </script>
+<style lang="scss" scoped>
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
+
+%icon_size {
+  font-size: 35px;
+}
+
+.play {
+  @extend %icon_size;
+  color: $color_success;  
+}
+
+.info {
+  @extend %icon_size;
+  color: $color_info;  
+}
+
+.delete{
+  @extend %icon_size;
+  color: $color_error;
+}
+
+#info_icon{
+  @extend .info;
+}
+
+#play_icon{
+  @extend .play;
+}
+
+#delete_icon{
+  @extend .delete;
+}
+
+.corporative_background {
+  background: #d1406b;
+}
+
+#info_link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1;
+  text-decoration: none;
+}
+
+#sanity_icon {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+}
+</style>

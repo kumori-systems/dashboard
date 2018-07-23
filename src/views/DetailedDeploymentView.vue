@@ -1,7 +1,7 @@
 <template>
   <v-form ref="form" lazy-validation>
 
-    <v-card v-if="deployment" style="max-width:1300px">
+    <v-card v-if="deployment">
 
       <v-card-title class="mybackground">
         
@@ -13,8 +13,18 @@
           <v-progress-circular v-else indeterminate color="light-blue lighten-4"></v-progress-circular>
 
           <span v-if="isEntrypoint(deployment)">
-            <v-icon class="ma-1">language</v-icon>
-            <v-icon class="ma-1" v-if="hasCertificate">https</v-icon>
+            <v-tooltip bottom>
+
+              <v-icon slot="activator">language</v-icon>
+              <span>is entrypoint</span>
+
+            </v-tooltip>
+            <v-tooltip v-if="hasCertificate" bottom>
+
+              <v-icon slot="activator">https</v-icon>
+              <span>has certificates</span>
+
+            </v-tooltip>
           </span>
           {{ deployment.name }}
         </h3>
@@ -171,22 +181,27 @@
                 <v-flex xs12>
                   <strong>Websites:</strong>
                   <template v-if="isEntrypoint(deployment)">
-                    <a
+                    <div
                       v-for="(domain, index) in deployment.websites"
-                      v-bind:key="index"
-                      v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
-                      <span v-if="index!==0">,</span>
-                      {{ domain.url }}
-                    </a>
+                      v-bind:key="index">
+                      <a
+                        v-bind:href="hasCertificate? 'https://' + domain.url : 'http://' + domain.url">
+                        <span v-if="index!==0">,</span>
+                        {{ domain.url }}
+                      </a>
+                    </div>
                   </template>
-                  <a
-                    v-else
-                    v-for="(domain, index) in linkedDomains"
-                    v-bind:key="index"
-                    v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
-                    <span v-if="index!==0">,</span>
-                    {{ domain.web }}
-                  </a>    
+                  <template v-else>
+                    <div
+                      v-for="(domain, index) in linkedDomains"
+                      v-bind:key="index">
+                      <a
+                      v-bind:href="domain.certificate? 'https://' + domain.web : 'http://' + domain.web">
+                      <span v-if="index!==0">,</span>
+                      {{ domain.web }}
+                      </a>
+                    </div>
+                  </template>
                 </v-flex>
               </v-layout>
 
@@ -284,12 +299,12 @@
         <v-layout wrap>
 
           <v-flex
-            v-for="(rolContent, roleId) in deployment.roles"
+            v-for="(rolContent, roleId) in service.roles"
             v-bind:key="roleId"
             xs12>
 
             <role-card-component
-              v-bind:role="rolContent"
+              v-bind:role="deployment.roles[roleId]"
               v-bind:service="service"
               v-bind:roleMetrics="deploymentMetrics.roles"
               v-bind:volumeMetrics="volumeMetrics"
@@ -659,6 +674,7 @@ export default class DetailedDeploymentView extends Vue {
       return channel ? res[channel] : res;
     };
   }
+
   set deploymentDependedConnections(val) {
     this.temporaryDependedLinks[
       (<any>val(1)).channel
@@ -669,6 +685,7 @@ export default class DetailedDeploymentView extends Vue {
   HandleDeploymentDependedConnections(channel, value) {
     this.deploymentDependedConnections = (a)=>{return  {channel:channel, value:value}; };
   }
+
   HandleDeploymentProvidedConnections(channel, value) {
     this.deploymentProvidedConnections = (a)=>{return  {channel:channel, value:value}; };
   }

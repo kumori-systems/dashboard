@@ -1,5 +1,5 @@
 <template>
-  <v-card id="volumes-view" style="max-width:1300px">
+  <v-card id="volumes-view">
     <v-card-title>
 
       <!-- View title -->
@@ -24,7 +24,7 @@
     <!-- Divides different sections of the view -->
     <v-divider></v-divider>
 
-    <v-container>
+    <v-container fluid>
       <v-data-table v-bind:headers="headers" v-bind:items="volumes" hide-actions>
         <template slot="items" scope="props">
 
@@ -50,10 +50,15 @@
           </td>
           
           <td class="text-xs-left">
-            <v-btn color="error" v-if="!props.item[5]"
+            <v-btn v-if="!props.item[5]"
             v-bind:disabled="props.item[8].length > 0"
               icon v-on:click="showDialog(props.item._urn)">
-              <v-icon class="white--text">delete_forever</v-icon>
+              <v-tooltip right>
+
+                <v-icon id="delete_icon" slot="activator">delete</v-icon>
+                <span>delete</span>
+
+              </v-tooltip>
             </v-btn>
           </td>
           
@@ -94,7 +99,7 @@ import {
 export default class VolumesView extends Vue {
   headers: any[] = [
     {
-      text: "Persistent",
+      text: "",
       align: "center",
       sortable: false,
       value: "persistent"
@@ -279,3 +284,59 @@ export default class VolumesView extends Vue {
   }
 }
 </script>
+<style lang="scss" scoped>
+$color_unkown: #bdbdbd;
+$color_error: #ff5252;
+$color_info: #2196f3;
+$color_success: #4caf50;
+$color_warning: #ffc107;
+
+%icon_size {
+  font-size: 35px;
+}
+
+.play {
+  @extend %icon_size;
+  color: $color_success;  
+}
+
+.info {
+  @extend %icon_size;
+  color: $color_info;  
+}
+
+.delete{
+  @extend %icon_size;
+  color: $color_error;
+}
+
+#info_icon{
+  @extend .info;
+}
+
+#play_icon{
+  @extend .play;
+}
+
+#delete_icon{
+  @extend .delete;
+}
+
+.corporative_background {
+  background: #d1406b;
+}
+
+#info_link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1;
+  text-decoration: none;
+}
+
+#sanity_icon {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+}
+</style>
