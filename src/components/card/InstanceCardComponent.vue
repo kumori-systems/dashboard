@@ -29,6 +29,7 @@
 
         <v-list three-line>
           <v-list-tile v-for="(vol, index) in instanceVolumes" v-bind:key="index" tag="div">
+
               <!-- A persistent volume -->
               <v-list-tile-content v-if="isPersistentVolumeInstance(vol)" >
                 <v-list-tile-title>
@@ -72,9 +73,9 @@
                 </v-list-tile-sub-title>
               </v-list-tile-content>
               
-              <!-- A volatile volume -->
               <v-list-tile-content v-else-if="isVolatileVolumeInstance(vol)">
 
+                <!-- A volatile volume -->
                 <v-list-tile-title>
                   
                   <v-badge
@@ -163,6 +164,7 @@ export default class InstanceCardComponent extends Vue {
   volatileVolumes = this.volatileVolumes;
   volumeMetrics = this.volumeMetrics;
 
+  /** Obtains the volumes associated to this instance. */
   get instanceVolumes(): any {
     let res: any = [];
     if (this.instance.resources) {
@@ -173,6 +175,10 @@ export default class InstanceCardComponent extends Vue {
     return res;
   }
 
+  /**
+   * This has been done to avoid using watchers. This is just a way of applying
+   * some computation to format metrics in a way the chart understands them.
+   */
   get onInstanceMetricsUpdate() {
     let res: {
       data: { [property: string]: number | string | object }[];
