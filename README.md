@@ -108,14 +108,15 @@ It's important to take a look at the different possibilities which vue gives us.
 
 7 - [Data update; reactivity](https://vuejs.org/v2/guide/reactivity.html)
 
-7 - Use the recommended tools (vetur, vue devtools), so they will provide warnings for the basic mistakes.
+7 - Use the recommended tools (vetur, vue devtools), so they will provide
+warnings for the basic mistakes.
 
 8 - If vue devtools is not shown (without a crash message), then you are making
 STORE CHANGES in the WRONG PLACE!.
 
 9 - [Typescript in vue](https://vuejs.org/v2/guide/typescript.html)
 
-10 - Avoid the use of '_' in vue properties, thus '_' and '$' are reserved
+10 - Avoid the use of '\_' in vue properties, thus '\_' and '$' are reserved
 symbols.
 
 ## This project structure
@@ -123,6 +124,8 @@ symbols.
 build - Generally it's about webpack configuration.
 
 src - Source files.
+
+dist - This folder will appear when the `npm run dist` is executed.
 
 static - Static folder provided with the compiled source files. Here go things
 like images or static css or other compiled libraries.
@@ -174,22 +177,22 @@ vue. The store is implemented as a cache of the service and will maintain all
 data received from petitions. Data is organized in modules and each module has
 it's own data types and functions. The way each module is scheduled is:
 
-  index - IMPORTANT strict propperty; this propperty watches for the right
-  way of implementing changes on the store. This propperty should only be true
-  when the dashboard is in development mode thus it makes the store to run
-  slowlier but it's a good help for newcommers to vue thus forces good habits.
-  The other code in this file is to point the different modules of the store.
+* index - IMPORTANT strict propperty; this propperty watches for the right way
+  of implementing changes on the store. This propperty should only be true when
+  the dashboard is in development mode thus it makes the store to run slowlier
+  but it's a good help for newcommers to vue thus forces good habits. The other
+  code in this file is to point the different modules of the store.
 
-  classes - All classes newly created by this module. For example, all general
+* classes - All classes newly created by this module. For example, all general
   classes for a webpage will be under pagestate/classes, all classes related to
   the Kumori PAAS will be under stampstate/classes. The manifest editor does not
   include new needed classes, thus all has been implemented like common
   javascript objects and there are not classes definitions.
 
-  state - The state of this module. This is where it's said which object is
+* state - The state of this module. This is where it's said which object is
   stored where and the innitial values of each one. IMPORTANT
 
-  getters - Is the way some info should be taken from the store. Getters sould
+* getters - Is the way some info should be taken from the store. Getters sould
   be kept SIMPLE! because when data changes all getters are recalculated. There
   is an important rule; hard computations should be kept BEFORE saving the data
   to a store or AFTER getting the data from the store, this means in the
@@ -200,7 +203,7 @@ it's own data types and functions. The way each module is scheduled is:
   respective component (were only is executed if the user is watching the
   component).
 
-  mutations - Mutations are the way to make changes to the store and should be
+* mutations - Mutations are the way to make changes to the store and should be
   kept simple. Mutations are executed in an atomic way(no mutation can be
   interrumpted by other mutation), thus keep less mutations as possible the less
   complex as possible. But try to keep mutations grouped in user actions, for
@@ -209,15 +212,15 @@ it's own data types and functions. The way each module is scheduled is:
   want to add a link and remove another one, then that should be two different
   mutations.
 
-  actions - Actions provide asynchony to mutations and is the recommended way of
+* actions - Actions provide asynchony to mutations and is the recommended way of
   doing them. This is mutations are only allowed inside actions. For example if
   it's required to change the links of a deployment where a link is broken and
   two new links are created, then the action called 'update_links' will have a
   commit 'unlink' and two 'link' commits.
 
-  NOTE: If an action/mutation/getter is called, you have to be carefull of giving
-  different names to each one, thus all 'clear' actions of each module are called
-  if you call this.$store.dispatch('clear');
+* NOTE: If an action/mutation/getter is called, you have to be carefull of
+  giving different names to each one, thus all 'clear' actions of each module
+  are called if you call this.$store.dispatch('clear');
 
 stylus - A folder which contains the css theme in stylys language. This is not
 actually working thus the actual vue version of this project has got a bug and
