@@ -1,6 +1,6 @@
 {
   "name": "dashboard",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Single web page for E-Cloud",
   "author": "Óscar Muñoz Garrigós <osmuogar@inf.upv.es>",
   "private": true,

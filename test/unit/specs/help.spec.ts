@@ -7,7 +7,8 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-import componentInTest from '../../../src/components/views/Help.vue';
+// import componentInTest from '../../../src/components/views/Help.vue';
+import componentInTest from '../../../src/views/HelpView.vue';
 const componentSelector = '#help-view';
 
 describe('Help.vue', () => {
