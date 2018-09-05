@@ -1,17 +1,16 @@
 import {
   AcsClient as EcloudAcsClient, AcsUser as EcloudAcsUser
-} from 'acs-client';
+} from '@kumori/acs-client';
 import {
   AdmissionClient as EcloudAdmissionClient, AdmissionEvent as EcloudEvent,
   Deployment as EcloudDeployment, DeploymentInstanceInfo, DeploymentList,
   EcloudEventName, EcloudEventType, Endpoint, FileStream,
-  ReconfigDeploymentModification, RegistrationResult,
-  ScalingDeploymentModification
-} from 'admission-client';
+  RegistrationResult, ScalingDeploymentModification
+} from '@kumori/admission-client';
 
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
-import { EventEmitter, Listener } from 'typed-event-emitter';
+import { EventEmitter } from 'typed-event-emitter';
 
 import { Notification, User } from '../store/pagestate/classes';
 import {
@@ -618,7 +617,7 @@ export class ProxyConnection extends EventEmitter {
               break;
 
             default:
-            
+
             /* // Silenced warnings
             this.emit(this.onAddNotification, new Notification(
               Notification.LEVEL.WARNING,
@@ -879,7 +878,7 @@ export class ProxyConnection extends EventEmitter {
 
   /**
    * Obtains detailed info from a element.
-   * @param urn 
+   * @param urn
    */
   getElementInfo(urn: string): Promise<any> {
 

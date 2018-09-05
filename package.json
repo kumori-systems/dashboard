@@ -15,14 +15,14 @@
     "lint": "eslint src/**/*.{js,vue}"
   },
   "devDependencies": {
+    "@kumori/acs-client": "1.0.0",
+    "@kumori/admission-client": "1.0.2",
     "@types/chai": "^3.4.35",
     "@types/mocha": "^2.2.40",
     "@types/node": "^8.10.2",
     "@types/sinon": "^2.3.2",
     "@types/socket.io": "^1.4.33",
     "@types/socket.io-client": "^1.4.32",
-    "acs-client": "git+ssh://git@gitlab.com:ECloud/acs-client.git#master",
-    "admission-client": "git+ssh://git@gitlab.com:ECloud/admission-client.git#master",
     "animate.css": "^3.5.2",
     "autoprefixer": "^6.7.2",
     "babel-core": "^6.26.3",
