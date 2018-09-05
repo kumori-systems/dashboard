@@ -7,8 +7,8 @@ import Router from 'vue-router';
 import {
   AlarmsAndLogsView, DetailedDeploymentView, DomainsView, ElementsView,
   HelpView, ManifestEditorView, NewBundleView, NewDeploymentView, NewDomainView,
-  NewHTTPEntrypointView, NewVolumeView, OverviewView, SignInView,
-  UserSettingsView, VolumesView
+  NewHTTPEntrypointView, NewVolumeView, OverviewView, UserSettingsView,
+  VolumesView
 } from '../views';
 
 Vue.use(Router);
