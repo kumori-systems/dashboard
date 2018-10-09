@@ -214,6 +214,21 @@ export default class Actions implements Vuex.ActionTree<State, any> {
       });
 
       /*
+        Listens to instance state updates and applies modifications to the
+        storage.
+       */
+      ProxyConnection.instance.onUndeploy((payload: {
+        deployment: string,
+        role: string,
+        instance: string,
+        state: Deployment.Role.Instance.STATE
+      }) => {
+
+        injectee.commit('undeploy', payload);
+
+      });
+
+      /*
         Listens to the add service event and adds the new service to the
         storage.
       */
