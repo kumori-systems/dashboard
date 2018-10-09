@@ -1,7 +1,13 @@
+import parse from 'url-parse';
 import {
   Deployment, ECloudElement, EntryPoint, HTTPEntryPoint, PersistentVolume,
   Resource, VolatileVolume, Volume
 } from '../store/stampstate/classes';
+
+// Obtains the actual URL
+const URL = parse(window.location.href, true);
+// Checks if the running instance is allowed to log
+const ALLOWED_TO_LOG = URL.hostname === 'localhost';
 
 /**
  * Given an URN returns the ECloud element type
@@ -236,4 +242,27 @@ export function isVolatileVolumeInstance(vol: Volume.Instance) {
  */
 export function isEntrypoint(deployment: Deployment) {
   return deployment instanceof HTTPEntryPoint;
+}
+
+
+export function log(
+  level: log.LEVEL, message?: any, ...optionalParams: any[]
+): void {
+
+  if (ALLOWED_TO_LOG) {
+    if (optionalParams.length > 0) {
+      console[level](message, optionalParams);
+    } else {
+      console[level](message);
+    }
+  }
+
+}
+export namespace log {
+  export enum LEVEL {
+    ERROR = 'error',
+    WARNING = 'warning',
+    INFO = 'info',
+    DEBUG = 'debug'
+  };
 }
