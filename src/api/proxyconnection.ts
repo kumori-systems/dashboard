@@ -24,7 +24,6 @@ import {
 
 import { utils } from './index';
 
-
 /**
  * This class connects with the platform and transform messages into
  * recognizable events for the page.
@@ -108,7 +107,6 @@ export class ProxyConnection extends EventEmitter {
    * recognizable events for the page.
    */
   private constructor() {
-
     super();
     this.onAddManifest = this.registerEvent<(manifest: Manifest) => void>();
     this.onAddComponent =
@@ -294,6 +292,11 @@ export class ProxyConnection extends EventEmitter {
         });
 
         this.admission.onEcloudEvent((event: EcloudEvent) => {
+
+          utils.log(
+            utils.log.LEVEL.DEBUG,
+            'Received event: ' + JSON.stringify(event, null, 2)
+          );
 
           switch (event.type) {
             case EcloudEventType.service:

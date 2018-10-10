@@ -94,6 +94,7 @@
     "typed-event-emitter": "^1.0.3",
     "typescript": "^2.9.1",
     "url-loader": "^1.0.1",
+    "url-parse": "^1.4.3",
     "urlencode": "^1.1.0",
     "utils-merge": "^1.0.1",
     "vue": "^2.2.2",
