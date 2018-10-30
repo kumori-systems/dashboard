@@ -655,7 +655,7 @@ export default class DetailedDeploymentView extends Vue {
     };
   }
 
-    /**
+  /**
    * Sets the deployment provided connections. Here a trick was used because
    * it was the only way to fit with all requirements.
    */
@@ -1109,9 +1109,9 @@ export default class DetailedDeploymentView extends Vue {
         someone has been doing changes in the deployment while the local user
         was in edit mode.
       */
-     
-     console.error('Changes cant be applied');
-     this.unableToChangeDialog = true;
+
+      // console.error('Changes cant be applied');
+      this.unableToChangeDialog = true;
 
       // @todo Message to the user and cancel changes.
     } else {
@@ -1136,9 +1136,9 @@ export default class DetailedDeploymentView extends Vue {
           }
 
           // Search in depended links
-          for (let tempConn in this.deploymentDependedConnections[chann]) {
+          for (let tempConn in this.deploymentDependedConnections(chann)) {
             if (
-              this.deploymentDependedConnections[chann][tempConn].value ===
+              this.deploymentDependedConnections(chann)[tempConn].value ===
               JSON.stringify({
                 deployment: this.deployment.channels[chann][realConn]
                   .destinyDeploymentId,
@@ -1165,14 +1165,14 @@ export default class DetailedDeploymentView extends Vue {
       }
 
       // Add new provided links
-      for (let chann in this.deploymentProvidedConnections) {
-        for (let tempConn in this.deploymentProvidedConnections[chann]) {
+      for (let chann in this.deploymentProvidedConnections(null)) {
+        for (let tempConn in this.deploymentProvidedConnections(chann)) {
           let found = false; // Checks if the connection has been found
 
           // Search in deployment channels
           for (let realConn in this.deployment.channels[chann]) {
             if (
-              this.deploymentProvidedConnections[chann][tempConn].value ===
+              this.deploymentProvidedConnections(chann)[tempConn].value ===
               JSON.stringify({
                 deployment: this.deployment.channels[chann][realConn]
                   .destinyDeploymentId,
@@ -1186,32 +1186,37 @@ export default class DetailedDeploymentView extends Vue {
 
           // If the connection haven't been found, a new one is created
           if (!found) {
-            let newConnexion: {
-              deployment: string;
-              channel: string;
-            } = JSON.parse(
-              this.deploymentProvidedConnections[chann][tempConn].value
-            );
+            try {
+              let newConnexion: {
+                deployment: string;
+                channel: string;
+              } = JSON.parse(
+                this.deploymentProvidedConnections(chann)[tempConn]
+              );
 
-            this.$store.dispatch("link", {
-              deploymentOne: this.deployment._urn,
-              channelOne: chann,
-              deploymentTwo: newConnexion.deployment,
-              channelTwo: newConnexion.channel
-            });
+              this.$store.dispatch("link", {
+                deploymentOne: this.deployment._urn,
+                channelOne: chann,
+                deploymentTwo: newConnexion.deployment,
+                channelTwo: newConnexion.channel
+              });
+
+            } catch (err) {
+              // console.error("Error parsing connection: " + err);
+            }
           }
         }
       }
 
       // Add new depended links
-      for (let chann in this.deploymentDependedConnections) {
-        for (let tempConn in this.deploymentDependedConnections[chann]) {
+      for (let chann in this.deploymentDependedConnections(null)) {
+        for (let tempConn in this.deploymentDependedConnections(chann)) {
           let found = false; // Checks if the connection has been found
 
           // Search in deployment channels
           for (let realConn in this.deployment.channels[chann]) {
             if (
-              this.deploymentDependedConnections[chann][tempConn].value ===
+              this.deploymentDependedConnections(chann)[tempConn].value ===
               JSON.stringify({
                 deployment: this.deployment.channels[chann][realConn]
                   .destinyDeploymentId,
@@ -1225,24 +1230,28 @@ export default class DetailedDeploymentView extends Vue {
 
           // If the connection haven't been found, a new one is created
           if (!found) {
-            let newConnexion: {
-              deployment: string;
-              channel: string;
-            } = JSON.parse(
-              this.deploymentDependedConnections[chann][tempConn].value
-            );
+            try{
+              let newConnexion: {
+                deployment: string;
+                channel: string;
+              } = JSON.parse(
+                this.deploymentDependedConnections(chann)[tempConn]
+              );
 
-            this.$store.dispatch("link", {
-              deploymentOne: this.deployment._urn,
-              channelOne: chann,
-              deploymentTwo: newConnexion.deployment,
-              channelTwo: newConnexion.channel
-            });
+              this.$store.dispatch("link", {
+                deploymentOne: this.deployment._urn,
+                channelOne: chann,
+                deploymentTwo: newConnexion.deployment,
+                channelTwo: newConnexion.channel
+              });
+            } catch(err){
+              // console.error('Error parsing connection: '+err);
+            }
           }
         }
       }
 
-      // If the number of instances has changed, a petition is sent
+      // If the number of instances has changed, a request is sent
       let changedNumInstances = false;
       for (let role in this.deployment.roles) {
         if (
