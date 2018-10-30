@@ -30,7 +30,7 @@
     <v-card v-if="deployment">
 
       <v-card-title class="mybackground">
-        
+
         <!-- View title-->
         <h3 class="headline mb-0">
 
@@ -54,10 +54,10 @@
           </span>
           {{ deployment.name }}
         </h3>
-          
+
         <!-- Applies a space between elements -->
         <v-spacer></v-spacer>
-        
+
         <!-- Deployment actions -->
         <v-card-actions>
 
@@ -79,9 +79,9 @@
           </template>
 
         </v-card-actions>
-        
+
       </v-card-title>
-      
+
       <!-- Divides the swections of the card -->
       <v-divider></v-divider>
 
@@ -284,7 +284,7 @@
 
                           <!-- Chips config-->
                           <template slot="selection" scope="items">
-                            <v-chip 
+                            <v-chip
                               @input="items.parent.selectItem(items.item)"
                               v-bind:close="editing"
                               color="light-blue lighten-1 white--text">
@@ -301,7 +301,7 @@
                   </table>
                 </v-flex>
               </v-layout>
-                
+
             </v-flex>
 
             <!-- Adds space between elements -->
@@ -1121,9 +1121,9 @@ export default class DetailedDeploymentView extends Vue {
           let found = false; // Marks if the connection has been found
 
           // Search in provided links
-          for (let tempConn in this.deploymentProvidedConnections[chann]) {
+          for (let tempConn in this.deploymentProvidedConnections(chann)) {
             if (
-              this.deploymentProvidedConnections[chann][tempConn].value ===
+              this.deploymentProvidedConnections(chann)[tempConn].value ===
               JSON.stringify({
                 deployment: this.deployment.channels[chann][realConn]
                   .destinyDeploymentId,
