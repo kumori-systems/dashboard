@@ -33,7 +33,7 @@
           <v-list-tile-title>{{ child.title }}</v-list-tile-title>
         </v-list-tile>
       </v-list-group>
-      
+
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -76,7 +76,6 @@ export default class NavigationComponent extends Vue {
       new NavigationItem("domain", "Domains", "/domains"),
       new NavigationItem("storage", "Data volumes", "/volumes"),
       new NavigationItem("alarm", "Alarms & logs", "/alarmsAndLogs"),
-      new NavigationItem("mode_edit", "Manifest editor", "/manifestEditor"),
       new NavigationItem("help", "Help", "/help")
     ];
   }

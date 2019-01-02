@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import manifesteditor from './manifesteditor';
 import pagestate from './pagestate';
 import stampstate from './stampstate';
 
@@ -15,7 +14,6 @@ export default new Vuex.Store({
   'strict': process.env.NODE_ENV !== 'production',
   'modules': {
     pagestate,
-    stampstate,
-    manifesteditor
+    stampstate
   }
 });
