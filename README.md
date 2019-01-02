@@ -1,19 +1,47 @@
 # Dashboard
 
-Dashboard single web page for Kumori Ecloud.
+Dashboard single page application for Kumori Ecloud.
 
-## Setup
+## Description
+
+This dashboard can be used by Kumori Cloud clients to manage their services and applications deployed in a Kumori Cloud instance or _stamp_.
+
+## Table of Contents
+
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Development](#development)
+  * [Production](#production)
+* [Development Tools](#development-tools)
+* [Brief Introduction to Vue](#brief-introduction-to-vue)
+* [Project Structure](#project-structure)
+* [Hints and Tips](#hints-and-tips)
+* [License](#license)
+
+## Installation
 
 ``` bash
-git clone git@gitlab.com:ECloud/dashboard.git;
-cd dashboard;
-npm install;
-npm run dev;
+git clone git@gitlab.com:ECloud/dashboard.git
+cd dashboard
+```
+
+## Usage
+
+The dashboard can be executed in a couple of ways:
+
+* Develpment: a development web server is executed with live updates. The dashboard can be accessed through `http://localhost:8080`.
+* Production: the single page application is compiled and packed as a web page. The result can be deployed in any web server.
+
+### Development
+
+``` bash
+npm install
+npm run dev
 ```
 
 The service will be running under localhost:8080
 
-## Build
+### Production
 
 ``` bash
 npm run build;
@@ -21,7 +49,7 @@ npm run build;
 
 All compiled service will be under dist/
 
-## Developer tools
+## Developer Tools
 
 For web debugging we can se
 [vue devtools](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd),
@@ -32,7 +60,7 @@ For visual studio it's recommended
 [vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur), which
 will give us a visual help in *.vue files.
 
-## Brief introduction to vue
+## Brief Introduction to Vue
 
 [Vue](https://vuejs.org/) has become famous because how easy is to use it's
 complements from different libraries like vuetify, which is the actuall
@@ -60,7 +88,7 @@ javascript). Additionally any number of blocks for different things can be
 added, mainly it's used another code for the style which contains css (or any
 code which compiles to css).
 
-### How compile different languages to html, javscript and css
+### Compiling to HTML, JavScript and CSS
 
 Ok, so the problem is *.vue files have different languages written on the same
 file, which is a headache for our compilers. This is where the 'vue-loader'
@@ -119,7 +147,7 @@ STORE CHANGES in the WRONG PLACE!.
 10 - Avoid the use of '\_' in vue properties, thus '\_' and '$' are reserved
 symbols.
 
-## This project structure
+## Project Structure
 
 build - Generally it's about webpack configuration.
 
@@ -238,7 +266,9 @@ between all components.
 main.ts - This is the entrypoint of all the project. It will require all vue
 libraries and assign vue to a label in the html code.
 
-## Minimum number of petitions
+## Hints and Tips
+
+### Minimum number of petitions
 
 The innitialitzation of the dashboard is done with the minimal number of calls,
 so there only the required information to show overview.
@@ -251,9 +281,9 @@ The information is only retrieved if the user successfully signs into the stamp,
 thus if you want to understand the dashboard innitialitzation it's a good idea
 to see the signin action (store/stampstate/actions).
 
-## Modifiying the dashboard
+### Modifiying the Dashboard
 
-The recommended way is to see the view which is givin a fail or wanna be
+The recommended way is to identify which view is failing or is going to be
 editted. This view will make different calls to the store, just follow the calls
 and methods until you arrive to the storage.
 
@@ -264,8 +294,12 @@ done before emitting the data to the vue instance.
 The way in which the dashboard innitializes admission-client and listens changes
 to the events is done in the sign in action (store/stampstate/actions).
 
-## New elements
+### New Elements
 
 When saying 'new' in the emmited events or the commits, it doesn't really mean
 these are new elements in the platform; it means these are new elements in the
 dashbaord.
+
+## License
+
+MIT © Kumori Systems

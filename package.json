@@ -3,6 +3,7 @@
   "version": "0.5.3",
   "description": "Single web page for E-Cloud",
   "author": "Óscar Muñoz Garrigós <osmuogar@inf.upv.es>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
